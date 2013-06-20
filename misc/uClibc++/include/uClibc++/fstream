@@ -362,7 +362,7 @@ namespace std
 
       // retval will be less than 1 only if an error or end-of-file is encountered
 
-      if ((retval <= 0)
+      if (retval <= 0)
       {
         return traits::eof();
       }
