@@ -5,3 +5,10 @@ uClibc++-1.0 2011-11-05 <gnutt@nuttx.org>
       David for the RGMP team.
 
 uClibc++-1.1 2011-xx-xx <gnutt@nuttx.org>
+
+    * misc/uClibc++/include/uClibc++/fstream:  Remove move of ferror()
+      and feof() to determine if fopen() and fread() were successful.
+      The NuttX version of ferror() is only fragmentary.  The usage of
+      ferror() in this file exceeds the capability of the current
+      implementatino (2013-6-20).
+

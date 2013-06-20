@@ -176,15 +176,10 @@ namespace std
         fp = fopen(s, "w+b");
       }
 
+      // Check for a failure to open the file
+
       if (fp == 0)
       {
-        return 0;
-      }
-
-      if (ferror(fp))
-      {
-        fclose(fp);
-        fp = 0;
         return 0;
       }
 
@@ -272,9 +267,14 @@ namespace std
 
         charT c;
         int retval;
+
+        // Read one element of size sizeof(charT)
+
         retval = fread(&c, sizeof(charT), 1, fp);
 
-        if (retval == 0 || feof(fp) || ferror(fp))
+        // retval will be less than 1 only if an error or end-of-file is encountered
+
+        if (retval <= 0)
         {
           return traits::eof();
         }
@@ -318,18 +318,13 @@ namespace std
         offset,
         fp);
 
-      // Clear problems where we didn't read in enough characters
-
-      if (EAGAIN == errno)
-      {
-        clearerr(fp);
-      }
-
       // Restore file descriptor clase
 
       fcntl(fileno(fp), F_SETFL, fcntl_flags);
 
-      // Now we are going to make sure that we read in at least one character.  The hard way.
+      // fread() will return a value < offset if an error or end-of-file
+      // occurred.  If nothing was read, make sure that we read in at least
+      // one character.  The hard way.
 
       if (retval == 0)
       {
@@ -338,6 +333,8 @@ namespace std
         // Set to blocking mode
 
         fcntl(fileno(fp), F_SETFL, fcntl_flags & ~O_NONBLOCK);
+
+        // Read one element of size sizeof(charT)
 
         retval = fread(basic_streambuf<charT,traits>::egptr() - 
           basic_streambuf<charT,traits>::gptr() + basic_streambuf<charT,traits>::eback(),
@@ -350,7 +347,7 @@ namespace std
         fcntl(fileno(fp), F_SETFL, fcntl_flags);
       }
 
-      if (retval !=offset)
+      if (retval != offset)
       {
         // Slide buffer forward again
 
@@ -363,7 +360,9 @@ namespace std
 
       basic_streambuf<charT,traits>::mgnext -= retval;
 
-      if ((retval <= 0 && feof(fp)) || ferror(fp))
+      // retval will be less than 1 only if an error or end-of-file is encountered
+
+      if ((retval <= 0)
       {
         return traits::eof();
       }
