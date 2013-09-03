@@ -1,7 +1,7 @@
 ############################################################################
-# configs/freedom-kl25z/src/Makefile
+# apps/examples/hello/Makefile
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,88 +33,73 @@
 #
 ############################################################################
 
+-include $(TOPDIR)/.config
 -include $(TOPDIR)/Make.defs
+include $(APPDIR)/Make.defs
 
-CFLAGS += -I$(TOPDIR)/sched
+# Hello, World! built-in application info
 
-ASRCS = 
-AOBJS = $(ASRCS:.S=$(OBJEXT))
+APPNAME		= c3b
+PRIORITY	= SCHED_PRIORITY_DEFAULT
+STACKSIZE	= 4096
 
-CSRCS = kl_boardinitialize.c kl_wifi.c
+# Hello, World! Example
 
-ifeq ($(CONFIG_KL_TSI),y)
-CSRCS += kl_tsi.c
-endif
+ASRCS		=
+CSRCS		= cc3000basic.c board.c
 
-ifeq ($(CONFIG_KL_SPI),y)
-CSRCS += kl_spi.c
-endif
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+COBJS		= $(CSRCS:.c=$(OBJEXT))
 
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += kl_cxxinitialize.c
-endif
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += kl_led.c
-endif
-
-ifeq ($(CONFIG_KL_USBOTG),y)
-CSRCS += kl_usb.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += kl_pwm.c
-endif
-
-ifeq ($(CONFIG_QENCODER),y)
-CSRCS += kl_qencoder.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += kl_watchdog.c
-endif
-
-ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += kl_nsh.c
-endif
-
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  CFLAGS += -I$(ARCH_SRCDIR)\chip -I$(ARCH_SRCDIR)\common -I$(ARCH_SRCDIR)\armv7-m
+  BIN		= ..\..\libapps$(LIBEXT)
 else
 ifeq ($(WINTOOL),y)
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-			-I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-			-I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+  BIN		= ..\\..\\libapps$(LIBEXT)
 else
-  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+  BIN		= ../../libapps$(LIBEXT)
 endif
 endif
 
-all: libboard$(LIBEXT)
+ROOTDEPPATH	= --dep-path .
+
+# Common build
+
+VPATH		= 
+
+all: .built
+.PHONY: clean depend distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+.built: $(OBJS)
+	$(call ARCHIVE, $(BIN), $(OBJS))
+	@touch .built
+
+ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
+$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
+
+context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
+else
+context:
+endif
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
+	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
 clean:
-	$(call DELFILE, libboard$(LIBEXT))
+	$(call DELFILE, .built)
 	$(call CLEAN)
 
 distclean: clean
