@@ -301,7 +301,7 @@ fi
 echo -e ${lgpl} | more
 echo ""
 
-readyn "I agree to the termso the GNU LGPL Version 3 license" "N"
+readyn "I agree to the terms of the GNU LGPL Version 3 license" "N"
 echo ""
 
 if [ "X${ans}" != "Xy" -a "X${ans}" != "XY" ]; then
