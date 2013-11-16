@@ -91,6 +91,10 @@ config BR2_arm926t
 	bool "ARM926T"
 config BR2_arm1136jf_s
 	bool "ARM1136JF-S"
+config BR2_cortex_a5
+	bool "Cortex-A5"
+config BR2_cortex_a8
+	bool "Cortex-A8"
 config BR2_cortex_m3
 	bool "Cortex-M3/M4"
 config BR2_cortex_m0
@@ -218,6 +222,8 @@ config BR2_GCC_TARGET_TUNE
 	default arm922t		if BR2_arm922t
 	default arm9tdmi	if BR2_arm926t
 	default arm1136jf-s	if BR2_arm1136jf_s
+	default cortex-a5	if BR2_cortex_a5
+	default cortex-a8	if BR2_cortex_a8
 	default cortex-m3	if BR2_cortex_m3
 	default cortex-m0	if BR2_cortex_m0
 	default strongarm110	if BR2_sa110
@@ -237,6 +243,7 @@ config BR2_GCC_TARGET_ARCH
 	default armv4t		if BR2_arm720t || BR2_arm920t || BR2_arm922t
 	default armv5te		if BR2_arm926t || BR2_arm10t || BR2_xscale
 	default armv6j		if BR2_arm1136jf_s
+	default armv7-a		if BR2_cortex_a5 || BR_cortex_a8
 	default armv7-m		if BR2_cortex_m3
 	default armv6-m		if BR2_cortex_m0
 	default iwmmxt		if BR2_iwmmxt

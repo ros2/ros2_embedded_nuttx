@@ -138,4 +138,5 @@ buildroot-1.13 2011-xx-xx <gnutt@nuttx.org>
 	* Ubuntu's HOSTCC prints 'gcc-Version 4.6.3' but dependencies.sh expects
 	  'gcc version 4.6.3'.  This changes solves the issue, but should be
 	  revisited at some time.  From Oliver Riesener (2013-12-12).
+	* Add support for Cortex-A5 and Cortex-A8
 
