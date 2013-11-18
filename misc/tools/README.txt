@@ -109,6 +109,29 @@ kconfig-macos.patch
     make
     make install
 
+kconfig-mconf Path Issues
+-------------------------
+
+Some people have experienced this problem after successfully building and installing
+the kconfig-frontends tools:
+
+  kconfig-mconf: error while loading shared libraries: libkconfig-parser-3.8.0.so: cannot open shared object file: No such file or directory
+  make: *** [menuconfig] Error 127
+
+There two known solutions to this:
+
+1) Add the directory where the kconfig-frontends libraries were installed
+   to the file /etc//ld.so.conf (probably /usr/local/lib), then run the
+   ldconfig tool.
+
+2) Specify the LD_RUN_PATH environment when building the kconfig-frontends
+   tools like:
+
+     ./configure --enable-mconf
+     LD_RUN_PATH=/usr/local/lib make
+     make install
+
+
 kconfig-frontends for Windows
 -----------------------------
 
