@@ -192,8 +192,8 @@ if [ -z "$COMPILER" ] ; then
 	exit 1
 fi
 
-COMPILER_VERSION=$($COMPILER -v 2>&1 | $SED -n '/^gcc version/p' |
-	$SED -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
+COMPILER_VERSION=$($COMPILER -v 2>&1 | $SED -n '/^gcc..ersion/p' |
+	$SED -e 's/^gcc..ersion \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
 if [ -z "$COMPILER_VERSION" ] ; then
 	echo "gcc installed:			FALSE"
 	echo ""
@@ -227,8 +227,8 @@ if [ -z "$CXXCOMPILER" ] ; then
 fi
 
 if [ ! -z "$CXXCOMPILER" ] ; then
-	CXXCOMPILER_VERSION=$($CXXCOMPILER -v 2>&1 | $SED -n '/^gcc version/p' |
-		$SED -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
+	CXXCOMPILER_VERSION=$($CXXCOMPILER -v 2>&1 | $SED -n '/^gcc..ersion/p' |
+		$SED -e 's/^gcc..ersion \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q')
 	if [ -z "$CXXCOMPILER_VERSION" ] ; then
 		echo "c++ installed:			FALSE"
 		echo ""
