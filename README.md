@@ -6,11 +6,13 @@ Nuttx STM32F4 Discovery Base Board
     ./configure.sh stm32f4discovery/bb
     cd ..
 
+Building
+---------
 
     make CROSSDEV=arm-none-eabi-
 
 
-to change the config
+Modify Config
 --------------------
 
     vi configs/stm32f4discovery/bb/defconfig
@@ -19,13 +21,13 @@ to change the config
     cd ..
 
 
-to program board
+Programming
 ------------
 
     openocd -f board/stm32f4discovery.cfg -c "init" -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000 bin" -c "reset run" -c "exit"
 
 
-to GDB debug
+Debugging
 -------
 
     openocd -f board/stm32f4discovery.cfg -c "init"
