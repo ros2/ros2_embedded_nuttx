@@ -93,12 +93,16 @@ config BR2_arm1136jf_s
 	bool "ARM1136JF-S"
 config BR2_cortex_a5
 	bool "Cortex-A5"
+	select BR2_GCC_CORTEX
 config BR2_cortex_a8
 	bool "Cortex-A8"
+	select BR2_GCC_CORTEX
 config BR2_cortex_m3
 	bool "Cortex-M3/M4"
+	select BR2_GCC_CORTEX
 config BR2_cortex_m0
 	bool "Cortex-M0"
+	select BR2_GCC_CORTEX
 config BR2_sa110
 	bool "SA110"
 config BR2_sa1100
@@ -108,6 +112,10 @@ config BR2_xscale
 config BR2_iwmmxt
 	bool "iwmmxt"
 endchoice
+
+config BR2_GCC_CORTEX
+	bool
+	default n
 
 choice
 	prompt "Target ABI"

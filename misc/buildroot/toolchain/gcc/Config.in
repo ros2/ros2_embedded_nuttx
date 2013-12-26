@@ -3,31 +3,31 @@
 comment "GCC Options"
 
 config BR2_PACKAGE_GCC
-        bool "Build GCC cross-compiler"
-        default n
-        help
-            Build the GCC cross-compiler for the target architecture.
+	bool "Build GCC cross-compiler"
+	default n
+	help
+		Build the GCC cross-compiler for the target architecture.
 
 choice
 	prompt "GCC compiler Version"
-	default BR2_GCC_VERSION_4_3_3 if BR2_cortex_a5 || BR2_cortex_a8 || BR2_cortex_m3 || BR2_cortex_m0
-	default BR2_GCC_VERSION_4_2_4 if !BR2_avr32 && !BR2_cortex_a5 && !BR2_cortex_a8 && !BR2_cortex_m3 && !BR2_cortex_m0 && !BR2_m9s12x
+	default BR2_GCC_VERSION_4_3_3 if BR2_GCC_CORTEX
+	default BR2_GCC_VERSION_4_2_4 if !BR2_avr32 && !BR2_GCC_CORTEX && !BR2_m9s12x
 	default BR2_GCC_VERSION_3_4_6 if BR2_avr32
 	default BR2_GCC_VERSION_3_3_6 if BR2_m9s12x
 	depends on BR2_PACKAGE_GCC
 	help
-	  Select the version of gcc you wish to use.
+		Select the version of gcc you wish to use.
 
 	config BR2_GCC_VERSION_3_3_6
 		depends on BR2_m9s12x
 		bool "gcc 3.3.6"
 
     config BR2_GCC_VERSION_3_4_6
-		depends on !BR2_m32c && !BR2_cortex_a5 && !BR2_cortex_a8 && !BR2_cortex_m3 && !BR2_cortex_m0 && !BR2_m9s12x
+		depends on !BR2_m32c && !BR2_GCC_CORTEX
 		bool "gcc 3.4.6"
 
 	config BR2_GCC_VERSION_4_2_4
-		depends on !BR2_avr32 && !BR2_nios2 && !BR2_cortex_a5 && !BR2_cortex_a8 && !BR2_cortex_m3 && !BR2_cortex_m0 && !BR2_m9s12x
+		depends on !BR2_avr32 && !BR2_nios2 && !BR2_GCC_CORTEX && !BR2_m9s12x
 		select BR2_GCC_SUPPORTS_SYSROOT
 		bool "gcc 4.2.4"
 
@@ -46,6 +46,11 @@ choice
 		select BR2_GCC_SUPPORTS_SYSROOT
 		bool "gcc 4.6.3"
 
+	config BR2_GCC_VERSION_4_8_2
+		depends on !BR2_avr32 && !BR2_nios2 && !BR2_m9s12x
+		select BR2_GCC_SUPPORTS_SYSROOT
+		bool "gcc 4.8.2"
+
 endchoice
 
 config BR2_GCC_SUPPORTS_SYSROOT
@@ -60,6 +65,7 @@ config BR2_GCC_VERSION
 	default "4.3.3"     if BR2_GCC_VERSION_4_3_3
 	default "4.5.2"     if BR2_GCC_VERSION_4_5_2
 	default "4.6.3"     if BR2_GCC_VERSION_4_6_3
+	default "4.8.2"     if BR2_GCC_VERSION_4_8_2
 
 config BR2_GCC_USE_SJLJ_EXCEPTIONS
 	bool "Enable setjmp/longjmp exceptions?"

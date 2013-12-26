@@ -4,10 +4,10 @@ comment "Binutils Options"
 
 choice
 	prompt "Binutils Version"
-	default BR2_BINUTILS_VERSION_2_19_1 if BR2_cortex_a5 || BR2_cortex_a8 || BR2_cortex_m3 || BR2_cortex_m0
-	default BR2_BINUTILS_VERSION_2_19 if !BR2_avr32 && !BR2_cortex_a5 && !BR2_cortex_a8 && !BR2_cortex_m3 && !BR2_cortex_m0 && !BR2_m9s12x
+	default BR2_BINUTILS_VERSION_2_19_1 if BR2_GCC_CORTEX
+	default BR2_BINUTILS_VERSION_2_19 if !BR2_avr32 && !BR2_GCC_CORTEX && !BR2_m9s12x
 	default BR2_BINUTILS_VERSION_2_18 if BR2_m9s12x
-	default BR2_BINUTILS_VERSION_2_17 if !BR2_cortex_a5 && !BR2_cortex_a8 && !BR2_cortex_m3 && !BR2_cortex_m0 && !BR2_m9s12x
+	default BR2_BINUTILS_VERSION_2_17 if !BR2_GCC_CORTEX && !BR2_m9s12x
 	help
 	  Select the version of binutils you wish to use.
 
@@ -34,6 +34,11 @@ choice
 	config BR2_BINUTILS_VERSION_2_22
 		depends !BR2_avr32 && !BR2_nios2 && !BR2_m9s12x
 		bool "binutils 2.22"
+
+	config BR2_BINUTILS_VERSION_2_24
+		depends !BR2_avr32 && !BR2_nios2 && !BR2_m9s12x
+		bool "binutils 2.24"
+
 endchoice
 
 config BR2_BINUTILS_VERSION
@@ -44,6 +49,7 @@ config BR2_BINUTILS_VERSION
 	default "2.19.1"          if BR2_BINUTILS_VERSION_2_19_1
 	default "2.21.1"          if BR2_BINUTILS_VERSION_2_21_1
 	default "2.22"            if BR2_BINUTILS_VERSION_2_22
+	default "2.24"            if BR2_BINUTILS_VERSION_2_24
 
 config BR2_EXTRA_BINUTILS_CONFIG_OPTIONS
 	string "Additional binutils options"
