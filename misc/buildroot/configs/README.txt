@@ -83,6 +83,16 @@ cortexm3-defconfig-nxflat
   This configuration build an NXFLAT toolchain (only) for
   use with the Cortex-M3.
 
+cortexa8-eabi-defconfig-4.6.3
+  Builds an EABI ARM toolchain for the Cortex-A5/8 using gcc 4.6.3.
+  This configuration builds gcc, g++ and the NXFLAT toolchain.  This
+  configuration builds but has not been used.
+
+cortexa8-eabi-defconfig-4.8.2
+  Builds an EABI ARM toolchain for the Cortex-A5/8 using gcc 4.8.2.
+  This configuration builds gcc, g++ and the NXFLAT toolchain.  This
+  configuration builds but has not been used.
+
 bfin-defconfig-4.2.4
   Builds an Blackfin toolchain using gcc 4.2.4
 
@@ -153,7 +163,8 @@ GENERAL BUILD STEPS
  
    You should try your package manager for whatever Linux version you are using
    first.  The header files are normally included in versions of the packages that
-   have "-devel" in the package name.
+   have "-devel" in the package name.  So you need mpfr-devl and gmp-devel (and
+   maybe mpc-devl).
 
 2. CD to the correct directory.
 
