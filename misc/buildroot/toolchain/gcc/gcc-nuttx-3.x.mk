@@ -139,8 +139,8 @@ $(GCC_BUILD_DIR)/.installed: $(GCC_BUILD_DIR)/.compiled
 		if [ ! -e "$(STAGING_DIR)/lib" ] ; then \
 			mkdir "$(STAGING_DIR)/lib" ; \
 		fi ; \
-		mv "$(STAGING_DIR)/lib64/"* "$(STAGING_DIR)/lib/" ; \
-		rmdir "$(STAGING_DIR)/lib64" ; \
+		cp -a "$(STAGING_DIR)/lib64/"* "$(STAGING_DIR)/lib/." ; \
+		rm -rf "$(STAGING_DIR)/lib64" ; \
 	fi
 	# Strip the host binaries
 ifeq ($(GCC_STRIP_HOST_BINARIES),true)
