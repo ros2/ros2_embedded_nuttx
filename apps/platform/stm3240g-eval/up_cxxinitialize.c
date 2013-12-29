@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm3240g-eval/src/up_cxxinitialize.c
- * arch/arm/src/board/up_cxxinitialize.c
+ * apps/platform/stm3240g-eval/src/up_cxxinitialize.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +44,6 @@
 #include <nuttx/arch.h>
 
 #include <arch/stm32/chip.h>
-#include "chip.h"
 
 #if defined(CONFIG_HAVE_CXX) && defined(CONFIG_HAVE_CXXINITIALIZE)
 
@@ -152,4 +150,3 @@ void up_cxxinitialize(void)
 }
 
 #endif /* CONFIG_HAVE_CXX && CONFIG_HAVE_CXXINITIALIZE */
-
