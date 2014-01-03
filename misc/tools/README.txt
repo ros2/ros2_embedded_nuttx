@@ -59,6 +59,32 @@ kconfig-frontends
   The default installation location for the tools is /usr/local/bin.  You
   may require root privileges to 'make install'.
 
+Graphical Configuration Tools
+-----------------------------
+
+  If you have an environment that suppots the Qt or GTK graphical systems
+  (probably KDE or gnome, respectively), then you can also build the
+  graphical kconfig-frontends, kconfig-qconf and kconfig-gconf:
+
+    ./configure --enable-mconf --disable-nconf --disable-gconf --enable-qconf
+    make
+    make install
+
+  Or,
+
+    ./configure --enable-mconf --disable-nconf --enable-gconf --disable-qconf
+    make
+    make install
+
+  In these case, you can start the graphical configurator in the nuttx/
+  directory with either:
+
+    make qconfig
+
+  or
+
+    make gconfig
+
 --program-prefix=
 -----------------
 
@@ -134,6 +160,15 @@ There two known solutions to this:
 
 kconfig-frontends for Windows
 -----------------------------
+
+Recent versions of NuttX support building NuttX from a native Windows
+console window (see "Native Windows Build" below).  But kconfig-frontends
+is a Linux tool.  At one time this was a problem for Windows users, but
+now there is a specially modified version of the kconfig-frontends tools
+that can be used:
+http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
+
+[The remainder of the text in this section is for historical interest only]
 
 From http://tech.groups.yahoo.com/group/nuttx/message/2900:
 
