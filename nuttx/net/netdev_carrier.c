@@ -1,8 +1,8 @@
 /****************************************************************************
- * netutils/uiplib/uip_getifflag.c
+ * net/netdev_carrier.c
  *
- *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
+ *   Author: Max Holtzberg <mh@uvc.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,67 +41,93 @@
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
 #include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <unistd.h>
+#include <stdio.h>
+#include <semaphore.h>
+#include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <debug.h>
 
-#include <netinet/in.h>
 #include <net/if.h>
+#include <net/ethernet.h>
+#include <nuttx/net/uip/uip-arch.h>
 
-#include <apps/netutils/uiplib.h>
+#include "net_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uip_getifstatus
+ * Function: netdev_carrier_on
  *
  * Description:
- *   Get the network driver ifup/ifdown status
+ *   Notifies the uip layer about an available carrier.
+ *   (e.g. a cable was plugged in)
  *
  * Parameters:
- *   ifname   The name of the interface to use
- *   flags    The interface flags returned by SIOCGIFFLAGS
+ *   dev - The device driver structure
  *
- * Return:
- *   0 on sucess; -1 on failure
+ * Returned Value:
+ *   0:Success; negated errno on failure
  *
  ****************************************************************************/
 
-int uip_getifstatus(const char *ifname, uint8_t *flags)
+int netdev_carrier_on(FAR struct uip_driver_s *dev)
 {
-  int ret = ERROR;
-  if (ifname)
+  if (dev)
     {
-      /* Get a socket (only so that we get access to the INET subsystem) */
-
-      int sockfd = socket(PF_INET, UIPLIB_SOCK_IOCTL, 0);
-      if (sockfd >= 0)
-        {
-          struct ifreq req;
-          memset (&req, 0, sizeof(struct ifreq));
-
-          /* Put the driver name into the request */
-
-          strncpy(req.ifr_name, ifname, IFNAMSIZ);
-
-          /* Perform the ioctl to ifup or ifdown status */
-
-          ret = ioctl(sockfd, SIOCGIFFLAGS, (unsigned long)&req);
-          if (!ret)
-            {
-              *flags = req.ifr_flags;
-            }
-
-          close(sockfd);
-        }
+      dev->d_flags |= IFF_RUNNING;
+      return OK;
     }
 
-  return ret;
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Function: netdev_carrier_off
+ *
+ * Description:
+ *   Notifies the uip layer about an disappeared carrier.
+ *   (e.g. a cable was unplugged)
+ *
+ * Parameters:
+ *   dev - The device driver structure
+ *
+ * Returned Value:
+ *   0:Success; negated errno on failure
+ *
+ ****************************************************************************/
+
+int netdev_carrier_off(FAR struct uip_driver_s *dev)
+{
+  if (dev)
+    {
+      dev->d_flags &= ~IFF_RUNNING;
+      return OK;
+    }
+
+  return -EINVAL;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */
