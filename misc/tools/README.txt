@@ -24,7 +24,7 @@ genromfs-0.5.2.tar.gz
 kconfig-frontends
 =================
 
-  This is a snapshot of the kconfig-frontends version 3.7.0 tarball taken
+  This is a snapshot of the kconfig-frontends version 3.12.0 tarball taken
   from http://ymorin.is-a-geek.org/projects/kconfig-frontends.
 
   General build instructions:

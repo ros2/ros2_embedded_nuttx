@@ -2,7 +2,7 @@
 set -e
 
 printf "Creating macrodir...\n"
-macrodir="$( sed -r -e '/^AC_CONFIG_MACRO_DIR\(\[(.*)\]\)/!d;'  \
+macrodir="$( sed    -e '/^AC_CONFIG_MACRO_DIR(\[\(.*\)\])/!d;'  \
                     -e 's//\1/;'                                \
                     configure.ac                                \
            )"

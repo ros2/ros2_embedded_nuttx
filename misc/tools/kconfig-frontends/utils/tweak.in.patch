@@ -1,9 +1,9 @@
 diff --git a/utils/tweak.in b/utils/tweak.in
 --- a/utils/tweak.in
 +++ b/utils/tweak.in
-@@ -1,8 +1,8 @@
- #!/bin/bash
- # Manipulate options in a .config file from the command line
+@@ -3,8 +3,8 @@
+ 
+ myname=${0##*/}
  
 -# If no prefix forced, use the default CONFIG_
 -CONFIG_="${CONFIG_-CONFIG_}"
@@ -12,12 +12,12 @@ diff --git a/utils/tweak.in b/utils/tweak.in
  
  usage() {
  	cat >&2 <<EOL
-@@ -39,7 +39,7 @@
- By default, config will upper-case the given symbol. Use --keep-case to keep
+@@ -41,7 +41,7 @@
+ By default, $myname will upper-case the given symbol. Use --keep-case to keep
  the case of all following symbols unchanged.
  
--config uses 'CONFIG_' as the default symbol prefix. Set the environment
-+config uses '@CONFIG_@' as the default symbol prefix. Set the environment
- variable CONFIG_ to the prefix to use. Eg.: CONFIG_="FOO_" config ...
+-$myname uses 'CONFIG_' as the default symbol prefix. Set the environment
++$myname uses '@CONFIG_@' as the default symbol prefix. Set the environment
+ variable CONFIG_ to the prefix to use. Eg.: CONFIG_="FOO_" $myname ...
  EOL
  	exit 1

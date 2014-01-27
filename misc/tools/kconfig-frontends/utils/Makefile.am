@@ -16,6 +16,6 @@ CLEANFILES = tweak
 EXTRA_DIST = tweak.in tweak.in.patch
 
 tweak: tweak.in
-	$(AM_V_GEN)$(SED) -r -e "s/@CONFIG_@/$(config_prefix)/g"    \
+	$(AM_V_GEN)$(SED) -e "s/@CONFIG_@/$(config_prefix)/g"    \
 	                  $< >$@
 	@chmod +x $@

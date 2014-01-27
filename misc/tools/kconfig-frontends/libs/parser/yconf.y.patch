@@ -9,16 +9,16 @@
  %}
  
  %%
-@@ -496,7 +496,7 @@
- 	modules_sym = sym_lookup(NULL, 0);
- 	modules_sym->type = S_BOOLEAN;
- 	modules_sym->flags |= SYMBOL_AUTO;
+@@ -493,7 +493,7 @@
+ 
+ 	sym_init();
+ 	_menu_init();
 -	rootmenu.prompt = menu_add_prompt(P_MENU, "Linux Kernel Configuration", NULL);
 +	rootmenu.prompt = menu_add_prompt(P_MENU, ROOTMENU, NULL);
  
  	if (getenv("ZCONF_DEBUG"))
  		zconfdebug = 1;
-@@ -732,7 +732,7 @@
+@@ -725,7 +725,7 @@
  	}
  }
  

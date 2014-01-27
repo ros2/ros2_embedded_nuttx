@@ -6,8 +6,8 @@ BUILT_SOURCES = images.c images.h
 CLEANFILES = images.c images.h
 
 images.c: images.c_orig
-	$(AM_V_GEN)$(SED) -r -e 's/^static //' $< >$@
+	$(AM_V_GEN)$(SED) -e 's/^static //' $< >$@
 
 images.h: images.c_orig
-	$(AM_V_GEN)$(SED) -r -e '/^static (const char \*xpm_(.+)\[\]) = \{/!d; s//extern \1;/' \
+	$(AM_V_GEN)$(SED) -e '/^static \(const char \*xpm_\(.\{1,\}\)\[\]\) = {/!d; s//extern \1;/' \
 	                  $< >$@

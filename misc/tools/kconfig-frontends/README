@@ -25,7 +25,7 @@ As such, there are currently a few known limitations:
     make LDFLAGS="-all-static -static-libtool-libs"
 
 - the nconf frontends requires (at least on my machine) to be linked against
-  GPM; this is not detected when staticaly linking (hence the nconf_EXTRA_LIBS
+  GPM; this is not detected when statically linking (hence the nconf_EXTRA_LIBS
   in the command above).
 
 - statically linking the graphical frontends (gconf and qconf) is *not*
@@ -34,6 +34,8 @@ As such, there are currently a few known limitations:
   installed static libraries (seemingly fixed in 2.4, but not quite yet, in
   fact...), so gconf does not link. That's why they are disabled above.
 
+For a list of known issues, please also refer to file docs/known-issues.txt.
+
 Note that, provided you have the required dependencies, all frontends are
-properly built if you link dynamicaly. The following just works as expected:
+properly built if you link dynamically. The following just works as expected:
     ./configure && make
