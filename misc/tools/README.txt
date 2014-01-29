@@ -157,6 +157,21 @@ There two known solutions to this:
      LD_RUN_PATH=/usr/local/lib make
      make install
 
+I have also been told that some people see this error until they re-boot, then it
+just goes away.
+
+gperf
+-----
+
+  "I am getting an error when configuring the kconfig-frontends-3.12.0.0 package.
+   Using command
+
+    ./configure --enable-mconf
+
+  "It says it 'configure: error: can not find gperf'"
+
+   If you see this, make sure that the gperf package is installed.
+
 
 kconfig-frontends for Windows
 -----------------------------
