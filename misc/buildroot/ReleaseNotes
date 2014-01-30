@@ -1,4 +1,4 @@
-ReleaseNotes v1.12
+ReleaseNotes v1.13
 ==================
 
 Supported Toolchains
@@ -73,7 +73,7 @@ Supported tool versions include:
   o gcc-4.6.3 + binutils-2.22
   o gcc-4.8.2 + binutils-2.24
 
-See the ChangeLog of features/architectures added in v1.12.
+See the ChangeLog of features/architectures added in v1.13.
 
 Installation instructions:
 
@@ -95,7 +95,7 @@ And set the "Path to the NuttX root directory" appropriately.
 Version Information
 -------------------
 
-buildroot release 1.12 corresponds to GIT tag nuttx-6.33.
+buildroot release 1.13 corresponds to GIT tag nuttx-6.33.
 
 NXFLAT Toolchain Build
 ----------------------
