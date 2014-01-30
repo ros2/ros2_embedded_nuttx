@@ -16,13 +16,18 @@ can be used to build the following NuttX-compatible toolchains:
     NXFLAT toolchain for use with the ARM7 and ARM9.
 
   o arm-eabi ARM Cortex-M0 toolchain needed for use with
-    the NUC120 ports provided with the NuttX releases.
+    the NUC120 and Freescale KL ports provided with the NuttX releases.
 
   o arm-elf and arm-eabi ARM Cortex-M3 (thumb2) toolchain needed
-    for use with the Luminary LM3Sxxx, NXP 17xxx, Atmel SAM3u, and
-    STMicro STM32 ports provided with the NuttX releases.
+    for use with the Freescale Kinetis, Luminary LM3Sxx, NXP LPC17xx,
+    NXP LPC43xx, Atmel SAM3/4, and STMicro STM32 ports provided with
+    the NuttX releases.
 
     NXFLAT toolchain for use with the ARM Cortex-M3.
+
+  o arm-elf and arm-eabi ARM Cortex-A5/A8 toolchain needed
+    for use with the Atmel SAMA5D3x and Allwinner A10 ports provided
+    with the NuttX releases.
 
   o avr-elf toolchain needed for use with the ATmega128 ports
     provided with the NuttX releases.
@@ -66,8 +71,9 @@ Supported tool versions include:
   o gcc-4.3.3 + binutils-2.19.1
   o gcc-4.5.2 + binutils-2.21
   o gcc-4.6.3 + binutils-2.22
+  o gcc-4.8.2 + binutils-2.24
 
-See the ChangeLog of features/architectures added in v0.1.11.
+See the ChangeLog of features/architectures added in v1.12.
 
 Installation instructions:
 
@@ -89,17 +95,7 @@ And set the "Path to the NuttX root directory" appropriately.
 Version Information
 -------------------
 
-buildroot release 1.11 corresponds to SVN revision r5313.
-
-Note that all SVN information has been stripped from the tarball.  If you
-need the SVN configuration, you should check out directly from SVN.  Revision
-r5313 should equivalent to release 1.0 of NuttX buildroot:
-
-    svn checkout -r5313 svn://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
-
-Or
-
-    svn checkout -r5313 http://svn.code.sf.net/p/nuttx/code/trunk nuttx-code
+buildroot release 1.12 corresponds to GIT tag nuttx-6.33.
 
 NXFLAT Toolchain Build
 ----------------------
@@ -113,3 +109,6 @@ NOTES:
   - NFFLAT is only available for ARM and Cortex-M3 architectures.
   - The GCC 4.6.3 will not work with NXFLAT.  See "Toolchain Compatibility
     Problem" at http://www.nuttx.org/doku.php?id=wiki:vfs:nxflat for details.
+  - It has been reported to me that the issues with GCC 4.6.3 and NXFLAT
+    has been corrected in subsequent versions, but I have not personally
+    verified that.
