@@ -23,11 +23,13 @@ can be used to build the following NuttX-compatible toolchains:
     NXP LPC43xx, Atmel SAM3/4, and STMicro STM32 ports provided with
     the NuttX releases.
 
-    NXFLAT toolchain for use with the ARM Cortex-M3.
+    NXFLAT toolchain for use with the ARM Cortex-M3/4.
 
   o arm-elf and arm-eabi ARM Cortex-A5/A8 toolchain needed
     for use with the Atmel SAMA5D3x and Allwinner A10 ports provided
     with the NuttX releases.
+
+    NXFLAT toolchain for use with the ARM Cortex-A5/8.
 
   o avr-elf toolchain needed for use with the ATmega128 ports
     provided with the NuttX releases.
