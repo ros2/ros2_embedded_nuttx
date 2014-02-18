@@ -23,8 +23,11 @@ SOFT_FLOAT_CONFIG_OPTION:=--without-float
 endif
 
 # again... there must be a better way
+
 ifeq ($(findstring x4.,x$(GCC_VERSION)),x4.)
+
 SOFT_FLOAT_CONFIG_OPTION:=--with-float=soft
+
 ifeq ($(BR2_SOFT_FLOAT_FP),y)
 TARGET_SOFT_FLOAT:=-mfloat-abi=softfp
 else # no fp at all
@@ -34,7 +37,9 @@ else
 TARGET_SOFT_FLOAT:=-msoft-float
 endif
 endif
+
 else # not gcc-4.x
+
 TARGET_SOFT_FLOAT:=-msoft-float
 endif
 ARCH_FPU_SUFFIX:=_nofpu
@@ -42,24 +47,43 @@ else # no softfloat support
 SOFT_FLOAT_CONFIG_OPTION:=
 TARGET_SOFT_FLOAT:=
 ARCH_FPU_SUFFIX:=
+
+endif
+
+# DSA: config gcc to build Cortex-M4 compiler with hard float
+
+ifeq ($(strip $(BR2_GCC_CORTEX_M4F)),y)
+TARGET_SOFT_FLOAT:=-mfpu=fpv4-sp-d16 -mfloat-abi=hard -mhard-float
+SOFT_FLOAT_CONFIG_OPTION:=--with-float=hard
+ARCH_FPU_SUFFIX:=_hf
 endif
 
 # some additional tuning values
+
 ifneq ($(strip $(subst ",,$(BR2_GCC_TARGET_ARCH))),)
 # ")))
 GCC_WITH_ARCH:=--with-arch=$(BR2_GCC_TARGET_ARCH)
 endif
+
 ifneq ($(strip $(subst ",,$(BR2_GCC_TARGET_TUNE))),)
 # ")))
 GCC_WITH_TUNE:=--with-tune=$(BR2_GCC_TARGET_TUNE)
 endif
+
 ifneq ($(strip $(subst ",,$(BR2_GCC_TARGET_ABI))),)
 # ")))
 GCC_WITH_ABI:=--with-abi=$(BR2_GCC_TARGET_ABI)
 endif
+
 ifdef BR2_cortex_m0
 GCC_WITH_MODE:=--with-mode=thumb
 endif
+
 ifdef BR2_cortex_m3
+GCC_WITH_MODE:=--with-mode=thumb
+endif
+
+# DSA: config gcc to build Cortec-M4 compiler with hard float
+ifdef BR2_cortex_m4f
 GCC_WITH_MODE:=--with-mode=thumb
 endif

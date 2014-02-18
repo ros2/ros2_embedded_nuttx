@@ -100,6 +100,10 @@ config BR2_cortex_a8
 config BR2_cortex_m3
 	bool "Cortex-M3/M4"
 	select BR2_GCC_CORTEX
+config BR2_cortex_m4f
+	bool "Cortex-M4F"
+	select BR2_GCC_CORTEX
+	select BR2_GCC_CORTEX_M4F
 config BR2_cortex_m0
 	bool "Cortex-M0"
 	select BR2_GCC_CORTEX
@@ -114,6 +118,10 @@ config BR2_iwmmxt
 endchoice
 
 config BR2_GCC_CORTEX
+	bool
+	default n
+
+config BR2_GCC_CORTEX_M4F
 	bool
 	default n
 
@@ -233,6 +241,7 @@ config BR2_GCC_TARGET_TUNE
 	default cortex-a5	if BR2_cortex_a5
 	default cortex-a8	if BR2_cortex_a8
 	default cortex-m3	if BR2_cortex_m3
+	default cortex-m4	if BR2_cortex_m4f
 	default cortex-m0	if BR2_cortex_m0
 	default strongarm110	if BR2_sa110
 	default strongarm1100	if BR2_sa1100
@@ -251,8 +260,8 @@ config BR2_GCC_TARGET_ARCH
 	default armv4t		if BR2_arm720t || BR2_arm920t || BR2_arm922t
 	default armv5te		if BR2_arm926t || BR2_arm10t || BR2_xscale
 	default armv6j		if BR2_arm1136jf_s
-	default armv7-a		if BR2_cortex_a5 || BR_cortex_a8
-	default armv7-m		if BR2_cortex_m3
+	default armv7-a		if BR2_cortex_a5 || BR2_cortex_a8
+	default armv7-m		if BR2_cortex_m3 || BR2_cortex_m4f
 	default armv6-m		if BR2_cortex_m0
 	default iwmmxt		if BR2_iwmmxt
 
