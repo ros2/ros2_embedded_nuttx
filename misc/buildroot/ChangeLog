@@ -146,3 +146,5 @@ buildroot-1.14 2011-xx-xx <gnutt@nuttx.org>
 	* Support for the GCC 4.7.3 compiler from David Alession (2014-2-18)
 	* Support for the Cortex-M4F (with hardware floating point).  Also from
 	  David Alessio (2014-2-18).
+	* Added a Cortex-M3 GCC 4.8.2 EABI configuration (2014-2-27).
+
