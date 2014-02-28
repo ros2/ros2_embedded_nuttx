@@ -213,6 +213,8 @@ restore it later):
 Then remove vterminate.o from the library. At build time, the uClibc++
 package will provide a usable replacement vterminate.o.
 
+  arm-none-eabi-ar.exe -d libsupc++.a vterminate.o
+
 Now NuttX should link with no problem. If you want to restore the
 vterminate.o that you removed from libsupc++, you can do that with:
 
