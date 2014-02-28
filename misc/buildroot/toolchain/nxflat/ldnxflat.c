@@ -65,6 +65,8 @@
  * Included Files
  ***********************************************************************/
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -77,7 +79,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 
-#include "config.h"
 #include "bfd.h"
 #include "arch/arch.h"
 #include "nxflat.h"
