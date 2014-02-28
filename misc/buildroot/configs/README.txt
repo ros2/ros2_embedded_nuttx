@@ -79,6 +79,10 @@ cortexm3-eabi-defconfig-4.6.3
   Builds an EABI ARM toolchain for the Cortex-M3 using gcc 4.6.3.
   This configuration builds gcc, g++ and the NXFLAT toolchain.
 
+cortexm3-eabi-defconfig-4.8.2
+  Builds an EABI ARM toolchain for the Cortex-M3 using gcc 4.8.2.
+  This configuration builds gcc, g++ and the NXFLAT toolchain.
+
 cortexm3-defconfig-nxflat
   This configuration build an NXFLAT toolchain (only) for
   use with the Cortex-M3.

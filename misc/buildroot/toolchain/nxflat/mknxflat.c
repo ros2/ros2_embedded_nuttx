@@ -51,7 +51,9 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <bfd.h>
+
+#include "config.h"
+#include "bfd.h"
 
 #include "nxflat.h"
 #include "arch/arch.h"
