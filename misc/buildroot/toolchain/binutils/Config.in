@@ -2,12 +2,19 @@
 
 comment "Binutils Options"
 
+config BR2_PACKAGE_BINUTILS
+	bool "Build binutils"
+	default n
+	help
+		Build the binutils for the target architecture.
+
 choice
 	prompt "Binutils Version"
 	default BR2_BINUTILS_VERSION_2_19_1 if BR2_GCC_CORTEX
 	default BR2_BINUTILS_VERSION_2_19 if !BR2_avr32 && !BR2_GCC_CORTEX && !BR2_m9s12x
 	default BR2_BINUTILS_VERSION_2_18 if BR2_m9s12x
 	default BR2_BINUTILS_VERSION_2_17 if !BR2_GCC_CORTEX && !BR2_m9s12x
+	depends on BR2_PACKAGE_BINUTILS
 	help
 	  Select the version of binutils you wish to use.
 
@@ -43,6 +50,7 @@ endchoice
 
 config BR2_BINUTILS_VERSION
 	string
+	depends on BR2_PACKAGE_BINUTILS
 	default "2.17"            if BR2_BINUTILS_VERSION_2_17
 	default "2.18"            if BR2_BINUTILS_VERSION_2_18
 	default "2.19"            if BR2_BINUTILS_VERSION_2_19
@@ -54,5 +62,6 @@ config BR2_BINUTILS_VERSION
 config BR2_EXTRA_BINUTILS_CONFIG_OPTIONS
 	string "Additional binutils options"
 	default ""
+	depends on BR2_PACKAGE_BINUTILS
 	help
 	  Any additional binutils options you may want to include ...

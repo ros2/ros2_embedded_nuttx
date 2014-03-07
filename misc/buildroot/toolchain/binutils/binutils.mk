@@ -123,3 +123,7 @@ binutils_target-clean:
 
 binutils_target-dirclean:
 	rm -rf $(BINUTILS_DIR2)
+
+ifeq ($(strip $(BR2_PACKAGE_BINUTILS)),y)
+TARGETS+=binutils
+endif

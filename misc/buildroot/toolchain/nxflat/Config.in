@@ -4,6 +4,7 @@ config BR2_PACKAGE_NXFLAT
 	bool "Build NXFLAT tools"
 	default n
 	depends on BR2_arm
+	select BR2_PACKAGE_BINUTILS
 	help
 	  Build tools need to build NuttX NXFLAT load-able binary
 

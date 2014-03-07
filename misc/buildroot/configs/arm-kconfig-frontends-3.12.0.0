@@ -24,7 +24,7 @@ BR2_arm=y
 # BR2_h8300 is not set
 # BR2_sparc is not set
 # BR2_x86_64 is not set
-# BR2_generic_arm is not set
+BR2_generic_arm=y
 # BR2_arm610 is not set
 # BR2_arm7tdmi is not set
 # BR2_arm710 is not set
@@ -35,18 +35,19 @@ BR2_arm=y
 # BR2_arm926t is not set
 # BR2_arm1136jf_s is not set
 # BR2_cortex_a5 is not set
-BR2_cortex_a8=y
+# BR2_cortex_a8 is not set
 # BR2_cortex_m3 is not set
+# BR2_cortex_m4f is not set
 # BR2_cortex_m0 is not set
 # BR2_sa110 is not set
 # BR2_sa1100 is not set
 # BR2_xscale is not set
 # BR2_iwmmxt is not set
-BR2_GCC_CORTEX=y
+# BR2_GCC_CORTEX is not set
+# BR2_GCC_CORTEX_M4F is not set
 # BR2_ARM_OABI is not set
 BR2_ARM_EABI=y
 BR2_ARCH="arm"
-BR2_GCC_TARGET_TUNE="cortex-a8"
 BR2_GCC_TARGET_ABI="aapcs-linux"
 BR2_ENDIAN="LITTLE"
 
@@ -64,7 +65,7 @@ BR2_NUTTX_DIR="$(TOPDIR)/../../nuttx"
 BR2_TOPDIR_PREFIX=""
 BR2_TOPDIR_SUFFIX=""
 BR2_GNU_BUILD_SUFFIX="pc-elf"
-BR2_GNU_TARGET_SUFFIX="nuttx-eabi"
+BR2_GNU_TARGET_SUFFIX="nuttx-elf"
 # BR2_PREFER_IMA is not set
 
 #
@@ -74,36 +75,13 @@ BR2_GNU_TARGET_SUFFIX="nuttx-eabi"
 #
 # Binutils Options
 #
-BR2_PACKAGE_BINUTILS=y
-# BR2_BINUTILS_VERSION_2_17 is not set
-# BR2_BINUTILS_VERSION_2_18 is not set
-# BR2_BINUTILS_VERSION_2_19 is not set
-# BR2_BINUTILS_VERSION_2_19_1 is not set
-# BR2_BINUTILS_VERSION_2_21_1 is not set
-BR2_BINUTILS_VERSION_2_22=y
-# BR2_BINUTILS_VERSION_2_24 is not set
-BR2_BINUTILS_VERSION="2.22"
-BR2_EXTRA_BINUTILS_CONFIG_OPTIONS=""
+# BR2_PACKAGE_BINUTILS is not set
 
 #
 # GCC Options
 #
-BR2_PACKAGE_GCC=y
-# BR2_GCC_VERSION_3_3_6 is not set
-# BR2_GCC_VERSION_3_4_6 is not set
-# BR2_GCC_VERSION_4_2_4 is not set
-# BR2_GCC_VERSION_4_3_3 is not set
-# BR2_GCC_VERSION_4_5_2 is not set
-BR2_GCC_VERSION_4_6_3=y
-# BR2_GCC_VERSION_4_8_2 is not set
-BR2_GCC_SUPPORTS_SYSROOT=y
-BR2_GCC_VERSION="4.6.3"
-# BR2_GCC_USE_SJLJ_EXCEPTIONS is not set
-BR2_EXTRA_GCC_CONFIG_OPTIONS=""
-BR2_INSTALL_LIBSTDCPP=y
-# BR2_INSTALL_LIBGCJ is not set
-# BR2_INSTALL_OBJC is not set
-# BR2_INSTALL_FORTRAN is not set
+# BR2_PACKAGE_GCC is not set
+# BR2_GCC_SUPPORTS_SYSROOT is not set
 
 #
 # Gdb Options
@@ -115,8 +93,13 @@ BR2_INSTALL_LIBSTDCPP=y
 #
 # NuttX Binary Support
 #
-BR2_PACKAGE_NXFLAT=y
-BR2_PACKAGE_GENROMFS=y
+# BR2_PACKAGE_NXFLAT is not set
+# BR2_PACKAGE_GENROMFS is not set
+BR2_PACKAGE_KCONFIG_FRONTENDS=y
+# BR2_NCONF_FRONTEND is not set
+# BR2_GCONF_FRONTEND is not set
+# BR2_QCONF_FRONTEND is not set
+BR2_KCONFIG_FRONTENDS_VERSION="3.12.0.0"
 
 #
 # Common Toolchain Options
@@ -125,5 +108,5 @@ BR2_PACKAGE_GENROMFS=y
 # BR2_PACKAGE_SSTRIP_HOST is not set
 # BR2_ENABLE_MULTILIB is not set
 BR2_LARGEFILE=y
-# BR2_SOFT_FLOAT is not set
+BR2_SOFT_FLOAT=y
 BR2_TARGET_OPTIMIZATION="-Os -pipe"

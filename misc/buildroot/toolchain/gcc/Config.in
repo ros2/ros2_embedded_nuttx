@@ -5,6 +5,7 @@ comment "GCC Options"
 config BR2_PACKAGE_GCC
 	bool "Build GCC cross-compiler"
 	default n
+	select BR2_PACKAGE_BINUTILS
 	help
 		Build the GCC cross-compiler for the target architecture.
 
