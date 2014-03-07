@@ -154,11 +154,16 @@ There two known solutions to this:
    tools like:
 
      ./configure --enable-mconf
-     LD_RUN_PATH=/usr/local/lib make
+     LD_RUN_PATH=/usr/local/lib
+     make
      make install
 
+3) Build the kconfig-frontends tools using only static libraries:
+
+     ./configure --enable-mconf --disable-shared --enable-static
+
 I have also been told that some people see this error until they re-boot, then it
-just goes away.
+just goes away.  I would try that before anything else.
 
 gperf
 -----
