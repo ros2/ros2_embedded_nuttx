@@ -56,6 +56,14 @@ arm926t-defconfig-nxflat
   This configuration build an NXFLAT toolchain (only) for
   use with the ARM9.
 
+arm-kconfig-frontends-3.12.0.0
+  The kconfig-frontends tools are required to configure NuttX.  This
+  configuration will build (only) the kconfig-frontends tools.  Any
+  of these configurations can (and should) be extended to build the
+  kconfig-frontend tools.  NOTE:  The arm-prefix on this configuration
+  is there because ARM is, indeed, selected internally.  However,
+  nothing about the kconfig-frontends depends upon ARM.
+
 avr-defconfig-4.3.3
 avr-defconfig-5.4.2
   Builds an AVR toolchain using gcc 4.3.3 or 4.5.2.  This configuration

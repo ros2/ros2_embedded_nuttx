@@ -1,8 +1,8 @@
 ReleaseNotes v1.13
 ==================
 
-Supported Toolchains
---------------------
+Supported GCC Toolchains
+------------------------
 
 This is a highly hacked up version of the buildroot (see
 http://buildroot.uclibc.org/). It has been hacked so that it
@@ -93,6 +93,21 @@ then:
   - make menuconfig
 
 And set the "Path to the NuttX root directory" appropriately.
+
+Other Tools
+-----------
+
+In addition to the GCC toolchain, these tools may also be built by the
+buildroot package:
+
+  - genromfs:  Used to generate ROMFS file system images for NuttX
+
+  - kconfig-frontends:  These tools are required by the NuttX
+    configuration system.
+
+  - NXFLAT tools:  Special tools to build NXFLAT binary images
+
+  - sstrip: Used internally by the build root logic
 
 Version Information
 -------------------
