@@ -33,6 +33,7 @@ $(DL_DIR)/$(KCONFIGS_SOURCE):
 	$(WGET) -P $(DL_DIR) $(KCONFIGS_SITE)/$(KCONFIGS_SOURCE)
 
 $(KCONFIGS_BUILD)/.unpacked : $(DL_DIR)/$(KCONFIGS_SOURCE)
+	mkdir -p $(TOOL_BUILD_DIR)
 	$(BZCAT) $(DL_DIR)/$(KCONFIGS_SOURCE) | tar -C $(TOOL_BUILD_DIR) $(TAR_OPTIONS) -
 	@#toolchain/patch-kernel.sh $(KCONFIGS_BUILD) toolchain/kconfig-frontends \*.patch
 	touch $@
