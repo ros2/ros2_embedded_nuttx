@@ -5,11 +5,16 @@ Contents:
 
   o genromfs-0.5.2.tar.gz
   o kconfig-frontends
+    - General Build Instructions
+    - Graphical Configuration Tools
     - --program-prefix=
     - kconfig-frontends-3.3.0-1-libintl.patch
     - kconfig-macos.patch
-    - kconfig-macos.patch
+    - kconfig-mconf Path Issues
+    - gperf
     - kconfig-frontends for Windows
+    - Buildroot
+  o osmocon
 
 genromfs-0.5.2.tar.gz
 =====================
@@ -23,6 +28,9 @@ genromfs-0.5.2.tar.gz
 
 kconfig-frontends
 =================
+
+General Build Instructions
+--------------------------
 
   This is a snapshot of the kconfig-frontends version 3.12.0 tarball taken
   from http://ymorin.is-a-geek.org/projects/kconfig-frontends.
@@ -236,6 +244,13 @@ windows IS POSSIBLE, I have done it in a few minutes."
 "Oops, forgot something, I had to bring a gperf binary from the gnuwin32 project."
 
 - Sebastien Lorquet
+
+Buildroot
+---------
+As of 2014-3-7, the kconfig-frontends tools have been included in the
+buildroot tool set.  This means that in one package you can build GCC tools
+that are especially tuned for NuttX and all of the support tools that you
+need ROMFS, configuration, and NXFLAT.
 
 osmocon
 =======
