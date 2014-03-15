@@ -1,4 +1,4 @@
-ReleaseNotes v1.13
+ReleaseNotes v1.14
 ==================
 
 Supported GCC Toolchains
@@ -18,12 +18,18 @@ can be used to build the following NuttX-compatible toolchains:
   o arm-eabi ARM Cortex-M0 toolchain needed for use with
     the NUC120 and Freescale KL ports provided with the NuttX releases.
 
-  o arm-elf and arm-eabi ARM Cortex-M3 (thumb2) toolchain needed
-    for use with the Freescale Kinetis, Luminary LM3Sxx, NXP LPC17xx,
-    NXP LPC43xx, Atmel SAM3/4, and STMicro STM32 ports provided with
-    the NuttX releases.
+  o arm-elf and arm-eabi ARM Cortex-M3/4 (thumb2) toolchain needed
+    for use with the Freescale Kinetis and KL, TI Tiva/Stellaris LM3S, LM4F,
+    and TM4C, NXP LPC17xx, NXP LPC43xx, Atmel SAM3/4, and STMicro STM32 F1,
+    F2, F3 and F4 ports  provided with the NuttX releases.
 
     NXFLAT toolchain for use with the ARM Cortex-M3/4.
+
+  o arm-eabi ARM Cortex-M4F (thumb2) toolchain needed for use with the
+    Tiva/Stellaris LM4F, and TM4C, NXP LPC43xx, Atmel SAM3/4, and STMicro
+    STM32 F3 and F3 ports provided with the NuttX releases.
+
+    NXFLAT toolchain for use with the ARM Cortex-M4F.
 
   o arm-elf and arm-eabi ARM Cortex-A5/A8 toolchain needed
     for use with the Atmel SAMA5D3x and Allwinner A10 ports provided

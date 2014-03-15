@@ -133,7 +133,7 @@ buildroot-1.12 2013-03-15 <gnutt@nuttx.org>
 	  (from Ken Bannister).
 	* Add support for a Cortex-M0 toolchain based on GCC 4.6.3.
 
-buildroot-1.13 2011-01-29 <gnutt@nuttx.org>
+buildroot-1.13 2014-01-29 <gnutt@nuttx.org>
 
 	* Ubuntu's HOSTCC prints 'gcc-Version 4.6.3' but dependencies.sh expects
 	  'gcc version 4.6.3'.  This changes solves the issue, but should be
@@ -141,7 +141,7 @@ buildroot-1.13 2011-01-29 <gnutt@nuttx.org>
 	* Add support for Cortex-A5 and Cortex-A8
 	* Bring-in support for GCC 4.8.2 from the "real" buildroot (2013-12-26).
 
-buildroot-1.14 2011-xx-xx <gnutt@nuttx.org>
+buildroot-1.14 2014-03-15 <gnutt@nuttx.org>
 
 	* Support for the GCC 4.7.3 compiler from David Alession (2014-2-18)
 	* Support for the Cortex-M4F (with hardware floating point).  Also from
@@ -150,4 +150,6 @@ buildroot-1.14 2011-xx-xx <gnutt@nuttx.org>
 	* toolchain/nxflat/ldnxflat.c and mknxflat.c:  Fix error with binutils-2.4:
 	  bfd.h wants us to include config.h first (2014-2.27).
 	* Added support for the kconfig-frontends-3.12.0.0 tools.
+
+buildroot-1.15 2014-xx-xx <gnutt@nuttx.org>
 
