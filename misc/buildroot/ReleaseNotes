@@ -8,30 +8,30 @@ This is a highly hacked up version of the buildroot (see
 http://buildroot.uclibc.org/). It has been hacked so that it
 can be used to build the following NuttX-compatible toolchains:
 
-  o arm-elf toolchain needed for use with the TI C5471 (ARM7TDMI),
+  o arm-nuttx-elf toolchain needed for use with the TI C5471 (ARM7TDMI),
     NXP LPC214x (ARM7TMDI), STMicro STR71x (ARM7TDMI), Freescale
     i.MX1 (ARM920T), and TI DM320 (ARM926EJ-S) provided with the
     NuttX releases.
 
     NXFLAT toolchain for use with the ARM7 and ARM9.
 
-  o arm-eabi ARM Cortex-M0 toolchain needed for use with
+  o arm-nuttx-eabi ARM Cortex-M0 toolchain needed for use with
     the NUC120 and Freescale KL ports provided with the NuttX releases.
 
-  o arm-elf and arm-eabi ARM Cortex-M3/4 (thumb2) toolchain needed
+  o arm-nuttx-elf and arm-nuttx-eabi ARM Cortex-M3/4 (thumb2) toolchain needed
     for use with the Freescale Kinetis and KL, TI Tiva/Stellaris LM3S, LM4F,
     and TM4C, NXP LPC17xx, NXP LPC43xx, Atmel SAM3/4, and STMicro STM32 F1,
     F2, F3 and F4 ports  provided with the NuttX releases.
 
     NXFLAT toolchain for use with the ARM Cortex-M3/4.
 
-  o arm-eabi ARM Cortex-M4F (thumb2) toolchain needed for use with the
+  o arm-nuttx-eabi ARM Cortex-M4F (thumb2) toolchain needed for use with the
     Tiva/Stellaris LM4F, and TM4C, NXP LPC43xx, Atmel SAM3/4, and STMicro
     STM32 F3 and F3 ports provided with the NuttX releases.
 
     NXFLAT toolchain for use with the ARM Cortex-M4F.
 
-  o arm-elf and arm-eabi ARM Cortex-A5/A8 toolchain needed
+  o arm-nuttx-elf and arm-nuttx-eabi ARM Cortex-A5/A8 toolchain needed
     for use with the Atmel SAMA5D3x and Allwinner A10 ports provided
     with the NuttX releases.
 
@@ -77,8 +77,9 @@ Supported tool versions include:
   o gcc-3.4.6 + binutils-2.17
   o gcc-4.2.4 + binutils-2.19
   o gcc-4.3.3 + binutils-2.19.1
-  o gcc-4.5.2 + binutils-2.21
+  o gcc-4.5.2 + binutils-2.21/2.21.1
   o gcc-4.6.3 + binutils-2.22
+  o gcc-4.7.3 + binutils-2.24
   o gcc-4.8.2 + binutils-2.24
 
 See the ChangeLog of features/architectures added in v1.13.

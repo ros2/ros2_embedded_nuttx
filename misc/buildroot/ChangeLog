@@ -143,11 +143,11 @@ buildroot-1.13 2014-01-29 <gnutt@nuttx.org>
 
 buildroot-1.14 2014-03-15 <gnutt@nuttx.org>
 
-	* Support for the GCC 4.7.3 compiler from David Alession (2014-2-18)
+	* Support for the GCC 4.7.3 compiler from David Alessio (2014-2-18)
 	* Support for the Cortex-M4F (with hardware floating point).  Also from
 	  David Alessio (2014-2-18).
 	* Added a Cortex-M3 GCC 4.8.2 EABI configuration (2014-2-27).
-	* toolchain/nxflat/ldnxflat.c and mknxflat.c:  Fix error with binutils-2.4:
+	* toolchain/nxflat/ldnxflat.c and mknxflat.c:  Fix error with binutils-2.24:
 	  bfd.h wants us to include config.h first (2014-2.27).
 	* Added support for the kconfig-frontends-3.12.0.0 tools.
 
