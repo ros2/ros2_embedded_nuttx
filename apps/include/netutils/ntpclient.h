@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/poll.h
+ * apps/include/netutils/ntpclient.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_POLL_H
-#define __INCLUDE_POLL_H
+#ifndef __APPS_INCLUDE_NETUTILS_NTPCLIENT_H
+#define __APPS_INCLUDE_NETUTILS_NTPCLIENT_H 1
 
 /****************************************************************************
  * Included Files
@@ -42,84 +42,40 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <semaphore.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
-/* Poll event definitions:
- *
- *   POLLIN
- *     Data other than high-priority data may be read without blocking.
- *   POLLRDNORM
- *     Normal data may be read without blocking.
- *   POLLRDBAND
- *     Priority data may be read without blocking.
- *   POLLPRI
- *     High priority data may be read without blocking.
- *
- *   POLLOUT
- *     Normal data may be written without blocking.
- *   POLLWRNORM
- *     Equivalent to POLLOUT.
- *   POLLWRBAND
- *     Priority data may be written.
- *
- *   POLLERR
- *     An error has occurred (revents only).
- *   POLLHUP
- *     Device has been disconnected (revents only).
- *   POLLNVAL
- *     Invalid fd member (revents only).
- */
+#ifndef CONFIG_NETUTILS_NTPCLIENT_SERVERIP
+#  define CONFIG_NETUTILS_NTPCLIENT_SERVERIP 0x0a000001
+#endif
 
-#define POLLIN       (0x01)  /* NuttX does not make priority distinctions */
-#define POLLRDNORM   (0x01)
-#define POLLRDBAND   (0x01)
-#define POLLPRI      (0x01)
+#ifndef CONFIG_NETUTILS_NTPCLIENT_PORTNO
+#  define CONFIG_NETUTILS_NTPCLIENT_PORTNO 123
+#endif
 
-#define POLLOUT      (0x02)  /* NuttX does not make priority distinctions */
-#define POLLWRNORM   (0x02)
-#define POLLWRBAND   (0x02)
+#ifndef CONFIG_NETUTILS_NTPCLIENT_STACKSIZE
+#  define CONFIG_NETUTILS_NTPCLIENT_STACKSIZE 2048
+#endif
 
-#define POLLERR      (0x04)
-#define POLLHUP      (0x08)
-#define POLLNVAL     (0x10)
+#ifndef CONFIG_NETUTILS_NTPCLIENT_SERVERPRIO
+#  define CONFIG_NETUTILS_NTPCLIENT_SERVERPRIO 100
+#endif
+
+#ifndef CONFIG_NETUTILS_NTPCLIENT_POLLDELAYSEC
+#  define CONFIG_NETUTILS_NTPCLIENT_POLLDELAYSEC 60
+#endif
 
 /****************************************************************************
- * Public Type Definitions
+ * Public Types
  ****************************************************************************/
-
-/* The number of poll descriptors (required by poll() specification */
-
-typedef unsigned int nfds_t;
-
-/* In the standard poll() definition, the size of the event set is 'short'.
- * Here we pick the smallest storage element that will contain all of the
- * poll events.
- */
-
-typedef uint8_t pollevent_t;
-
-/* This is the Nuttx variant of the standard pollfd structure. */
-
-struct pollfd
-{
-  int         fd;       /* The descriptor being polled */
-  sem_t      *sem;      /* Pointer to semaphore used to post output event */
-  pollevent_t events;   /* The input event flags */
-  pollevent_t revents;  /* The output event flags */
-  FAR void   *priv;     /* For use by drivers */
-};
 
 /****************************************************************************
- * Public Variables
+ * Public Data
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C" {
 #else
@@ -129,12 +85,29 @@ extern "C" {
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+/****************************************************************************
+ * Name: ntpclient_start
+ *
+ * Description:
+ *   Start the NTP daemon
+ *
+ ****************************************************************************/
 
-int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout);
+int ntpclient_start(void);
+
+/****************************************************************************
+ * Name: ntpclient_stop
+ *
+ * Description:
+ *   Stop the NTP daemon
+ *
+ ****************************************************************************/
+
+int ntpclient_stop(void);
 
 #undef EXTERN
-#if defined(__cplusplus)
+#ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_POLL_H */
+#endif /* __APPS_INCLUDE_NETUTILS_NTPCLIENT_H */
