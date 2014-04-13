@@ -67,7 +67,7 @@
 /***********************************************************************
  * Definitions
  ***********************************************************************/
- 
+
 #define NXFLAT_HDR_SIZE   sizeof(struct nxflat_hdr_s)
 
 /***********************************************************************
@@ -456,7 +456,7 @@ static void dump_relocation_entries(FILE * in_stream, struct nxflat_hdr_s *heade
             }
           exit(1);
         }
- 
+
 #ifdef RELOCS_IN_NETWORK_ORDER
       {
         u_int32_t *ptmp;

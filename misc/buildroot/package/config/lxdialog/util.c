@@ -29,7 +29,7 @@ const char *backtitle = NULL;
 
 const char *dialog_result;
 
-/* 
+/*
  * Attribute values, default is for mono display
  */
 chtype attributes[] =
@@ -350,7 +350,7 @@ first_alpha(const char *string, const char *exempt)
 		if (strchr("<[(", c)) ++in_paren;
 		if (strchr(">])", c) && in_paren > 0) --in_paren;
 
-		if ((! in_paren) && isalpha(c) && 
+		if ((! in_paren) && isalpha(c) &&
 		     strchr(exempt, c) == 0)
 			return i;
 	}

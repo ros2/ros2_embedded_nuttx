@@ -12,7 +12,7 @@
  *
  * sstrip is a small utility that removes the contents at the end of an
  * ELF file that are not part of the program's memory image.
- * 
+ *
  * Most ELF executables are built with both a program header table and a
  * section header table. However, only the former is required in order
  * for the OS to load, link and execute a program. sstrip attempts to
@@ -21,7 +21,7 @@
  * the file that occur at the end, after the parts to be saved. However,
  * this almost always includes the section header table, and occasionally
  * a few random sections that are not used when running a program.
- * 
+ *
  * It should be noted that the GNU bfd library is (understandably)
  * dependent on the section header table as an index to the file's
  * contents. Thus, an executable file that has no section header table
@@ -33,15 +33,15 @@
  * low-priority item, as executables without a section header table are
  * rare in the extreme.) This probably also explains why strip doesn't
  * offer the option to do this.
- * 
+ *
  * Shared library files may also have their section header table removed.
  * Such a library will still function; however, it will no longer be
  * possible for a compiler to link a new program against it.
- * 
+ *
  * As an added bonus, sstrip also tries to removes trailing zero bytes
  * from the end of the file. (This normally cannot be done with an
  * executable that has a section header table.)
- * 
+ *
  * sstrip is a very simplistic program. It depends upon the common
  * practice of putting the parts of the file that contribute to the
  * memory image at the front, and the remaining material at the end. This

@@ -5,7 +5,7 @@
 #
 ######################################################################
 
-dependencies: 
+dependencies:
 	@HOSTCC="$(firstword $(HOSTCC))" MAKE="$(MAKE)" $(TOPDIR)/toolchain/dependencies/dependencies.sh
 
 dependencies-source:

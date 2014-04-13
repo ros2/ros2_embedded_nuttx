@@ -1,4 +1,4 @@
-# 
+#
 
 GCC_VERSION:=$(strip $(subst ",, $(BR2_GCC_VERSION)))
 #"))

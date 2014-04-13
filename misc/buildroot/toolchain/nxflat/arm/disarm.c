@@ -81,7 +81,7 @@ static unsigned int regname_selected = 1;
 static char * arm_fp_const[] =
 {"0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0"};
 
-static char * arm_shift[] = 
+static char * arm_shift[] =
 {"lsl", "lsr", "asr", "ror"};
 
 static struct arm_opcode arm_opcodes[] =
@@ -105,7 +105,7 @@ static struct arm_opcode arm_opcodes[] =
     {0x0c400000, 0x0ff00fff, "mar%c\tacc0, %12-15r, %16-19r"},
     {0x0c500000, 0x0ff00fff, "mra%c\t%12-15r, %16-19r, acc0"},
     {0xf450f000, 0xfc70f000, "pld\t%a"},
-    
+
     /* V5 Instructions.  */
     {0xe1200070, 0xfff000f0, "bkpt\t0x%16-19X%12-15X%8-11X%0-3X"},
     {0xfa000000, 0xfe000000, "blx\t%B"},
@@ -117,7 +117,7 @@ static struct arm_opcode arm_opcodes[] =
     {0xfe000010, 0xff100010, "mcr2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
     {0xfe100010, 0xff100010, "mrc2\t%8-11d, %21-23d, %12-15r, cr%16-19d, cr%0-3d, {%5-7d}"},
 
-    /* V5E "El Segundo" Instructions.  */    
+    /* V5E "El Segundo" Instructions.  */
     {0x000000d0, 0x0e1000f0, "ldr%cd\t%12-15r, %s"},
     {0x000000f0, 0x0e1000f0, "str%cd\t%12-15r, %s"},
     {0x01000080, 0x0ff000f0, "smlabb%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
@@ -304,7 +304,7 @@ static struct arm_opcode arm_opcodes[] =
     {0x0d100400, 0x0f500f00, "cfldrs%c\tmvf%12-15d, %A"},
     {0x0c100400, 0x0f500f00, "cfldrs%c\tmvf%12-15d, %A"},
     {0x0d500400, 0x0f500f00, "cfldrd%c\tmvd%12-15d, %A"},
-    {0x0c500400, 0x0f500f00, "cfldrd%c\tmvd%12-15d, %A"}, 
+    {0x0c500400, 0x0f500f00, "cfldrd%c\tmvd%12-15d, %A"},
     {0x0d100500, 0x0f500f00, "cfldr32%c\tmvfx%12-15d, %A"},
     {0x0c100500, 0x0f500f00, "cfldr32%c\tmvfx%12-15d, %A"},
     {0x0d500500, 0x0f500f00, "cfldr64%c\tmvdx%12-15d, %A"},
@@ -406,14 +406,14 @@ static inline void print_address(FILE *stream, u_int32_t offset)
 static void arm_decode_shift(u_int32_t given, FILE *stream)
 {
   fprintf(stream, "%s", arm_regnames[given & 0xf]);
-  
+
   if ((given & 0xff0) != 0)
     {
       if ((given & 0x10) == 0)
 	{
 	  int amount = (given & 0xf80) >> 7;
 	  int shift = (given & 0x60) >> 5;
-	  
+	
 	  if (amount == 0)
 	    {
 	      if (shift == 3)
@@ -421,10 +421,10 @@ static void arm_decode_shift(u_int32_t given, FILE *stream)
 		  fprintf(stream, ", rrx");
 		  return;
 		}
-	      
+	
 	      amount = 32;
 	    }
-	  
+	
 	  fprintf(stream, ", %s #%d", arm_shift[shift], amount);
 	}
       else
@@ -442,7 +442,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
       if ((given & insn->mask) == insn->value)
 	{
 	  char * c;
-	  
+	
 	  for (c = insn->assembler; *c; c++)
 	    {
 	      if (*c == '%')
@@ -458,14 +458,14 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			  && ((given & 0x02000000) == 0))
 			{
 			  int offset = given & 0xfff;
-			  
+			
 			  fprintf(stream, "[pc");
- 
+
 			  if (given & 0x01000000)
 			    {
 			      if ((given & 0x00800000) == 0)
 				offset = - offset;
-			  
+			
 			      /* Pre-indexed.  */
 			      fprintf(stream, ", #%d]", offset);
 
@@ -486,13 +486,13 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			      /* ie ignore the offset.  */
 			      offset = pc + 8;
 			    }
-			  
+			
 			  fprintf(stream, "\t; ");
 			  print_address(stream, offset);
 			}
 		      else
 			{
-			  fprintf(stream, "[%s", 
+			  fprintf(stream, "[%s",
 				arm_regnames[(given >> 16) & 0xf]);
 			  if ((given & 0x01000000) != 0)
 			    {
@@ -512,7 +512,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 				  arm_decode_shift (given, stream);
 				}
 
-			      fprintf(stream, "]%s", 
+			      fprintf(stream, "]%s",
 				    ((given & 0x00200000) != 0) ? "!" : "");
 			    }
 			  else
@@ -524,13 +524,13 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 				    fprintf(stream, "], %s#%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
-				  else 
+				  else
 				    fprintf(stream, "]");
 				}
 			      else
 				{
 				  fprintf(stream, "], %s",
-					(((given & 0x00800000) == 0) 
+					(((given & 0x00800000) == 0)
 					 ? "-" : ""));
 				  arm_decode_shift (given, stream);
 				}
@@ -543,17 +543,17 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			{
                           /* PC relative with immediate offset.  */
 			  int offset = ((given & 0xf00) >> 4) | (given & 0xf);
-			  
+			
 			  if ((given & 0x00800000) == 0)
 			    offset = -offset;
-			  
+			
 			  fprintf(stream, "[pc, #%d]\t; ", offset);
-			  
+			
 			  print_address(stream, offset + pc + 8);
 			}
 		      else
 			{
-			  fprintf(stream, "[%s", 
+			  fprintf(stream, "[%s",
 				arm_regnames[(given >> 16) & 0xf]);
 			  if ((given & 0x01000000) != 0)
 			    {
@@ -576,7 +576,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
                                         arm_regnames[given & 0xf]);
 				}
 
-			      fprintf(stream, "]%s", 
+			      fprintf(stream, "]%s",
 				    ((given & 0x00200000) != 0) ? "!" : "");
 			    }
 			  else
@@ -590,7 +590,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 				    fprintf(stream, "], %s#%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
-				  else 
+				  else
 				    fprintf(stream, "]");
 				}
 			      else
@@ -604,7 +604,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			    }
 			}
 		      break;
-			  
+			
 		    case 'b':
 		      print_address(stream, BDISP (given) * 4 + pc + 8);
 		      break;
@@ -802,7 +802,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			}
 		      break;
 
-		    case '0': case '1': case '2': case '3': case '4': 
+		    case '0': case '1': case '2': case '3': case '4':
 		    case '5': case '6': case '7': case '8': case '9':
 		      {
 			int bitstart = *c++ - '0';
@@ -814,44 +814,44 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			  {
 			  case '-':
 			    c++;
-			    
+			
 			    while (*c >= '0' && *c <= '9')
 			      bitend = (bitend * 10) + *c++ - '0';
-			    
+			
 			    if (!bitend)
 			      return -1;
-			    
+			
 			    switch (*c)
 			      {
 			      case 'r':
 				{
 				  int32_t reg;
-				  
+				
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  
+				
 				  fprintf(stream, "%s", arm_regnames[reg]);
 				}
 				break;
 			      case 'd':
 				{
 				  int32_t reg;
-				  
+				
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  
+				
 				  fprintf(stream, "%d", reg);
 				}
 				break;
 			      case 'x':
 				{
 				  int32_t reg;
-				  
+				
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  
+				
 				  fprintf(stream, "0x%08x", reg);
-				  
+				
 				  /* Some SWI instructions have special
 				     meanings.  */
 				  if ((given & 0x0fffffff) == 0x0FF00000)
@@ -863,20 +863,20 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 			      case 'X':
 				{
 				  int32_t reg;
-				  
+				
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  
+				
 				  fprintf(stream, "%01x", reg & 0xf);
 				}
 				break;
 			      case 'f':
 				{
 				  int32_t reg;
-				  
+				
 				  reg = given >> bitstart;
 				  reg &= (2 << (bitend - bitstart)) - 1;
-				  
+				
 				  if (reg > 7)
 				    fprintf(stream, "#%s",
 					  arm_fp_const[reg & 7]);
@@ -937,7 +937,7 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
 				    }
 				  break;
 
-				  
+				
 				default:
 				  return -1;
 				}

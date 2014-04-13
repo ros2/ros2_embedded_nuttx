@@ -7,7 +7,7 @@ CC		= gcc
 CFLAGS		= -g -Wall -IZ80 -DLSB_FIRST=1 -DDEBUG=1 -DJUMPZ80
 
 LD		= gcc
-LDFLAGS		= 
+LDFLAGS		=
 
 SRCS		= main.c Debug.c Z80.c
 OBJS		= $(SRCS:.c=.o)

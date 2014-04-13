@@ -8,7 +8,7 @@ CONTENTS
   o GENERAL BUILD STEPS
   o FAQ
   o Cygwin GCC BUILD NOTES
-  o Building GDB Under Cygwin 
+  o Building GDB Under Cygwin
 
 AVAILABLE CONFIGURATIONS
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -20,7 +20,7 @@ arm7tdmi-defconfig-4.2.4
 arm920t-defconfig-4.2.4
 arm926t-defconfig-4.2.4
   Builds an OABI ARM toolchain using gcc 4.2.4.  This configuration
-  builds both gcc and g++.  There are three versions: one for 
+  builds both gcc and g++.  There are three versions: one for
   arm7tdmi (armv4t), arm920t (armv4t) and arm926t (arv5t) because
   of differences in the way that soft floating is handled in between
   the armv4t and arm5t architectures.
@@ -132,7 +132,7 @@ m68hc12-config-3.4.6
 m68hc12-config-4.3.3
   Builds an hc11/hc12 toolchain using gcc 4.3.3.NOT RECOMMENDED for hcs12;
     Use m9s12x_config_3.3.6
- 
+
   This configuration fails to build with the following error:
 
   make[3]: Entering directory `blabla/buildroot/toolchain_build_m68hc12/gcc-4.3.3-build/m68hc12-elf/libgcc'
@@ -172,7 +172,7 @@ GENERAL BUILD STEPS
      They may be located in separate packages."
 
    Version 4.5.x and beyond also require the MPC package.
- 
+
    You should try your package manager for whatever Linux version you are using
    first.  The header files are normally included in versions of the packages that
    have "-devel" in the package name.  So you need mpfr-devl and gmp-devel (and
@@ -371,4 +371,4 @@ Building GDB Under Cygwin
    directory if it is needed:
 
    cp configs/gdb-1_8-cygwin-1_7.patch toolchain/gdb/6.8/.
- 
+

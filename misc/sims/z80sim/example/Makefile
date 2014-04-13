@@ -8,7 +8,7 @@ CC		= /usr/local/bin/sdcc
 CFLAGS		= -mz80 --stack-auto --int-long-reent --float-reent
 
 LD		= /usr/local/bin/link-z80
-LDFLAGS		= 
+LDFLAGS		=
 
 ASMEXT		= .asm
 OBJEXT		= .rel

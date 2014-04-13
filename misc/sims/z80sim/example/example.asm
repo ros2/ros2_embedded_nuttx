@@ -53,7 +53,7 @@ hello:
 start:
 	;ei				; Enable interrrupts
 	ld	hl, #hello		; Say hello
-	call   print 
+	call   print
 
 forever:				; Then stop execution
 	jp	forever

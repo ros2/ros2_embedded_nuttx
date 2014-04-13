@@ -2,7 +2,7 @@
  * toolchain/nxflat/ldnxflat.c
  * Convert ELF (or any BFD format) to NXFLAT binary format
  *
- * ldnxflat takes a fully resolvable elf binary which was linked with -r 
+ * ldnxflat takes a fully resolvable elf binary which was linked with -r
  * and resolves all references, then generates relocation table entries for
  * any relocation entries in data sections. This is designed to work with
  * the options -fpic -msingle-pic-base (and -mno-got or -membedded-pic, but
@@ -42,7 +42,7 @@
  *   (c) 1996, 1997 Dionne & Associates
  *   jeff@ryeham.ee.ryerson.ca
  *
- *   Relocation added March 1997, Kresten Krab Thorup 
+ *   Relocation added March 1997, Kresten Krab Thorup
  *   krab@california.daimi.aau.dk
  *
  * This program is free software; you can redistribute it and/or modify
@@ -183,7 +183,7 @@ typedef struct
     }
   tc_data;
 
-  /* Version information.  This is from an Elf_Internal_Versym structure in a 
+  /* Version information.  This is from an Elf_Internal_Versym structure in a
    * SHT_GNU_versym section.  It is zero if there is no version information. */
 
   u_int16_t version;
@@ -692,7 +692,7 @@ static int get_reloc_type(asection *sym_section, segment_info **sym_segment)
           /* Yes... */
 
           vdbg("Sym section %s is BSS\n", sym_section->name);
- 
+
           if (sym_segment)
             {
               *sym_segment = &bss_info;
@@ -984,7 +984,7 @@ relocate_abs32(arelent *relp, int32_t *target, symvalue sym_value)
   else
     {
       /* Reallocation was successful.  Update globals */
-               
+
       nxflat_nrelocs++;
       nxflat_relocs = relocs;
 
@@ -992,7 +992,7 @@ relocate_abs32(arelent *relp, int32_t *target, symvalue sym_value)
 
       nxflat_relocs[nxflat_nrelocs-1].r_info =
       NXFLAT_RELOC(reloc_type, relp->address + got_size);
- 
+
       vdbg("relocs[%d]: type: %d offset: %08x\n",
       nxflat_nrelocs-1,
       NXFLAT_RELOC_TYPE(nxflat_relocs[nxflat_nrelocs-1].r_info),
@@ -1305,7 +1305,7 @@ resolve_segment_relocs(bfd *input_bfd, segment_info *inf, asymbol **syms)
                  * constant strings in D-Space.  I think we can just ignore
                  * this relocation. The usual assembly language sequence
                  * is like:
-                 * 
+                 *
                  *      ldr  r0, .L9       <- r0 holds GOT-relative offset to 'n'
                  *      add  r0, sl, r0    <- Adding SL produces address of 'n'
                  *      ...
@@ -1323,7 +1323,7 @@ resolve_segment_relocs(bfd *input_bfd, segment_info *inf, asymbol **syms)
                  */
 
                 /* Check if symbols lies in I- or D-Space */
- 
+
                 reltype = get_reloc_type(rel_section, NULL);
                 if (reltype == NXFLAT_RELOC_TARGET_TEXT)
                   {
@@ -1349,7 +1349,7 @@ resolve_segment_relocs(bfd *input_bfd, segment_info *inf, asymbol **syms)
                  * offset table. This relocation type is used to set the 32-bit
                  * address of global variables.  The usual assembly language sequence
                  * is like:
-                 * 
+                 *
                  *      ldr  r3, .L4       <- r3 holds GOT-relative offset to address of 'n'
                  *      ldr  r1, [sl,r3]   <- r1 holds (relocated) address of 'n'
                  *      ...
@@ -1385,9 +1385,9 @@ resolve_segment_relocs(bfd *input_bfd, segment_info *inf, asymbol **syms)
 
                 dbg("Performing GOTPC reloc at addr %08lx [%08lx] to sym '%s' [%08lx]\n",
                     (long)relpp[j]->address, (long)*target, rel_sym->name, (long)sym_value);
- 
+
                 /* Check if this is TEXT section relocation */
- 
+
                 if ((inf->subsect[i]->flags & SEC_CODE) != 0 &&
                          (inf->subsect[i]->flags & SEC_ALLOC) != 0)
                   {
@@ -1928,7 +1928,7 @@ static void output_got(int fd)
           /* And output the relocation information associate with the GOT entry */
 
           relocs[j].r_info = NXFLAT_RELOC(reloc_type, sizeof(u_int32_t) * i);
- 
+
           vdbg("relocs[%d]: type: %d offset: %08x\n",
                 j, NXFLAT_RELOC_TYPE(relocs[j].r_info), NXFLAT_RELOC_OFFSET(relocs[j].r_info));
         }
@@ -2215,7 +2215,7 @@ int main(int argc, char **argv, char **envp)
 
   symbol_table = get_symbols(bf, &number_of_symbols);
 
-  /* Find all of the special symbols that we will need in the symbol table that 
+  /* Find all of the special symbols that we will need in the symbol table that
    * we just read. */
 
   find_special_symbols();

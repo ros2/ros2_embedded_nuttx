@@ -79,7 +79,7 @@ static const char import_prologue[] = "";
  * Import Function Name String Table
  *******************************************************************/
 
-static const char import_name_strtab_prologue[] = 
+static const char import_name_strtab_prologue[] =
   "\n/*******************************************************************\n"
   " * Import Function Names\n"
   " *******************************************************************/\n\n"

@@ -3,7 +3,7 @@ z80sim
 
   This is an emulator for the Z80 instruction set.  It is based
   on the instruction set emulator by Marat Fayzullin but has
-  been extended to load Intel hex format files as produced by 
+  been extended to load Intel hex format files as produced by
   the SDCC toolchain.
 
   Sources and licensing

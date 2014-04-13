@@ -359,7 +359,7 @@ config BR2_TOPDIR_SUFFIX
 	  Add a custom string to the end of the build directories.
 
 	  build_ARCH -> build_ARCH_[SUFFIX]
-	  toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX] 
+	  toolchain_build_ARCH -> toolchain_build_ARCH_[SUFFIX]
 
 config BR2_GNU_BUILD_SUFFIX
 	string "GNU build hostname suffix"
