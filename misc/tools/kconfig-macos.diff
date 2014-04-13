@@ -6,9 +6,9 @@ diff -ru orig/kconfig-frontends-3.3.0-1/libs/parser/yconf.c kconfig-frontends-3.
  #include <string.h>
  #include <stdbool.h>
 +#include <stddef.h>
-
+ 
  #include "lkc.h"
-
+ 
 diff -ru orig/kconfig-frontends-3.3.0-1/libs/parser/yconf.y kconfig-frontends-3.3.0-1/libs/parser/yconf.y
 --- orig/kconfig-frontends-3.3.0-1/libs/parser/yconf.y	2012-03-20 15:07:45.000000000 -0700
 +++ kconfig-frontends-3.3.0-1/libs/parser/yconf.y	2012-04-13 23:38:22.000000000 -0700
@@ -17,6 +17,6 @@ diff -ru orig/kconfig-frontends-3.3.0-1/libs/parser/yconf.y kconfig-frontends-3.
  #include <string.h>
  #include <stdbool.h>
 +#include <stddef.h>
-
+ 
  #include "lkc.h"
-
+ 
