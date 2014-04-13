@@ -34,7 +34,7 @@
 #
 ############################################################################
 
-POFF_ASRCS		= 
+POFF_ASRCS		=
 POFF_CSRCS		= pfhandle.c pfproghandle.c pftprog.c \
 			  pfsymhandle.c pftsymbol.c pofferr.c \
 			  pfwhdr.c pfwrodata.c pfwsymbol.c pfwfname.c \

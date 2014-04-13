@@ -404,7 +404,7 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-gettext$(EXEEXT): $(gettext_OBJECTS) $(gettext_DEPENDENCIES) $(EXTRA_gettext_DEPENDENCIES) 
+gettext$(EXEEXT): $(gettext_OBJECTS) $(gettext_DEPENDENCIES) $(EXTRA_gettext_DEPENDENCIES)
 	@rm -f gettext$(EXEEXT)
 	$(AM_V_CCLD)$(gettext_LINK) $(gettext_OBJECTS) $(gettext_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)

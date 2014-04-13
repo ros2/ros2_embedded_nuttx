@@ -43,7 +43,7 @@ AR			= /usr/bin/ar
 
 RM			= /bin/rm -f
 
-DEFINES			= 
+DEFINES			=
 INCLUDES		= -I. -I$(INCDIR)
 CFLAGS			= -Wall -g $(DEFINES) $(INCLUDES)
 LDFLAGS			= -L$(LIBDIR)

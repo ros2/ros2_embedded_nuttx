@@ -119,7 +119,7 @@ template<class charT, class traits, class Allocator> _UCXXEXPORT basic_istream<c
 
     str.append(1, c);
   }
-  return is;  
+  return is;
 }
 
 template<class charT, class traits, class Allocator> _UCXXEXPORT basic_istream<charT,traits>&
@@ -139,7 +139,7 @@ template<> _UCXXEXPORT basic_istream<char, char_traits<char> >& operator>>(
 
 #ifdef __UCLIBCXX_EXPAND_OSTREAM_CHAR__
 template<> _UCXXEXPORT basic_ostream<char, char_traits<char> >&
-  operator<<(basic_ostream<char, char_traits<char> >& os, 
+  operator<<(basic_ostream<char, char_traits<char> >& os,
   const basic_string<char,char_traits<char>, std::allocator<char> >& str);
 
 #endif

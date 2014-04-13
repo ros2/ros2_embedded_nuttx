@@ -29,7 +29,7 @@
 extern "C++"
 {
 
-namespace std 
+namespace std
 {
   class ios_base;
   template<> class char_traits<char>;
@@ -45,10 +45,10 @@ namespace std
   template <class charT, class traits = char_traits<charT> > class basic_ostream;
   template <class charT, class traits = char_traits<charT> > class basic_iostream;
 
-  template <class charT, class traits = char_traits<charT>, 
+  template <class charT, class traits = char_traits<charT>,
     class Allocator = allocator<charT> > class basic_stringbuf;
 
-  template <class charT, class traits = char_traits<charT>, 
+  template <class charT, class traits = char_traits<charT>,
     class Allocator = allocator<charT> > class basic_istringstream;
 
   template <class charT, class traits = char_traits<charT>,
@@ -104,7 +104,7 @@ namespace std
   typedef basic_ofstream<wchar_t> wofstream;
   typedef basic_fstream<wchar_t>  wfstream;
 #endif
-  
+
   template <class state> class fpos;
   typedef fpos<char_traits<char>::state_type> streampos;
 #ifdef __UCLIBCXX_HAS_WCHAR__

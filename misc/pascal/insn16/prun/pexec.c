@@ -294,7 +294,7 @@ static uint16_t pexec_sysio(struct pexec_s *st, uint8_t fno, uint16_t subfunc)
  * Name: pexec_libcall
  *
  * Description:
- *   This function process a system I/O operation 
+ *   This function process a system I/O operation
  *
  ****************************************************************************/
 
@@ -327,7 +327,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
     case lbGETENV :
       len = TOS(st, 0);                    /* Number of bytes in string */
       src = (uint8_t*)&GETSTACK(st, TOS(st, 1));  /* Pointer to string */
-                       
+
       /* Make a C string out of the pascal string */
 
       name = pexec_mkcstring(src, len);
@@ -348,7 +348,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
       break;
 
       /* Copy pascal string to a pascal string
-       * 
+       *
        * ON INPUT:
        *   TOS(st, 0) = address of dest string hdr
        *   TOS(st, 1) = length of source string
@@ -408,7 +408,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
       break;
 
       /* Copy C string to a pascal string
-       * 
+       *
        * ON INPUT:
        *   TOS(st, 0) = address of dest hdr
        *   TOS(st, 1) = MS 16-bits of 32-bit C string pointer
@@ -571,7 +571,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
       break;
 
       /* Convert a string to a numeric value
-       *   procedure val(const s : string; var v; var code : word); 
+       *   procedure val(const s : string; var v; var code : word);
        *
        * Description:
        * val() converts the value represented in the string S to a numerical
@@ -668,7 +668,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
 
       uparm1 = TOS(st, 0);     /* Original string size */
       addr1  = TOS(st, 1);     /* Original string data pointer */
- 
+
       /* Check if there is space on the string stack for the new string
        * FIXME:  This logic does not handle strings with other than the
        * default size!
@@ -842,7 +842,7 @@ static uint16_t pexec_libcall(struct pexec_s *st, uint16_t subfunc)
        *   TOS(st, 3)=length of string1
        *   TOS(st, 4)=address of string1 data
        * ON OUTPUT
-       *   TOS(st, 0)=(-1=less than, 0=equal, 1=greater than} 
+       *   TOS(st, 0)=(-1=less than, 0=equal, 1=greater than}
        */
 
     case lbSTRCMP :

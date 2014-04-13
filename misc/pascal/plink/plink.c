@@ -401,7 +401,7 @@ static uint32_t mergeRoData(poffHandle_t inHandle, poffHandle_t outHandle)
 
   return oldRoDataSize;
 }
-      
+
 /***********************************************************************/
 /* This function merges the program data section of a new file into the
  * program data section of the output file, relocating simple program

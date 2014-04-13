@@ -30,7 +30,7 @@
  * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * There are probably also pieces from the Linux RTL8187x driver
- * 
+ *
  *   Copyright 2007 Michael Wu <flamingice@sourmilk.net>
  *   Copyright 2007 Andrea Merello <andreamrl@tiscali.it>
  *
@@ -282,7 +282,7 @@ static inline int rtl8187x_allocbuffers(FAR struct rtl8187x_state_s *priv);
 static inline int rtl8187x_freebuffers(FAR struct rtl8187x_state_s *priv);
 
 /* struct usbhost_registry_s methods */
- 
+
 static struct usbhost_class_s *rtl8187x_create(FAR struct usbhost_driver_s *hcd,
                                                FAR const struct usbhost_id_s *id);
 
@@ -386,7 +386,7 @@ static int rtl8187x_netuninitialize(FAR struct rtl8187x_state_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID informatino that will  be 
+/* This structure provides the registry entry ID informatino that will  be
  * used to associate the USB class driver to a connected USB device.
  */
 
@@ -404,7 +404,7 @@ static const const struct usbhost_id_s g_id[2] =
     0,                      /* subclass */
     0,                      /* proto */
     CONFIG_USB_WLAN_VID,    /* vid */
-    CONFIG_USB_WLAN_PID     /* pid */  
+    CONFIG_USB_WLAN_PID     /* pid */
   }
 };
 
@@ -682,7 +682,7 @@ static void rtl8187x_destroy(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
   uvdbg("crefs: %d\n", priv->crefs);
- 
+
   /* Unregister WLAN network interface */
 
   rtl8187x_netuninitialize(priv);
@@ -704,7 +704,7 @@ static void rtl8187x_destroy(FAR void *arg)
   rtl8187x_freebuffers(priv);
 
   /* Destroy the semaphores */
-  
+
   sem_destroy(&priv->exclsem);
 
   /* Disconnect the USB host device */
@@ -758,10 +758,10 @@ static inline int rtl8187x_cfgdesc(FAR struct rtl8187x_state_s *priv,
   int ret;
 
   uvdbg("desclen:%d funcaddr:%d\n", desclen, funcaddr);
-  DEBUGASSERT(priv != NULL && 
+  DEBUGASSERT(priv != NULL &&
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
-  
+
   /* Verify that we were passed a configuration descriptor */
 
   cfgdesc = (FAR struct usb_cfgdesc_s *)configdesc;
@@ -797,7 +797,7 @@ static inline int rtl8187x_cfgdesc(FAR struct rtl8187x_state_s *priv,
         case USB_DESC_TYPE_INTERFACE:
           {
             FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
- 
+
             uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
@@ -873,7 +873,7 @@ static inline int rtl8187x_cfgdesc(FAR struct rtl8187x_state_s *priv,
                     found |= USBHOST_BINFOUND;
 
                     /* Save the bulk IN endpoint information */
-                    
+
                     bindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
                     bindesc.in           = 1;
                     bindesc.funcaddr     = funcaddr;
@@ -903,13 +903,13 @@ static inline int rtl8187x_cfgdesc(FAR struct rtl8187x_state_s *priv,
         }
 
       /* Increment the address of the next descriptor */
- 
+
       configdesc += desc->len;
       remaining  -= desc->len;
     }
 
   /* Sanity checking... did we find all of things that we need? */
-    
+
   if (found != USBHOST_ALLFOUND)
     {
       udbg("ERROR: Found IF:%s BIN:%s BOUT:%s\n",
@@ -1231,7 +1231,7 @@ static inline int rtl8187x_freebuffers(FAR struct rtl8187x_state_s *priv)
 
       (void)DRVR_FREE(priv->hcd, (FAR uint8_t *)priv->ctrlreq);
       priv->ctrlreq = NULL;
-      
+
       /* Free the allocated buffer */
 
       (void)DRVR_FREE(priv->hcd, priv->tbuffer);
@@ -1249,7 +1249,7 @@ static inline int rtl8187x_freebuffers(FAR struct rtl8187x_state_s *priv)
  * Name: rtl8187x_create
  *
  * Description:
- *   This function implements the create() method of struct usbhost_registry_s. 
+ *   This function implements the create() method of struct usbhost_registry_s.
  *   The create() method is a callback into the class implementation.  It is
  *   used to (1) create a new instance of the USB host class state and to (2)
  *   bind a USB host driver "session" to the class instance.  Use of this
@@ -1335,7 +1335,7 @@ static FAR struct usbhost_class_s *rtl8187x_create(FAR struct usbhost_driver_s *
       sem_init(&priv->exclsem, 0, 1);
 
       /* Return the instance of the USB class driver */
- 
+
       return &priv->class;
     }
 
@@ -1390,7 +1390,7 @@ static int rtl8187x_connect(FAR struct usbhost_class_s *class,
   FAR struct rtl8187x_state_s *priv = (FAR struct rtl8187x_state_s *)class;
   int ret;
 
-  DEBUGASSERT(priv != NULL && 
+  DEBUGASSERT(priv != NULL &&
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
 
@@ -1411,7 +1411,7 @@ static int rtl8187x_connect(FAR struct usbhost_class_s *class,
           udbg("rtl8187x_devinit() failed: %d\n", ret);
         }
     }
- 
+
   return ret;
 }
 
@@ -1469,7 +1469,7 @@ static int rtl8187x_disconnected(struct usbhost_class_s *class)
       (void)work_queue(&priv->wkdisconn, rtl8187x_destroy, priv, 0);
     }
 
-  irqrestore(flags);  
+  irqrestore(flags);
   return OK;
 }
 
@@ -1993,7 +1993,7 @@ static int rtl8187x_uiptxpoll(struct uip_driver_s *dev)
 static void rtl8187x_txpollwork(FAR void *arg)
 {
   FAR struct rtl8187x_state_s *priv = (FAR struct rtl8187x_state_s *)arg;
-  
+
   /* Verify that the RTL8187 is still connected and that the interface is up */
 
   if (!priv->disconnected && priv->bifup)
@@ -2256,7 +2256,7 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
     }
   else if (ethhdr->type == htons(UIP_ETHTYPE_ARP))
     {
-      RTL8187X_STATS(priv, rxarppackets);   
+      RTL8187X_STATS(priv, rxarppackets);
       uip_arp_arpin(&priv->ethdev);
 
       /* If the above function invocation resulted in data that should be
@@ -2299,7 +2299,7 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
 static void rtl8187x_rxpollwork(FAR void *arg)
 {
   FAR struct rtl8187x_state_s *priv = (FAR struct rtl8187x_state_s *)arg;
-  
+
   /* Get exclusive access to the USB controller interface and the device
    * structure
    */
@@ -3436,7 +3436,7 @@ static void rtl8187x_anaparamoff(FAR struct rtl8187x_state_s *priv)
 }
 
 /****************************************************************************
- * Function: rtl8225_settxpower and 
+ * Function: rtl8225_settxpower and
  *
  * Description:
  *   Chip-specific TX power configuration
@@ -3829,7 +3829,7 @@ static void rtl8187x_setchannel(FAR struct rtl8187x_state_s *priv, int channel)
   regval = rtl8187x_ioread32(priv, RTL8187X_ADDR_TXCONF);
 
   /* Enable TX loopback on MAC level to avoid TX during channel changes, as
-   * this has be seen to causes problems and the card will stop work until next 
+   * this has be seen to causes problems and the card will stop work until next
    * reset
    */
 
@@ -4081,7 +4081,7 @@ static int rtl8187x_setup(FAR struct rtl8187x_state_s *priv)
     }
 
   rtl8187x_write(priv, 0, 0x0b7);
-  
+
   /* Save the MAC address in the device structure */
 
   priv->ethdev.d_mac.ether_addr_octet[0] = permaddr[0] & 0xff;

@@ -104,7 +104,7 @@ static void regm_Pass1Child(poffHandle_t hPoff, struct procdata_s *pParent,
   pNode = regm_Pass1Node(hPoff, dwStartOffset, dwEndOffset, oRET);
 
   /* Put the func/proc body section into the tree */
-  
+
   regm_AddProgChild(pParent, pNode);
 
   /* Handle nested and child proc/func blocks */
@@ -127,7 +127,7 @@ static void regm_Pass1Peer(poffHandle_t hPoff, struct procdata_s *pPeer,
   pNode = regm_Pass1Node(hPoff, dwStartOffset, dwEndOffset, oRET);
 
   /* Put the func/proc body section into the tree */
-  
+
   regm_AddProgPeer(pPeer, pNode);
 
   /* Handle nested and child proc/func blocks */
@@ -266,7 +266,7 @@ void regm_Pass1(poffHandle_t hPoff)
   pNode = regm_Pass1Node(hPoff, dwEntryPoint, 0xffffffff, oEND);
 
   /* Put the main program section into the tree (at the root) */
-  
+
   regm_SetProgRoot(pNode);
 
   /* Then process any nested functions */

@@ -76,7 +76,7 @@ void insn_AddTmpOpCode(poffProgHandle_t progHandle, OPTYPE *ptr)
 
   /* Write the 8-bit argument if present */
 
-  if (ptr->op & o8)  
+  if (ptr->op & o8)
     {
       (void)poffAddTmpProgByte(progHandle, ptr->arg1);
     }
@@ -84,7 +84,7 @@ void insn_AddTmpOpCode(poffProgHandle_t progHandle, OPTYPE *ptr)
   /* Write the 16-bit argument if present */
 
   if (ptr->op & o16)
-    { 
+    {
       (void)poffAddTmpProgByte(progHandle, (ptr->arg2 >> 8));
       (void)poffAddTmpProgByte(progHandle, (ptr->arg2 & 0xff));
     }

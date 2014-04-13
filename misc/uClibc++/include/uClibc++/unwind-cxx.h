@@ -50,10 +50,10 @@ namespace __cxxabiv1
 // followed by the exception object itself.
 
 struct __cxa_exception
-{ 
+{
   // Manage the exception object itself.
   std::type_info *exceptionType;
-  void (*exceptionDestructor)(void *); 
+  void (*exceptionDestructor)(void *);
 
   // The C++ standard has entertaining rules wrt calling set_terminate
   // and set_unexpected in the middle of the exception cleanup process.
@@ -185,7 +185,7 @@ extern std::unexpected_handler __unexpected_handler;
 // This is the exception class we report -- "GNUCC++\0".
 
 const _Unwind_Exception_Class __gxx_exception_class =
-  ((((((((_Unwind_Exception_Class) 'G' 
+  ((((((((_Unwind_Exception_Class) 'G'
          << 8 | (_Unwind_Exception_Class) 'N')
         << 8 | (_Unwind_Exception_Class) 'U')
        << 8 | (_Unwind_Exception_Class) 'C')

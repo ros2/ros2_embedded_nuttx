@@ -1,5 +1,5 @@
 program MyProgram;
- 
+
 uses
    MyCosineUnit in '501-unit-cosine.pas';
    MySineUnit in '501-unit-sine.pas';
@@ -7,7 +7,7 @@ uses
 
 var
    x : real;
- 
+
 begin			
    write('Enter radians	: ');
    read(x);

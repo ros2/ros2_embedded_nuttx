@@ -111,7 +111,7 @@ namespace std
     _UCXXEXPORT basic_ostream<charT,traits>& write(const char_type* s, streamsize n)
     {
       if (basic_ostream<charT,traits>::traits_type::eq_int_type(
-          basic_ios<charT, traits>::mstreambuf->sputn(s, n), 
+          basic_ios<charT, traits>::mstreambuf->sputn(s, n),
           basic_ostream<charT,traits>::traits_type::eof())
          )
       {
@@ -167,7 +167,7 @@ namespace std
       streamsize extra = ios::width() - n;
       if ((ios::flags()&ios::adjustfield) == ios::right)
       {
-        while (extra > 0) 
+        while (extra > 0)
         {
           --extra;
           put(ios::fill());
@@ -197,7 +197,7 @@ namespace std
   // Implementations of template functions.  To allow for partial specialization
 
   template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>::~basic_ostream(){ }
-  
+
   template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>& basic_ostream<charT, traits>::operator<<(bool n)
   {
     sentry s(*this);
@@ -232,7 +232,7 @@ namespace std
     return *this;
   }
 
-  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>& 
+  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     basic_ostream<charT, traits>::operator<<(unsigned short n)
   {
     sentry s(*this);
@@ -268,7 +268,7 @@ namespace std
     return *this;
   }
 
-  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>& 
+  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     basic_ostream<charT, traits>::operator<<(unsigned long n)
   {
     sentry s(*this);
@@ -310,7 +310,7 @@ namespace std
     return *this;
   }
 
-  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>& 
+  template <class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     basic_ostream<charT, traits>::operator<<(basic_streambuf<charT,traits>* sb)
   {
     sentry s(*this);
@@ -385,7 +385,7 @@ namespace std
 
     _UCXXEXPORT ~sentry() { }
 
-    _UCXXEXPORT operator bool() 
+    _UCXXEXPORT operator bool()
     {
       return ok;
     }
@@ -411,7 +411,7 @@ namespace std
     out.put(c);
     return out;
   }
-  
+
   template<class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     operator<<(basic_ostream<charT,traits>& out, char c)
   {
@@ -419,7 +419,7 @@ namespace std
     out.put(c);
     return out;
   }
-    
+
   template<class traits> _UCXXEXPORT basic_ostream<char,traits>&
     operator<<(basic_ostream<char,traits>& out, char c)
   {
@@ -427,7 +427,7 @@ namespace std
     out.put(c);
     return out;
   }
-    
+
     // signed and unsigned
   template<class traits> _UCXXEXPORT basic_ostream<char,traits>&
     operator<<(basic_ostream<char,traits>& out, signed char c)
@@ -436,7 +436,7 @@ namespace std
     out.put(c);
     return out;
   }
-  
+
   template<class traits> _UCXXEXPORT basic_ostream<char,traits>&
     operator<<(basic_ostream<char,traits>& out, unsigned char c)
   {
@@ -444,7 +444,7 @@ namespace std
     out.put(c);
     return out;
   }
-  
+
   template<class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     operator<<(basic_ostream<charT,traits>& out, const charT* c)
   {
@@ -452,7 +452,7 @@ namespace std
     out.printout(c, traits::length(c));
     return out;
   }
-  
+
   template<class charT, class traits> _UCXXEXPORT basic_ostream<charT,traits>&
     operator<<(basic_ostream<charT,traits>& out, const char* c)
   {
@@ -488,7 +488,7 @@ namespace std
     return out;
   }
 #endif
-    
+
   // Signed and unsigned
 
   template<class traits> _UCXXEXPORT basic_ostream<char,traits>&
@@ -498,7 +498,7 @@ namespace std
     out.printout(reinterpret_cast<const char *>(c), traits::length(reinterpret_cast<const char *>(c)));
     return out;
   }
-  
+
   template<class traits> _UCXXEXPORT basic_ostream<char,traits>&
     operator<<(basic_ostream<char,traits>& out, const unsigned char* c)
   {
@@ -546,7 +546,7 @@ namespace std
 
 // Support for output of long long data types
 
-template<class Ch, class Tr> _UCXXEXPORT basic_ostream<Ch, Tr>& 
+template<class Ch, class Tr> _UCXXEXPORT basic_ostream<Ch, Tr>&
   operator<<(basic_ostream<Ch, Tr>& os, signed long long int i)
 {
   typename basic_ostream<Ch, Tr>::sentry s(os);
@@ -554,7 +554,7 @@ template<class Ch, class Tr> _UCXXEXPORT basic_ostream<Ch, Tr>&
   return os;
 }
 
-template<class Ch, class Tr> _UCXXEXPORT basic_ostream<Ch, Tr>& 
+template<class Ch, class Tr> _UCXXEXPORT basic_ostream<Ch, Tr>&
   operator<<(basic_ostream<Ch, Tr>& os, unsigned long long int i)
 {
   typename basic_ostream<Ch, Tr>::sentry s(os);

@@ -277,7 +277,7 @@ poffLibLineNumber_t *poffFindLineNumber(uint32_t offset)
        * for offset, then we can safely set the upper search index
        * to the midpoint.
        */
-      
+
       if (lineNumberTable[lineNumberIndex].offset > offset)
         lastLineNumberIndex = lineNumberIndex;
 

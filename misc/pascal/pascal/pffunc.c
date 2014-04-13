@@ -129,7 +129,7 @@ exprType builtInFunction(void)
           expression(exprReal, NULL);
           pas_GenerateFpOperation(fpROUND);
           funcType = exprInteger;
-          break; 
+          break;
         case txTRUNC :
           getToken();                          /* Skip over 'trunc' */
           expression(exprReal, NULL);
@@ -447,6 +447,6 @@ static exprType getenvFunc(void)
   pas_BuiltInFunctionCall(lbGETENV);
   checkRParen();
   return exprCString;
-}            
+}
 
 /***********************************************************************/

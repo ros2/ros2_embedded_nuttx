@@ -54,14 +54,14 @@ struct llist_head {
 } while (0)
 
 /*
- * Insert a new entry between two known consecutive entries. 
+ * Insert a new entry between two known consecutive entries.
  *
  * This is only for internal llist manipulation where we know
  * the prev/next entries already!
  */
 static inline void __llist_add(struct llist_head *_new,
-			      struct llist_head *prev,
-			      struct llist_head *next)
+				 struct llist_head *prev,
+				 struct llist_head *next)
 {
 	next->prev = _new;
 	_new->next = next;
@@ -128,7 +128,7 @@ static inline void llist_del(struct llist_head *entry)
 static inline void llist_del_init(struct llist_head *entry)
 {
 	__llist_del(entry->prev, entry->next);
-	INIT_LLIST_HEAD(entry); 
+	INIT_LLIST_HEAD(entry);
 }
 
 /**
@@ -220,7 +220,7 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each(pos, head) \
 	for (pos = (head)->next, prefetch(pos->next); pos != (head); \
-        	pos = pos->next, prefetch(pos->next))
+		pos = pos->next, prefetch(pos->next))
 
 /**
  * __llist_for_each	-	iterate over a llist
@@ -242,8 +242,8 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each_prev(pos, head) \
 	for (pos = (head)->prev, prefetch(pos->prev); pos != (head); \
-        	pos = pos->prev, prefetch(pos->prev))
-        	
+		pos = pos->prev, prefetch(pos->prev))
+
 /**
  * llist_for_each_safe	-	iterate over a llist safe against removal of llist entry
  * @pos:	the &struct llist_head to use as a loop counter.
@@ -262,10 +262,10 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each_entry(pos, head, member)				\
 	for (pos = llist_entry((head)->next, typeof(*pos), member),	\
-		     prefetch(pos->member.next);			\
-	     &pos->member != (head); 					\
-	     pos = llist_entry(pos->member.next, typeof(*pos), member),	\
-		     prefetch(pos->member.next))
+			prefetch(pos->member.next);			\
+		&pos->member != (head); 					\
+		pos = llist_entry(pos->member.next, typeof(*pos), member),	\
+			prefetch(pos->member.next))
 
 /**
  * llist_for_each_entry_reverse - iterate backwards over llist of given type.
@@ -275,10 +275,10 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each_entry_reverse(pos, head, member)			\
 	for (pos = llist_entry((head)->prev, typeof(*pos), member),	\
-		     prefetch(pos->member.prev);			\
-	     &pos->member != (head); 					\
-	     pos = llist_entry(pos->member.prev, typeof(*pos), member),	\
-		     prefetch(pos->member.prev))
+			prefetch(pos->member.prev);			\
+		&pos->member != (head); 					\
+		pos = llist_entry(pos->member.prev, typeof(*pos), member),	\
+			prefetch(pos->member.prev))
 
 /**
  * llist_for_each_entry_continue -	iterate over llist of given type
@@ -289,10 +289,10 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each_entry_continue(pos, head, member) 		\
 	for (pos = llist_entry(pos->member.next, typeof(*pos), member),	\
-		     prefetch(pos->member.next);			\
-	     &pos->member != (head);					\
-	     pos = llist_entry(pos->member.next, typeof(*pos), member),	\
-		     prefetch(pos->member.next))
+			prefetch(pos->member.next);			\
+		&pos->member != (head);					\
+		pos = llist_entry(pos->member.next, typeof(*pos), member),	\
+			prefetch(pos->member.next))
 
 /**
  * llist_for_each_entry_safe - iterate over llist of given type safe against removal of llist entry
@@ -304,8 +304,8 @@ static inline void llist_splice_init(struct llist_head *llist,
 #define llist_for_each_entry_safe(pos, n, head, member)			\
 	for (pos = llist_entry((head)->next, typeof(*pos), member),	\
 		n = llist_entry(pos->member.next, typeof(*pos), member);	\
-	     &pos->member != (head); 					\
-	     pos = n, n = llist_entry(n->member.next, typeof(*n), member))
+		&pos->member != (head); 					\
+		pos = n, n = llist_entry(n->member.next, typeof(*n), member))
 
 /**
  * llist_for_each_rcu	-	iterate over an rcu-protected llist
@@ -315,11 +315,11 @@ static inline void llist_splice_init(struct llist_head *llist,
 #define llist_for_each_rcu(pos, head) \
 	for (pos = (head)->next, prefetch(pos->next); pos != (head); \
         	pos = pos->next, ({ smp_read_barrier_depends(); 0;}), prefetch(pos->next))
-        	
+
 #define __llist_for_each_rcu(pos, head) \
 	for (pos = (head)->next; pos != (head); \
         	pos = pos->next, ({ smp_read_barrier_depends(); 0;}))
-        	
+
 /**
  * llist_for_each_safe_rcu	-	iterate over an rcu-protected llist safe
  *					against removal of llist entry
@@ -339,15 +339,15 @@ static inline void llist_splice_init(struct llist_head *llist,
  */
 #define llist_for_each_entry_rcu(pos, head, member)			\
 	for (pos = llist_entry((head)->next, typeof(*pos), member),	\
-		     prefetch(pos->member.next);			\
-	     &pos->member != (head); 					\
-	     pos = llist_entry(pos->member.next, typeof(*pos), member),	\
-		     ({ smp_read_barrier_depends(); 0;}),		\
-		     prefetch(pos->member.next))
+			prefetch(pos->member.next);			\
+		&pos->member != (head); 					\
+		pos = llist_entry(pos->member.next, typeof(*pos), member),	\
+			({ smp_read_barrier_depends(); 0;}),		\
+			prefetch(pos->member.next))
 
 
 /**
- * llist_for_each_continue_rcu	-	iterate over an rcu-protected llist 
+ * llist_for_each_continue_rcu	-	iterate over an rcu-protected llist
  *			continuing after existing point.
  * @pos:	the &struct llist_head to use as a loop counter.
  * @head:	the head for your llist.

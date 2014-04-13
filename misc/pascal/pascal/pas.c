@@ -203,7 +203,7 @@ static void openOutputFiles(void)
         {
           fprintf(stderr, "Could not open output file '%s': %s\n",
                   tmpname, strerror(errno));
-          showUsage(); 
+          showUsage();
         }
     }
 }
@@ -266,7 +266,7 @@ static void parseArguments(int argc, char **argv)
   if (argc < 2)
     {
       fprintf(stderr, "Invalid number of arguments\n");
-      showUsage(); 
+      showUsage();
     }
 
   /* Parse any optional command line arguments */
@@ -282,7 +282,7 @@ static void parseArguments(int argc, char **argv)
               if (nIncPathes >= MAX_INCPATHES)
                 {
                   fprintf(stderr, "Unrecognized [option]\n");
-                  showUsage(); 
+                  showUsage();
                 }
               else
                 {
@@ -292,13 +292,13 @@ static void parseArguments(int argc, char **argv)
               break;
             default:
               fprintf(stderr, "Unrecognized [option]\n");
-              showUsage(); 
+              showUsage();
             }
         }
       else
         {
           fprintf(stderr, "Unrecognized [option]\n");
-          showUsage(); 
+          showUsage();
         }
     }
 
@@ -338,9 +338,9 @@ int main(int argc, char *argv[])
     {
       errmsg("Could not open source file '%s': %s\n",
              filename, strerror(errno));
-      showUsage(); 
+      showUsage();
     }
-   
+
   /* Initialization */
 
   primeSignalHandlers();
@@ -387,7 +387,7 @@ int main(int argc, char *argv[])
 
   getToken();
   if (token == tPROGRAM)
-    { 
+    {
       /* Compile a pascal program */
 
       FP->kind    = eIsProgram;

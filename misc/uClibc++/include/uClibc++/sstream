@@ -108,7 +108,7 @@ namespace std
         ++ielement;
       }
 
-      return retval;  
+      return retval;
     }
 
     virtual _UCXXEXPORT int_type   pbackfail(int_type c = traits::eof())
@@ -241,7 +241,7 @@ namespace std
         if (which & ios_base::in)
         {
           newpos = ielement + off;
-        } 
+        }
       }
       else
       {
@@ -274,8 +274,8 @@ namespace std
 
       return newpos;
     }
-      
-    virtual _UCXXEXPORT pos_type seekpos(pos_type sp, 
+
+    virtual _UCXXEXPORT pos_type seekpos(pos_type sp,
       ios_base::openmode which = ios_base::in | ios_base::out)
     {
       return seekoff(sp, ios_base::beg, which);
@@ -295,13 +295,13 @@ namespace std
     typedef typename traits::pos_type pos_type;
     typedef typename traits::off_type off_type;
 
-    explicit _UCXXEXPORT basic_istringstream(ios_base::openmode m = ios_base::in) 
+    explicit _UCXXEXPORT basic_istringstream(ios_base::openmode m = ios_base::in)
       : basic_ios<charT, traits>(&sb), basic_istream<charT,traits>(&sb), sb(m)
     {
     }
 
-    explicit _UCXXEXPORT basic_istringstream(const basic_string<charT,traits,Allocator>& str, 
-      ios_base::openmode which = ios_base::in) 
+    explicit _UCXXEXPORT basic_istringstream(const basic_string<charT,traits,Allocator>& str,
+      ios_base::openmode which = ios_base::in)
       : basic_ios<charT, traits>(&sb), basic_istream<charT,traits>(&sb), sb(str, which)
     {
     }
@@ -341,7 +341,7 @@ namespace std
     {
     }
 
-    explicit _UCXXEXPORT basic_ostringstream(const basic_string<charT,traits,Allocator>& str, 
+    explicit _UCXXEXPORT basic_ostringstream(const basic_string<charT,traits,Allocator>& str,
       ios_base::openmode which = ios_base::out)
       : basic_ios<charT, traits>(&sb), basic_ostream<charT,traits>(&sb), sb(str, which)
     {

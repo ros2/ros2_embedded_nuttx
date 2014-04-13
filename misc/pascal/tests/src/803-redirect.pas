@@ -71,7 +71,7 @@ var
                      NewLocation := BASE + value
             end
          else
-            ; (* do nothing we have an undefined form element *)            
+            ; (* do nothing we have an undefined form element *)
       end;
 
    begin (* ProcessCGIData *)

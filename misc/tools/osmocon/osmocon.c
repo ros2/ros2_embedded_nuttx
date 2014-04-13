@@ -628,7 +628,7 @@ static int handle_write_dnload(void)
 		default:
 			break;
 		}
-	} else if (dnload.write_ptr >= dnload.data + dnload.data_len) { 
+	} else if (dnload.write_ptr >= dnload.data + dnload.data_len) {
 		printf("finished\n");
 		dnload.write_ptr = dnload.data;
 		dnload.serial_fd.when &= ~BSC_FD_WRITE;

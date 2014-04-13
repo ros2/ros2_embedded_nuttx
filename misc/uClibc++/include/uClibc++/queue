@@ -91,7 +91,7 @@ namespace std
   template <class T,
     class Container = vector<T>,
     class Compare = less<typename Container::value_type>
-  > class _UCXXEXPORT priority_queue 
+  > class _UCXXEXPORT priority_queue
   {
   protected:
     Container c;
@@ -109,7 +109,7 @@ namespace std
       const Compare& x = Compare(),
       const Container& y= Container())
     :  c(y), comp(c)
-    { 
+    {
       c.insert(c.end(), first, last);
       make_heap(c.begin(), c.end(), comp);
      }

@@ -351,7 +351,7 @@ namespace std
       }
 
       if (basic_ios<charT, traits>::mstreambuf == 0){
-      
+
         basic_ios<charT,traits>::setstate(ios_base::badbit);
         return *this;
       }

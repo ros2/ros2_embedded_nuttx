@@ -107,7 +107,7 @@ static bool   pas_IntAlignRequired      (STYPE *typePtr);
  ***************************************************************/
 
 static int32_t g_nParms;
-static int32_t g_dwVarSize;                      
+static int32_t g_dwVarSize;
 
 /***************************************************************
  * Public Functions
@@ -190,7 +190,7 @@ void block()
   pas_GenerateDataOperation(opLABEL, (int32_t)beginLabel);
 
   /* Since we don't know for certain how we got here, invalidate
-   * the level stack pointer (LSP).  This is, of course, only 
+   * the level stack pointer (LSP).  This is, of course, only
    * meaningful on architectures that implement an LSP.
    */
 
@@ -318,7 +318,7 @@ void declarationGroup(int32_t beginLabel)
       variableDeclarationGroup();
     }
 
-  /* Process procedure/function-declaration(s) if present 
+  /* Process procedure/function-declaration(s) if present
    * FORM: function-declaration =
    *       function-heading ';' directive |
    *       function-heading ';' function-block
@@ -531,7 +531,7 @@ int16_t formalParameterList(STYPE *procPtr)
             {
               pointerType = 1;
               getToken();
-            } 
+            }
           else pointerType = 0;
 
           /* Process the common part of the variable-parameter-specification
@@ -833,7 +833,7 @@ static STYPE *pas_DeclareVar(void)
               /* IMPORT the symbol; assign an offset relative to
                * the dstack at the beginning of this file
                */
- 
+
               pas_GenerateStackImport(varPtr);
             }
           else /* if (FP0->kind == eIsProgram) */
@@ -844,7 +844,7 @@ static STYPE *pas_DeclareVar(void)
             }
         }
 
-      /* In any event, bump the stack offset to include space for 
+      /* In any event, bump the stack offset to include space for
        * this new symbol.  The 'bumped' stack offset will be the
        * offset for the next variable that is declared.
        */
@@ -1564,7 +1564,7 @@ static STYPE *pas_NewComplexType(char *typeName)
       else
         typeIdPtr = pas_DeclareOrdinalType(NULL);
 
-      /* Verify that the ordinal-type is either a scalar or a 
+      /* Verify that the ordinal-type is either a scalar or a
        * subrange type.  These are the only valid types for 'set of'
        */
 
@@ -1605,7 +1605,7 @@ static STYPE *pas_NewComplexType(char *typeName)
       else
         error(eSET);
       break;
- 
+
       /* File Types
        * FORM: file-type = 'file' 'of' type-denoter
        */
@@ -1858,7 +1858,7 @@ static STYPE *pas_DeclareRecord(char *recordName)
           recordOffset += recordPtr[symbolIndex].sParm.r.size;
           recordCount++;
         }
-    } 
+    }
 
   /* Update the RECORD entry for the total size of all fields */
 
@@ -1883,7 +1883,7 @@ static STYPE *pas_DeclareRecord(char *recordName)
 
       if (token != tIDENT) error(eRECORDDECLARE);
 
-      /* Add a variant-selector to the fixed-part of the record */ 
+      /* Add a variant-selector to the fixed-part of the record */
 
       else
         {
@@ -2088,7 +2088,7 @@ static STYPE *pas_DeclareRecord(char *recordName)
 
               if (recordOffset > maxRecordSize)
                 maxRecordSize = recordOffset;
-            } 
+            }
 
           /* Verify that the <field list> is enclosed in parentheses */
 
@@ -2175,7 +2175,7 @@ static STYPE *pas_DeclareField(STYPE *recordPtr)
 
    return typePtr;
 }
- 
+
 /***************************************************************/
 /* Process VAR/value Parameter Declaration */
 /* NOTE:  This function increments the global variable g_nParms */

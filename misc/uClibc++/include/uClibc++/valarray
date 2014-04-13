@@ -797,8 +797,8 @@ namespace std
     void operator|=(const valarray<T>& array) const;
     void operator<<=(const valarray<T>& array) const;
     void operator>>=(const valarray<T>& array) const;
- 
-    void operator=(const T&);  
+
+    void operator=(const T&);
 
   private:
     gslice_array();

@@ -372,7 +372,7 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-nconf$(EXEEXT): $(nconf_OBJECTS) $(nconf_DEPENDENCIES) $(EXTRA_nconf_DEPENDENCIES) 
+nconf$(EXEEXT): $(nconf_OBJECTS) $(nconf_DEPENDENCIES) $(EXTRA_nconf_DEPENDENCIES)
 	@rm -f nconf$(EXEEXT)
 	$(AM_V_CCLD)$(nconf_LINK) $(nconf_OBJECTS) $(nconf_LDADD) $(LIBS)
 

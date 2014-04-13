@@ -355,7 +355,7 @@ static void interfaceSection(void)
 
    /* Process the exported-heading
     *
-    * FORM: exported-heading = 
+    * FORM: exported-heading =
     *       procedure-heading ';' [ directive ] |
     *       function-heading ';' [ directive ]
     */
@@ -458,8 +458,8 @@ static void exportedProcedureHeading(void)
    if (token !=  ';') error (eSEMICOLON);
    else getToken();
 
-   /* If we are compiling a program or unit that "imports" the 
-    * procedure then generate the appropriate symbol table entries 
+   /* If we are compiling a program or unit that "imports" the
+    * procedure then generate the appropriate symbol table entries
     * in the output file to support relocation when the external
     * procedure is called.
     */
@@ -573,8 +573,8 @@ static void exportedFunctionHeading(void)
    if (token !=  ';') error (eSEMICOLON);
    else getToken();
 
-   /* If we are compiling a program or unit that "imports" the 
-    * function then generate the appropriate symbol table entries 
+   /* If we are compiling a program or unit that "imports" the
+    * function then generate the appropriate symbol table entries
     * in the output file to support relocation when the external
     * function is called.
     */

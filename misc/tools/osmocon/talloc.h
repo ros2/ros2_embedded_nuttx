@@ -1,16 +1,16 @@
 #ifndef _TALLOC_H_
 #define _TALLOC_H_
-/* 
+/*
    Unix SMB/CIFS implementation.
    Samba temporary memory allocation functions
 
    Copyright (C) Andrew Tridgell 2004-2005
    Copyright (C) Stefan Metzmacher 2006
-   
+
      ** NOTE! The following LGPL license applies to the talloc
      ** library. This does NOT imply that all of Samba is released
      ** under the LGPL
-   
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
@@ -130,7 +130,7 @@ void *_talloc_reference(const void *context, const void *ptr);
 int talloc_unlink(const void *context, void *ptr);
 const char *talloc_set_name(const void *ptr, const char *fmt, ...) PRINTF_ATTRIBUTE(2,3);
 void talloc_set_name_const(const void *ptr, const char *name);
-void *talloc_named(const void *context, size_t size, 
+void *talloc_named(const void *context, size_t size,
 		   const char *fmt, ...) PRINTF_ATTRIBUTE(3,4);
 void *talloc_named_const(const void *context, size_t size, const char *name);
 const char *talloc_get_name(const void *ptr);

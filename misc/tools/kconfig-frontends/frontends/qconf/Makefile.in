@@ -397,7 +397,7 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-qconf$(EXEEXT): $(qconf_OBJECTS) $(qconf_DEPENDENCIES) $(EXTRA_qconf_DEPENDENCIES) 
+qconf$(EXEEXT): $(qconf_OBJECTS) $(qconf_DEPENDENCIES) $(EXTRA_qconf_DEPENDENCIES)
 	@rm -f qconf$(EXEEXT)
 	$(AM_V_CXXLD)$(qconf_LINK) $(qconf_OBJECTS) $(qconf_LDADD) $(LIBS)
 

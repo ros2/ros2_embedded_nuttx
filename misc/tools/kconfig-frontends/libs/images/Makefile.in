@@ -322,7 +322,7 @@ $(am__aclocal_m4_deps):
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libkconfig-images.a: $(libkconfig_images_a_OBJECTS) $(libkconfig_images_a_DEPENDENCIES) $(EXTRA_libkconfig_images_a_DEPENDENCIES) 
+libkconfig-images.a: $(libkconfig_images_a_OBJECTS) $(libkconfig_images_a_DEPENDENCIES) $(EXTRA_libkconfig_images_a_DEPENDENCIES)
 	$(AM_V_at)-rm -f libkconfig-images.a
 	$(AM_V_AR)$(libkconfig_images_a_AR) libkconfig-images.a $(libkconfig_images_a_OBJECTS) $(libkconfig_images_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libkconfig-images.a

@@ -79,7 +79,7 @@ while [ ! -z "$1" ]; do
   shift
 done
 
-# Sanity checking 
+# Sanity checking
 
 if [ -z "${nuttxdir}" ]; then
   echo "Path to the top-level NuttX directory not provided"

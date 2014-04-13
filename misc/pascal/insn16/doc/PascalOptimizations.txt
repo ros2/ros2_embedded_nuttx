@@ -1,6 +1,6 @@
 P-Code optimizations:
   Let <push-ops> be oPUSH|oPUSHB
-  Let <load-ops> be oLOD|oLODB|PUSH|oLADR|oLCADR 
+  Let <load-ops> be oLOD|oLODB|PUSH|oLADR|oLCADR
 
 pcopt.c:unaryOptimize
 STEP 1:
@@ -211,7 +211,7 @@ pjopt.c: BranchOptimize
   oLTEZ + oNOT                                 -> oGTZ
   oLTEZ + oJEQUZ                               -> oJGTZ
   oLTEZ + oJNEQZ                               -> oJLTEZ
-  
+
 plopt.c:LoadOptimize()
 Eliminate duplicate loads
   oLOD arg1 + oLOAD arg1                       -> oLOD arg1 + oDUP

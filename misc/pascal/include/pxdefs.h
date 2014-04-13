@@ -126,7 +126,7 @@
 #define lbCSTR2RSTR     (0x0004)
 
 /* Convert a string to a numeric value
- *   procedure val(const s : string; var v; var code : word); 
+ *   procedure val(const s : string; var v; var code : word);
  *
  * Description:
  * val() converts the value represented in the string S to a numerical
@@ -222,7 +222,7 @@
  *   TOS(3)=length of string1
  *   TOS(4)=address of string1 data
  * ON OUTPUT
- *   TOS(0)=(-1=less than, 0=equal, 1=greater than} 
+ *   TOS(0)=(-1=less than, 0=equal, 1=greater than}
  */
 
 #define lbSTRCMP        (0x000b)

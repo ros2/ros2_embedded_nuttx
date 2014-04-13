@@ -258,7 +258,7 @@ var
 		GenerateBody;
 		GenerateFooter;
 	end; (* GenerateResponse *)
-              
+
     procedure Shutdown;
 	begin (* Shutdown *)
 		dispose(NameValuePairs);

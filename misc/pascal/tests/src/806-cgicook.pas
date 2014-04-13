@@ -436,7 +436,7 @@ var
 		begin (* GenerateBodyData *)
 			writeln('<tr>');
             writeln('<td width="100%">');
- 
+
  			//Generate the HTML to display the cookies returned by the browser.
 			writeln('<h1>Current Cookies</h1>');
 			iNumCookies := length(Cookies);	//Number of cookies returned by the browser

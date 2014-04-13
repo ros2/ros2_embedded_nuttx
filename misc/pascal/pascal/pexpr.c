@@ -112,7 +112,7 @@ static bool     isStringReference (exprType testExprType);
  /* The abstract types - SETs, RECORDS, etc - require an exact */
  /* match in type.  This variable points to the symbol table   */
  /* sTYPE entry associated with the expression. */
-  
+
  static STYPE *abstractType;
 
 /***************************************************************/
@@ -178,14 +178,14 @@ exprType expression(exprType findExprType, STYPE *typePtr)
        break;
      case tIN :
        if ((!abstractType) ||
-	   ((abstractType->sParm.t.type != sSCALAR) &&
-	    (abstractType->sParm.t.type != sSUBRANGE)))
-	 error(eEXPRTYPE);
+           ((abstractType->sParm.t.type != sSCALAR) &&
+            (abstractType->sParm.t.type != sSUBRANGE)))
+         error(eEXPRTYPE);
        else if (abstractType->sParm.t.minValue)
-	 {
-	   pas_GenerateDataOperation(opPUSH, abstractType->sParm.t.minValue);
-	   pas_GenerateSimple(opSUB);
-	 } /* end else if */
+         {
+           pas_GenerateDataOperation(opPUSH, abstractType->sParm.t.minValue);
+           pas_GenerateSimple(opSUB);
+         } /* end else if */
        intOpCode = opBIT;
        fpOpCode  = fpINVLD;
        strOpCode = opNOP;
@@ -207,67 +207,67 @@ exprType expression(exprType findExprType, STYPE *typePtr)
        simple2Type = simpleExpression(findExprType);
 
        /* Perform automatic type conversion from INTEGER to REAL
-	* for integer vs. real comparisons.
-	*/
+        * for integer vs. real comparisons.
+        */
 
        if (simple1Type != simple2Type)
-	 {
-	   /* Handle the case where the 1st argument is REAL and the
-	    * second is INTEGER. */
+         {
+           /* Handle the case where the 1st argument is REAL and the
+            * second is INTEGER. */
 
-	   if ((simple1Type == exprReal) &&
-	       (simple2Type == exprInteger) &&
-	       (fpOpCode != fpINVLD))
-	     {
-	       fpOpCode   |= fpARG2;
-	       simple2Type = exprReal;
-	     } /* end if */
+           if ((simple1Type == exprReal) &&
+               (simple2Type == exprInteger) &&
+               (fpOpCode != fpINVLD))
+             {
+               fpOpCode   |= fpARG2;
+               simple2Type = exprReal;
+             } /* end if */
 
-	   /* Handle the case where the 1st argument is Integer and the
-	    * second is REAL. */
+           /* Handle the case where the 1st argument is Integer and the
+            * second is REAL. */
 
-	   else if ((simple1Type == exprInteger) &&
-		    (simple2Type == exprReal) &&
-		    (fpOpCode != fpINVLD))
-	     {
-	       fpOpCode   |= fpARG1;
-	       simple1Type = exprReal;
-	     } /* end else if */
+           else if ((simple1Type == exprInteger) &&
+                    (simple2Type == exprReal) &&
+                    (fpOpCode != fpINVLD))
+             {
+               fpOpCode   |= fpARG1;
+               simple1Type = exprReal;
+             } /* end else if */
 
-	   /* Allow the case of <scalar type> IN <set type> */
-	   /* Otherwise, the two terms must agree in type */
+           /* Allow the case of <scalar type> IN <set type> */
+           /* Otherwise, the two terms must agree in type */
 
-	   else if ((operation != tIN) || (simple2Type != exprSet))
-	     {
-	       error(eEXPRTYPE);
-	     }
-	 } /* end if */
+           else if ((operation != tIN) || (simple2Type != exprSet))
+             {
+               error(eEXPRTYPE);
+             }
+         } /* end if */
 
        /* Generate the comparison */
 
        if (simple1Type == exprReal)
-	 {
-	   if (fpOpCode == fpINVLD)
-	     error(eEXPRTYPE);
-	   else
-	     pas_GenerateFpOperation(fpOpCode);
-	 } /* end if */
+         {
+           if (fpOpCode == fpINVLD)
+             error(eEXPRTYPE);
+           else
+             pas_GenerateFpOperation(fpOpCode);
+         } /* end if */
        else if ((simple1Type == exprString) || (simple1Type == exprString))
-	 {
-	   if (strOpCode != opNOP)
-	     {
-	       pas_BuiltInFunctionCall(lbSTRCMP);
-	       pas_GenerateSimple(strOpCode);
-	     }
-	   else
-	     {
-	       error(eEXPRTYPE);
-	     }
-	 }
+         {
+           if (strOpCode != opNOP)
+             {
+               pas_BuiltInFunctionCall(lbSTRCMP);
+               pas_GenerateSimple(strOpCode);
+             }
+           else
+             {
+               error(eEXPRTYPE);
+             }
+         }
        else
-	 {
-	   pas_GenerateSimple(intOpCode);
-	 }
+         {
+           pas_GenerateSimple(intOpCode);
+         }
 
        /* The type resulting from these operations becomes BOOLEAN */
 
@@ -312,28 +312,28 @@ exprType expression(exprType findExprType, STYPE *typePtr)
        (findExprType != simple1Type) &&     /* 2)NOT Matched expression */
 
        ((findExprType != exprAnyOrdinal) || /* 3)NOT any ordinal type */
-	(!isOrdinalType(simple1Type))) &&   /*   OR type is not ordinal */
+        (!isOrdinalType(simple1Type))) &&   /*   OR type is not ordinal */
 
        ((findExprType != exprAnyString) ||  /* 4)NOT any string type */
-	(!isAnyStringType(simple1Type))) && /*   OR type is not string */
+        (!isAnyStringType(simple1Type))) && /*   OR type is not string */
 
        ((findExprType != exprString) ||     /* 5)Not looking for string ref */
-	(!isStringReference(simple1Type)))) /*   OR type is not string ref */
+        (!isStringReference(simple1Type)))) /*   OR type is not string ref */
      {
        /* Automatic conversions from INTEGER to REAL will be performed */
 
        if ((findExprType == exprReal) && (simple1Type == exprInteger))
-	 {
-	   pas_GenerateFpOperation(fpFLOAT);
-	   simple1Type = exprReal;
-	 }
+         {
+           pas_GenerateFpOperation(fpFLOAT);
+           simple1Type = exprReal;
+         }
 
        /* Any other type mismatch is an error */
 
        else
-	 {
-	   error(eEXPRTYPE);
-	 }
+         {
+           error(eEXPRTYPE);
+         }
    } /* end if */
 
    return simple1Type;
@@ -367,7 +367,7 @@ exprType varParm (exprType varExprType, STYPE *typePtr)
    return factorType;
 
 } /* end varParm */
- 
+
 /**********************************************************************/
 /* Process Array Index */
 void arrayIndex (int32_t size)
@@ -386,7 +386,7 @@ void arrayIndex (int32_t size)
 
      /* Correct for size of array element */
      if (size > 1) {
-	pas_GenerateDataOperation(opPUSH, size);
+        pas_GenerateDataOperation(opPUSH, size);
         pas_GenerateSimple(opMUL);
      } /* end if */
 
@@ -411,74 +411,74 @@ exprType getExprType(STYPE *sType)
   if ((sType) && (sType->sKind == sTYPE))
     {
       switch (sType->sParm.t.type)
-	{
-	case sINT :
-	  factorType = exprInteger;
-	  break;
-	case sBOOLEAN :
-	  factorType = exprBoolean;
-	  break;
-	case sCHAR :
-	  factorType = exprChar;
-	  break;
-	case sREAL :
-	  factorType = exprReal;
-	  break;
-	case sSCALAR :
-	  factorType = exprScalar;
-	  break;
-	case sSTRING :
-	case sRSTRING :
-	  factorType = exprString;
-	  break;
-       	case sSUBRANGE :
-	  switch (sType->sParm.t.subType)
-	    {
-	    case sINT :
-	      factorType = exprInteger;
-	      break;
-	    case sCHAR :
-	      factorType = exprChar;
-	      break;
-	    case sSCALAR :
-	      factorType = exprScalar;
-	      break;
-	    default :
-	      error(eSUBRANGETYPE);
-	      break;
-	    } /* end switch */
-	  break;
-	case sPOINTER :
-	  sType = sType->sParm.t.parent;
-	  if (sType)
-	    {
-	      switch (sType->sKind)
-		{
-		case sINT :
-		  factorType = exprIntegerPtr;
-		  break;
-		case sBOOLEAN :
-		  factorType = exprBooleanPtr;
-		  break;
-		case sCHAR :
-		  factorType = exprCharPtr;
-		  break;
-		case sREAL :
-		  factorType = exprRealPtr;
-		  break;
-		case sSCALAR :
-		  factorType = exprScalarPtr;
-		  break;
-		default :
-		  error(eINVTYPE);
-		  break;
-		} /* end switch */
-	    } /* end if */
-	  break;
-	default :
-	  error(eINVTYPE);
-	  break;
-	} /* end switch */
+        {
+        case sINT :
+          factorType = exprInteger;
+          break;
+        case sBOOLEAN :
+          factorType = exprBoolean;
+          break;
+        case sCHAR :
+          factorType = exprChar;
+          break;
+        case sREAL :
+          factorType = exprReal;
+          break;
+        case sSCALAR :
+          factorType = exprScalar;
+          break;
+        case sSTRING :
+        case sRSTRING :
+          factorType = exprString;
+          break;
+               case sSUBRANGE :
+          switch (sType->sParm.t.subType)
+            {
+            case sINT :
+              factorType = exprInteger;
+              break;
+            case sCHAR :
+              factorType = exprChar;
+              break;
+            case sSCALAR :
+              factorType = exprScalar;
+              break;
+            default :
+              error(eSUBRANGETYPE);
+              break;
+            } /* end switch */
+          break;
+        case sPOINTER :
+          sType = sType->sParm.t.parent;
+          if (sType)
+            {
+              switch (sType->sKind)
+                {
+                case sINT :
+                  factorType = exprIntegerPtr;
+                  break;
+                case sBOOLEAN :
+                  factorType = exprBooleanPtr;
+                  break;
+                case sCHAR :
+                  factorType = exprCharPtr;
+                  break;
+                case sREAL :
+                  factorType = exprRealPtr;
+                  break;
+                case sSCALAR :
+                  factorType = exprScalarPtr;
+                  break;
+                default :
+                  error(eINVTYPE);
+                  break;
+                } /* end switch */
+            } /* end if */
+          break;
+        default :
+          error(eINVTYPE);
+          break;
+        } /* end switch */
     } /* end if */
 
   return factorType;
@@ -512,11 +512,11 @@ static exprType simpleExpression(exprType findExprType)
    if (operation == '-')
      {
        if (term1Type == exprInteger)
-	 pas_GenerateSimple(opNEG);
+         pas_GenerateSimple(opNEG);
        else if (term1Type == exprReal)
-	 pas_GenerateFpOperation(fpNEG);
+         pas_GenerateFpOperation(fpNEG);
        else
-	 error(eTERMTYPE);
+         error(eTERMTYPE);
      } /* end if */
 
    /* Process subsequent (optional) terms and binary operations */
@@ -526,41 +526,41 @@ static exprType simpleExpression(exprType findExprType)
        /* Check for binary operator */
 
        if ((token == '+') || (token == '-') || (token == tOR))
-	 operation = token;
+         operation = token;
        else
-	 break;
+         break;
 
        /* Special case for string types.  So far, we have parsed
-	* '<string> +'  At this point, it is safe to assume we
-	* going to modified string.  So, if the string has not
-	* been copied to the string stack, we will have to do that
-	* now.
-	*/
+        * '<string> +'  At this point, it is safe to assume we
+        * going to modified string.  So, if the string has not
+        * been copied to the string stack, we will have to do that
+        * now.
+        */
 
        if ((term1Type == exprString) && (operation == '+'))
-	 {
-	   /* Duplicate the string on the string stack.  And
-	    * change the expression type to reflect this.
-	    */
+         {
+           /* Duplicate the string on the string stack.  And
+            * change the expression type to reflect this.
+            */
 
-	   pas_BuiltInFunctionCall(lbMKSTKSTR);
-	   term1Type = exprStkString;
-	 }
+           pas_BuiltInFunctionCall(lbMKSTKSTR);
+           term1Type = exprStkString;
+         }
 
        /* If we are going to add something to a char, then the
-	* result must be a string.  We will similarly have to
-	* convert the character to a string.
-	*/
+        * result must be a string.  We will similarly have to
+        * convert the character to a string.
+        */
 
        else if ((term1Type == exprChar) && (operation == '+'))
-	 {
-	   /* Duplicate the string on the string stack.  And
-	    * change the expression type to reflect this.
-	    */
+         {
+           /* Duplicate the string on the string stack.  And
+            * change the expression type to reflect this.
+            */
 
-	   pas_BuiltInFunctionCall(lbMKSTKC);
-	   term1Type = exprStkString;
-	 }
+           pas_BuiltInFunctionCall(lbMKSTKC);
+           term1Type = exprStkString;
+         }
 
        /* Get the 2nd term */
 
@@ -568,153 +568,153 @@ static exprType simpleExpression(exprType findExprType)
        term2Type = term(findExprType);
 
        /* Before generating the operation, verify that the types match.
-	* Perform automatic type conversion from INTEGER to REAL as
-	* necessary.
-	*/
+        * Perform automatic type conversion from INTEGER to REAL as
+        * necessary.
+        */
 
        arg8FpBits = 0;
 
        /* Skip over string types.  These will be handled below */
 
        if (!isStringReference(term1Type))
-	 {
-	   /* Handle the case where the type of the terms differ. */
+         {
+           /* Handle the case where the type of the terms differ. */
 
-	   if (term1Type != term2Type)
-	     {
-	       /* Handle the case where the 1st argument is REAL and the
-		* second is INTEGER. */
+           if (term1Type != term2Type)
+             {
+               /* Handle the case where the 1st argument is REAL and the
+                * second is INTEGER. */
 
-	       if ((term1Type == exprReal) && (term2Type == exprInteger))
-		 {
-		   arg8FpBits = fpARG2;
-		   term2Type = exprReal;
-		 } /* end if */
+               if ((term1Type == exprReal) && (term2Type == exprInteger))
+                 {
+                   arg8FpBits = fpARG2;
+                   term2Type = exprReal;
+                 } /* end if */
 
-	       /* Handle the case where the 1st argument is Integer and the
-		* second is REAL. */
+               /* Handle the case where the 1st argument is Integer and the
+                * second is REAL. */
 
-	       else if ((term1Type == exprInteger) && (term2Type == exprReal))
-		 {
-		   arg8FpBits = fpARG1;
-		   term1Type = exprReal;
-		 } /* end if */
+               else if ((term1Type == exprInteger) && (term2Type == exprReal))
+                 {
+                   arg8FpBits = fpARG1;
+                   term1Type = exprReal;
+                 } /* end if */
 
-	       /* Otherwise, the two terms must agree in type */
+               /* Otherwise, the two terms must agree in type */
 
-	       else
-		 {
-		   error(eTERMTYPE);
-		 }
-	     } /* end if */
+               else
+                 {
+                   error(eTERMTYPE);
+                 }
+             } /* end if */
 
-	   /* We do not perform conversions for the cases where the two
-	    * terms agree in type. There is only one interesting case:
-	    * When the expected expression is real and both arguments are
-	    * integer.  Since addition an subtraction are exact, it would,
-	    * in general, be more efficient to perform the conversion
-	    * AFTER the operation (at the the risk of possible overflow
-	    * conditions due to the limited range of integers).
-	    */
-	 }
+           /* We do not perform conversions for the cases where the two
+            * terms agree in type. There is only one interesting case:
+            * When the expected expression is real and both arguments are
+            * integer.  Since addition an subtraction are exact, it would,
+            * in general, be more efficient to perform the conversion
+            * AFTER the operation (at the the risk of possible overflow
+            * conditions due to the limited range of integers).
+            */
+         }
 
        /* Generate code to perform the selected binary operation */
 
        switch (operation)
-	 {
-	 case '+' :
-	   switch (term1Type)
-	     {
-	       /* Integer addition */
+         {
+         case '+' :
+           switch (term1Type)
+             {
+               /* Integer addition */
 
-	     case exprInteger :
-	       pas_GenerateSimple(opADD);
-	       break;
+             case exprInteger :
+               pas_GenerateSimple(opADD);
+               break;
 
-	       /* Floating point addition */
+               /* Floating point addition */
 
-	     case exprReal :
-	       pas_GenerateFpOperation(fpADD | arg8FpBits);
-	       break;
+             case exprReal :
+               pas_GenerateFpOperation(fpADD | arg8FpBits);
+               break;
 
-	       /* Set 'addition' */
+               /* Set 'addition' */
 
-	     case exprSet :
-	       pas_GenerateSimple(opOR);
-	       break;
+             case exprSet :
+               pas_GenerateSimple(opOR);
+               break;
 
-	       /* Handle the special cases where '+' indicates that we are
-		* concatenating a string or a character to the end of a
-		* string.  Note that these operations can only be performed
-		* on stack copies of the strings.  Logic above should have
-		* made the conversion for the case of exprString.
-		*/
+               /* Handle the special cases where '+' indicates that we are
+                * concatenating a string or a character to the end of a
+                * string.  Note that these operations can only be performed
+                * on stack copies of the strings.  Logic above should have
+                * made the conversion for the case of exprString.
+                */
 
-	     case exprStkString :
-	       if ((term2Type == exprString) || (term2Type == exprStkString))
-		 {
-		   /* We are concatenating one string with another.*/
+             case exprStkString :
+               if ((term2Type == exprString) || (term2Type == exprStkString))
+                 {
+                   /* We are concatenating one string with another.*/
 
-		   pas_BuiltInFunctionCall(lbSTRCAT);
-		 }
-	       else if (term2Type == exprChar)
-		 {
-		   /* We are concatenating a character to the end of a string */
+                   pas_BuiltInFunctionCall(lbSTRCAT);
+                 }
+               else if (term2Type == exprChar)
+                 {
+                   /* We are concatenating a character to the end of a string */
 
-		   pas_BuiltInFunctionCall(lbSTRCATC);
-		 }
-	       else
-		 {
-		   error(eTERMTYPE);
-		 }
-	       break;
+                   pas_BuiltInFunctionCall(lbSTRCATC);
+                 }
+               else
+                 {
+                   error(eTERMTYPE);
+                 }
+               break;
 
-	       /* Otherwise, the '+' operation is not permitted */
+               /* Otherwise, the '+' operation is not permitted */
 
-	     default :
-	       error(eTERMTYPE);
-	       break;
-	     }
-	   break;
+             default :
+               error(eTERMTYPE);
+               break;
+             }
+           break;
 
-	 case '-' :
-	   /* Integer subtraction */
+         case '-' :
+           /* Integer subtraction */
 
-	   if (term1Type == exprInteger)
-	     pas_GenerateSimple(opSUB);
+           if (term1Type == exprInteger)
+             pas_GenerateSimple(opSUB);
 
-	   /* Floating point subtraction */
+           /* Floating point subtraction */
 
-	   else if (term1Type == exprReal)
-	     pas_GenerateFpOperation(fpSUB | arg8FpBits);
+           else if (term1Type == exprReal)
+             pas_GenerateFpOperation(fpSUB | arg8FpBits);
 
-	   /* Set 'subtraction' */
+           /* Set 'subtraction' */
 
-	   else if (term1Type == exprSet)
-	     {
-	       pas_GenerateSimple(opNOT);
-	       pas_GenerateSimple(opAND);
-	     } /* end else if */
+           else if (term1Type == exprSet)
+             {
+               pas_GenerateSimple(opNOT);
+               pas_GenerateSimple(opAND);
+             } /* end else if */
 
-	   /* Otherwise, the '-' operation is not permitted */
+           /* Otherwise, the '-' operation is not permitted */
 
-	   else
-	     error(eTERMTYPE);
-	   break;
+           else
+             error(eTERMTYPE);
+           break;
 
-	 case tOR :
-	   /* Integer/boolean 'OR' */
+         case tOR :
+           /* Integer/boolean 'OR' */
 
-	   if ((term1Type == exprInteger) || (term1Type == exprBoolean))
-	     pas_GenerateSimple(opOR);
+           if ((term1Type == exprInteger) || (term1Type == exprBoolean))
+             pas_GenerateSimple(opOR);
 
-	   /* Otherwise, the 'OR' operation is not permitted */
+           /* Otherwise, the 'OR' operation is not permitted */
 
-	   else
-	     error(eTERMTYPE);
-	   break;
+           else
+             error(eTERMTYPE);
+           break;
 
-	 } /* end switch */
+         } /* end switch */
      } /* end for */
 
    return term1Type;
@@ -741,9 +741,9 @@ static exprType term(exprType findExprType)
      /* Check for binary operator */
 
      if ((token == tMUL)  || (token == tDIV)  ||
-	 (token == tFDIV) || (token == tMOD)  ||
-	 (token == tAND)  || (token == tSHL)  ||
-	 (token == tSHR))
+         (token == tFDIV) || (token == tMOD)  ||
+         (token == tAND)  || (token == tSHL)  ||
+         (token == tSHR))
        operation = token;
      else
        break;
@@ -764,29 +764,29 @@ static exprType term(exprType findExprType)
 
      if (factor1Type != factor2Type)
        {
-	 /* Handle the case where the 1st argument is REAL and the
-	  * second is INTEGER. */
+         /* Handle the case where the 1st argument is REAL and the
+          * second is INTEGER. */
 
-	 if ((factor1Type == exprReal) && (factor2Type == exprInteger))
-	   {
-	     arg8FpBits = fpARG2;
-	   } /* end if */
-	 
-	 /* Handle the case where the 1st argument is Integer and the
-	  * second is REAL. */
+         if ((factor1Type == exprReal) && (factor2Type == exprInteger))
+           {
+             arg8FpBits = fpARG2;
+           } /* end if */
 
-	 else if ((factor1Type == exprInteger) && (factor2Type == exprReal))
-	   {
-	     arg8FpBits = fpARG1;
-	     factor1Type = exprReal;
-	   } /* end if */
+         /* Handle the case where the 1st argument is Integer and the
+          * second is REAL. */
 
-	 /* Otherwise, the two factors must agree in type */
+         else if ((factor1Type == exprInteger) && (factor2Type == exprReal))
+           {
+             arg8FpBits = fpARG1;
+             factor1Type = exprReal;
+           } /* end if */
 
-	 else
-	   {
-	     error(eFACTORTYPE);
-	   }
+         /* Otherwise, the two factors must agree in type */
+
+         else
+           {
+             error(eFACTORTYPE);
+           }
        } /* end if */
 
      /* Handle the cases for conversions when the two string
@@ -795,35 +795,35 @@ static exprType term(exprType findExprType)
 
      else
        {
-	 /* There is only one interesting case:  When the
-	  * expected expression is real and both arguments are
-	  * integer.  In this case, for example, 1/2 must yield
-	  * 0.5, not 0.
-	  */
+         /* There is only one interesting case:  When the
+          * expected expression is real and both arguments are
+          * integer.  In this case, for example, 1/2 must yield
+          * 0.5, not 0.
+          */
 
-	 if ((factor1Type == exprInteger) && (findExprType == exprReal))
-	   {
-	     /* However, we will perform this conversin only for the
-	      * arithmetic operations: tMUL, tDIV/tFDIV, and tMOD.
-	      * The logical operations must be performed on integer
-	      * types with the result converted to a real type afterward.
-	      */
+         if ((factor1Type == exprInteger) && (findExprType == exprReal))
+           {
+             /* However, we will perform this conversin only for the
+              * arithmetic operations: tMUL, tDIV/tFDIV, and tMOD.
+              * The logical operations must be performed on integer
+              * types with the result converted to a real type afterward.
+              */
 
-	     if ((operation == tMUL)  || (operation == tDIV)  ||
-		 (operation == tFDIV) || (operation == tMOD))
-	       {
-		 /* Perform the conversion of both terms */
+             if ((operation == tMUL)  || (operation == tDIV)  ||
+                 (operation == tFDIV) || (operation == tMOD))
+               {
+                 /* Perform the conversion of both terms */
 
-		 arg8FpBits = fpARG1 | fpARG2;
-		 factor1Type = exprReal;
+                 arg8FpBits = fpARG1 | fpARG2;
+                 factor1Type = exprReal;
 
-		 /* We will also have to switch the operation in
-		  * the case of tDIV:  We'll have to used tFDIV.
-		  */
+                 /* We will also have to switch the operation in
+                  * the case of tDIV:  We'll have to used tFDIV.
+                  */
 
-		 if (operation == tDIV) operation = tFDIV;
-	       }
-	   }
+                 if (operation == tDIV) operation = tFDIV;
+               }
+           }
        }
 
      /* Generate code to perform the selected binary operation */
@@ -831,59 +831,59 @@ static exprType term(exprType findExprType)
      switch (operation)
        {
        case tMUL :
-	 if (factor1Type == exprInteger)
-	   pas_GenerateSimple(opMUL);
-	 else if (factor1Type == exprReal)
-	   pas_GenerateFpOperation(fpMUL | arg8FpBits);
-	 else if (factor1Type == exprSet)
-	   pas_GenerateSimple(opAND);
+         if (factor1Type == exprInteger)
+           pas_GenerateSimple(opMUL);
+         else if (factor1Type == exprReal)
+           pas_GenerateFpOperation(fpMUL | arg8FpBits);
+         else if (factor1Type == exprSet)
+           pas_GenerateSimple(opAND);
          else
-	   error(eFACTORTYPE);
+           error(eFACTORTYPE);
          break;
 
        case tDIV :
-	 if (factor1Type == exprInteger)
-	   pas_GenerateSimple(opDIV);
+         if (factor1Type == exprInteger)
+           pas_GenerateSimple(opDIV);
          else
-	   error(eFACTORTYPE);
-	 break;
+           error(eFACTORTYPE);
+         break;
 
        case tFDIV :
-	 if (factor1Type == exprReal)
-	   pas_GenerateFpOperation(fpDIV | arg8FpBits);
-	 else
-	   error(eFACTORTYPE);
+         if (factor1Type == exprReal)
+           pas_GenerateFpOperation(fpDIV | arg8FpBits);
+         else
+           error(eFACTORTYPE);
          break;
 
        case tMOD :
-	 if (factor1Type == exprInteger)
-	   pas_GenerateSimple(opMOD);
-	 else if (factor1Type == exprReal)
-	   pas_GenerateFpOperation(fpMOD | arg8FpBits);
-	 else
-	   error(eFACTORTYPE);
+         if (factor1Type == exprInteger)
+           pas_GenerateSimple(opMOD);
+         else if (factor1Type == exprReal)
+           pas_GenerateFpOperation(fpMOD | arg8FpBits);
+         else
+           error(eFACTORTYPE);
          break;
 
        case tAND :
-	 if ((factor1Type == exprInteger) || (factor1Type == exprBoolean))
-	   pas_GenerateSimple(opAND);
+         if ((factor1Type == exprInteger) || (factor1Type == exprBoolean))
+           pas_GenerateSimple(opAND);
          else
-	   error(eFACTORTYPE);
+           error(eFACTORTYPE);
          break;
 
        case tSHL :
-	 if (factor1Type == exprInteger)
-	   pas_GenerateSimple(opSLL);
+         if (factor1Type == exprInteger)
+           pas_GenerateSimple(opSLL);
          else
-	   error(eFACTORTYPE);
+           error(eFACTORTYPE);
          break;
 
        case tSHR :
-	 if (factor1Type == exprInteger)
-	   pas_GenerateSimple(opSRA);
+         if (factor1Type == exprInteger)
+           pas_GenerateSimple(opSRA);
          else
-	   error(eFACTORTYPE);
-	 break;
+           error(eFACTORTYPE);
+         break;
 
        } /* end switch */
    } /* end for */
@@ -944,11 +944,11 @@ static exprType factor(exprType findExprType)
 
     case sSCALAR_OBJECT :
       if (abstractType)
-	{
-	  if (tknPtr->sParm.c.parent != abstractType) error(eSCALARTYPE);
-	} /* end if */
+        {
+          if (tknPtr->sParm.c.parent != abstractType) error(eSCALARTYPE);
+        } /* end if */
       else
-	abstractType = tknPtr->sParm.c.parent;
+        abstractType = tknPtr->sParm.c.parent;
 
       pas_GenerateDataOperation(opPUSH, tknPtr->sParm.c.val.i);
       getToken();
@@ -986,26 +986,26 @@ static exprType factor(exprType findExprType)
 
     case tSTRING_CONST :
       {
-	/* Final stack representation is:
-	 * TOS(0) : size in bytes
-	 * TOS(1) : pointer to string
-	 *
-	 * Add the string to the RO data section of the output
-	 * and get the offset to the string location.
-	 */
+        /* Final stack representation is:
+         * TOS(0) : size in bytes
+         * TOS(1) : pointer to string
+         *
+         * Add the string to the RO data section of the output
+         * and get the offset to the string location.
+         */
 
-	uint32_t offset = poffAddRoDataString(poffHandle, tkn_strt);
+        uint32_t offset = poffAddRoDataString(poffHandle, tkn_strt);
 
-	/* Get the offset then size of the string on the stack */
+        /* Get the offset then size of the string on the stack */
 
-	pas_GenerateDataOperation(opLAC, offset);
-	pas_GenerateDataOperation(opPUSH, strlen(tkn_strt));
+        pas_GenerateDataOperation(opLAC, offset);
+        pas_GenerateDataOperation(opPUSH, strlen(tkn_strt));
 
-	/* Release the tokenized string */
+        /* Release the tokenized string */
 
-	stringSP = tkn_strt;
-	getToken();
-	factorType = exprString;
+        stringSP = tkn_strt;
+        getToken();
+        factorType = exprString;
       }
       break;
 
@@ -1050,11 +1050,11 @@ static exprType factor(exprType findExprType)
 
     case sSCALAR :
       if (abstractType)
-	{
-	  if (tknPtr->sParm.v.parent != abstractType) error(eSCALARTYPE);
-	} /* end if */
+        {
+          if (tknPtr->sParm.v.parent != abstractType) error(eSCALARTYPE);
+        } /* end if */
       else
-	abstractType = tknPtr->sParm.v.parent;
+        abstractType = tknPtr->sParm.v.parent;
 
       pas_GenerateStackReference(opLDS, tknPtr);
       getToken();
@@ -1066,13 +1066,13 @@ static exprType factor(exprType findExprType)
       /* same SET OF <object> -OR- the same <object> */
 
       if (abstractType)
-	{
-	  if ((tknPtr->sParm.v.parent != abstractType) &&
-	      (tknPtr->sParm.v.parent->sParm.t.parent != abstractType))
-	    error(eSET);
-	} /* end if */
+        {
+          if ((tknPtr->sParm.v.parent != abstractType) &&
+              (tknPtr->sParm.v.parent->sParm.t.parent != abstractType))
+            error(eSET);
+        } /* end if */
       else
-	abstractType = tknPtr->sParm.v.parent;
+        abstractType = tknPtr->sParm.v.parent;
 
       pas_GenerateStackReference(opLDS, tknPtr);
       getToken();
@@ -1120,7 +1120,7 @@ static exprType factor(exprType findExprType)
     case '^' :
       getToken();
       factorType = ptrFactor();
-      break;  
+      break;
 
       /* Highest Priority Operators */
 
@@ -1128,7 +1128,7 @@ static exprType factor(exprType findExprType)
       getToken();
       factorType = factor(findExprType);
       if ((factorType != exprInteger) && (factorType != exprBoolean))
-	error(eFACTORTYPE);
+        error(eFACTORTYPE);
       pas_GenerateSimple(opNOT);
       break;
 
@@ -1192,258 +1192,258 @@ static exprType simpleFactor(STYPE *varPtr, uint8_t factorFlags)
 
     case sINT :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprInteger;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprIntegerPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprInteger;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprInteger;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprIntegerPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprInteger;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprInteger;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprIntegerPtr;
-	    } /* end else if */
-	   else
-	     {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	       factorType = exprInteger;
-	     } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprInteger;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprIntegerPtr;
+            } /* end else if */
+           else
+             {
+              pas_GenerateStackReference(opLDS, varPtr);
+               factorType = exprInteger;
+             } /* end else */
+        } /* end else */
       break;
     case sCHAR :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateSimple(opLDIB);
-	      factorType = exprChar;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprCharPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSXB, varPtr);
-	      factorType = exprChar;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateSimple(opLDIB);
+              factorType = exprChar;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprCharPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSXB, varPtr);
+              factorType = exprChar;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opLDIB);
-	      factorType = exprChar;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprCharPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSB, varPtr);
-	      factorType = exprChar;
-	    } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opLDIB);
+              factorType = exprChar;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprCharPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSB, varPtr);
+              factorType = exprChar;
+            } /* end else */
+        } /* end else */
       break;
     case sBOOLEAN :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprBoolean;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprBooleanPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprBoolean;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprBoolean;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprBooleanPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprBoolean;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprBoolean;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprBooleanPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprBoolean;
-	    } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprBoolean;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprBooleanPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprBoolean;
+            } /* end else */
+        } /* end else */
       break;
     case sREAL         :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateSimple(opLDIM);
-	      factorType = exprReal;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprRealPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateStackReference(opLDSXM, varPtr);
-	      factorType = exprReal;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateSimple(opLDIM);
+              factorType = exprReal;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprRealPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateStackReference(opLDSXM, varPtr);
+              factorType = exprReal;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateSimple(opLDIM);
-	      factorType = exprReal;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprRealPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateStackReference(opLDSM, varPtr);
-	      factorType = exprReal;
-	    } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateSimple(opLDIM);
+              factorType = exprReal;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprRealPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateStackReference(opLDSM, varPtr);
+              factorType = exprReal;
+            } /* end else */
+        } /* end else */
       break;
     case sSCALAR :
       if (!abstractType)
-	abstractType = typePtr;
+        abstractType = typePtr;
       else if (typePtr != abstractType)
-	error(eSCALARTYPE);
+        error(eSCALARTYPE);
 
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprScalar;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprScalarPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprScalar;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprScalar;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprScalarPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprScalar;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprScalar;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprScalarPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprScalar;
-	    } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprScalar;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprScalarPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprScalar;
+            } /* end else */
+        } /* end else */
       break;
     case sSET_OF :
       if (!abstractType)
-	abstractType = typePtr;
+        abstractType = typePtr;
       else if ((typePtr != abstractType) &&
-	       (typePtr->sParm.v.parent != abstractType))
-	error(eSCALARTYPE);
+               (typePtr->sParm.v.parent != abstractType))
+        error(eSCALARTYPE);
 
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprSet;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprSetPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	      factorType = exprSet;
-	    } /* end else */
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprSet;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprSetPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+              factorType = exprSet;
+            } /* end else */
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opLDI);
-	      factorType = exprSet;
-	    } /* end if */
-	  else if ((factorFlags & ADDRESS_FACTOR) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprSetPtr;
-	    } /* end else if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      factorType = exprSet;
-	    } /* end else */
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opLDI);
+              factorType = exprSet;
+            } /* end if */
+          else if ((factorFlags & ADDRESS_FACTOR) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprSetPtr;
+            } /* end else if */
+          else
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              factorType = exprSet;
+            } /* end else */
+        } /* end else */
       break;
 
       /* NOPE... recurse until it becomes a simple factor */
@@ -1458,85 +1458,85 @@ static exprType simpleFactor(STYPE *varPtr, uint8_t factorFlags)
       /* Check if this is a pointer to a record */
 
       if ((factorFlags & ADDRESS_FACTOR) != 0)
-	{
-	  if (token == '.') error(ePOINTERTYPE);
+        {
+          if (token == '.') error(ePOINTERTYPE);
 
-	  if ((factorFlags & INDEXED_FACTOR) != 0)
-	    pas_GenerateStackReference(opLDSX, varPtr);
-	  else
-	    pas_GenerateStackReference(opLDS, varPtr);
+          if ((factorFlags & INDEXED_FACTOR) != 0)
+            pas_GenerateStackReference(opLDSX, varPtr);
+          else
+            pas_GenerateStackReference(opLDS, varPtr);
 
-	  factorType = exprRecordPtr;
-	} /* end if */
+          factorType = exprRecordPtr;
+        } /* end if */
 
       /* Verify that a period separates the RECORD identifier from the */
       /* record field identifier */
 
       else if (token == '.')
-	{
-	  if (((factorFlags & ADDRESS_DEREFERENCE) != 0) &&
-	      ((factorFlags & VAR_PARM_FACTOR) == 0))
-	    error(ePOINTERTYPE);
+        {
+          if (((factorFlags & ADDRESS_DEREFERENCE) != 0) &&
+              ((factorFlags & VAR_PARM_FACTOR) == 0))
+            error(ePOINTERTYPE);
 
-	  /* Skip over the period. */
+          /* Skip over the period. */
 
-	  getToken();
+          getToken();
 
-	  /* Verify that a field identifier associated with this record */
-	  /* follows the period. */
+          /* Verify that a field identifier associated with this record */
+          /* follows the period. */
 
-	  if ((token != sRECORD_OBJECT) ||
-	      (tknPtr->sParm.r.record != typePtr))
-	    {
-	      error(eRECORDOBJECT);
-	      factorType = exprInteger;
-	    } /* end if */
-	  else
-	    {
-	      /* Modify the variable so that it has the characteristics of the */
-	      /* the field but with level and offset associated with the record */
+          if ((token != sRECORD_OBJECT) ||
+              (tknPtr->sParm.r.record != typePtr))
+            {
+              error(eRECORDOBJECT);
+              factorType = exprInteger;
+            } /* end if */
+          else
+            {
+              /* Modify the variable so that it has the characteristics of the */
+              /* the field but with level and offset associated with the record */
 
-	      typePtr                 = tknPtr->sParm.r.parent;
-	      varPtr->sKind           = typePtr->sParm.t.type;
-	      varPtr->sParm.v.parent  = typePtr;
+              typePtr                 = tknPtr->sParm.r.parent;
+              varPtr->sKind           = typePtr->sParm.t.type;
+              varPtr->sParm.v.parent  = typePtr;
 
-	      /* Special case:  The record is a VAR parameter. */
+              /* Special case:  The record is a VAR parameter. */
 
-	      if (factorFlags == (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR))
-		{
-		  pas_GenerateDataOperation(opPUSH, tknPtr->sParm.r.offset);
-		  pas_GenerateSimple(opADD);
-		} /* end if */
-	      else
-		varPtr->sParm.v.offset += tknPtr->sParm.r.offset;
+              if (factorFlags == (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR))
+                {
+                  pas_GenerateDataOperation(opPUSH, tknPtr->sParm.r.offset);
+                  pas_GenerateSimple(opADD);
+                } /* end if */
+              else
+                varPtr->sParm.v.offset += tknPtr->sParm.r.offset;
 
-	      getToken();
-	      factorType = simpleFactor(varPtr, factorFlags);
-	    } /* end else */
-	} /* end else if */
+              getToken();
+              factorType = simpleFactor(varPtr, factorFlags);
+            } /* end else */
+        } /* end else if */
 
       /* A RECORD name name be a valid factor -- as the input */
       /* parameter of a function or in an assignment */
 
       else if (abstractType == typePtr)
-	{
-	  /* Special case:  The record is a VAR parameter. */
+        {
+          /* Special case:  The record is a VAR parameter. */
 
-	  if (factorFlags == (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR))
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	      pas_GenerateSimple(opADD);
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateSimple(opLDIM);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateDataSize(varPtr->sParm.v.size);
-	      pas_GenerateStackReference(opLDSM, varPtr);
-	    } /* end else */
+          if (factorFlags == (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR))
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+              pas_GenerateSimple(opADD);
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateSimple(opLDIM);
+            } /* end if */
+          else
+            {
+              pas_GenerateDataSize(varPtr->sParm.v.size);
+              pas_GenerateStackReference(opLDSM, varPtr);
+            } /* end else */
 
-	  factorType = exprRecord;
-	} /* end else if */
+          factorType = exprRecord;
+        } /* end else if */
       else error(ePERIOD);
       break;
 
@@ -1545,69 +1545,69 @@ static exprType simpleFactor(STYPE *varPtr, uint8_t factorFlags)
       /* defining the RECORD type */
 
       if (!withRecord.parent)
-	error(eINVTYPE);
+        error(eINVTYPE);
       else if ((factorFlags && (ADDRESS_DEREFERENCE | ADDRESS_FACTOR)) != 0)
-	error(ePOINTERTYPE);
+        error(ePOINTERTYPE);
       else if ((factorFlags && INDEXED_FACTOR) != 0)
-	error(eARRAYTYPE);
+        error(eARRAYTYPE);
 
       /* Verify that a field identifier is associated with the RECORD */
       /* specified by the WITH statement. */
 
       else if (varPtr->sParm.r.record != withRecord.parent)
-	error(eRECORDOBJECT);
+        error(eRECORDOBJECT);
       else
-	{
-	  int16_t tempOffset;
+        {
+          int16_t tempOffset;
 
-	  /* Now there are two cases to consider:  (1) the withRecord is a */
-	  /* pointer to a RECORD, or (2) the withRecord is the RECOR itself */
+          /* Now there are two cases to consider:  (1) the withRecord is a */
+          /* pointer to a RECORD, or (2) the withRecord is the RECOR itself */
 
-	  if (withRecord.pointer)
-	    {
-	      /* If the pointer is really a VAR parameter, then other syntax */
-	      /* rules will apply */
+          if (withRecord.pointer)
+            {
+              /* If the pointer is really a VAR parameter, then other syntax */
+              /* rules will apply */
 
-	      if (withRecord.varParm)
-		factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR);
-	      else
-		factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE);
+              if (withRecord.varParm)
+                factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE | VAR_PARM_FACTOR);
+              else
+                factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE);
 
-	      pas_GenerateDataOperation(opPUSH, (varPtr->sParm.r.offset + withRecord.index));
-	      tempOffset   = withRecord.offset;
-	    } /* end if */
-	  else
-	    {
-	      tempOffset   = varPtr->sParm.r.offset + withRecord.offset;
-	    } /* end else */
+              pas_GenerateDataOperation(opPUSH, (varPtr->sParm.r.offset + withRecord.index));
+              tempOffset   = withRecord.offset;
+            } /* end if */
+          else
+            {
+              tempOffset   = varPtr->sParm.r.offset + withRecord.offset;
+            } /* end else */
 
-	  /* Modify the variable so that it has the characteristics of the */
-	  /* the field but with level and offset associated with the record */
-	  /* NOTE:  We have to be careful here because the structure */
-	  /* associated with sRECORD_OBJECT is not the same as for */
-	  /* variables! */
+          /* Modify the variable so that it has the characteristics of the */
+          /* the field but with level and offset associated with the record */
+          /* NOTE:  We have to be careful here because the structure */
+          /* associated with sRECORD_OBJECT is not the same as for */
+          /* variables! */
 
-	  typePtr                 = varPtr->sParm.r.parent;
-	  tempOffset              = varPtr->sParm.r.offset;
+          typePtr                 = varPtr->sParm.r.parent;
+          tempOffset              = varPtr->sParm.r.offset;
 
-	  varPtr->sKind           = typePtr->sParm.t.type;
-	  varPtr->sLevel          = withRecord.level;
-	  varPtr->sParm.v.size    = typePtr->sParm.t.asize;
-	  varPtr->sParm.v.offset  = tempOffset + withRecord.offset;
-	  varPtr->sParm.v.parent  = typePtr;
+          varPtr->sKind           = typePtr->sParm.t.type;
+          varPtr->sLevel          = withRecord.level;
+          varPtr->sParm.v.size    = typePtr->sParm.t.asize;
+          varPtr->sParm.v.offset  = tempOffset + withRecord.offset;
+          varPtr->sParm.v.parent  = typePtr;
 
-	  factorType = simpleFactor(varPtr, factorFlags);
-	} /* end else */
+          factorType = simpleFactor(varPtr, factorFlags);
+        } /* end else */
       break;
 
     case sPOINTER :
       if (token == '^')
-	{
-	  getToken();
-	  factorFlags |= ADDRESS_DEREFERENCE;
-	} /* end if */
+        {
+          getToken();
+          factorFlags |= ADDRESS_DEREFERENCE;
+        } /* end if */
       else
-	factorFlags |= ADDRESS_FACTOR;
+        factorFlags |= ADDRESS_FACTOR;
 
       varPtr->sKind  = typePtr->sParm.t.type;
       factorType     = simpleFactor(varPtr, factorFlags);
@@ -1625,23 +1625,23 @@ static exprType simpleFactor(STYPE *varPtr, uint8_t factorFlags)
       if (factorFlags != 0) error(eARRAYTYPE);
 
       if (token == '[')
-	{
-	  factorFlags         |= INDEXED_FACTOR;
-	  arrayIndex(typePtr->sParm.t.asize);
-	  varPtr->sKind        = typePtr->sParm.t.type;
-	  varPtr->sParm.v.size = typePtr->sParm.t.asize;
-	  factorType           = simpleFactor(varPtr, factorFlags);
-	} /* end if */
+        {
+          factorFlags         |= INDEXED_FACTOR;
+          arrayIndex(typePtr->sParm.t.asize);
+          varPtr->sKind        = typePtr->sParm.t.type;
+          varPtr->sParm.v.size = typePtr->sParm.t.asize;
+          factorType           = simpleFactor(varPtr, factorFlags);
+        } /* end if */
 
       /* An ARRAY name name be a valid factor -- only as the input */
       /* parameter of a function */
 
       else if (abstractType == varPtr)
-	{
-	  pas_GenerateDataSize(varPtr->sParm.v.size);
-	  pas_GenerateStackReference(opLDSM, varPtr);
-	  factorType = exprArray;
-	} /* end else if */
+        {
+          pas_GenerateDataSize(varPtr->sParm.v.size);
+          pas_GenerateStackReference(opLDSM, varPtr);
+          factorType = exprArray;
+        } /* end else if */
       else error(eLBRACKET);
       break;
 
@@ -1693,11 +1693,11 @@ static exprType ptrFactor(void)
        break;
      case sSCALAR :
        if (abstractType)
-	 {
-	   if (tknPtr->sParm.v.parent != abstractType) error(eSCALARTYPE);
-	 } /* end if */
+         {
+           if (tknPtr->sParm.v.parent != abstractType) error(eSCALARTYPE);
+         } /* end if */
        else
-	 abstractType = tknPtr->sParm.v.parent;
+         abstractType = tknPtr->sParm.v.parent;
 
        pas_GenerateStackReference(opLAS, tknPtr);
        getToken();
@@ -1708,12 +1708,12 @@ static exprType ptrFactor(void)
        /* same SET OF <object> -OR- the same <object> */
 
        if (abstractType) {
-	 if ((tknPtr->sParm.v.parent != abstractType)
-	 &&   (tknPtr->sParm.v.parent->sParm.t.parent != abstractType))
-	   error(eSET);
+         if ((tknPtr->sParm.v.parent != abstractType)
+         &&   (tknPtr->sParm.v.parent->sParm.t.parent != abstractType))
+           error(eSET);
        } /* end if */
        else
-	 abstractType = tknPtr->sParm.v.parent;
+         abstractType = tknPtr->sParm.v.parent;
        pas_GenerateStackReference(opLAS, tknPtr);
        getToken();
        factorType = exprSetPtr;
@@ -1736,7 +1736,7 @@ static exprType ptrFactor(void)
        error(eNOTYET);
        getToken();
        factorType = ptrFactor();
-       break;  
+       break;
 
      case '('             :
        getToken();
@@ -1796,170 +1796,170 @@ static exprType simplePtrFactor(STYPE *varPtr, uint8_t factorFlags)
       /* Check if we have reduced the complex factor to a simple factor */
     case sINT :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprIntegerPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprIntegerPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprIntegerPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprIntegerPtr;
+        } /* end else */
       break;
     case sCHAR :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprCharPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprCharPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprCharPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprCharPtr;
+        } /* end else */
       break;
     case sBOOLEAN :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprBooleanPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprBooleanPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprBooleanPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprBooleanPtr;
+        } /* end else */
       break;
     case sREAL         :
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprRealPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprRealPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprRealPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprRealPtr;
+        } /* end else */
       break;
     case sSCALAR :
       if (!abstractType)
-	abstractType = typePtr;
+        abstractType = typePtr;
       else if (typePtr != abstractType)
-	error(eSCALARTYPE);
+        error(eSCALARTYPE);
 
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprScalarPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprScalarPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprScalarPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprScalarPtr;
+        } /* end else */
       break;
     case sSET_OF :
       if (!abstractType)
-	abstractType = typePtr;
+        abstractType = typePtr;
       else if ((typePtr != abstractType) &&
-	       (typePtr->sParm.v.parent != abstractType))
-	error(eSCALARTYPE);
+               (typePtr->sParm.v.parent != abstractType))
+        error(eSCALARTYPE);
 
       if ((factorFlags & INDEXED_FACTOR) != 0)
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDSX, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLASX, varPtr);
-	    } /* end else */
-	  factorType = exprSetPtr;
-	} /* end if */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDSX, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLASX, varPtr);
+            } /* end else */
+          factorType = exprSetPtr;
+        } /* end if */
       else
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    {
-	      pas_GenerateStackReference(opLDS, varPtr);
-	    } /* end if */
-	  else
-	    {
-	      pas_GenerateStackReference(opLAS, varPtr);
-	    } /* end else */
-	  factorType = exprSetPtr;
-	} /* end else */
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            {
+              pas_GenerateStackReference(opLDS, varPtr);
+            } /* end if */
+          else
+            {
+              pas_GenerateStackReference(opLAS, varPtr);
+            } /* end else */
+          factorType = exprSetPtr;
+        } /* end else */
       break;
 
       /* NOPE... recurse until it becomes a simple factor */
@@ -1974,53 +1974,53 @@ static exprType simplePtrFactor(STYPE *varPtr, uint8_t factorFlags)
       /* Check if this is a pointer to a record */
 
       if (token != '.')
-	{
-	  if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
-	    error(ePOINTERTYPE);
+        {
+          if ((factorFlags & ADDRESS_DEREFERENCE) != 0)
+            error(ePOINTERTYPE);
 
-	  if ((factorFlags & INDEXED_FACTOR) != 0)
-	    pas_GenerateStackReference(opLASX, varPtr);
-	  else
-	    pas_GenerateStackReference(opLAS, varPtr);
+          if ((factorFlags & INDEXED_FACTOR) != 0)
+            pas_GenerateStackReference(opLASX, varPtr);
+          else
+            pas_GenerateStackReference(opLAS, varPtr);
 
-	  factorType = exprRecordPtr;
-	} /* end if */
+          factorType = exprRecordPtr;
+        } /* end if */
       else
-	{
-	  /* Verify that a period separates the RECORD identifier from the
-	   * record field identifier
-	   */
+        {
+          /* Verify that a period separates the RECORD identifier from the
+           * record field identifier
+           */
 
-	  if (token != '.') error(ePERIOD);
-	  else getToken();
+          if (token != '.') error(ePERIOD);
+          else getToken();
 
-	  /* Verify that a field identifier associated with this record
-	   * follows the period.
-	   */
+          /* Verify that a field identifier associated with this record
+           * follows the period.
+           */
 
-	  if ((token != sRECORD_OBJECT) ||
-	      (tknPtr->sParm.r.record != typePtr))
-	    {
-	      error(eRECORDOBJECT);
-	      factorType = exprInteger;
-	    } /* end if */
-	  else
-	    {
-	      /* Modify the variable so that it has the characteristics
-	       * of the field but with level and offset associated with
-	       * the record
-	       */
+          if ((token != sRECORD_OBJECT) ||
+              (tknPtr->sParm.r.record != typePtr))
+            {
+              error(eRECORDOBJECT);
+              factorType = exprInteger;
+            } /* end if */
+          else
+            {
+              /* Modify the variable so that it has the characteristics
+               * of the field but with level and offset associated with
+               * the record
+               */
 
-	      typePtr                 = tknPtr->sParm.r.parent;
-	      varPtr->sKind           = typePtr->sParm.t.type;
-	      varPtr->sParm.v.offset += tknPtr->sParm.r.offset;
-	      varPtr->sParm.v.parent  = typePtr;
+              typePtr                 = tknPtr->sParm.r.parent;
+              varPtr->sKind           = typePtr->sParm.t.type;
+              varPtr->sParm.v.offset += tknPtr->sParm.r.offset;
+              varPtr->sParm.v.parent  = typePtr;
 
-	      getToken();
-	      factorType = simplePtrFactor(varPtr, factorFlags);
+              getToken();
+              factorType = simplePtrFactor(varPtr, factorFlags);
 
-	    } /* end else */
-	} /* end else */
+            } /* end else */
+        } /* end else */
       break;
 
     case sRECORD_OBJECT :
@@ -2029,55 +2029,55 @@ static exprType simplePtrFactor(STYPE *varPtr, uint8_t factorFlags)
        */
 
       if (!withRecord.parent)
-	error(eINVTYPE);
+        error(eINVTYPE);
       else if ((factorFlags && ADDRESS_DEREFERENCE) != 0)
-	error(ePOINTERTYPE);
+        error(ePOINTERTYPE);
       else if ((factorFlags && INDEXED_FACTOR) != 0)
-	error(eARRAYTYPE);
+        error(eARRAYTYPE);
 
       /* Verify that a field identifier is associated with the RECORD
        * specified by the WITH statement.
        */
 
       else if (varPtr->sParm.r.record != withRecord.parent)
-	error(eRECORDOBJECT);
+        error(eRECORDOBJECT);
       else
-	{
-	  int16_t tempOffset;
+        {
+          int16_t tempOffset;
 
-	  /* Now there are two cases to consider:  (1) the withRecord is a
-	   * pointer to a RECORD, or (2) the withRecord is the RECOR itself
-	   */
+          /* Now there are two cases to consider:  (1) the withRecord is a
+           * pointer to a RECORD, or (2) the withRecord is the RECOR itself
+           */
 
-	  if (withRecord.pointer)
-	    {
-	      pas_GenerateDataOperation(opPUSH, (varPtr->sParm.r.offset + withRecord.index));
-	      factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE);
-	      tempOffset   = withRecord.offset;
-	    } /* end if */
-	  else
-	    {
-	      tempOffset   = varPtr->sParm.r.offset + withRecord.offset;
-	    } /* end else */
+          if (withRecord.pointer)
+            {
+              pas_GenerateDataOperation(opPUSH, (varPtr->sParm.r.offset + withRecord.index));
+              factorFlags |= (INDEXED_FACTOR | ADDRESS_DEREFERENCE);
+              tempOffset   = withRecord.offset;
+            } /* end if */
+          else
+            {
+              tempOffset   = varPtr->sParm.r.offset + withRecord.offset;
+            } /* end else */
 
-	  /* Modify the variable so that it has the characteristics of the
-	   * the field but with level and offset associated with the record
-	   * NOTE:  We have to be careful here because the structure
-	   * associated with sRECORD_OBJECT is not the same as for
-	   * variables!
-	   */
+          /* Modify the variable so that it has the characteristics of the
+           * the field but with level and offset associated with the record
+           * NOTE:  We have to be careful here because the structure
+           * associated with sRECORD_OBJECT is not the same as for
+           * variables!
+           */
 
-	  typePtr                 = varPtr->sParm.r.parent;
-	  tempOffset              = varPtr->sParm.r.offset;
+          typePtr                 = varPtr->sParm.r.parent;
+          tempOffset              = varPtr->sParm.r.offset;
 
-	  varPtr->sKind           = typePtr->sParm.t.type;
-	  varPtr->sLevel          = withRecord.level;
-	  varPtr->sParm.v.size    = typePtr->sParm.t.asize;
-	  varPtr->sParm.v.offset  = tempOffset + withRecord.offset;
-	  varPtr->sParm.v.parent  = typePtr;
+          varPtr->sKind           = typePtr->sParm.t.type;
+          varPtr->sLevel          = withRecord.level;
+          varPtr->sParm.v.size    = typePtr->sParm.t.asize;
+          varPtr->sParm.v.offset  = tempOffset + withRecord.offset;
+          varPtr->sParm.v.parent  = typePtr;
 
-	  factorType = simplePtrFactor(varPtr, factorFlags);
-	} /* end else */
+          factorType = simplePtrFactor(varPtr, factorFlags);
+        } /* end else */
       break;
 
     case sPOINTER :
@@ -2100,19 +2100,19 @@ static exprType simplePtrFactor(STYPE *varPtr, uint8_t factorFlags)
     case sARRAY :
       if (factorFlags != 0) error(eARRAYTYPE);
       if (token == '[')
-	{
-	  factorFlags         |= INDEXED_FACTOR;
+        {
+          factorFlags         |= INDEXED_FACTOR;
 
-	  arrayIndex(typePtr->sParm.t.asize);
-	  varPtr->sKind        = typePtr->sParm.t.type;
-	  varPtr->sParm.v.size = typePtr->sParm.t.asize;
-	  factorType           = simplePtrFactor(varPtr, factorFlags);
-	} /* end if */
+          arrayIndex(typePtr->sParm.t.asize);
+          varPtr->sKind        = typePtr->sParm.t.type;
+          varPtr->sParm.v.size = typePtr->sParm.t.asize;
+          factorType           = simplePtrFactor(varPtr, factorFlags);
+        } /* end if */
       else
-	{
-	  pas_GenerateStackReference(opLAS, varPtr);
-	  factorType = exprArrayPtr;
-	} /* end else */
+        {
+          pas_GenerateStackReference(opLAS, varPtr);
+          factorType = exprArrayPtr;
+        } /* end else */
       break;
 
     default :
@@ -2205,34 +2205,34 @@ static void setAbstractType(STYPE *sType)
    if ((sType) && (sType->sKind == sTYPE)
    &&   (sType->sParm.t.type == sPOINTER))
      sType = sType->sParm.t.parent;
-       
+
    if ((sType) && (sType->sKind == sTYPE)) {
      switch (sType->sParm.t.type) {
        case sSCALAR :
-	 if (abstractType) {
+         if (abstractType) {
            if (sType != abstractType) error(eSCALARTYPE);
          } /* end if */
          else
            abstractType = sType;
-	 break;
+         break;
        case sSUBRANGE :
-	 if (!abstractType)
-	   abstractType = sType;
-	 else if ((abstractType->sParm.t.type != sSUBRANGE)
+         if (!abstractType)
+           abstractType = sType;
+         else if ((abstractType->sParm.t.type != sSUBRANGE)
          ||        (abstractType->sParm.t.subType != sType->sParm.t.subType))
            error(eSUBRANGETYPE);
-	 switch (sType->sParm.t.subType) {
-	   case sINT :
-	   case sCHAR :
-	     break;
-	   case sSCALAR :
+         switch (sType->sParm.t.subType) {
+           case sINT :
+           case sCHAR :
+             break;
+           case sSCALAR :
              if (abstractType != sType) error(eSUBRANGETYPE);
-	     break;
-	   default :
-	     error(eSUBRANGETYPE);
-	     break;
-	 } /* end switch */
-	 break;
+             break;
+           default :
+             error(eSUBRANGETYPE);
+             break;
+         } /* end switch */
+         break;
      } /* end switch */
    } /* end if */
    else error(eINVTYPE);
@@ -2319,11 +2319,11 @@ static void getSetElement(setTypeStruct *s)
      case sSCALAR_OBJECT : /* A scalar or scalar subrange constant */
        firstValue = tknPtr->sParm.c.val.i;
        if (!s->typeFound) {
-	 s->typeFound = true;
-	 s->typePtr   = tknPtr->sParm.c.parent;
-	 s->setType   = sSCALAR;
-	 s->minValue  = s->typePtr->sParm.t.minValue;
-	 s->maxValue  = s->typePtr->sParm.t.maxValue;
+         s->typeFound = true;
+         s->typePtr   = tknPtr->sParm.c.parent;
+         s->setType   = sSCALAR;
+         s->minValue  = s->typePtr->sParm.t.minValue;
+         s->maxValue  = s->typePtr->sParm.t.maxValue;
        } /* end if */
        else if ((s->setType != sSCALAR)
        ||        (s->typePtr != tknPtr->sParm.c.parent))
@@ -2333,8 +2333,8 @@ static void getSetElement(setTypeStruct *s)
      case tINT_CONST : /* An integer subrange constant ? */
        firstValue = tknInt;
        if (!s->typeFound) {
-	 s->typeFound = true;
-	 s->setType   = sINT;
+         s->typeFound = true;
+         s->setType   = sINT;
        } /* end if */
        else if (s->setType != sINT)
          error(eSET);
@@ -2343,8 +2343,8 @@ static void getSetElement(setTypeStruct *s)
      case tCHAR_CONST : /* A character subrange constant */
        firstValue = tknInt;
        if (!s->typeFound) {
-	 s->typeFound = true;
-	 s->setType   = sCHAR;
+         s->typeFound = true;
+         s->setType   = sCHAR;
        } /* end if */
        else if (s->setType != sCHAR)
          error(eSET);
@@ -2356,170 +2356,170 @@ static void getSetElement(setTypeStruct *s)
        getToken();
        if (token != tSUBRANGE) {
 
-	 /* Verify that the new value is in range */
+         /* Verify that the new value is in range */
 
          if ((firstValue < s->minValue) || (firstValue > s->maxValue)) {
-	   error(eSETRANGE);
-	   setValue = 0;
+           error(eSETRANGE);
+           setValue = 0;
          } /* end if */
          else
-	   setValue = (1 << (firstValue - s->minValue));
+           setValue = (1 << (firstValue - s->minValue));
 
          /* Now, generate P-Code to push the set value onto the stack */
 
-	 pas_GenerateDataOperation(opPUSH, setValue);
+         pas_GenerateDataOperation(opPUSH, setValue);
 
        } /* end if */
        else {
          if (!s->typeFound) error(eSUBRANGETYPE);
 
-	 /* Skip over the tSUBRANGE token */
+         /* Skip over the tSUBRANGE token */
 
-	 getToken();
+         getToken();
 
-	 /* TYPE check */
+         /* TYPE check */
 
-	 switch (token) {
+         switch (token) {
            case sSCALAR_OBJECT : /* A scalar or scalar subrange constant */
-	     lastValue = tknPtr->sParm.c.val.i;
-	     if ((s->setType != sSCALAR)
-	     ||   (s->typePtr != tknPtr->sParm.c.parent))
-	       error(eSET);
-	     goto addLottaBits;
+             lastValue = tknPtr->sParm.c.val.i;
+             if ((s->setType != sSCALAR)
+             ||   (s->typePtr != tknPtr->sParm.c.parent))
+               error(eSET);
+             goto addLottaBits;
 
-	   case tINT_CONST : /* An integer subrange constant ? */
-	     lastValue = tknInt;
-	     if (s->setType != sINT) error(eSET);
-	     goto addLottaBits;
+           case tINT_CONST : /* An integer subrange constant ? */
+             lastValue = tknInt;
+             if (s->setType != sINT) error(eSET);
+             goto addLottaBits;
 
-	   case tCHAR_CONST : /* A character subrange constant */
-	     lastValue = tknInt;
-	     if (s->setType != sCHAR) error(eSET);
+           case tCHAR_CONST : /* A character subrange constant */
+             lastValue = tknInt;
+             if (s->setType != sCHAR) error(eSET);
 
-	   addLottaBits :
-	     /* Verify that the first value is in range */
-	     if (firstValue < s->minValue) {
-	       error(eSETRANGE);
-	       firstValue = s->minValue;
+           addLottaBits :
+             /* Verify that the first value is in range */
+             if (firstValue < s->minValue) {
+               error(eSETRANGE);
+               firstValue = s->minValue;
              } /* end if */
-	     else if (firstValue > s->maxValue) {
-	       error(eSETRANGE);
+             else if (firstValue > s->maxValue) {
+               error(eSETRANGE);
                firstValue = s->maxValue;
-	     } /* end else if */
-
-	     /* Verify that the last value is in range */
-	     if (lastValue < firstValue) {
-               error(eSETRANGE);
-	       lastValue = firstValue;
-             } /* end if */
-	     else if (lastValue > s->maxValue) {
-               error(eSETRANGE);
-	       lastValue = s->maxValue;
              } /* end else if */
 
-	     /* Set all bits from firstValue through lastValue */
+             /* Verify that the last value is in range */
+             if (lastValue < firstValue) {
+               error(eSETRANGE);
+               lastValue = firstValue;
+             } /* end if */
+             else if (lastValue > s->maxValue) {
+               error(eSETRANGE);
+               lastValue = s->maxValue;
+             } /* end else if */
 
-	     setValue  = (0xffff << (firstValue - s->minValue));
-	     setValue &= (0xffff >> ((BITS_IN_INTEGER-1) - (lastValue - s->minValue)));
+             /* Set all bits from firstValue through lastValue */
+
+             setValue  = (0xffff << (firstValue - s->minValue));
+             setValue &= (0xffff >> ((BITS_IN_INTEGER-1) - (lastValue - s->minValue)));
 
              /* Now, generate P-Code to push the set value onto the stack */
 
              pas_GenerateDataOperation(opPUSH, setValue);
-       	     break;
+                    break;
 
            case sSCALAR :
-	     if ((!s->typePtr)
-	     ||   (s->typePtr != tknPtr->sParm.v.parent)) {
-	       error(eSET);
+             if ((!s->typePtr)
+             ||   (s->typePtr != tknPtr->sParm.v.parent)) {
+               error(eSET);
 
                if (!s->typePtr) {
-	         s->typeFound = true;
-	         s->typePtr   = tknPtr->sParm.v.parent;
-	         s->setType   = sSCALAR;
-	         s->minValue  = s->typePtr->sParm.t.minValue;
-	         s->maxValue  = s->typePtr->sParm.t.maxValue;
+                 s->typeFound = true;
+                 s->typePtr   = tknPtr->sParm.v.parent;
+                 s->setType   = sSCALAR;
+                 s->minValue  = s->typePtr->sParm.t.minValue;
+                 s->maxValue  = s->typePtr->sParm.t.maxValue;
                } /* end if */
-	     } /* end if */
+             } /* end if */
              goto addVarToBits;
 
            case sINT : /* An integer subrange variable ? */
-	   case sCHAR : /* A character subrange variable? */
-	     if (s->setType != token) error(eSET);
+           case sCHAR : /* A character subrange variable? */
+             if (s->setType != token) error(eSET);
              goto addVarToBits;
 
-	   case sSUBRANGE :
-	     if ((!s->typePtr)
-	     ||   (s->typePtr != tknPtr->sParm.v.parent)) {
+           case sSUBRANGE :
+             if ((!s->typePtr)
+             ||   (s->typePtr != tknPtr->sParm.v.parent)) {
 
-	       if ((tknPtr->sParm.v.parent->sParm.t.subType == sSCALAR)
-	       ||   (tknPtr->sParm.v.parent->sParm.t.subType != s->setType))
-		 error(eSET);
+               if ((tknPtr->sParm.v.parent->sParm.t.subType == sSCALAR)
+               ||   (tknPtr->sParm.v.parent->sParm.t.subType != s->setType))
+                 error(eSET);
 
                if (!s->typePtr) {
-	         s->typeFound = true;
-	         s->typePtr   = tknPtr->sParm.v.parent;
-	         s->setType   = s->typePtr->sParm.t.subType;
-	         s->minValue  = s->typePtr->sParm.t.minValue;
-		 s->maxValue  = s->typePtr->sParm.t.maxValue;
+                 s->typeFound = true;
+                 s->typePtr   = tknPtr->sParm.v.parent;
+                 s->setType   = s->typePtr->sParm.t.subType;
+                 s->minValue  = s->typePtr->sParm.t.minValue;
+                 s->maxValue  = s->typePtr->sParm.t.maxValue;
                } /* end if */
-	     } /* end if */
+             } /* end if */
 
            addVarToBits:
-	     /* Verify that the first value is in range */
+             /* Verify that the first value is in range */
 
-	     if (firstValue < s->minValue) {
-	       error(eSETRANGE);
-	       firstValue = s->minValue;
+             if (firstValue < s->minValue) {
+               error(eSETRANGE);
+               firstValue = s->minValue;
              } /* end if */
-	     else if (firstValue > s->maxValue) {
-	       error(eSETRANGE);
+             else if (firstValue > s->maxValue) {
+               error(eSETRANGE);
                firstValue = s->maxValue;
-	     } /* end else if */
+             } /* end else if */
 
-	     /* Set all bits from firstValue through maxValue */
+             /* Set all bits from firstValue through maxValue */
 
-	     setValue  = (0xffff >> ((BITS_IN_INTEGER-1) - (s->maxValue - s->minValue)));
-	     setValue &= (0xffff << (firstValue - s->minValue));
+             setValue  = (0xffff >> ((BITS_IN_INTEGER-1) - (s->maxValue - s->minValue)));
+             setValue &= (0xffff << (firstValue - s->minValue));
 
-	     /* Generate run-time logic to get all bits from firstValue */
-	     /* through last value, i.e., need to generate logic to get: */
-	     /* 0xffff >> ((BITS_IN_INTEGER-1)-(lastValue-minValue)) */
+             /* Generate run-time logic to get all bits from firstValue */
+             /* through last value, i.e., need to generate logic to get: */
+             /* 0xffff >> ((BITS_IN_INTEGER-1)-(lastValue-minValue)) */
 
-	     pas_GenerateDataOperation(opPUSH, 0xffff);
-	     pas_GenerateDataOperation(opPUSH, ((BITS_IN_INTEGER-1) + s->minValue));
-	     pas_GenerateStackReference(opLDS, tknPtr);
-	     pas_GenerateSimple(opSUB);
-	     pas_GenerateSimple(opSRL);
+             pas_GenerateDataOperation(opPUSH, 0xffff);
+             pas_GenerateDataOperation(opPUSH, ((BITS_IN_INTEGER-1) + s->minValue));
+             pas_GenerateStackReference(opLDS, tknPtr);
+             pas_GenerateSimple(opSUB);
+             pas_GenerateSimple(opSRL);
 
              /* Then AND this with the setValue */
 
              if (setValue != 0xffff) {
-	       pas_GenerateDataOperation(opPUSH, setValue);
-	       pas_GenerateSimple(opAND);
+               pas_GenerateDataOperation(opPUSH, setValue);
+               pas_GenerateSimple(opAND);
              } /* end if */
 
              getToken();
              break;
 
-	   default :
+           default :
              error(eSET);
-	     pas_GenerateDataOperation(opPUSH, 0);
-	     break;
+             pas_GenerateDataOperation(opPUSH, 0);
+             break;
 
-	 } /* end switch */
+         } /* end switch */
        } /* end else */
        break;
 
      case sSCALAR :
        if (s->typeFound) {
-	 if ((!s->typePtr) || (s->typePtr != tknPtr->sParm.v.parent))
+         if ((!s->typePtr) || (s->typePtr != tknPtr->sParm.v.parent))
            error(eSET);
        } /* end if */
        else {
          s->typeFound = true;
-	 s->typePtr   = tknPtr->sParm.v.parent;
-	 s->setType   = sSCALAR;
-	 s->minValue  = s->typePtr->sParm.t.minValue;
+         s->typePtr   = tknPtr->sParm.v.parent;
+         s->setType   = sSCALAR;
+         s->minValue  = s->typePtr->sParm.t.minValue;
          s->maxValue  = s->typePtr->sParm.t.maxValue;
        } /* end if */
        goto addVar;
@@ -2527,8 +2527,8 @@ static void getSetElement(setTypeStruct *s)
      case sINT : /* An integer subrange variable ? */
      case sCHAR : /* A character subrange variable? */
        if (!s->typeFound) {
-	 s->typeFound = true;
-	 s->setType   = token;
+         s->typeFound = true;
+         s->setType   = token;
        } /* end if */
        else if (s->setType != token)
          error(eSET);
@@ -2536,14 +2536,14 @@ static void getSetElement(setTypeStruct *s)
 
      case sSUBRANGE :
        if (s->typeFound) {
-	 if ((!s->typePtr) || (s->typePtr != tknPtr->sParm.v.parent))
+         if ((!s->typePtr) || (s->typePtr != tknPtr->sParm.v.parent))
            error(eSET);
        } /* end if */
        else {
          s->typeFound = true;
-	 s->typePtr   = tknPtr->sParm.v.parent;
-	 s->setType   = s->typePtr->sParm.t.subType;
-	 s->minValue  = s->typePtr->sParm.t.minValue;
+         s->typePtr   = tknPtr->sParm.v.parent;
+         s->setType   = s->typePtr->sParm.t.subType;
+         s->minValue  = s->typePtr->sParm.t.minValue;
          s->maxValue  = s->typePtr->sParm.t.maxValue;
        } /* end if */
 
@@ -2555,130 +2555,130 @@ static void getSetElement(setTypeStruct *s)
        getToken();
        if (token != tSUBRANGE) {
 
-	 /* Generate P-Code to push the set value onto the stack */
+         /* Generate P-Code to push the set value onto the stack */
          /* FORM:  1 << (firstValue - minValue) */
 
          pas_GenerateDataOperation(opPUSH, 1);
-	 pas_GenerateStackReference(opLDS, setPtr);
-	 pas_GenerateDataOperation(opPUSH, s->minValue);
-	 pas_GenerateSimple(opSUB);
-	 pas_GenerateSimple(opSLL);
+         pas_GenerateStackReference(opLDS, setPtr);
+         pas_GenerateDataOperation(opPUSH, s->minValue);
+         pas_GenerateSimple(opSUB);
+         pas_GenerateSimple(opSLL);
 
        } /* end if */
        else {
          if (!s->typeFound) error(eSUBRANGETYPE);
 
-	 /* Skip over the tSUBRANGE token */
+         /* Skip over the tSUBRANGE token */
 
-	 getToken();
+         getToken();
 
-	 /* TYPE check */
+         /* TYPE check */
 
-	 switch (token) {
+         switch (token) {
            case sSCALAR_OBJECT : /* A scalar or scalar subrange constant */
-	     lastValue = tknPtr->sParm.c.val.i;
-	     if ((s->setType != sSCALAR)
-	     ||   (s->typePtr != tknPtr->sParm.c.parent))
-	       error(eSET);
-	     goto addBitsToVar;
+             lastValue = tknPtr->sParm.c.val.i;
+             if ((s->setType != sSCALAR)
+             ||   (s->typePtr != tknPtr->sParm.c.parent))
+               error(eSET);
+             goto addBitsToVar;
 
-	   case tINT_CONST : /* An integer subrange constant ? */
-	     lastValue = tknInt;
-	     if (s->setType != sINT) error(eSET);
-	     goto addBitsToVar;
+           case tINT_CONST : /* An integer subrange constant ? */
+             lastValue = tknInt;
+             if (s->setType != sINT) error(eSET);
+             goto addBitsToVar;
 
-	   case tCHAR_CONST : /* A character subrange constant */
-	     lastValue = tknInt;
-	     if (s->setType != sCHAR) error(eSET);
+           case tCHAR_CONST : /* A character subrange constant */
+             lastValue = tknInt;
+             if (s->setType != sCHAR) error(eSET);
 
-	   addBitsToVar :
-	     /* Verify that the last value is in range */
+           addBitsToVar :
+             /* Verify that the last value is in range */
 
-	     if (lastValue < s->minValue) {
+             if (lastValue < s->minValue) {
                error(eSETRANGE);
-	       lastValue = s->minValue;
+               lastValue = s->minValue;
              } /* end if */
-	     else if (lastValue > s->maxValue) {
+             else if (lastValue > s->maxValue) {
                error(eSETRANGE);
-	       lastValue = s->maxValue;
+               lastValue = s->maxValue;
              } /* end else if */
 
-	     /* Set all bits from minValue through lastValue */
+             /* Set all bits from minValue through lastValue */
 
-	     setValue  = (0xffff >> ((BITS_IN_INTEGER-1) - (lastValue - s->minValue)));
+             setValue  = (0xffff >> ((BITS_IN_INTEGER-1) - (lastValue - s->minValue)));
 
              /* Now, generate P-Code to push the set value onto the stack */
-	     /* First generate: 0xffff << (firstValue-minValue) */
+             /* First generate: 0xffff << (firstValue-minValue) */
 
-	     pas_GenerateDataOperation(opPUSH, 0xffff);
-	     pas_GenerateStackReference(opLDS, setPtr);
+             pas_GenerateDataOperation(opPUSH, 0xffff);
+             pas_GenerateStackReference(opLDS, setPtr);
              if (s->minValue) {
-	       pas_GenerateDataOperation(opPUSH, s->minValue);
-	       pas_GenerateSimple(opSUB);
+               pas_GenerateDataOperation(opPUSH, s->minValue);
+               pas_GenerateSimple(opSUB);
              } /* end if */
-	     pas_GenerateSimple(opSLL);
+             pas_GenerateSimple(opSLL);
 
              /* Then and this with the pre-computed constant set value */
 
              if (setValue != 0xffff) {
-	       pas_GenerateDataOperation(opPUSH, setValue);
-	       pas_GenerateSimple(opAND);
+               pas_GenerateDataOperation(opPUSH, setValue);
+               pas_GenerateSimple(opAND);
              } /* end if */
 
              getToken();
-	     break;
+             break;
 
            case sINT : /* An integer subrange variable ? */
            case sCHAR : /* A character subrange variable? */
              if (s->setType != token) error(eSET);
-	     goto addVarToVar;
+             goto addVarToVar;
 
-	   case sSCALAR :
-	     if (s->typePtr != tknPtr->sParm.v.parent) error(eSET);
-	     goto addVarToVar;
+           case sSCALAR :
+             if (s->typePtr != tknPtr->sParm.v.parent) error(eSET);
+             goto addVarToVar;
 
-	   case sSUBRANGE :
-	     if ((s->typePtr != tknPtr->sParm.v.parent)
-	     &&   ((tknPtr->sParm.v.parent->sParm.t.subType == sSCALAR)
+           case sSUBRANGE :
+             if ((s->typePtr != tknPtr->sParm.v.parent)
+             &&   ((tknPtr->sParm.v.parent->sParm.t.subType == sSCALAR)
              ||     (tknPtr->sParm.v.parent->sParm.t.subType != s->setType)))
-	       error(eSET);
+               error(eSET);
 
            addVarToVar:
 
-	     /* Generate run-time logic to get all bits from firstValue */
-	     /* through lastValue */
-	     /* First generate: 0xffff << (firstValue-minValue) */
+             /* Generate run-time logic to get all bits from firstValue */
+             /* through lastValue */
+             /* First generate: 0xffff << (firstValue-minValue) */
 
-	     pas_GenerateDataOperation(opPUSH, 0xffff);
-	     pas_GenerateStackReference(opLDS, setPtr);
-	     if (s->minValue) {
-	       pas_GenerateDataOperation(opPUSH, s->minValue);
-	       pas_GenerateSimple(opSUB);
+             pas_GenerateDataOperation(opPUSH, 0xffff);
+             pas_GenerateStackReference(opLDS, setPtr);
+             if (s->minValue) {
+               pas_GenerateDataOperation(opPUSH, s->minValue);
+               pas_GenerateSimple(opSUB);
              } /* end if */
-	     pas_GenerateSimple(opSLL);
+             pas_GenerateSimple(opSLL);
 
-	     /* Generate logic to get: */
-	     /* 0xffff >> ((BITS_IN_INTEGER-1)-(lastValue-minValue)) */
+             /* Generate logic to get: */
+             /* 0xffff >> ((BITS_IN_INTEGER-1)-(lastValue-minValue)) */
 
-	     pas_GenerateDataOperation(opPUSH, 0xffff);
-	     pas_GenerateDataOperation(opPUSH, ((BITS_IN_INTEGER-1) + s->minValue));
-	     pas_GenerateStackReference(opLDS, tknPtr);
-	     pas_GenerateSimple(opSUB);
-	     pas_GenerateSimple(opSRL);
+             pas_GenerateDataOperation(opPUSH, 0xffff);
+             pas_GenerateDataOperation(opPUSH, ((BITS_IN_INTEGER-1) + s->minValue));
+             pas_GenerateStackReference(opLDS, tknPtr);
+             pas_GenerateSimple(opSUB);
+             pas_GenerateSimple(opSRL);
 
              /* Then AND the two values */
 
-	     pas_GenerateSimple(opAND);
+             pas_GenerateSimple(opAND);
 
-	     getToken();
+             getToken();
              break;
 
-	   default :
+           default :
              error(eSET);
-	     pas_GenerateDataOperation(opPUSH, 0);
-	     break;
+             pas_GenerateDataOperation(opPUSH, 0);
+             break;
 
-	 } /* end switch */
+         } /* end switch */
        } /* end else */
        break;
 

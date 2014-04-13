@@ -90,7 +90,7 @@ struct poffLibSymbol_s
   /* name is a reference to the symbol name in the string table
    * section data.
    */
-  
+
   const char *name;
 
   /* value is the value associated with symbol.  For defined data

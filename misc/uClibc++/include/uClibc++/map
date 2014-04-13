@@ -35,7 +35,7 @@ template<class Key, class T, class Compare = less<Key>, class Allocator = alloca
 
   //Compare the keys of the two items
 
-  /*  template<class Key, class T, class Compare, class Allocator> class _UCXXEXPORT 
+  /*  template<class Key, class T, class Compare, class Allocator> class _UCXXEXPORT
     __base_map<Key, T, Compare, Allocator>::value_compare : public binary_function<
       typename map<Key, T, Compare, Allocator>::value_type,
       typename map<Key, T, Compare, Allocator>::value_type,
@@ -216,11 +216,11 @@ protected:
 };
 
 /* Non-member functions.  These are at the end because they are not associated with any
- * particular class.  These will be implemented as I figure out exactly what all of 
+ * particular class.  These will be implemented as I figure out exactly what all of
  * them are supposed to do, and I have time.
  */
 
-  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator< 
+  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator<
     (const map<Key,T,Compare,Allocator>& x, const map<Key,T,Compare,Allocator>& y);
 
   template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator!=
@@ -241,13 +241,13 @@ protected:
   template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator==
     (const multimap<Key,T,Compare,Allocator>& x, const multimap<Key,T,Compare,Allocator>& y);
 
-  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator< 
+  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator<
     (const multimap<Key,T,Compare,Allocator>& x, const multimap<Key,T,Compare,Allocator>& y);
 
   template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator!=
     (const multimap<Key,T,Compare,Allocator>& x, const multimap<Key,T,Compare,Allocator>& y);
 
-  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator> 
+  template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator>
     (const multimap<Key,T,Compare,Allocator>& x, const multimap<Key,T,Compare,Allocator>& y);
 
   template <class Key, class T, class Compare, class Allocator> _UCXXEXPORT bool operator>=
@@ -266,4 +266,4 @@ protected:
 
 #endif
 
-  
+

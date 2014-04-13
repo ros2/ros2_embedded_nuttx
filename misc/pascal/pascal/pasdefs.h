@@ -76,7 +76,7 @@
  ***********************************************************************/
 
 /* This enumeration identies what kind of binary object we are creating
- * with the compilation.  At present, we may be generating either a 
+ * with the compilation.  At present, we may be generating either a
  * program binary or a unit binary.
  */
 

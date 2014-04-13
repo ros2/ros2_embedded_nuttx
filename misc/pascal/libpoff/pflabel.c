@@ -128,7 +128,7 @@ static void poffCheckDefinedLabelRealloc(void)
 {
   /* Check if there is room for the new data */
 
-  if (((nDefinedLabelRefs + 1)*sizeof(optDefinedLabelRef_t)) > 
+  if (((nDefinedLabelRefs + 1)*sizeof(optDefinedLabelRef_t)) >
       definedLabelRefAlloc)
     {
       uint32_t newAlloc = definedLabelRefAlloc + DEFINED_INCREMENT;

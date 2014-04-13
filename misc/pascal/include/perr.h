@@ -46,7 +46,7 @@
 /***********************************************************************
  * Public Function Prototypes
  ***********************************************************************/
- 
+
 extern void errmsg(char *fmt, ...);
 extern void warn(uint16_t errcode);
 extern void error(uint16_t errcode);

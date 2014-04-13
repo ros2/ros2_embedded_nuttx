@@ -6,7 +6,7 @@ CONST
    lexmiddle2 = 'ZZZLexically Middl';
    lexsmall   = 'AAALexically Small';
    lexnothing = ''
-VAR 
+VAR
    string1, string2 : string;
 BEGIN
    IF (lexbig <= lexmiddle) THEN
@@ -18,22 +18,22 @@ BEGIN
       writeln('ERROR: ', lexmiddle, ' > ', lexmiddle1)
    else
       writeln('OKAY:  ', lexmiddle, ' <= ', lexmiddle1);
-      
+
    IF (lexmiddle <> lexmiddle) THEN
       writeln('ERROR: ', lexmiddle, ' <> ', lexmiddle)
    else
       writeln('OKAY:  ', lexmiddle, ' = ', lexmiddle);
-      
+
    IF (lexmiddle = lexnothing) THEN
       writeln('ERROR: ', lexmiddle, ' = ', lexnothing)
    else
       writeln('OKAY:  ', lexmiddle, ' <> ', lexnothing);
-      
+
    IF (lexnothing <> lexnothing) THEN
       writeln('ERROR: ', lexnothing, ' <> ', lexnothing)
    else
       writeln('OKAY:  ', lexnothing, ' = ', lexnothing);
-      
+
    IF (lexmiddle < lexmiddle2) THEN
       writeln('ERROR: ', lexmiddle, ' < ', lexmiddle2)
    else
@@ -43,5 +43,5 @@ BEGIN
       writeln('ERROR: ', lexsmall, ' >= ', lexmiddle)
    else
       writeln('OKAY:  ', lexsmall, ' < ', lexmiddle)
-      
+
 END.

@@ -235,7 +235,7 @@ int unaryOptimize(void)
               deletePcode(i+1);
               nchanges++;
               break;
-                              
+
             case oGTEZ  :
               if ((int32_t)GETARG(pptr[i]) >= 0)
                 PUTARG(pptr[i], -1);
@@ -253,7 +253,7 @@ int unaryOptimize(void)
               deletePcode(i+1);
               nchanges++;
               break;
-                                                                                         
+
             case oLTEZ :
               if (GETARG(pptr[i]) <= 0)
                 PUTARG(pptr[i], -1);
@@ -417,7 +417,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;
@@ -428,7 +428,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;
@@ -439,7 +439,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;
@@ -450,7 +450,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;
@@ -461,7 +461,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;
@@ -472,7 +472,7 @@ int unaryOptimize(void)
                   PUTOP(pptr[i+1], oJMP);
                   deletePcode(i);
                 } /* end if */
-              else 
+              else
                 deletePcodePair(i, (i+1));
               nchanges++;
               break;

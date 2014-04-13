@@ -106,7 +106,7 @@ namespace std
   /** The runtime will call this function if an %exception is thrown which
    *  violates the function's %exception specification.
    */
- 
+
   void unexpected() noreturn_function;
 
   /** [18.6.4]/1:  "Returns true after completing evaluation of a
@@ -119,7 +119,7 @@ namespace std
    *  2:  "When @c uncaught_exception() is true, throwing an %exception can
    *  result in a call of @c terminate() (15.5.1)."
    */
- 
+
   bool uncaught_exception() throw();
 
 } // namespace std

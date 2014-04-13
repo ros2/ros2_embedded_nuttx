@@ -254,7 +254,7 @@ var
          writeln(pipe, '.');
          close(pipe);
       end;  //SendEmailWithSendMail
-      
+
       //***************************************************************
       //PURPOSE: Sends and email message using the CDONTS components
       //NOTE: The CDONTS components were created by Microsoft to

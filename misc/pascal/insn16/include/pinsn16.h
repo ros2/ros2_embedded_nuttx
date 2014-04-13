@@ -120,7 +120,7 @@
  * xx11 1100  ---        ---            ---            ---
  * xx11 1101  ---        ---            ---            ---
  * xx11 1110  ---        ---            ---            ---
- * xx11 1111  END        ---           *LABEL ilbl    *LINE fn,lineno 
+ * xx11 1111  END        ---           *LABEL ilbl    *LINE fn,lineno
  *
  * KEY:
  *   n     = 8-bit value (unsigned)

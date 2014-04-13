@@ -107,7 +107,7 @@ void builtInFunctionOfConstant(void)
 
         case txROUND :
           constantReal2IntFunc(fpROUND);
-          break; 
+          break;
         case txTRUNC :
           constantReal2IntFunc(fpTRUNC);
           break;

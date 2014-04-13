@@ -7,10 +7,10 @@ TYPES
   - FILE OF and TEXT types partially supported
     - Not supported in TYPE block
     - TEXT is defined as FILE OF CHAR vs PACKED FILE OF CHAR
-    - No function returning FILE OF; No FILE OF 
+    - No function returning FILE OF; No FILE OF
       procedure/function arguments
     - Only PROGRAM arguments can be declared type FILE OF
-    - Only one file identifier per FILE OF declaration in type 
+    - Only one file identifier per FILE OF declaration in type
       block.
   - SET is limit to 16/32 (# bits in int) adjacent elements
   - Expressions are not strongly typed across different SCALAR types
@@ -70,7 +70,7 @@ COMPILER PSEUDO-OPERATIONS
 - INCLUDE
 
 STATEMENTS
-- CASE statement expects integer expression for the switch 
+- CASE statement expects integer expression for the switch
   variable
 - ELSE in CASE statement
 
@@ -82,7 +82,7 @@ TODO LIST
 
 o BUGS
 - Implement PUT and GET.
-- In FUNC/PROC calls, if simpleExpression fails to find a parameter (eg., 
+- In FUNC/PROC calls, if simpleExpression fails to find a parameter (eg.,
   proc (,,), no error is detected.
 - Type FILE OF is totally busted -- fix it
 - Need to get max string size into stack somehow.  Runtime routines like
@@ -97,14 +97,14 @@ o BUGS
   input and output in CONST section of pageutils.pas).
 
 o IMPROVEMENTS
-- In PTKN, verify that string stack does not overflow when 
+- In PTKN, verify that string stack does not overflow when
   character added.
 - Option to turn on listing
 - Option to interleave assembly language with listing
 - Option to select string stack size (or let it grow dynamically)
 - Option to select symbol table size (or let it grow dynamically)
-- List file should only be produced if option provided.  
-- Provide instrumentation to use the line number data in the 
+- List file should only be produced if option provided.
+- Provide instrumentation to use the line number data in the
   object files.  In debugger, display source line.  Allow stepping
   from source line to source line.
 - Optimizer needs to be incorporated into compiler.
@@ -124,11 +124,11 @@ o IMPROVEMENTS
 - Add 16-bit word type
 
 o ISSUES
-- What happens in TYPE block if type is sTYPE or sFILE_OF?  Need 
-  to re-think all typing.  Maybe replace sTYPE and sFILE_OF with 
-  sINT_TYPE, sINT_ARRAY_TYPE, ..., sFILE_OF_INT, 
+- What happens in TYPE block if type is sTYPE or sFILE_OF?  Need
+  to re-think all typing.  Maybe replace sTYPE and sFILE_OF with
+  sINT_TYPE, sINT_ARRAY_TYPE, ..., sFILE_OF_INT,
   sFILE_OF_INT_ARRAY, etc.
-- Is it really necessary or meaningful to allocate dstack for 
+- Is it really necessary or meaningful to allocate dstack for
   file buffers.
 - Revisit procedure call logic in pexec.c & pdbg.c.  First stack parameter
   is calculated but never used.

@@ -358,7 +358,7 @@ scripts/.autostuff/config.h: scripts/.autostuff/stamp-h1
 scripts/.autostuff/stamp-h1: $(top_srcdir)/scripts/.autostuff/config.h.in $(top_builddir)/config.status
 	@rm -f scripts/.autostuff/stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status scripts/.autostuff/config.h
-$(top_srcdir)/scripts/.autostuff/config.h.in:  $(am__configure_deps) 
+$(top_srcdir)/scripts/.autostuff/config.h.in:  $(am__configure_deps)
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f scripts/.autostuff/stamp-h1
 	touch $@

@@ -60,8 +60,8 @@ namespace std
       return setbuf(s,n);
     }
 
-    pos_type pubseekoff(off_type off, 
-      typename ios_base::seekdir way, 
+    pos_type pubseekoff(off_type off,
+      typename ios_base::seekdir way,
       ios_base::openmode which = ios_base::in |
       ios_base::out)
     {
@@ -116,7 +116,7 @@ namespace std
     charT * mgnext;
     charT * mgend;
 
-    // Pointers for the "put" buffers  
+    // Pointers for the "put" buffers
 
     charT * mpbeg;
     charT * mpnext;
@@ -125,7 +125,7 @@ namespace std
     // In the event of null buffers Lets us know what the buffer is opened for
 
     ios_base::openmode openedFor;
-    
+
     basic_streambuf();
 
     basic_streambuf(const basic_streambuf<char, char_traits<char> > &)
@@ -138,7 +138,7 @@ namespace std
     {
       return *this;
     }
-    
+
     char_type* eback() const
     {
       return mgbeg;
@@ -204,7 +204,7 @@ namespace std
       return 0;
     }
 
-    virtual pos_type seekoff(off_type , ios_base::seekdir, 
+    virtual pos_type seekoff(off_type , ios_base::seekdir,
       ios_base::openmode = ios_base::in | ios_base::out)
     {
       return 0;
@@ -372,7 +372,7 @@ namespace std
     return T::to_int_type(c);
   }
 
-  template <class C, class T> basic_streambuf<C, T>::basic_streambuf() 
+  template <class C, class T> basic_streambuf<C, T>::basic_streambuf()
     : myLocale(),
     mgbeg(0), mgnext(0), mgend(0), mpbeg(0), mpnext(0), mpend(0),
     openedFor(0)

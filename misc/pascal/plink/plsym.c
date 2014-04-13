@@ -325,8 +325,8 @@ static symContainer_t *insertSymbol(poffLibSymbol_t *sym)
     }
 
   /* We get here if:
-   * a.  curr == NULL meaning that the symbol goes at the end of the 
-   *     list.  (special case, prev == NULL as well. This happens when 
+   * a.  curr == NULL meaning that the symbol goes at the end of the
+   *     list.  (special case, prev == NULL as well. This happens when
    *     the list is empty).
    * b.  curr != NULL mean that the symbol goes between prev and curr
    *     (special cases:  (i) compare == 0 meaning that the symbol is
@@ -406,7 +406,7 @@ static symContainer_t *insertSymbol(poffLibSymbol_t *sym)
       newsym       = makeSymContainer(sym);
       newsym->next = curr;
       newsym->prev = prev;
-      
+
       if (prev)
         prev->next = newsym;
       else

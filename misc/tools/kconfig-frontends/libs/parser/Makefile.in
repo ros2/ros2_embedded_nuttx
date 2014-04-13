@@ -413,7 +413,7 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libkconfig-parser.la: $(libkconfig_parser_la_OBJECTS) $(libkconfig_parser_la_DEPENDENCIES) $(EXTRA_libkconfig_parser_la_DEPENDENCIES) 
+libkconfig-parser.la: $(libkconfig_parser_la_OBJECTS) $(libkconfig_parser_la_DEPENDENCIES) $(EXTRA_libkconfig_parser_la_DEPENDENCIES)
 	$(AM_V_CCLD)$(libkconfig_parser_la_LINK) -rpath $(libdir) $(libkconfig_parser_la_OBJECTS) $(libkconfig_parser_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:

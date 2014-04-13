@@ -368,7 +368,7 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-conf$(EXEEXT): $(conf_OBJECTS) $(conf_DEPENDENCIES) $(EXTRA_conf_DEPENDENCIES) 
+conf$(EXEEXT): $(conf_OBJECTS) $(conf_DEPENDENCIES) $(EXTRA_conf_DEPENDENCIES)
 	@rm -f conf$(EXEEXT)
 	$(AM_V_CCLD)$(conf_LINK) $(conf_OBJECTS) $(conf_LDADD) $(LIBS)
 

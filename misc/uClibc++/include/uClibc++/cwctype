@@ -66,7 +66,7 @@
 #undef iswspace
 #undef iswupper
 #undef iswxdigit
-#undef iswctype  
+#undef iswctype
 #undef towlower
 #undef towupper
 #undef towctrans
@@ -103,4 +103,4 @@ namespace std
 }
 #endif //__ULIBCXX_HAS_WCHAR__
 
-#endif 
+#endif

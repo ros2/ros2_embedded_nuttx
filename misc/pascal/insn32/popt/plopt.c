@@ -92,7 +92,7 @@ int LoadOptimize(void)
            * unindexed form.
            */
 
-          if (GETOP(pptr[i+1]) == oLDSXH) 
+          if (GETOP(pptr[i+1]) == oLDSXH)
             {
               PUTOP(pptr[i+1], oLDSH);
               val += GETARG(pptr[i+1]);
@@ -201,7 +201,7 @@ int StoreOptimize (void)
           else i++;
           break;
 
-        default     : 
+        default     :
           i++;
           break;
         } /* end switch */

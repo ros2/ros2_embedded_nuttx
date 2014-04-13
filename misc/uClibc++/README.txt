@@ -99,7 +99,7 @@ is still required.  This logic would handle both cases:
   endif
 
 To get the required libraries into to the NuttX build, it is necessary to add
-them to EXTRA_LIBS and to EXTRA_LIBPATHS.  
+them to EXTRA_LIBS and to EXTRA_LIBPATHS.
 
   LIBSUPXX = ${shell $(CC) --print-file-name=libsupc++.a}
   EXTRA_LIBPATHS = -L "${shell dirname "$(LIBSUPXX)"}"

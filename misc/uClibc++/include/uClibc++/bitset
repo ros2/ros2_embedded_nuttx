@@ -38,12 +38,12 @@ namespace std
   template <size_t N> bitset<N> operator&(const bitset<N>&, const bitset<N>&);
   template <size_t N> bitset<N> operator|(const bitset<N>&, const bitset<N>&);
   template <size_t N> bitset<N> operator^(const bitset<N>&, const bitset<N>&);
-  template <class charT, class traits, size_t N> basic_istream<charT, traits>& 
+  template <class charT, class traits, size_t N> basic_istream<charT, traits>&
     operator>>(basic_istream<charT, traits>& is, bitset<N>& x);
 
-  template <class charT, class traits, size_t N> basic_ostream<charT, traits>& 
+  template <class charT, class traits, size_t N> basic_ostream<charT, traits>&
     operator<<(basic_ostream<charT, traits>& os, const bitset<N>& x);
-  
+
   // Actual Code
 
   template<size_t N> class _UCXXEXPORT bitset {
@@ -56,7 +56,7 @@ namespace std
     //From the bit number, figure out which byte we are working with
 
     size_t byte_num(size_t bit_num) const
-    { 
+    {
       if (WORD_SIZE == 8)
       {
         return (bit_num >> 3);
@@ -93,7 +93,7 @@ namespace std
 
   public:
 
-    class _UCXXEXPORT reference 
+    class _UCXXEXPORT reference
     {
       friend class bitset;
       reference() : bit_num(0), parent(0) {  }
@@ -176,7 +176,7 @@ namespace std
       typename basic_string<charT,traits,Allocator>::size_type pos = 0,
       typename basic_string<charT,traits,Allocator>::size_type n =
       basic_string<charT>::npos
-      
+
     )
     {
       reset();
@@ -526,7 +526,7 @@ namespace std
     return retval;
   }
 
-  template <class charT, class traits, size_t N> _UCXXEXPORT basic_istream<charT, traits>& 
+  template <class charT, class traits, size_t N> _UCXXEXPORT basic_istream<charT, traits>&
     operator>>(basic_istream<charT, traits>& is, bitset<N>& x)
   {
     string s;
@@ -553,7 +553,7 @@ namespace std
     return is;
   }
 
-  template <class charT, class traits, size_t N> _UCXXEXPORT basic_ostream<charT, traits>& 
+  template <class charT, class traits, size_t N> _UCXXEXPORT basic_ostream<charT, traits>&
     operator<<(basic_ostream<charT, traits>& os, const bitset<N>& x)
   {
     for (size_t i = N ; i > 0; --i)

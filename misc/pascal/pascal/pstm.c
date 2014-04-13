@@ -266,7 +266,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprIntegerPtr, varPtr, typePtr);
-          else 
+          else
             pas_Assignment(opSTSX, exprInteger, varPtr, typePtr);
         } /* end if */
       else
@@ -292,7 +292,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprCharPtr, varPtr, typePtr);
-          else 
+          else
             pas_Assignment(opSTSXB, exprChar, varPtr, typePtr);
         } /* end if */
       else
@@ -318,7 +318,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprBooleanPtr, varPtr, typePtr);
-          else 
+          else
             pas_Assignment(opSTSX, exprBoolean, varPtr, NULL);
         } /* end if */
       else
@@ -344,7 +344,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprRealPtr, varPtr, typePtr);
-          else 
+          else
             pas_LargeAssignment(opSTSXM, exprReal, varPtr, typePtr);
         } /* end if */
       else
@@ -370,7 +370,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprScalarPtr, varPtr, typePtr);
-          else 
+          else
             pas_Assignment(opSTSX, exprScalar, varPtr, typePtr);
         } /* end if */
       else
@@ -396,7 +396,7 @@ static void pas_SimpleAssignment(STYPE *varPtr, uint8_t assignFlags)
             } /* end if */
           else if ((assignFlags & ADDRESS_ASSIGNMENT) != 0)
             pas_Assignment(opSTSX, exprSetPtr, varPtr, typePtr);
-          else 
+          else
             pas_Assignment(opSTSX, exprSet, varPtr, typePtr);
         } /* end if */
       else
@@ -888,7 +888,7 @@ static void pas_ProcStatement(void)
 
   /* Generate procedure call and stack adjustment (if required)
    * Upon return from the procedure, the level stack pointer (LSP)
-   * may also be invalid.  However, we rely on level level logic in 
+   * may also be invalid.  However, we rely on level level logic in
    * pgen.c to manage this case (as well as the function call case).
    */
 
@@ -1143,7 +1143,7 @@ static void pas_WhileStatement(void)
    pas_GenerateDataOperation(opLABEL, endwhile_label);
 
    /* We always get here from the check at the top of the loop.
-    * Normally this will be from the branch from the bottom of 
+    * Normally this will be from the branch from the bottom of
     * the loop to the top of the loop.  Then from the conditional
     * branch at the top of the loop to here.
     *
@@ -1290,7 +1290,7 @@ static void pas_CaseStatement(void)
         * NOTE:  We accept any kind of constant for the case selector; there
         * really should be some check to assure that the constant is of the
         * same type as the expression!
-        */  
+        */
 
        else
          {
@@ -1518,7 +1518,7 @@ static void pas_ForStatement(void)
        pas_GenerateDataOperation(opINDS, -sINT_SIZE);
 
        /* We always get here from the check at the top of the loop.
-        * Normally this will be from the branch from the bottom of 
+        * Normally this will be from the branch from the bottom of
         * the loop to the top of the loop.  Then from the conditional
         * branch at the top of the loop to here.
         *

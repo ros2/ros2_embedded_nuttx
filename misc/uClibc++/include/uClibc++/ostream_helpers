@@ -338,7 +338,7 @@ namespace std
       {
         length = snprintf(buffer, 32, "%*.*f",static_cast<int>(stream.width()),static_cast<int>(stream.precision()), f);
       }
-      else 
+      else
       {
         length = snprintf(buffer, 32, "%*.*g",static_cast<int>(stream.width()),static_cast<int>(stream.precision()), f);
       }

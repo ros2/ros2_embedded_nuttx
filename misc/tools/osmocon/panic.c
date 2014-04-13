@@ -17,7 +17,7 @@ void osmo_panic(const char *fmt, ...)
 	osmo_panic_default(fmt, args);
 	va_end(args);
 }
- 
+
 
 void osmo_set_panic_handler(osmo_panic_handler_t h)
 {

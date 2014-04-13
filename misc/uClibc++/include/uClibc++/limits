@@ -184,7 +184,7 @@ public:
   static T signaling_NaN();
 };
 
-template <> class numeric_limits<bool> 
+template <> class numeric_limits<bool>
 {
 public:
   typedef bool T;

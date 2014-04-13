@@ -178,7 +178,7 @@ char getNextCharacter(bool skipWhiteSpace)
 
   /* If it is a space and we have been told to skip spaces then consume
    * the input line until a non-space or the EOL is encountered.
-   */ 
+   */
 
   else if (skipWhiteSpace)
     {
@@ -393,7 +393,7 @@ void getToken(void)
 
   DEBUG(lstFile,"[%02x]", token);
 
-} /* End getToken */  
+} /* End getToken */
 
 /***************************************************************
  * Private Functions
@@ -452,7 +452,7 @@ static void identifier(void)
 
     } /* end else */
 
-} /* End identifier */  
+} /* End identifier */
 
 /***************************************************************/
 /* Process string */

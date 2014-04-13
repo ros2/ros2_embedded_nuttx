@@ -78,7 +78,7 @@ void insn_AddTmpOpCode(poffProgHandle_t hProg, OPTYPE *ptr)
 
   /* Write the 32-bit argument if present */
 
-  if (ptr->op & o32)  
+  if (ptr->op & o32)
     {
       uint8_t *pb = (uint8_t*)&ptr->arg;
 

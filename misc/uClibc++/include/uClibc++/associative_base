@@ -340,7 +340,7 @@ public:
   {
     // The following approach ensures that we only need to
     // provide code for ++ in one place (above)
-    
+
     _associative_citer temp(base_iter);
     ++base_iter;
     return temp;
@@ -609,7 +609,7 @@ public:
     const Compare& comp,
     const Allocator& A,
     const key_type (*v_to_k)(const value_type)
-  ) : base(comp, A, v_to_k) 
+  ) : base(comp, A, v_to_k)
   {
     insert(first, last);
   }

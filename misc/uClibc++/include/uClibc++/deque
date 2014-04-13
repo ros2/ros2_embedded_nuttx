@@ -558,7 +558,7 @@ namespace std
   };
 
   template<class T, class Allocator> deque<T, Allocator>::deque(const Allocator& al)
-    : data(0), 
+    : data(0),
     data_size(0), elements(0), first_element(0), last_element(0), a(al)
   {
     data_size = __UCLIBCXX_STL_BUFFER_SIZE__;
@@ -585,7 +585,7 @@ namespace std
   }
 
 
-  template<class T, class Allocator> template <class InputIterator> 
+  template<class T, class Allocator> template <class InputIterator>
     deque<T, Allocator>::deque(InputIterator first, InputIterator last, const Allocator& al)
     : data(0),
     data_size(0), elements(0), first_element(0), last_element(0), a(al)
@@ -665,7 +665,7 @@ namespace std
     }
   }
 
-  template<class T, class Allocator> typename deque<T, Allocator>::allocator_type 
+  template<class T, class Allocator> typename deque<T, Allocator>::allocator_type
     deque<T, Allocator>::get_allocator() const
   {
     return a;
@@ -694,7 +694,7 @@ namespace std
   {
     return deque_citer(this, elements);
   }
-  
+
   template<class T, class Allocator> typename
     deque<T, Allocator>::reverse_iterator deque<T, Allocator>::rbegin()
   {
@@ -813,7 +813,7 @@ namespace std
   {
     return data[array_element(elements-1)];
   }
-  
+
   template<class T, class Allocator> void deque<T, Allocator>::push_front(const T& x)
   {
     reserve(elements + 1);
@@ -867,7 +867,7 @@ namespace std
     }
   }
 
-  template<class T, class Allocator> template <class InputIterator> 
+  template<class T, class Allocator> template <class InputIterator>
     void deque<T, Allocator>::insert (iterator position, InputIterator first, InputIterator last)
   {
     while (first != last){
@@ -920,7 +920,7 @@ namespace std
     return deque_iter(this, position.element);
   }
 
-  template<class T, class Allocator> typename deque<T, Allocator>::iterator 
+  template<class T, class Allocator> typename deque<T, Allocator>::iterator
     deque<T, Allocator>::
     erase(typename deque<T, Allocator>::iterator first, typename deque<T, Allocator>::iterator last)
   {
@@ -1010,7 +1010,7 @@ namespace std
     T * data_temp;
     size_temp = n + __UCLIBCXX_STL_BUFFER_SIZE__;    //Reserve extra 'cause we can
     data_temp = a.allocate(size_temp);
-  
+
     first_temp = (size_temp - elements) / 2;
     for (size_type i = 0; i < elements; ++i)
     {
@@ -1027,7 +1027,7 @@ namespace std
     last_element = first_element + elements;
   }
 
-  template <class T, class Allocator> _UCXXEXPORT 
+  template <class T, class Allocator> _UCXXEXPORT
     bool
     operator==(const deque<T,Allocator>& x, const deque<T,Allocator>& y)
   {

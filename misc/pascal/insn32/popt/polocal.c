@@ -100,7 +100,7 @@ void localOptimization(poffHandle_t poffHandle,
   initPTable();
 
   /* Outer loop traverse the file op-code by op-code until the oEND P-Code
-   * has been output.  NOTE:  it is assumed throughout that oEND is the 
+   * has been output.  NOTE:  it is assumed throughout that oEND is the
    * final P-Code in the program data section.
    */
 
@@ -195,7 +195,7 @@ static void setupPointer(void)
   for (pindex = 0; pindex < WINDOW; pindex++)
     pptr[pindex] = (OPTYPE *) NULL;
 
-  nops = 0; 
+  nops = 0;
   for (pindex = 0; pindex < WINDOW; pindex++)
     {
       switch (GETOP(&ptable[pindex]))

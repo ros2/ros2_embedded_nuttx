@@ -441,7 +441,7 @@ void constantTerm(void)
           {
             constantReal = (double)constantInt;
           }
-         
+
         /* Handle the case where the 1st argument is Integer and the
          * second is REAL. */
 
@@ -573,4 +573,4 @@ static void constantFactor(void)
       error(eINVFACTOR);
       break;
     }
-} 
+}

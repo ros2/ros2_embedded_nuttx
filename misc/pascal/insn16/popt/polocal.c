@@ -101,7 +101,7 @@ void localOptimization(poffHandle_t poffHandle,
   initPTable();
 
   /* Outer loop traverse the file op-code by op-code until the oEND P-Code
-   * has been output.  NOTE:  it is assumed throughout that oEND is the 
+   * has been output.  NOTE:  it is assumed throughout that oEND is the
    * final P-Code in the program data section.
    */
 
@@ -171,11 +171,11 @@ static void putPCodeFromTable(void)
         {
           (void)poffAddTmpProgByte(myPoffProgHandle, ptable[0].op);
 
-          if (ptable[0].op & o8)  
+          if (ptable[0].op & o8)
             (void)poffAddTmpProgByte(myPoffProgHandle, ptable[0].arg1);
 
           if (ptable[0].op & o16)
-            { 
+            {
               (void)poffAddTmpProgByte(myPoffProgHandle,
                                        (ptable[0].arg2 >> 8));
               (void)poffAddTmpProgByte(myPoffProgHandle,
@@ -213,7 +213,7 @@ static void setupPointer(void)
   for (pindex = 0; pindex < WINDOW; pindex++)
     pptr[pindex] = (OPTYPE *) NULL;
 
-  nops = 0; 
+  nops = 0;
   for (pindex = 0; pindex < WINDOW; pindex++)
     {
       switch (ptable[pindex].op)
@@ -276,13 +276,13 @@ static void initPTable(void)
 
       (void)poffAddTmpProgByte(myPoffProgHandle, ptable[0].op);
 
-      if (ptable[0].op & o8)  
+      if (ptable[0].op & o8)
         {
           (void)poffAddTmpProgByte(myPoffProgHandle, ptable[0].arg1);
         }
 
       if (ptable[0].op & o16)
-        { 
+        {
           (void)poffAddTmpProgByte(myPoffProgHandle, (ptable[0].arg2 >> 8));
           (void)poffAddTmpProgByte(myPoffProgHandle, (ptable[0].arg2 & 0xff));
         } /* end if */

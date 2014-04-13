@@ -5268,7 +5268,7 @@ END; { change_const_line }
 
 { ************************* set_line_flags ******************************** }
 
-PROCEDURE set_line_flags 
+PROCEDURE set_line_flags
    (page: page_pointer; ind: short; select, attribute: char;
     get_line_pointer:  get_line_pointer_type) ;
 
@@ -5301,7 +5301,7 @@ END; { set_line_flags }
 
 { ************************* get_line_flags ******************************** }
 
-PROCEDURE get_line_flags 
+PROCEDURE get_line_flags
    (page: page_pointer; ind: short; VAR select, attribute: char;
     get_line_pointer:  get_line_pointer_type) ;
 
@@ -5326,7 +5326,7 @@ END; { get_line_flags }
 
 { ************************* is_selected *********************************** }
 
-FUNCTION is_selected 
+FUNCTION is_selected
    (list: list_cb_type; page: page_pointer; ind: short;
     get_line_pointer:  get_line_pointer_type): boolean ;
 
@@ -5360,7 +5360,7 @@ END; { is_selected }
 
 { ************************* set_list_line_flags *************************** }
 
-PROCEDURE set_list_line_flags 
+PROCEDURE set_list_line_flags
    (VAR list: list_cb_type; select, attribute: char;
     get_line_pointer:  get_line_pointer_type
    ) ;
@@ -5384,7 +5384,7 @@ END; { set_list_line_flags }
 
 { ************************* get_next_selected_line ************************ }
 
-PROCEDURE get_next_selected_line 
+PROCEDURE get_next_selected_line
    (VAR list: list_cb_type; VAR page: page_pointer; VAR ind: short;
     get_line_pointer:  get_line_pointer_type) ;
 
@@ -5408,7 +5408,7 @@ END; { get_next_selected_line }
 
 { ************************* get_prev_selected_line ************************ }
 
-PROCEDURE get_prev_selected_line 
+PROCEDURE get_prev_selected_line
    (VAR list: list_cb_type; VAR page: page_pointer; VAR ind: short;
     get_line_pointer:  get_line_pointer_type) ;
 
@@ -5432,7 +5432,7 @@ END; { get_prev_selected_line }
 
 { ************************* get_first_selected_line_m *********************** }
 
-PROCEDURE get_first_selected_line_m 
+PROCEDURE get_first_selected_line_m
    (VAR list: list_cb_type; VAR page: page_pointer; VAR ind: short;
     get_line_pointer:  get_line_pointer_type) ;
 
@@ -5453,7 +5453,7 @@ END; { get_first_selected_line_m }
 
 { ************************* get_first_selected_line ************************ }
 
-PROCEDURE get_first_selected_line 
+PROCEDURE get_first_selected_line
    (VAR list: list_cb_type; VAR page: page_pointer; VAR ind: short;
     get_line_pointer:  get_line_pointer_type) ;
 

@@ -175,7 +175,7 @@ const RTYPE *findReservedWord (char *name)
 
   return (RTYPE*)NULL;                 /* return NULL pointer if no match */
 
-} /* fnd findReservedWord */  
+} /* fnd findReservedWord */
 
 /***************************************************************/
 
@@ -681,7 +681,7 @@ void dumpTables(void)
         default :
           fprintf(lstFile, "Unknown sKind\n");
           break;
-     
+
         } /* end switch */
     } /* end for */
 

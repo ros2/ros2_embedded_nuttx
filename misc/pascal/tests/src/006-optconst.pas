@@ -1,7 +1,7 @@
 { A test of constant optimiztion }
 
 program constopt;
-var 
+var
    i1, i2, i3 : integer;
    b1	      :  boolean
 begin
@@ -11,7 +11,7 @@ begin
    3. *, DIV, AND, SHL, SHR
    4. -, NOT
    }
-     
+
    i1 := -2;                { -2 }
    i1 := 3 * 2;             {  6 }
    i1 := 3 * (-2);          { -6 }

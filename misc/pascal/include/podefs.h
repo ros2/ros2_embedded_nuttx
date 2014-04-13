@@ -170,7 +170,7 @@ enum pcode_e
 
   /* Store: arg1 = level; arg2 = signed frame offset */
 
-  opSTS, opSTSB, opSTSM, 
+  opSTS, opSTSB, opSTSM,
 
   /* Load Indexed: arg1 = level; arg2 = signed frame offset */
 

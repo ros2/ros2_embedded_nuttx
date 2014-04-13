@@ -38,7 +38,7 @@ namespace std
 template <class T> class allocator;
   // Specialize for void:
 
-template <> class _UCXXEXPORT allocator<void> 
+template <> class _UCXXEXPORT allocator<void>
 {
 public:
   typedef void*       pointer;
@@ -53,7 +53,7 @@ public:
   typedef T value_type;
   typedef size_t size_type;
   typedef ptrdiff_t difference_type;
-  
+
   typedef T* pointer;
   typedef const T* const_pointer;
 
@@ -62,7 +62,7 @@ public:
 
   pointer address(reference r) const { return &r; }
   const_pointer address(const_reference r) const { return &r; }
-  
+
   allocator() throw(){}
   template <class U> allocator(const allocator<U>& ) throw();
   ~allocator() throw(){}

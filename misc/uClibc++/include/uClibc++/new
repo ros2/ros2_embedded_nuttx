@@ -58,7 +58,7 @@ _UCXXEXPORT void operator delete[](void* ptr, const std::nothrow_t& ) throw();
 
 inline void* operator new(std::size_t, void* ptr) throw() {return ptr; }
 inline void operator delete(void* , void *) throw() { }
-  
+
 inline void* operator new[](std::size_t, void *p) throw() { return p; }
 inline void operator delete[](void* , void *) throw() {}
 

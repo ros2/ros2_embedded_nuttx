@@ -256,7 +256,7 @@ struct poffSectionHeader_s
   /* sh_name is an offset into the string table section data.
    * It refers to a name associated with section.
    */
-  
+
   uint32_t sh_name;
 
   /* If the section is loaded into memory (SHF_ALLOC), then this
@@ -330,7 +330,7 @@ struct poffSymbol_s
   /* st_name is an offset into the string table section data.
    * It refers to a name associated with symbol.
    */
-  
+
   uint32_t st_name;
 
   /* st_value is the value associated with symbol.  For defined data

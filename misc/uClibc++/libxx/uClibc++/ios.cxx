@@ -181,7 +181,7 @@ namespace std{
 		locale retval = mLocale;
 		mLocale = loc;
 		return retval;
-	}	
+	}
 
 }
 

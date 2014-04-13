@@ -120,7 +120,7 @@ void builtInProcedure(void)
           fileProc(xWRITE_PAGE);
           break;
 
-        case txREAD : 
+        case txREAD :
           getToken();
           (void)readProc();
           break;
@@ -137,7 +137,7 @@ void builtInProcedure(void)
           fileProc(xREWRITE);
           break;
 
-        case txWRITE : 
+        case txWRITE :
           getToken();
           (void)writeProc();
           break;
@@ -146,11 +146,11 @@ void builtInProcedure(void)
           writelnProc();
           break;
 
-        case txGET : 
-        case txNEW : 
-        case txPACK : 
-        case txPUT : 
-        case txUNPACK : 
+        case txGET :
+        case txNEW :
+        case txPACK :
+        case txPUT :
+        case txUNPACK :
           error(eNOTYET);
           getToken();
           break;
@@ -161,7 +161,7 @@ void builtInProcedure(void)
           break;
 
           /* Its not a recognized procedure */
-        
+
         default :
           error(eINVALIDPROC);
           break;
@@ -489,7 +489,7 @@ static void readlnProc(void)          /* READLN procedure */
 } /* end readlnProc */
 
 /****************************************************************************/
-/* REWRITE/RESET/PAGE procedure call -- REWRITE sets the file pointer to the 
+/* REWRITE/RESET/PAGE procedure call -- REWRITE sets the file pointer to the
  * beginning of the file and prepares the file for write access; RESET is
  * similar except that it prepares the file for read access; PAGE simply
  * writes a form-feed to the file (no check is made, but is meaningful only
@@ -698,7 +698,7 @@ static void valProc(void)         /* VAL procedure */
   TRACE(lstFile, "[valProc]");
 
   /* Declaration:
-   *   procedure val(const S : string; var V; var Code : word); 
+   *   procedure val(const S : string; var V; var Code : word);
    *
    * Description:
    * val() converts the value represented in the string S to a numerical
@@ -713,7 +713,7 @@ static void valProc(void)         /* VAL procedure */
    *
    * Errors:
    * If the conversion doesn��t succeed, the value of Code indicates the
-   * position where the conversion went wrong. 
+   * position where the conversion went wrong.
    */
 
   /* Skip over the 'val' identifer */

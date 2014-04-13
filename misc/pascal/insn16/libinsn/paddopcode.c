@@ -76,7 +76,7 @@ void insn_AddOpCode(poffHandle_t handle, OPTYPE *ptr)
 
   /* Write the 8-bit argument if present */
 
-  if (ptr->op & o8)  
+  if (ptr->op & o8)
     {
       (void)poffAddProgByte(handle, ptr->arg1);
     }
@@ -84,7 +84,7 @@ void insn_AddOpCode(poffHandle_t handle, OPTYPE *ptr)
   /* Write the 16-bit argument if present */
 
   if (ptr->op & o16)
-    { 
+    {
       (void)poffAddProgByte(handle, (ptr->arg2 >> 8));
       (void)poffAddProgByte(handle, (ptr->arg2 & 0xff));
     }

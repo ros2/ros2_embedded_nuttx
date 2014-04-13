@@ -102,7 +102,7 @@ int16_t LoadOptimize(void)
            * unindexed form.
            */
 
-          if (pptr[i+1]->op == oLDSXH) 
+          if (pptr[i+1]->op == oLDSXH)
             {
               pptr[i+1]->op = oLDSH;
               pptr[i+1]->arg2 += val;
@@ -236,7 +236,7 @@ int16_t StoreOptimize (void)
           else i++;
           break;
 
-        default     : 
+        default     :
           i++;
           break;
         } /* end switch */

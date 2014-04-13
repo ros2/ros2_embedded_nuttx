@@ -162,7 +162,7 @@ template <> _UCXXEXPORT basic_filebuf<wchar_t, char_traits<wchar_t> >::int_type
 	}
 
 	*(wstreambuf::egptr()-1) = c;
-	
+
 	wstreambuf::mgnext -= 1;
 
 	return traits::to_int_type(*wstreambuf::gptr());

@@ -62,14 +62,14 @@ namespace std
 
   // Specialize for char
 
-  template<> struct _UCXXEXPORT char_traits<char> 
+  template<> struct _UCXXEXPORT char_traits<char>
   {
     typedef char char_type;
     typedef short int int_type;
     typedef char_traits_off_type off_type;
     typedef char_traits_off_type pos_type;
     typedef char state_type;
-    
+
     inline static void assign(char_type & c, const char_type & d) { c = d; }
 
     static bool eq(const char_type& c1, const char_type& c2);
@@ -142,7 +142,7 @@ namespace std
       {
         return 0;
       }
-      else 
+      else
       {
         return i;
       }
@@ -157,7 +157,7 @@ namespace std
   };
 
 #ifdef __UCLIBCXX_HAS_WCHAR__
-  template<> struct _UCXXEXPORT char_traits<wchar_t> 
+  template<> struct _UCXXEXPORT char_traits<wchar_t>
   {
     typedef wchar_t char_type;
     typedef wint_t int_type;
@@ -242,7 +242,7 @@ namespace std
     inline static char_type eos() { return 0; }
     inline static int_type eof() { return WEOF; }
 
-    inline static int_type not_eof(const int_type & i) 
+    inline static int_type not_eof(const int_type & i)
     {
       if (i == WEOF)
       {

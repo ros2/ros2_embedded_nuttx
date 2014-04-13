@@ -58,7 +58,7 @@ namespace std
   /** The runtime will call this function if an %exception is thrown which
    *  violates the function's %exception specification.
    */
- 
+
   _UCXXEXPORT void unexpected(void) throw()
   {
     if (__unexpected_handler)

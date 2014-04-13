@@ -421,7 +421,7 @@ static int32_t pdbg_readdecimal(char *ptr)
    while (isspace(*ptr))  ptr++;
    for (; ((*ptr >= '0') && (*ptr <= '9')); ptr++)
       decimal = 10*decimal + (int32_t)*ptr - (int32_t)'0';
- 
+
    return decimal;
 
 } /* end pdbg_readdecimal */
@@ -495,7 +495,7 @@ static paddr_t pdbg_printpcode(struct pexec_s *st, paddr_t pc, int16_t nitems)
           printf("%02x", op.arg1);
           opsize++;
         } /* end if */
-      else 
+      else
         printf("..");
 
       if ((op.op & o16) != 0)
@@ -575,7 +575,7 @@ static void pdbg_printtracearray(struct pexec_s *st)
    for (nprinted = 0; nprinted < g_ntracepoints; nprinted++) {
 
       printf("SP:%04x  %04x  ",
-         g_tracearray[ index ].sp, g_tracearray[ index ].tos); 
+         g_tracearray[ index ].sp, g_tracearray[ index ].tos);
 
       /* Print the instruction executed at this traced address */
       (void)pdbg_printpcode(st, g_tracearray[ index ].pc, 1);
@@ -627,7 +627,7 @@ static void pdbg_deletebreakpoint(int16_t bpno)
 
       for (; (bpno < g_nbreakpoints); bpno++)
          g_breakpoint[bpno-1] = g_breakpoint[bpno];
- 
+
       g_nbreakpoints--;
 
    } /* end if */

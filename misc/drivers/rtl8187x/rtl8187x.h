@@ -33,7 +33,7 @@
  * 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * There are probably also pieces from the Linux RTL8187x driver
- * 
+ *
  *   Copyright 2007 Michael Wu <flamingice@sourmilk.net>
  *   Copyright 2007 Andrea Merello <andreamrl@tiscali.it>
  *
@@ -178,7 +178,7 @@
 #define RTL8187X_TXDESC_FLAG_NOENC      (1 << 15) /* Disable hardware based encryption */
 #define RTL8187X_TXDESC_FLAG_TXOK       (1 << 15) /* TX frame was ACKed */
 #define RTL8187X_TXDESC_FLAG_SPLCP      (1 << 16) /* Use short preamble */
-#define RTL8187X_TXDESC_FLAG_RXUNDER    (1 << 16) 
+#define RTL8187X_TXDESC_FLAG_RXUNDER    (1 << 16)
 #define RTL8187X_TXDESC_FLAG_MOREFRAG   (1 << 17) /* More fragments follow */
 #define RTL8187X_TXDESC_FLAG_CTS        (1 << 18) /* Use CTS-to-self protection */
 #define RTL8187X_TXDESC_FLAG_RTS        (1 << 23) /* Use RTS/CTS protection */
@@ -334,7 +334,7 @@
   * See the RTL8187x_ADDR_* definitions above.
   */
 
-struct rtl8187x_csr_s 
+struct rtl8187x_csr_s
 {
   uint8_t   mac[6];                /*                            0xff00-0xff05 */
   uint8_t   reserved_0[2];         /*                            0xff06-0xff07 */

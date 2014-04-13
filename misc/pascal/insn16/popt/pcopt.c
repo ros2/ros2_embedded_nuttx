@@ -419,7 +419,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;
@@ -430,7 +430,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;
@@ -441,7 +441,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;
@@ -452,7 +452,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;
@@ -463,7 +463,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;
@@ -474,7 +474,7 @@ int16_t unaryOptimize(void)
                    pptr[i+1]->op = oJMP;
                    deletePcode(i);
                  } /* end if */
-               else 
+               else
                  deletePcodePair(i, (i+1));
                nchanges++;
                break;

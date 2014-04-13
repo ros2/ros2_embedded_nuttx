@@ -100,7 +100,7 @@
 
 /* Token Values 0x80-0xef are for RESERVED WORDS */
 
-/* Standard constants (TRUE, FALSE, MAXINT) and standard files (INPUT, OUTPUT) 
+/* Standard constants (TRUE, FALSE, MAXINT) and standard files (INPUT, OUTPUT)
  * are hard initialized into the constant/symbol table and are transparent
  * to the compiler */
 

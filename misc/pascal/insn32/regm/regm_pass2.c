@@ -210,7 +210,7 @@ int      g_bRegisterCountValid = 0;
  * Private Variables
  **********************************************************************/
 
-static const struct regm_opmap_s vrgOpMap1[64] = 
+static const struct regm_opmap_s vrgOpMap1[64] =
   {
     /* 0x00: oNOP */    {0,       0,   0,   regm_NoOperation},
     /* 0x01: oNEG */    {rRSBI,   0,   0,   regm_UnaryOperation},
@@ -281,7 +281,7 @@ static const struct regm_opmap_s vrgOpMap1[64] =
     /* 0x3f: oEND */    {0,       0,   0,   regm_Return}
   };
 
-static const struct regm_opmap_s vrgOpMap2[64] = 
+static const struct regm_opmap_s vrgOpMap2[64] =
   {
     /* 0x80: oLD */     {rLD,     2,   SPB, regm_LoadOffset},
     /* 0x81: oLDH */    {rLDH,    1,   SPB, regm_LoadOffset},
@@ -354,25 +354,25 @@ static const struct regm_opmap_s vrgOpMap2[64] =
 
 static const struct regm_builtin_s g_rgSysIoBuiltIns[MAX_XOP] =
 {
-  /* 0x00 */ ILLEGAL_BUILTIN_INIT,      xEOF_INIT, 
-  /* 0x02 */ xEOLN_INIT,                xRESET_INIT, 
+  /* 0x00 */ ILLEGAL_BUILTIN_INIT,      xEOF_INIT,
+  /* 0x02 */ xEOLN_INIT,                xRESET_INIT,
   /* 0x04 */ xREWRITE_INIT,             ILLEGAL_BUILTIN_INIT,
   /* 0x06 */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x08 */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x0a */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x0c */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x0e */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
-  /* 0x10 */ xREADLN_INIT,              xREAD_PAGE_INIT, 
-  /* 0x12 */ xREAD_BINARY_INIT,         xREAD_INT_INIT, 
-  /* 0x14 */ xREAD_CHAR_INIT,           xREAD_STRING_INIT, 
+  /* 0x10 */ xREADLN_INIT,              xREAD_PAGE_INIT,
+  /* 0x12 */ xREAD_BINARY_INIT,         xREAD_INT_INIT,
+  /* 0x14 */ xREAD_CHAR_INIT,           xREAD_STRING_INIT,
   /* 0x16 */ xREAD_REAL_INIT,           ILLEGAL_BUILTIN_INIT,
   /* 0x18 */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x1a */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x1c */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
   /* 0x1e */ ILLEGAL_BUILTIN_INIT,      ILLEGAL_BUILTIN_INIT,
-  /* 0x20 */ xWRITELN_INIT,             xWRITE_PAGE_INIT, 
-  /* 0x22 */ xWRITE_BINARY_INIT,        xWRITE_INT_INIT, 
-  /* 0x24 */ xWRITE_CHAR_INIT,          xWRITE_STRING_INIT, 
+  /* 0x20 */ xWRITELN_INIT,             xWRITE_PAGE_INIT,
+  /* 0x22 */ xWRITE_BINARY_INIT,        xWRITE_INT_INIT,
+  /* 0x24 */ xWRITE_CHAR_INIT,          xWRITE_STRING_INIT,
   /* 0x25 */ xWRITE_REAL_INIT
 };
 
@@ -389,68 +389,68 @@ static const struct regm_builtin_s g_rgLibCallBuiltIns[MAX_LBOP] =
 static const struct regm_builtin_s g_rgRrFopBuiltIns[MAX_FOP] =
 {
   /* 0x00 */ ILLEGAL_BUILTIN_INIT, fpFLOAT_INIT,
-  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT, 
-  /* 0x04 */ fpADD_RR_INIT,        fpSUB_RR_INIT, 
-  /* 0x06 */ fpMUL_RR_INIT,        fpDIV_RR_INIT, 
+  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT,
+  /* 0x04 */ fpADD_RR_INIT,        fpSUB_RR_INIT,
+  /* 0x06 */ fpMUL_RR_INIT,        fpDIV_RR_INIT,
   /* 0x00 */ fpMOD_RR_INIT,        ILLEGAL_BUILTIN_INIT,
-  /* 0x0a */ fpEQU_RR_INIT,        fpNEQ_RR_INIT, 
-  /* 0x0c */ fpLT_RR_INIT,         fpGTE_RR_INIT, 
-  /* 0x0e */ fpGT_RR_INIT,         fpLTE_RR_INIT, 
-  /* 0x10 */ fpNEG_R_INIT,         fpABS_R_INIT, 
-  /* 0x12 */ fpSQR_R_INIT,         fpSQRT_R_INIT, 
-  /* 0x14 */ fpSIN_R_INIT,         fpCOS_R_INIT, 
-  /* 0x16 */ fpATAN_R_INIT,        fpLN_R_INIT, 
+  /* 0x0a */ fpEQU_RR_INIT,        fpNEQ_RR_INIT,
+  /* 0x0c */ fpLT_RR_INIT,         fpGTE_RR_INIT,
+  /* 0x0e */ fpGT_RR_INIT,         fpLTE_RR_INIT,
+  /* 0x10 */ fpNEG_R_INIT,         fpABS_R_INIT,
+  /* 0x12 */ fpSQR_R_INIT,         fpSQRT_R_INIT,
+  /* 0x14 */ fpSIN_R_INIT,         fpCOS_R_INIT,
+  /* 0x16 */ fpATAN_R_INIT,        fpLN_R_INIT,
   /* 0x18 */ fpEXP_R_INIT
 };
 
 static const struct regm_builtin_s g_rgRiFopBuiltIns[MAX_FOP] =
 {
   /* 0x00 */ ILLEGAL_BUILTIN_INIT, fpFLOAT_INIT,
-  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT, 
-  /* 0x04 */ fpADD_RI_INIT,        fpSUB_RI_INIT, 
-  /* 0x06 */ fpMUL_RI_INIT,        fpDIV_RI_INIT, 
+  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT,
+  /* 0x04 */ fpADD_RI_INIT,        fpSUB_RI_INIT,
+  /* 0x06 */ fpMUL_RI_INIT,        fpDIV_RI_INIT,
   /* 0x00 */ fpMOD_RI_INIT,        ILLEGAL_BUILTIN_INIT,
-  /* 0x0a */ fpEQU_RI_INIT,        fpNEQ_RI_INIT, 
-  /* 0x0c */ fpLT_RI_INIT,         fpGTE_RI_INIT, 
-  /* 0x0e */ fpGT_RI_INIT,         fpLTE_RI_INIT, 
-  /* 0x10 */ fpNEG_I_INIT,         fpABS_I_INIT, 
-  /* 0x12 */ fpSQR_I_INIT,         fpSQRT_I_INIT, 
-  /* 0x14 */ fpSIN_I_INIT,         fpCOS_I_INIT, 
-  /* 0x16 */ fpATAN_I_INIT,        fpLN_I_INIT, 
+  /* 0x0a */ fpEQU_RI_INIT,        fpNEQ_RI_INIT,
+  /* 0x0c */ fpLT_RI_INIT,         fpGTE_RI_INIT,
+  /* 0x0e */ fpGT_RI_INIT,         fpLTE_RI_INIT,
+  /* 0x10 */ fpNEG_I_INIT,         fpABS_I_INIT,
+  /* 0x12 */ fpSQR_I_INIT,         fpSQRT_I_INIT,
+  /* 0x14 */ fpSIN_I_INIT,         fpCOS_I_INIT,
+  /* 0x16 */ fpATAN_I_INIT,        fpLN_I_INIT,
   /* 0x18 */ fpEXP_I_INIT
 };
 
 static const struct regm_builtin_s g_rgIrFopBuiltIns[MAX_FOP] =
 {
   /* 0x00 */ ILLEGAL_BUILTIN_INIT, fpFLOAT_INIT,
-  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT, 
-  /* 0x04 */ fpADD_IR_INIT,        fpSUB_IR_INIT, 
-  /* 0x06 */ fpMUL_IR_INIT,        fpDIV_IR_INIT, 
+  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT,
+  /* 0x04 */ fpADD_IR_INIT,        fpSUB_IR_INIT,
+  /* 0x06 */ fpMUL_IR_INIT,        fpDIV_IR_INIT,
   /* 0x00 */ fpMOD_IR_INIT,        ILLEGAL_BUILTIN_INIT,
-  /* 0x0a */ fpEQU_IR_INIT,        fpNEQ_IR_INIT, 
-  /* 0x0c */ fpLT_IR_INIT,         fpGTE_IR_INIT, 
-  /* 0x0e */ fpGT_IR_INIT,         fpLTE_IR_INIT, 
-  /* 0x10 */ fpNEG_R_INIT,         fpABS_R_INIT, 
-  /* 0x12 */ fpSQR_R_INIT,         fpSQRT_R_INIT, 
-  /* 0x14 */ fpSIN_R_INIT,         fpCOS_R_INIT, 
-  /* 0x16 */ fpATAN_R_INIT,        fpLN_R_INIT, 
+  /* 0x0a */ fpEQU_IR_INIT,        fpNEQ_IR_INIT,
+  /* 0x0c */ fpLT_IR_INIT,         fpGTE_IR_INIT,
+  /* 0x0e */ fpGT_IR_INIT,         fpLTE_IR_INIT,
+  /* 0x10 */ fpNEG_R_INIT,         fpABS_R_INIT,
+  /* 0x12 */ fpSQR_R_INIT,         fpSQRT_R_INIT,
+  /* 0x14 */ fpSIN_R_INIT,         fpCOS_R_INIT,
+  /* 0x16 */ fpATAN_R_INIT,        fpLN_R_INIT,
   /* 0x18 */ fpEXP_R_INIT
 };
 
 static const struct regm_builtin_s g_rgIiFopBuiltIns[MAX_FOP] =
 {
   /* 0x00 */ ILLEGAL_BUILTIN_INIT, fpFLOAT_INIT,
-  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT, 
-  /* 0x04 */ fpADD_II_INIT,        fpSUB_II_INIT, 
-  /* 0x06 */ fpMUL_II_INIT,        fpDIV_II_INIT, 
+  /* 0x02 */ fpTRUNC_INIT,         fpROUND_INIT,
+  /* 0x04 */ fpADD_II_INIT,        fpSUB_II_INIT,
+  /* 0x06 */ fpMUL_II_INIT,        fpDIV_II_INIT,
   /* 0x00 */ fpMOD_II_INIT,        ILLEGAL_BUILTIN_INIT,
-  /* 0x0a */ fpEQU_II_INIT,        fpNEQ_II_INIT, 
-  /* 0x0c */ fpLT_II_INIT,         fpGTE_II_INIT, 
-  /* 0x0e */ fpGT_II_INIT,         fpLTE_II_INIT, 
-  /* 0x10 */ fpNEG_I_INIT,         fpABS_I_INIT, 
-  /* 0x12 */ fpSQR_I_INIT,         fpSQRT_I_INIT, 
-  /* 0x14 */ fpSIN_I_INIT,         fpCOS_I_INIT, 
-  /* 0x16 */ fpATAN_I_INIT,        fpLN_I_INIT, 
+  /* 0x0a */ fpEQU_II_INIT,        fpNEQ_II_INIT,
+  /* 0x0c */ fpLT_II_INIT,         fpGTE_II_INIT,
+  /* 0x0e */ fpGT_II_INIT,         fpLTE_II_INIT,
+  /* 0x10 */ fpNEG_I_INIT,         fpABS_I_INIT,
+  /* 0x12 */ fpSQR_I_INIT,         fpSQRT_I_INIT,
+  /* 0x14 */ fpSIN_I_INIT,         fpCOS_I_INIT,
+  /* 0x16 */ fpATAN_I_INIT,        fpLN_I_INIT,
   /* 0x18 */ fpEXP_I_INIT
 };
 
@@ -530,7 +530,7 @@ static void regm_BinaryOperation(const struct regm_opmap_s *pEntry,
   /* Generate the binary operation */
 
   regm_GenerateForm3R(pEntry->chOpCode, dwRDest, dwROperand1, dwROperand2);
-      
+
   /* Reduce stack */
 
   g_dwStackOffset -= sINT_SIZE;
@@ -608,7 +608,7 @@ static void regm_BinaryComparison(const struct regm_opmap_s *pEntry,
   regm_GenerateForm2I(rMOVI, dwRDest, 0);
   regm_GenerateForm4ICc(pEntry->chOpCode, 2, dwCcRegister);
   regm_GenerateForm2I(rMOVI, dwRDest, 1);
-      
+
   /* Reduce stack */
 
   g_dwStackOffset -= sINT_SIZE;
@@ -699,7 +699,7 @@ static void regm_StoreImmediate(const struct regm_opmap_s *pEntry,
 
   regm_GenerateForm3R(pEntry->chOpCode, dwRSrc, dwROperand1,
                       MKSPECIAL(pEntry->chSpecial));
-  
+
   /* Reduce stack */
 
   g_dwStackOffset -= 2*sINT_SIZE;
@@ -838,7 +838,7 @@ static void regm_PopSpecial(const struct regm_opmap_s *pEntry,
 /***********************************************************************/
 /* Save the immediate value in the data count register */
 
-static void regm_SetDataCount(const struct regm_opmap_s *pEntry, 
+static void regm_SetDataCount(const struct regm_opmap_s *pEntry,
                               OPTYPE *pOpCode,
                               struct procdata_s *pNode)
 {
@@ -878,7 +878,7 @@ static void regm_LoadOffset(const struct regm_opmap_s *pEntry,
 
   regm_GenerateForm3I(pEntry->chOpCode, dwRDest, MKSPECIAL(pEntry->chSpecial),
                       GETARG(pOpCode) >> pEntry->chImmediate);
-  
+
   /* Increment the stack */
 
   g_dwStackOffset += sINT_SIZE;
@@ -919,7 +919,7 @@ static void regm_StoreOffset(const struct regm_opmap_s *pEntry,
   regm_GenerateForm3I(pEntry->chOpCode, dwRSrc,
                       MKSPECIAL(pEntry->chSpecial),
                       GETARG(pOpCode) >> pEntry->chImmediate);
-  
+
   /* Decrement the stack */
 
   g_dwStackOffset -= sINT_SIZE;
@@ -1098,7 +1098,7 @@ static void regm_ConditionalBranchBinary(const struct regm_opmap_s *pEntry,
 
   regm_GenerateForm1RCc(rCMP, dwROperand1, dwROperand2, dwCcRegister);
   regm_GenerateForm4ICc(pEntry->chOpCode, GETARG(pOpCode), dwCcRegister);
-      
+
   /* Reduce stack */
 
   g_dwStackOffset -= 2*sINT_SIZE;
@@ -1160,7 +1160,7 @@ static void regm_LoadAddress(const struct regm_opmap_s *pEntry,
 
   regm_GenerateForm3I(rADD, dwRDest, MKSPECIAL(pEntry->chSpecial),
                       GETARG(pOpCode));
-  
+
   /* Increment the stack */
 
   g_dwStackOffset += sINT_SIZE;
@@ -1201,7 +1201,7 @@ static void regm_SetupOutArgs(uint32_t nParms, const uint32_t *pwArgSize)
     }
 
   /* Emit move instructions to handle each */
-    
+
   dwOffset = g_dwStackOffset  - sINT_SIZE;
   for (i = 0;  i < nArgRegs; i++)
     {
@@ -1427,7 +1427,7 @@ static void regm_GenerateRegm(struct procdata_s *pNode, void *pvArg)
       uint8_t chOpCode = GETOP(&pNode->pPCode[i]);
 
       /* Select the right decode table */
-      
+
       if ((chOpCode & o32) != 0)
         {
           rgOpMap  = vrgOpMap2;
@@ -1450,7 +1450,7 @@ static void regm_GenerateRegm(struct procdata_s *pNode, void *pvArg)
       rgOpMap->pMapper(rgOpMap, &pNode->pPCode[i], pNode);
     }
 
-  /* If a frame was obtained at the beginning, make sure that 
+  /* If a frame was obtained at the beginning, make sure that
    * there is matching frame release logic at the end.
    */
 
@@ -1463,7 +1463,7 @@ static void regm_GenerateRegm(struct procdata_s *pNode, void *pvArg)
         }
       i++;
     }
-      
+
   /* Analyze the proc/func epilogue */
 
   if ((GETOP(&pNode->pPCode[i]) != oRET) &&

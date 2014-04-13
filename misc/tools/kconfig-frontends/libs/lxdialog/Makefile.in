@@ -334,7 +334,7 @@ $(am__aclocal_m4_deps):
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libkconfig-lxdialog.a: $(libkconfig_lxdialog_a_OBJECTS) $(libkconfig_lxdialog_a_DEPENDENCIES) $(EXTRA_libkconfig_lxdialog_a_DEPENDENCIES) 
+libkconfig-lxdialog.a: $(libkconfig_lxdialog_a_OBJECTS) $(libkconfig_lxdialog_a_DEPENDENCIES) $(EXTRA_libkconfig_lxdialog_a_DEPENDENCIES)
 	$(AM_V_at)-rm -f libkconfig-lxdialog.a
 	$(AM_V_AR)$(libkconfig_lxdialog_a_AR) libkconfig-lxdialog.a $(libkconfig_lxdialog_a_OBJECTS) $(libkconfig_lxdialog_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libkconfig-lxdialog.a

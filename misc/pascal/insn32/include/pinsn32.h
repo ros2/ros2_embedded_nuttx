@@ -72,7 +72,7 @@
  *  | GT  |  0  |  0  |
  *  | LTE |  1  |  1  |
  *  +=====+=====+=====+
- *   
+ *
  * Opcode Encoding Summary:
  *
  *            0rxx xxxx  1rxxx xxxx
@@ -104,7 +104,7 @@
  * xr01 1000  EQU        JEQU  ilbl
  * xr01 1001  NEQ        JNEQ  ilbl
  * xr01 1010  LT         JLT   ilbl
- * xr01 1011  GTE        JGTE  ilbl    
+ * xr01 1011  GTE        JGTE  ilbl
  * xr01 1100  GT         JGT   ilbl
  * xr01 1101  LTE        JLTE  ilbl
  * xr01 1110  ---        ---
@@ -127,7 +127,7 @@
  * xr10 1110  ---        STSXB offs
  * xr10 1111  RET        STSXM offs
  *
- * xr11 0000  ---        LA    uoffs       
+ * xr11 0000  ---        LA    uoffs
  * xr11 0001  ---        LAS   offs
  * xr11 0010  ---        LAC   dlbl
  * xr11 0011  ---        ---
@@ -142,7 +142,7 @@
  * xr11 1100  ---        FLOAT fop
  * xr11 1101  ---       *LABEL ilbl
  * xr11 1110  ---       *INCLUDE fn
- * xr11 1111  END       *LINE  lineno 
+ * xr11 1111  END       *LINE  lineno
  *
  * KEY:
  *   r      = Reserved bit (must be zero)

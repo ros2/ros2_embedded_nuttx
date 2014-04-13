@@ -407,7 +407,7 @@ clean-binPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-gconf$(EXEEXT): $(gconf_OBJECTS) $(gconf_DEPENDENCIES) $(EXTRA_gconf_DEPENDENCIES) 
+gconf$(EXEEXT): $(gconf_OBJECTS) $(gconf_DEPENDENCIES) $(EXTRA_gconf_DEPENDENCIES)
 	@rm -f gconf$(EXEEXT)
 	$(AM_V_CCLD)$(gconf_LINK) $(gconf_OBJECTS) $(gconf_LDADD) $(LIBS)
 

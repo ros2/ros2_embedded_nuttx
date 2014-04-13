@@ -40,7 +40,7 @@ namespace std
   public:
     class failure;
 #ifdef CONFIG_UCLIBCXX_EXCEPTION
-    class failure : public exception 
+    class failure : public exception
     {
     public:
       explicit failure(const std::string&) { }
