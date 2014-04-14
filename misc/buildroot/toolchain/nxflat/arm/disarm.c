@@ -410,26 +410,26 @@ static void arm_decode_shift(u_int32_t given, FILE *stream)
   if ((given & 0xff0) != 0)
     {
       if ((given & 0x10) == 0)
-	{
-	  int amount = (given & 0xf80) >> 7;
-	  int shift = (given & 0x60) >> 5;
-	
-	  if (amount == 0)
-	    {
-	      if (shift == 3)
-		{
-		  fprintf(stream, ", rrx");
-		  return;
-		}
-	
-	      amount = 32;
-	    }
-	
-	  fprintf(stream, ", %s #%d", arm_shift[shift], amount);
-	}
+        {
+          int amount = (given & 0xf80) >> 7;
+          int shift = (given & 0x60) >> 5;
+
+          if (amount == 0)
+            {
+              if (shift == 3)
+                {
+                  fprintf(stream, ", rrx");
+                  return;
+                }
+
+              amount = 32;
+            }
+
+          fprintf(stream, ", %s #%d", arm_shift[shift], amount);
+        }
       else
-	fprintf(stream, ", %s %s", arm_shift[(given & 0x60) >> 5],
-	      arm_regnames[(given & 0xf00) >> 8]);
+        fprintf(stream, ", %s %s", arm_shift[(given & 0x60) >> 5],
+              arm_regnames[(given & 0xf00) >> 8]);
     }
 }
 
@@ -440,565 +440,565 @@ int print_insn_arm(u_int32_t pc, FILE *stream, u_int32_t given)
   for (insn = arm_opcodes; insn->assembler; insn++)
     {
       if ((given & insn->mask) == insn->value)
-	{
-	  char * c;
-	
-	  for (c = insn->assembler; *c; c++)
-	    {
-	      if (*c == '%')
-		{
-		  switch (*++c)
-		    {
-		    case '%':
-		      fprintf(stream, "%%");
-		      break;
+        {
+          char * c;
 
-		    case 'a':
-		      if (((given & 0x000f0000) == 0x000f0000)
-			  && ((given & 0x02000000) == 0))
-			{
-			  int offset = given & 0xfff;
-			
-			  fprintf(stream, "[pc");
+          for (c = insn->assembler; *c; c++)
+            {
+              if (*c == '%')
+                {
+                  switch (*++c)
+                    {
+                    case '%':
+                      fprintf(stream, "%%");
+                      break;
 
-			  if (given & 0x01000000)
-			    {
-			      if ((given & 0x00800000) == 0)
-				offset = - offset;
-			
-			      /* Pre-indexed.  */
-			      fprintf(stream, ", #%d]", offset);
+                    case 'a':
+                      if (((given & 0x000f0000) == 0x000f0000)
+                          && ((given & 0x02000000) == 0))
+                        {
+                          int offset = given & 0xfff;
 
-			      offset += pc + 8;
+                          fprintf(stream, "[pc");
 
-			      /* Cope with the possibility of write-back
-				 being used.  Probably a very dangerous thing
-				 for the programmer to do, but who are we to
-				 argue ?  */
-			      if (given & 0x00200000)
-				fprintf(stream, "!");
-			    }
-			  else
-			    {
-			      /* Post indexed.  */
-			      fprintf(stream, "], #%d", offset);
+                          if (given & 0x01000000)
+                            {
+                              if ((given & 0x00800000) == 0)
+                                offset = - offset;
 
-			      /* ie ignore the offset.  */
-			      offset = pc + 8;
-			    }
-			
-			  fprintf(stream, "\t; ");
-			  print_address(stream, offset);
-			}
-		      else
-			{
-			  fprintf(stream, "[%s",
-				arm_regnames[(given >> 16) & 0xf]);
-			  if ((given & 0x01000000) != 0)
-			    {
-			      if ((given & 0x02000000) == 0)
-				{
-				  int offset = given & 0xfff;
-				  if (offset)
-				    fprintf(stream, ", %s#%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				}
-			      else
-				{
-				  fprintf(stream, ", %s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""));
-				  arm_decode_shift (given, stream);
-				}
-
-			      fprintf(stream, "]%s",
-				    ((given & 0x00200000) != 0) ? "!" : "");
-			    }
-			  else
-			    {
-			      if ((given & 0x02000000) == 0)
-				{
-				  int offset = given & 0xfff;
-				  if (offset)
-				    fprintf(stream, "], %s#%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				  else
-				    fprintf(stream, "]");
-				}
-			      else
-				{
-				  fprintf(stream, "], %s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""));
-				  arm_decode_shift (given, stream);
-				}
-			    }
-			}
-		      break;
-
-		    case 's':
-                      if ((given & 0x004f0000) == 0x004f0000)
-			{
-                          /* PC relative with immediate offset.  */
-			  int offset = ((given & 0xf00) >> 4) | (given & 0xf);
-			
-			  if ((given & 0x00800000) == 0)
-			    offset = -offset;
-			
-			  fprintf(stream, "[pc, #%d]\t; ", offset);
-			
-			  print_address(stream, offset + pc + 8);
-			}
-		      else
-			{
-			  fprintf(stream, "[%s",
-				arm_regnames[(given >> 16) & 0xf]);
-			  if ((given & 0x01000000) != 0)
-			    {
                               /* Pre-indexed.  */
-			      if ((given & 0x00400000) == 0x00400000)
-				{
+                              fprintf(stream, ", #%d]", offset);
+
+                              offset += pc + 8;
+
+                              /* Cope with the possibility of write-back
+                                 being used.  Probably a very dangerous thing
+                                 for the programmer to do, but who are we to
+                                 argue ?  */
+                              if (given & 0x00200000)
+                                fprintf(stream, "!");
+                            }
+                          else
+                            {
+                              /* Post indexed.  */
+                              fprintf(stream, "], #%d", offset);
+
+                              /* ie ignore the offset.  */
+                              offset = pc + 8;
+                            }
+
+                          fprintf(stream, "\t; ");
+                          print_address(stream, offset);
+                        }
+                      else
+                        {
+                          fprintf(stream, "[%s",
+                                arm_regnames[(given >> 16) & 0xf]);
+                          if ((given & 0x01000000) != 0)
+                            {
+                              if ((given & 0x02000000) == 0)
+                                {
+                                  int offset = given & 0xfff;
+                                  if (offset)
+                                    fprintf(stream, ", %s#%d",
+                                          (((given & 0x00800000) == 0)
+                                           ? "-" : ""), offset);
+                                }
+                              else
+                                {
+                                  fprintf(stream, ", %s",
+                                        (((given & 0x00800000) == 0)
+                                         ? "-" : ""));
+                                  arm_decode_shift (given, stream);
+                                }
+
+                              fprintf(stream, "]%s",
+                                    ((given & 0x00200000) != 0) ? "!" : "");
+                            }
+                          else
+                            {
+                              if ((given & 0x02000000) == 0)
+                                {
+                                  int offset = given & 0xfff;
+                                  if (offset)
+                                    fprintf(stream, "], %s#%d",
+                                          (((given & 0x00800000) == 0)
+                                           ? "-" : ""), offset);
+                                  else
+                                    fprintf(stream, "]");
+                                }
+                              else
+                                {
+                                  fprintf(stream, "], %s",
+                                        (((given & 0x00800000) == 0)
+                                         ? "-" : ""));
+                                  arm_decode_shift (given, stream);
+                                }
+                            }
+                        }
+                      break;
+
+                    case 's':
+                      if ((given & 0x004f0000) == 0x004f0000)
+                        {
+                          /* PC relative with immediate offset.  */
+                          int offset = ((given & 0xf00) >> 4) | (given & 0xf);
+
+                          if ((given & 0x00800000) == 0)
+                            offset = -offset;
+
+                          fprintf(stream, "[pc, #%d]\t; ", offset);
+
+                          print_address(stream, offset + pc + 8);
+                        }
+                      else
+                        {
+                          fprintf(stream, "[%s",
+                                arm_regnames[(given >> 16) & 0xf]);
+                          if ((given & 0x01000000) != 0)
+                            {
+                              /* Pre-indexed.  */
+                              if ((given & 0x00400000) == 0x00400000)
+                                {
                                   /* Immediate.  */
                                   int offset = ((given & 0xf00) >> 4) | (given & 0xf);
-				  if (offset)
-				    fprintf(stream, ", %s#%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				}
-			      else
-				{
+                                  if (offset)
+                                    fprintf(stream, ", %s#%d",
+                                          (((given & 0x00800000) == 0)
+                                           ? "-" : ""), offset);
+                                }
+                              else
+                                {
                                   /* Register.  */
-				  fprintf(stream, ", %s%s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""),
+                                  fprintf(stream, ", %s%s",
+                                        (((given & 0x00800000) == 0)
+                                         ? "-" : ""),
                                         arm_regnames[given & 0xf]);
-				}
+                                }
 
-			      fprintf(stream, "]%s",
-				    ((given & 0x00200000) != 0) ? "!" : "");
-			    }
-			  else
-			    {
+                              fprintf(stream, "]%s",
+                                    ((given & 0x00200000) != 0) ? "!" : "");
+                            }
+                          else
+                            {
                               /* Post-indexed.  */
-			      if ((given & 0x00400000) == 0x00400000)
-				{
+                              if ((given & 0x00400000) == 0x00400000)
+                                {
                                   /* Immediate.  */
                                   int offset = ((given & 0xf00) >> 4) | (given & 0xf);
-				  if (offset)
-				    fprintf(stream, "], %s#%d",
-					  (((given & 0x00800000) == 0)
-					   ? "-" : ""), offset);
-				  else
-				    fprintf(stream, "]");
-				}
-			      else
-				{
+                                  if (offset)
+                                    fprintf(stream, "], %s#%d",
+                                          (((given & 0x00800000) == 0)
+                                           ? "-" : ""), offset);
+                                  else
+                                    fprintf(stream, "]");
+                                }
+                              else
+                                {
                                   /* Register.  */
-				  fprintf(stream, "], %s%s",
-					(((given & 0x00800000) == 0)
-					 ? "-" : ""),
+                                  fprintf(stream, "], %s%s",
+                                        (((given & 0x00800000) == 0)
+                                         ? "-" : ""),
                                         arm_regnames[given & 0xf]);
-				}
-			    }
-			}
-		      break;
-			
-		    case 'b':
-		      print_address(stream, BDISP (given) * 4 + pc + 8);
-		      break;
+                                }
+                            }
+                        }
+                      break;
 
-		    case 'c':
-		      fprintf(stream, "%s",
-			    arm_conditional [(given >> 28) & 0xf]);
-		      break;
+                    case 'b':
+                      print_address(stream, BDISP (given) * 4 + pc + 8);
+                      break;
 
-		    case 'm':
-		      {
-			int started = 0;
-			int reg;
+                    case 'c':
+                      fprintf(stream, "%s",
+                            arm_conditional [(given >> 28) & 0xf]);
+                      break;
 
-			fprintf(stream, "{");
-			for (reg = 0; reg < 16; reg++)
-			  if ((given & (1 << reg)) != 0)
-			    {
-			      if (started)
-				fprintf(stream, ", ");
-			      started = 1;
-			      fprintf(stream, "%s", arm_regnames[reg]);
-			    }
-			fprintf(stream, "}");
-		      }
-		      break;
+                    case 'm':
+                      {
+                        int started = 0;
+                        int reg;
 
-		    case 'o':
-		      if ((given & 0x02000000) != 0)
-			{
-			  int rotate = (given & 0xf00) >> 7;
-			  int immed = (given & 0xff);
-			  immed = (((immed << (32 - rotate))
-				    | (immed >> rotate)) & 0xffffffff);
-			  fprintf(stream, "#%d\t; 0x%x", immed, immed);
-			}
-		      else
-			arm_decode_shift (given, stream);
-		      break;
+                        fprintf(stream, "{");
+                        for (reg = 0; reg < 16; reg++)
+                          if ((given & (1 << reg)) != 0)
+                            {
+                              if (started)
+                                fprintf(stream, ", ");
+                              started = 1;
+                              fprintf(stream, "%s", arm_regnames[reg]);
+                            }
+                        fprintf(stream, "}");
+                      }
+                      break;
 
-		    case 'p':
-		      if ((given & 0x0000f000) == 0x0000f000)
-			fprintf(stream, "p");
-		      break;
+                    case 'o':
+                      if ((given & 0x02000000) != 0)
+                        {
+                          int rotate = (given & 0xf00) >> 7;
+                          int immed = (given & 0xff);
+                          immed = (((immed << (32 - rotate))
+                                    | (immed >> rotate)) & 0xffffffff);
+                          fprintf(stream, "#%d\t; 0x%x", immed, immed);
+                        }
+                      else
+                        arm_decode_shift (given, stream);
+                      break;
 
-		    case 't':
-		      if ((given & 0x01200000) == 0x00200000)
-			fprintf(stream, "t");
-		      break;
+                    case 'p':
+                      if ((given & 0x0000f000) == 0x0000f000)
+                        fprintf(stream, "p");
+                      break;
 
-		    case 'A':
-		      fprintf(stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
-		      if ((given & 0x01000000) != 0)
-			{
-			  int offset = given & 0xff;
-			  if (offset)
-			    fprintf(stream, ", %s#%d]%s",
-				  ((given & 0x00800000) == 0 ? "-" : ""),
-				  offset * 4,
-				  ((given & 0x00200000) != 0 ? "!" : ""));
-			  else
-			    fprintf(stream, "]");
-			}
-		      else
-			{
-			  int offset = given & 0xff;
-			  if (offset)
-			    fprintf(stream, "], %s#%d",
-				  ((given & 0x00800000) == 0 ? "-" : ""),
-				  offset * 4);
-			  else
-			    fprintf(stream, "]");
-			}
-		      break;
+                    case 't':
+                      if ((given & 0x01200000) == 0x00200000)
+                        fprintf(stream, "t");
+                      break;
 
-		    case 'B':
-		      /* Print ARM V5 BLX(1) address: pc+25 bits.  */
-		      {
-			u_int32_t address;
-			u_int32_t offset = 0;
-			
-			if (given & 0x00800000)
-			  /* Is signed, hi bits should be ones.  */
-			  offset = (-1) ^ 0x00ffffff;
+                    case 'A':
+                      fprintf(stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
+                      if ((given & 0x01000000) != 0)
+                        {
+                          int offset = given & 0xff;
+                          if (offset)
+                            fprintf(stream, ", %s#%d]%s",
+                                  ((given & 0x00800000) == 0 ? "-" : ""),
+                                  offset * 4,
+                                  ((given & 0x00200000) != 0 ? "!" : ""));
+                          else
+                            fprintf(stream, "]");
+                        }
+                      else
+                        {
+                          int offset = given & 0xff;
+                          if (offset)
+                            fprintf(stream, "], %s#%d",
+                                  ((given & 0x00800000) == 0 ? "-" : ""),
+                                  offset * 4);
+                          else
+                            fprintf(stream, "]");
+                        }
+                      break;
 
-			/* Offset is (SignExtend(offset field)<<2).  */
-			offset += given & 0x00ffffff;
-			offset <<= 2;
-			address = offset + pc + 8;
-			
-			if (given & 0x01000000)
-			  /* H bit allows addressing to 2-byte boundaries.  */
-			  address += 2;
+                    case 'B':
+                      /* Print ARM V5 BLX(1) address: pc+25 bits.  */
+                      {
+                        u_int32_t address;
+                        u_int32_t offset = 0;
 
-		        print_address(stream, address);
-		      }
-		      break;
+                        if (given & 0x00800000)
+                          /* Is signed, hi bits should be ones.  */
+                          offset = (-1) ^ 0x00ffffff;
 
-		    case 'I':
-		      /* Print a Cirrus/DSP shift immediate.  */
-		      /* Immediates are 7bit signed ints with bits 0..3 in
-			 bits 0..3 of opcode and bits 4..6 in bits 5..7
-			 of opcode.  */
-		      {
-			int imm;
+                        /* Offset is (SignExtend(offset field)<<2).  */
+                        offset += given & 0x00ffffff;
+                        offset <<= 2;
+                        address = offset + pc + 8;
 
-			imm = (given & 0xf) | ((given & 0xe0) >> 1);
+                        if (given & 0x01000000)
+                          /* H bit allows addressing to 2-byte boundaries.  */
+                          address += 2;
 
-			/* Is ``imm'' a negative number?  */
-			if (imm & 0x40)
-			  imm |= (-1 << 7);
+                        print_address(stream, address);
+                      }
+                      break;
 
-			fprintf(stream, "%d", imm);
-		      }
+                    case 'I':
+                      /* Print a Cirrus/DSP shift immediate.  */
+                      /* Immediates are 7bit signed ints with bits 0..3 in
+                         bits 0..3 of opcode and bits 4..6 in bits 5..7
+                         of opcode.  */
+                      {
+                        int imm;
 
-		      break;
+                        imm = (given & 0xf) | ((given & 0xe0) >> 1);
 
-		    case 'C':
-		      fprintf(stream, "_");
-		      if (given & 0x80000)
-			fprintf(stream, "f");
-		      if (given & 0x40000)
-			fprintf(stream, "s");
-		      if (given & 0x20000)
-			fprintf(stream, "x");
-		      if (given & 0x10000)
-			fprintf(stream, "c");
-		      break;
+                        /* Is ``imm'' a negative number?  */
+                        if (imm & 0x40)
+                          imm |= (-1 << 7);
 
-		    case 'F':
-		      switch (given & 0x00408000)
-			{
-			case 0:
-			  fprintf(stream, "4");
-			  break;
-			case 0x8000:
-			  fprintf(stream, "1");
-			  break;
-			case 0x00400000:
-			  fprintf(stream, "2");
-			  break;
-			default:
-			  fprintf(stream, "3");
-			}
-		      break;
-			
-		    case 'P':
-		      switch (given & 0x00080080)
-			{
-			case 0:
-			  fprintf(stream, "s");
-			  break;
-			case 0x80:
-			  fprintf(stream, "d");
-			  break;
-			case 0x00080000:
-			  fprintf(stream, "e");
-			  break;
-			default:
-			  fprintf(stream, "<illegal precision>");
-			  break;
-			}
-		      break;
-		    case 'Q':
-		      switch (given & 0x00408000)
-			{
-			case 0:
-			  fprintf(stream, "s");
-			  break;
-			case 0x8000:
-			  fprintf(stream, "d");
-			  break;
-			case 0x00400000:
-			  fprintf(stream, "e");
-			  break;
-			default:
-			  fprintf(stream, "p");
-			  break;
-			}
-		      break;
-		    case 'R':
-		      switch (given & 0x60)
-			{
-			case 0:
-			  break;
-			case 0x20:
-			  fprintf(stream, "p");
-			  break;
-			case 0x40:
-			  fprintf(stream, "m");
-			  break;
-			default:
-			  fprintf(stream, "z");
-			  break;
-			}
-		      break;
+                        fprintf(stream, "%d", imm);
+                      }
 
-		    case '0': case '1': case '2': case '3': case '4':
-		    case '5': case '6': case '7': case '8': case '9':
-		      {
-			int bitstart = *c++ - '0';
-			int bitend = 0;
-			while (*c >= '0' && *c <= '9')
-			  bitstart = (bitstart * 10) + *c++ - '0';
+                      break;
 
-			switch (*c)
-			  {
-			  case '-':
-			    c++;
-			
-			    while (*c >= '0' && *c <= '9')
-			      bitend = (bitend * 10) + *c++ - '0';
-			
-			    if (!bitend)
-			      return -1;
-			
-			    switch (*c)
-			      {
-			      case 'r':
-				{
-				  int32_t reg;
-				
-				  reg = given >> bitstart;
-				  reg &= (2 << (bitend - bitstart)) - 1;
-				
-				  fprintf(stream, "%s", arm_regnames[reg]);
-				}
-				break;
-			      case 'd':
-				{
-				  int32_t reg;
-				
-				  reg = given >> bitstart;
-				  reg &= (2 << (bitend - bitstart)) - 1;
-				
-				  fprintf(stream, "%d", reg);
-				}
-				break;
-			      case 'x':
-				{
-				  int32_t reg;
-				
-				  reg = given >> bitstart;
-				  reg &= (2 << (bitend - bitstart)) - 1;
-				
-				  fprintf(stream, "0x%08x", reg);
-				
-				  /* Some SWI instructions have special
-				     meanings.  */
-				  if ((given & 0x0fffffff) == 0x0FF00000)
-				    fprintf(stream, "\t; IMB");
-				  else if ((given & 0x0fffffff) == 0x0FF00001)
-				    fprintf(stream, "\t; IMBRange");
-				}
-				break;
-			      case 'X':
-				{
-				  int32_t reg;
-				
-				  reg = given >> bitstart;
-				  reg &= (2 << (bitend - bitstart)) - 1;
-				
-				  fprintf(stream, "%01x", reg & 0xf);
-				}
-				break;
-			      case 'f':
-				{
-				  int32_t reg;
-				
-				  reg = given >> bitstart;
-				  reg &= (2 << (bitend - bitstart)) - 1;
-				
-				  if (reg > 7)
-				    fprintf(stream, "#%s",
-					  arm_fp_const[reg & 7]);
-				  else
-				    fprintf(stream, "f%d", reg);
-				}
-				break;
-			      default:
-				return -1;
-			      }
-			    break;
+                    case 'C':
+                      fprintf(stream, "_");
+                      if (given & 0x80000)
+                        fprintf(stream, "f");
+                      if (given & 0x40000)
+                        fprintf(stream, "s");
+                      if (given & 0x20000)
+                        fprintf(stream, "x");
+                      if (given & 0x10000)
+                        fprintf(stream, "c");
+                      break;
 
-			  case 'y':
-			  case 'z':
-			    {
-			      int single = *c == 'y';
-			      int regno;
+                    case 'F':
+                      switch (given & 0x00408000)
+                        {
+                        case 0:
+                          fprintf(stream, "4");
+                          break;
+                        case 0x8000:
+                          fprintf(stream, "1");
+                          break;
+                        case 0x00400000:
+                          fprintf(stream, "2");
+                          break;
+                        default:
+                          fprintf(stream, "3");
+                        }
+                      break;
 
-			      switch (bitstart)
-				{
-				case 4: /* Sm pair */
-				  fprintf(stream, "{");
-				  /* Fall through.  */
-				case 0: /* Sm, Dm */
-				  regno = given & 0x0000000f;
-				  if (single)
-				    {
-				      regno <<= 1;
-				      regno += (given >> 5) & 1;
-				    }
-				  break;
+                    case 'P':
+                      switch (given & 0x00080080)
+                        {
+                        case 0:
+                          fprintf(stream, "s");
+                          break;
+                        case 0x80:
+                          fprintf(stream, "d");
+                          break;
+                        case 0x00080000:
+                          fprintf(stream, "e");
+                          break;
+                        default:
+                          fprintf(stream, "<illegal precision>");
+                          break;
+                        }
+                      break;
+                    case 'Q':
+                      switch (given & 0x00408000)
+                        {
+                        case 0:
+                          fprintf(stream, "s");
+                          break;
+                        case 0x8000:
+                          fprintf(stream, "d");
+                          break;
+                        case 0x00400000:
+                          fprintf(stream, "e");
+                          break;
+                        default:
+                          fprintf(stream, "p");
+                          break;
+                        }
+                      break;
+                    case 'R':
+                      switch (given & 0x60)
+                        {
+                        case 0:
+                          break;
+                        case 0x20:
+                          fprintf(stream, "p");
+                          break;
+                        case 0x40:
+                          fprintf(stream, "m");
+                          break;
+                        default:
+                          fprintf(stream, "z");
+                          break;
+                        }
+                      break;
 
-				case 1: /* Sd, Dd */
-				  regno = (given >> 12) & 0x0000000f;
-				  if (single)
-				    {
-				      regno <<= 1;
-				      regno += (given >> 22) & 1;
-				    }
-				  break;
+                    case '0': case '1': case '2': case '3': case '4':
+                    case '5': case '6': case '7': case '8': case '9':
+                      {
+                        int bitstart = *c++ - '0';
+                        int bitend = 0;
+                        while (*c >= '0' && *c <= '9')
+                          bitstart = (bitstart * 10) + *c++ - '0';
 
-				case 2: /* Sn, Dn */
-				  regno = (given >> 16) & 0x0000000f;
-				  if (single)
-				    {
-				      regno <<= 1;
-				      regno += (given >> 7) & 1;
-				    }
-				  break;
+                        switch (*c)
+                          {
+                          case '-':
+                            c++;
 
-				case 3: /* List */
-				  fprintf(stream, "{");
-				  regno = (given >> 12) & 0x0000000f;
-				  if (single)
-				    {
-				      regno <<= 1;
-				      regno += (given >> 22) & 1;
-				    }
-				  break;
+                            while (*c >= '0' && *c <= '9')
+                              bitend = (bitend * 10) + *c++ - '0';
 
-				
-				default:
-				  return -1;
-				}
+                            if (!bitend)
+                              return -1;
 
-			      fprintf(stream, "%c%d", single ? 's' : 'd', regno);
+                            switch (*c)
+                              {
+                              case 'r':
+                                {
+                                  int32_t reg;
 
-			      if (bitstart == 3)
-				{
-				  int count = given & 0xff;
+                                  reg = given >> bitstart;
+                                  reg &= (2 << (bitend - bitstart)) - 1;
 
-				  if (single == 0)
-				    count >>= 1;
+                                  fprintf(stream, "%s", arm_regnames[reg]);
+                                }
+                                break;
+                              case 'd':
+                                {
+                                  int32_t reg;
 
-				  if (--count)
-				    {
-				      fprintf(stream, "-%c%d",
-					    single ? 's' : 'd',
-					    regno + count);
-				    }
+                                  reg = given >> bitstart;
+                                  reg &= (2 << (bitend - bitstart)) - 1;
 
-				  fprintf(stream, "}");
-				}
-			      else if (bitstart == 4)
-				fprintf(stream, ", %c%d}", single ? 's' : 'd',
-				      regno + 1);
+                                  fprintf(stream, "%d", reg);
+                                }
+                                break;
+                              case 'x':
+                                {
+                                  int32_t reg;
 
-			      break;
-			    }
+                                  reg = given >> bitstart;
+                                  reg &= (2 << (bitend - bitstart)) - 1;
 
-			  case '`':
-			    c++;
-			    if ((given & (1 << bitstart)) == 0)
-			      fprintf(stream, "%c", *c);
-			    break;
-			  case '\'':
-			    c++;
-			    if ((given & (1 << bitstart)) != 0)
-			      fprintf(stream, "%c", *c);
-			    break;
-			  case '?':
-			    ++c;
-			    if ((given & (1 << bitstart)) != 0)
-			      fprintf(stream, "%c", *c++);
-			    else
-			      fprintf(stream, "%c", *++c);
-			    break;
-			  default:
-			    return -1;
-			  }
-			break;
+                                  fprintf(stream, "0x%08x", reg);
 
-		      default:
-			return -1;
-		      }
-		    }
-		}
-	      else
-		fprintf(stream, "%c", *c);
-	    }
-	  return 0;
-	}
+                                  /* Some SWI instructions have special
+                                     meanings.  */
+                                  if ((given & 0x0fffffff) == 0x0FF00000)
+                                    fprintf(stream, "\t; IMB");
+                                  else if ((given & 0x0fffffff) == 0x0FF00001)
+                                    fprintf(stream, "\t; IMBRange");
+                                }
+                                break;
+                              case 'X':
+                                {
+                                  int32_t reg;
+
+                                  reg = given >> bitstart;
+                                  reg &= (2 << (bitend - bitstart)) - 1;
+
+                                  fprintf(stream, "%01x", reg & 0xf);
+                                }
+                                break;
+                              case 'f':
+                                {
+                                  int32_t reg;
+
+                                  reg = given >> bitstart;
+                                  reg &= (2 << (bitend - bitstart)) - 1;
+
+                                  if (reg > 7)
+                                    fprintf(stream, "#%s",
+                                          arm_fp_const[reg & 7]);
+                                  else
+                                    fprintf(stream, "f%d", reg);
+                                }
+                                break;
+                              default:
+                                return -1;
+                              }
+                            break;
+
+                          case 'y':
+                          case 'z':
+                            {
+                              int single = *c == 'y';
+                              int regno;
+
+                              switch (bitstart)
+                                {
+                                case 4: /* Sm pair */
+                                  fprintf(stream, "{");
+                                  /* Fall through.  */
+                                case 0: /* Sm, Dm */
+                                  regno = given & 0x0000000f;
+                                  if (single)
+                                    {
+                                      regno <<= 1;
+                                      regno += (given >> 5) & 1;
+                                    }
+                                  break;
+
+                                case 1: /* Sd, Dd */
+                                  regno = (given >> 12) & 0x0000000f;
+                                  if (single)
+                                    {
+                                      regno <<= 1;
+                                      regno += (given >> 22) & 1;
+                                    }
+                                  break;
+
+                                case 2: /* Sn, Dn */
+                                  regno = (given >> 16) & 0x0000000f;
+                                  if (single)
+                                    {
+                                      regno <<= 1;
+                                      regno += (given >> 7) & 1;
+                                    }
+                                  break;
+
+                                case 3: /* List */
+                                  fprintf(stream, "{");
+                                  regno = (given >> 12) & 0x0000000f;
+                                  if (single)
+                                    {
+                                      regno <<= 1;
+                                      regno += (given >> 22) & 1;
+                                    }
+                                  break;
+
+
+                                default:
+                                  return -1;
+                                }
+
+                              fprintf(stream, "%c%d", single ? 's' : 'd', regno);
+
+                              if (bitstart == 3)
+                                {
+                                  int count = given & 0xff;
+
+                                  if (single == 0)
+                                    count >>= 1;
+
+                                  if (--count)
+                                    {
+                                      fprintf(stream, "-%c%d",
+                                            single ? 's' : 'd',
+                                            regno + count);
+                                    }
+
+                                  fprintf(stream, "}");
+                                }
+                              else if (bitstart == 4)
+                                fprintf(stream, ", %c%d}", single ? 's' : 'd',
+                                      regno + 1);
+
+                              break;
+                            }
+
+                          case '`':
+                            c++;
+                            if ((given & (1 << bitstart)) == 0)
+                              fprintf(stream, "%c", *c);
+                            break;
+                          case '\'':
+                            c++;
+                            if ((given & (1 << bitstart)) != 0)
+                              fprintf(stream, "%c", *c);
+                            break;
+                          case '?':
+                            ++c;
+                            if ((given & (1 << bitstart)) != 0)
+                              fprintf(stream, "%c", *c++);
+                            else
+                              fprintf(stream, "%c", *++c);
+                            break;
+                          default:
+                            return -1;
+                          }
+                        break;
+
+                      default:
+                        return -1;
+                      }
+                    }
+                }
+              else
+                fprintf(stream, "%c", *c);
+            }
+          return 0;
+        }
     }
   return -1;
 }
