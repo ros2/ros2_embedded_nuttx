@@ -386,7 +386,7 @@ static int rtl8187x_netuninitialize(FAR struct rtl8187x_state_s *priv);
  * Private Data
  ****************************************************************************/
 
-/* This structure provides the registry entry ID informatino that will  be
+/* This structure provides the registry entry ID information that will  be
  * used to associate the USB class driver to a connected USB device.
  */
 
@@ -396,15 +396,15 @@ static const const struct usbhost_id_s g_id[2] =
     USB_CLASS_VENDOR_SPEC,  /* base */
     0xff,                   /* subclass */
     0xff,                   /* proto */
-    CONFIG_USB_WLAN_VID,    /* vid */
-    CONFIG_USB_WLAN_PID     /* pid */
+    CONFIG_RTL8187_VID,     /* vid */
+    CONFIG_RTL8187_PID      /* pid */
   },
   {
     0,                      /* base */
     0,                      /* subclass */
     0,                      /* proto */
-    CONFIG_USB_WLAN_VID,    /* vid */
-    CONFIG_USB_WLAN_PID     /* pid */
+    CONFIG_RTL8187_VID,     /* vid */
+    CONFIG_RTL8187_PID      /* pid */
   }
 };
 
