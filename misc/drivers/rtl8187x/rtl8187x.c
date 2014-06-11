@@ -72,13 +72,13 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 
-#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip.h>
+#include <nuttx/net/arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
 #include "rtl8187x.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_NET) && defined(CONFIG_NET_WLAN)
+#if defined(CONFIG_USBHOST) && defined(CONFIG_NET)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1466,7 +1466,7 @@ static int rtl8187x_disconnected(struct usbhost_class_s *class)
 
       ullvdbg("Queuing destruction: worker %p->%p\n", priv->wkdisconn.worker, rtl8187x_destroy);
       DEBUGASSERT(priv->wkdisconn.worker == NULL);
-      (void)work_queue(&priv->wkdisconn, rtl8187x_destroy, priv, 0);
+      (void)work_queue(HPWORK, &priv->wkdisconn, rtl8187x_destroy, priv, 0);
     }
 
   irqrestore(flags);
@@ -1960,7 +1960,7 @@ static int rtl8187x_uiptxpoll(struct uip_driver_s *dev)
 
   if (priv->ethdev.d_len > 0)
     {
-      uip_arp_out(&priv->ethdev);
+      arp_out(&priv->ethdev);
       rtl8187x_transmit(priv);
     }
 
@@ -2064,7 +2064,7 @@ static void rtl8187x_txpolltimer(int argc, uint32_t arg, ...)
         }
       else
         {
-          (void)work_queue(&priv->wktxpoll, rtl8187x_txpollwork, priv, 0);
+          (void)work_queue(HPWORK, &priv->wktxpoll, rtl8187x_txpollwork, priv, 0);
         }
     }
 
@@ -2250,14 +2250,14 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
 
       if (priv->ethdev.d_len > 0)
         {
-          uip_arp_out(&priv->ethdev);
+          arp_out(&priv->ethdev);
           rtl8187x_transmit(priv);
         }
     }
   else if (ethhdr->type == htons(UIP_ETHTYPE_ARP))
     {
       RTL8187X_STATS(priv, rxarppackets);
-      uip_arp_arpin(&priv->ethdev);
+      arp_arpin(&priv->ethdev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, the field  d_len will set to a value > 0.
@@ -2388,7 +2388,7 @@ static void rtl8187x_rxpolltimer(int argc, uint32_t arg, ...)
         }
       else
         {
-          (void)work_queue(&priv->wkrxpoll, rtl8187x_rxpollwork, priv, 0);
+          (void)work_queue(HPWORK, &priv->wkrxpoll, rtl8187x_rxpollwork, priv, 0);
         }
     }
 
@@ -3578,7 +3578,7 @@ static int rtl8187x_reset(struct rtl8187x_state_s *priv)
 
   /* Turn on ANAPARAM */
 
-  rtl8187x_anaparamon(priv)
+  rtl8187x_anaparamon(priv);
 
   /* Reset PLL sequence on 8187B. Realtek note: reduces power
    * consumption about 30 mA
@@ -3604,7 +3604,7 @@ static int rtl8187x_reset(struct rtl8187x_state_s *priv)
   rtl8187x_iowrite16(priv, (uint16_t*)0xff34, 0x0fff);
 
   regval = rtl818x_ioread8(priv, RTL8187X_ADDR_CWCONF);
-  regval |= RTL818X_CW_CONF_PERPACKET_RETRY_SHIFT;
+  regval |= RTL8187X_CW_CONF_PERPACKET_RETRY_SHIFT;
   rtl8187x_iowrite8(priv, RTL8187X_ADDR_CWCONF, regval);
 
   /* Auto Rate Fallback Register (ARFR): 1M-54M setting */
@@ -3613,10 +3613,10 @@ static int rtl8187x_reset(struct rtl8187x_state_s *priv)
   rtl8187x_iowrite8_idx(priv, (uint8_t*)0xffe2, 0x00, 1);
   rtl8187x_iowrite16_idx(priv, (uint16_t*)0xffd4, 0xffff, 1);
 
-  rtl8187x_iowrite8(priv, RTL8187X_ADDR_EEPROMCMD, RTL818X_EEPROMCMD_CONFIG);
+  rtl8187x_iowrite8(priv, RTL8187X_ADDR_EEPROMCMD, RTL8187X_EEPROMCMD_CONFIG);
   regval = rtl818x_ioread8(priv, RTL8187X_ADDR_CONFIG1);
   rtl8187x_iowrite8(priv, RTL8187X_ADDR_CONFIG1, (regval & 0x3f) | 0x80);
-  rtl8187x_iowrite8(priv, RTL8187X_ADDR_EEPROMCMD, RTL818X_EEPROMCMD_NORMAL);
+  rtl8187x_iowrite8(priv, RTL8187X_ADDR_EEPROMCMD, RTL8187X_EEPROMCMD_NORMAL);
 
   rtl8187x_iowrite8(priv, RTL8187X_ADDR_WPACONF, 0);
   for (i = 0; i < ARRAY_SIZE(rtl8187b_reg_table); i++) {
@@ -3646,7 +3646,7 @@ static int rtl8187x_reset(struct rtl8187x_state_s *priv)
 
   priv->rf->init(dev);
 
-  regval = RTL818X_CMD_TX_ENABLE | RTL818X_CMD_RX_ENABLE;
+  regval = RTL8187X_CMD_TX_ENABLE | RTL8187X_CMD_RX_ENABLE;
   rtl8187x_iowrite8(priv, RTL8187X_ADDR_CMD, regval);
   rtl8187x_iowrite16(priv, RTL8187X_ADDR_INTMASK, 0xffff);
 
@@ -3684,7 +3684,7 @@ static int rtl8187x_reset(struct rtl8187x_state_s *priv)
 
   /* ENEDCA flag must always be set, transmit issues? */
 
-  rtl8187x_iowrite8(priv, RTL8187X_ADDR_MSR, RTL818X_MSR_ENEDCA);
+  rtl8187x_iowrite8(priv, RTL8187X_ADDR_MSR, RTL8187X_MSR_ENEDCA);
 #else
 
   /* reset */
@@ -3876,11 +3876,11 @@ static int rtl8187x_start(FAR struct rtl8187x_state_s *priv)
 
 #ifdef CONFIG_RTL8187B
 
-  regval = RTL818X_RXCONF_MGMT | RTL818X_RXCONF_DATA | RTL818X_RXCONF_BROADCAST |
-           RTL818X_RXCONF_NICMAC | RTL818X_RX_ONF_BSSID |
+  regval = RTL8187X_RXCONF_MGMT | RTL8187X_RXCONF_DATA | RTL8187X_RXCONF_BROADCAST |
+           RTL8187X_RXCONF_NICMAC | RTL8187X_RX_ONF_BSSID |
            (7 << 13 /* RX FIFO threshold NONE */) |
            (7 << 10 /* MAX RX DMA */) |
-           RTL818X_RXCONF_RX_AUTORESETPHY | RTL818X_RXCONF_ONLYERLPKT | RTL818X_RXCONF_MULTICAST;
+           RTL8187X_RXCONF_RX_AUTORESETPHY | RTL8187X_RXCONF_ONLYERLPKT | RTL8187X_RXCONF_MULTICAST;
   rtl8187x_iowrite32(priv, RTL8187X_ADDR_RXCONF, regval);
 
   regval  = rtl8187x_ioread8(priv, RTL8187X_ADDR_TXAGCCTL);
@@ -3889,7 +3889,7 @@ static int rtl8187x_start(FAR struct rtl8187x_state_s *priv)
   regval &= ~RTL8187X_TXAGCCTL_FEEDBACKANT;
   rtl8187x_iowrite8(priv, RTL8187X_ADDR_TXAGCCTL, regval);
 
-  regval = RTL818X_TXCONF_HWSEQNUM | RTL818X_TXCONF_DISREQQSIZE |
+  regval = RTL8187X_TXCONF_HWSEQNUM | RTL8187X_TXCONF_DISREQQSIZE |
            (7 << 8  /* short retry limit */) |
            (7 << 0  /* long retry limit */) |
            (7 << 21 /* MAX TX DMA */);
@@ -4032,7 +4032,7 @@ static int rtl8187x_setup(FAR struct rtl8187x_state_s *priv)
 
 #ifdef CONFIG_RTL8187B
 
-  rtl8187x_eeprom_read(&priv, RTL8187_EEPROM_TXPWR_CHAN_6, &txpwr);
+  rtl8187x_eeprom_read(&priv, RTL8187X_EEPROM_TXPWRCHAN6, &txpwr);
   (*channel++).val = txpwr & 0xff;
 
   rtl8187x_eeprom_read(&priv, 0x0a, &txpwr);
@@ -4040,7 +4040,7 @@ static int rtl8187x_setup(FAR struct rtl8187x_state_s *priv)
 
   rtl8187x_eeprom_read(&priv, 0x1c, &txpwr);
   (*channel++).val = txpwr & 0xff;
-  (*channel++).val= txpwr
+  (*channel++).val= txpwr;
 
 #else
 
@@ -4208,6 +4208,6 @@ int usbhost_wlaninit(void)
   return usbhost_registerclass(&g_wlan);
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_NET && CONFIG_NET_WLAN */
+#endif /* CONFIG_USBHOST && CONFIG_NET */
 
 
