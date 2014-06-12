@@ -1,7 +1,7 @@
 ############################################################################
-# net/uip/Make.defs
+# apps/examples/netpkt/Makefile
 #
-#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,67 +33,77 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_NET),y)
+-include $(TOPDIR)/.config
+-include $(TOPDIR)/Make.defs
+include $(APPDIR)/Make.defs
 
-# Common IP source files
+# Network packet socket example
 
-NET_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
-NET_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
+APPNAME = netpkt
+PRIORITY = SCHED_PRIORITY_DEFAULT
+STACKSIZE = 2048
 
-# Non-interrupt level support required?
+# MDIO tool
 
-ifeq ($(CONFIG_NET_NOINTS),y)
-NET_CSRCS += uip_lock.c
+ASRCS =
+CSRCS = netpkt_main.c
+
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  BIN = ..\..\libapps$(LIBEXT)
+else
+ifeq ($(WINTOOL),y)
+  BIN = ..\\..\\libapps$(LIBEXT)
+else
+  BIN = ../../libapps$(LIBEXT)
+endif
 endif
 
-# Packet socket support
+ROOTDEPPATH = --dep-path .
 
-ifeq ($(CONFIG_NET_PKT),y)
-NET_CSRCS += uip_pktconn.c
-NET_CSRCS += uip_pktinput.c
-NET_CSRCS += uip_pktcallback.c
-NET_CSRCS += uip_pktpoll.c
+# Common build
+
+VPATH = 
+
+all: .built
+.PHONY: clean depend distclean
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+.built: $(OBJS)
+	$(call ARCHIVE, $(BIN), $(OBJS))
+	@touch .built
+
+ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
+$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
+
+context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
+else
+context:
 endif
 
-# IPv6-specific logic
+.depend: Makefile $(SRCS)
+	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
-ifeq ($(CONFIG_NET_IPv6),y)
-NET_CSRCS += uip_neighbor.c
-endif
+depend: .depend
 
-# TCP/IP source files
+clean:
+	$(call DELFILE, .built)
+	$(call CLEAN)
 
-ifeq ($(CONFIG_NET_TCP),y)
+distclean: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
 
-NET_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
-NET_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
-NET_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
-
-# TCP Buffering
-
-ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
-NET_CSRCS += uip_tcpreadahead.c
-endif
-
-ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
-NET_CSRCS += uip_tcpwrbuffer.c
-endif
-
-endif
-
-# UDP source files
-
-ifeq ($(CONFIG_NET_UDP),y)
-
-NET_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c
-NET_CSRCS += uip_udpcallback.c
-
-endif
-
-# Include uip build support
-
-DEPPATH += --dep-path uip
-VPATH += :uip
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)net$(DELIM)uip}
-
-endif
+-include Make.dep
