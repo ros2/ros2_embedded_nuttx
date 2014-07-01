@@ -1931,7 +1931,7 @@ static int rtl8187x_transmit(FAR struct rtl8187x_state_s *priv)
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   to send.  This is a callback from devif_poll().  devif_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timesout and the interface is reset
@@ -2018,7 +2018,7 @@ static void rtl8187x_txpollwork(FAR void *arg)
        */
 
       priv->ethdev.d_buf = &priv->txbuffer[SIZEOF_TXDESC];
-      (void)uip_timer(&priv->ethdev, rtl8187x_uiptxpoll, (int)hsecs);
+      (void)devif_timer(&priv->ethdev, rtl8187x_uiptxpoll, (int)hsecs);
       net_unlock(lock);
     }
 }
@@ -2522,7 +2522,7 @@ static int rtl8187x_txavail(struct net_driver_s *dev)
 
       lock = net_lock();
       priv->ethdev.d_buf = &priv->txbuffer[SIZEOF_TXDESC];
-      (void)uip_poll(&priv->ethdev, rtl8187x_uiptxpoll);
+      (void)devif_poll(&priv->ethdev, rtl8187x_uiptxpoll);
       net_unlock(lock);
     }
 
