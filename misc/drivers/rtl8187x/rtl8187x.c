@@ -2242,7 +2242,7 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
     {
       RTL8187X_STATS(priv, rxippackets);
       arp_ipin(&priv->ethdev);
-      uip_input(&priv->ethdev);
+      devif_input(&priv->ethdev);
 
       /* If the above function invocation resulted in data that should be
        * sent out on the network, the field  d_len will set to a value > 0.
