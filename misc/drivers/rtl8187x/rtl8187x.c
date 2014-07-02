@@ -318,7 +318,7 @@ static void rtl8187x_write(FAR struct rtl8187x_state_s *priv, uint8_t addr,
 /* TX logic */
 
 static int rtl8187x_transmit(FAR struct rtl8187x_state_s *priv);
-static int rtl8187x_uiptxpoll(struct net_driver_s *dev);
+static int rtl8187x_txpoll(struct net_driver_s *dev);
 static void rtl8187x_txpollwork(FAR void *arg);
 static void rtl8187x_txpolltimer(int argc, uint32_t arg, ...);
 
@@ -1927,7 +1927,7 @@ static int rtl8187x_transmit(FAR struct rtl8187x_state_s *priv)
 }
 
 /****************************************************************************
- * Function: rtl8187x_uiptxpoll
+ * Function: rtl8187x_txpoll
  *
  * Description:
  *   The transmitter is available, check if uIP has any outgoing packets ready
@@ -1950,7 +1950,7 @@ static int rtl8187x_transmit(FAR struct rtl8187x_state_s *priv)
  *
  ****************************************************************************/
 
-static int rtl8187x_uiptxpoll(struct net_driver_s *dev)
+static int rtl8187x_txpoll(struct net_driver_s *dev)
 {
   FAR struct rtl8187x_state_s *priv = (FAR struct rtl8187x_state_s *)dev->d_private;
 
@@ -2018,7 +2018,7 @@ static void rtl8187x_txpollwork(FAR void *arg)
        */
 
       priv->ethdev.d_buf = &priv->txbuffer[SIZEOF_TXDESC];
-      (void)devif_timer(&priv->ethdev, rtl8187x_uiptxpoll, (int)hsecs);
+      (void)devif_timer(&priv->ethdev, rtl8187x_txpoll, (int)hsecs);
       net_unlock(lock);
     }
 }
@@ -2522,7 +2522,7 @@ static int rtl8187x_txavail(struct net_driver_s *dev)
 
       lock = net_lock();
       priv->ethdev.d_buf = &priv->txbuffer[SIZEOF_TXDESC];
-      (void)devif_poll(&priv->ethdev, rtl8187x_uiptxpoll);
+      (void)devif_poll(&priv->ethdev, rtl8187x_txpoll);
       net_unlock(lock);
     }
 
