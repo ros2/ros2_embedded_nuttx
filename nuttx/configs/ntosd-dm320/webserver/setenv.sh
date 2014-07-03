@@ -1,7 +1,7 @@
-############################################################################
-# apps/examples/uip/Makefile
+#!/bin/bash
+# configs/ntosd-dm320/webserver/setenv.sh
 #
-#   Copyright (C) 2007-2008, 2010-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,71 +31,32 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
-include $(APPDIR)/Make.defs
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-# uIP very tiny web server example
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-ASRCS		=
-CSRCS		= uip_main.c cgi.c httpd_fsdata.c
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+# This is the Cygwin path to the location where I installed the CodeSourcery
+# toolchain under windows.  You will also have to edit this if you install
+# the CodeSourcery toolchain in any other location
+# export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+# This is the Cygwin path to the location where I build the buildroot
+# toolchain.
+export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  BIN		= ..\..\libapps$(LIBEXT)
-else
-ifeq ($(WINTOOL),y)
-  BIN		= ..\\..\\libapps$(LIBEXT)
-else
-  BIN		= ../../libapps$(LIBEXT)
-endif
-endif
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
-ROOTDEPPATH	= --dep-path .
-
-# Common build
-
-VPATH		=
-
-all: .built
-.PHONY: clean depend distclean
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-.built: $(OBJS)
-	$(call ARCHIVE, $(BIN), $(OBJS))
-	@touch .built
-
-httpd_fsdata.c: httpd-fs/*
-	$(TOPDIR)/tools/mkfsdata.pl
-
-context:
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-
-epend: .depend
-
-clean:
-	$(call DELFILE, .built)
-	$(call DELFILE, httpd_fsdata.c)
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep
-
+echo "PATH : ${PATH}"
