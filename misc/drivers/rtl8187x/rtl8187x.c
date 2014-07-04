@@ -2110,7 +2110,7 @@ static inline int rtl8187x_receive(FAR struct rtl8187x_state_s *priv,
    * and an Ethernet header
    */
 
-  if (iolen < UIP_LLH_LEN + SIZEOF_RXDESC)
+  if (iolen < NET_LLH_LEN + SIZEOF_RXDESC)
     {
       RTL8187X_STATS(priv, rxtoosmall);
       RTL8187X_STATS(priv, rxdropped);
@@ -2235,9 +2235,9 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
   /* We only accept IP packets of the configured type and ARP packets */
 
 #ifdef CONFIG_NET_IPv6
-  if (ethhdr->type == HTONS(UIP_ETHTYPE_IP6))
+  if (ethhdr->type == HTONS(ETHTYPE_IP6))
 #else
-  if (ethhdr->type == HTONS(UIP_ETHTYPE_IP))
+  if (ethhdr->type == HTONS(ETHTYPE_IP))
 #endif
     {
       RTL8187X_STATS(priv, rxippackets);
@@ -2254,7 +2254,7 @@ static inline void rtl8187x_rxdispatch(FAR struct rtl8187x_state_s *priv,
           rtl8187x_transmit(priv);
         }
     }
-  else if (ethhdr->type == htons(UIP_ETHTYPE_ARP))
+  else if (ethhdr->type == htons(ETHTYPE_ARP))
     {
       RTL8187X_STATS(priv, rxarppackets);
       arp_arpin(&priv->ethdev);
