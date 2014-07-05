@@ -2112,7 +2112,7 @@ static inline int rtl8187x_receive(FAR struct rtl8187x_state_s *priv,
    * and an Ethernet header
    */
 
-  if (iolen < NET_LLH_LEN + SIZEOF_RXDESC)
+  if (iolen < NET_LL_HDRLEN + SIZEOF_RXDESC)
     {
       RTL8187X_STATS(priv, rxtoosmall);
       RTL8187X_STATS(priv, rxdropped);
