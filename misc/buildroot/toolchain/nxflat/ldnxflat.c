@@ -1872,7 +1872,7 @@ static void output_got(int fd)
           asection *rel_section = rel_sym->section;
           symvalue  sym_value   = rel_sym->value;
 
-          /* j is the offset index into the relocatino table */
+          /* j is the offset index into the relocation table */
 
           j = i + nxflat_nrelocs;
 

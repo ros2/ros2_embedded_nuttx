@@ -10,5 +10,5 @@ uClibc++-1.1 2011-xx-xx <gnutt@nuttx.org>
       and feof() to determine if fopen() and fread() were successful.
       The NuttX version of ferror() is only fragmentary.  The usage of
       ferror() in this file exceeds the capability of the current
-      implementatino (2013-6-20).
+      implementation (2013-6-20).
 
