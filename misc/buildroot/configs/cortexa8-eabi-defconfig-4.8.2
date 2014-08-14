@@ -37,16 +37,19 @@ BR2_arm=y
 # BR2_cortex_a5 is not set
 BR2_cortex_a8=y
 # BR2_cortex_m3 is not set
+# BR2_cortex_m4f is not set
 # BR2_cortex_m0 is not set
 # BR2_sa110 is not set
 # BR2_sa1100 is not set
 # BR2_xscale is not set
 # BR2_iwmmxt is not set
 BR2_GCC_CORTEX=y
+# BR2_GCC_CORTEX_M4F is not set
 # BR2_ARM_OABI is not set
 BR2_ARM_EABI=y
 BR2_ARCH="arm"
 BR2_GCC_TARGET_TUNE="cortex-a8"
+BR2_GCC_TARGET_ARCH="armv7-a"
 BR2_GCC_TARGET_ABI="aapcs-linux"
 BR2_ENDIAN="LITTLE"
 
@@ -95,6 +98,7 @@ BR2_PACKAGE_GCC=y
 # BR2_GCC_VERSION_4_3_3 is not set
 # BR2_GCC_VERSION_4_5_2 is not set
 # BR2_GCC_VERSION_4_6_3 is not set
+# BR2_GCC_VERSION_4_7_3 is not set
 BR2_GCC_VERSION_4_8_2=y
 BR2_GCC_SUPPORTS_SYSROOT=y
 BR2_GCC_VERSION="4.8.2"
@@ -117,6 +121,11 @@ BR2_INSTALL_LIBSTDCPP=y
 #
 BR2_PACKAGE_NXFLAT=y
 BR2_PACKAGE_GENROMFS=y
+BR2_PACKAGE_KCONFIG_FRONTENDS=y
+# BR2_NCONF_FRONTEND is not set
+# BR2_GCONF_FRONTEND is not set
+# BR2_QCONF_FRONTEND is not set
+BR2_KCONFIG_FRONTENDS_VERSION="3.12.0.0"
 
 #
 # Common Toolchain Options

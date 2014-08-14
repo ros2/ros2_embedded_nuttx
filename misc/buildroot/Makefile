@@ -73,7 +73,7 @@ TARGETS_CLEAN:=$(patsubst %,%-clean,$(TARGETS))
 TARGETS_SOURCE:=$(patsubst %,%-source,$(TARGETS))
 TARGETS_DIRCLEAN:=$(patsubst %,%-dirclean,$(TARGETS))
 
-world: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) nuttx_setup $(NUTTX_HDRS) $(TARGETS)
+world: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) $(TOOL_BUILD_DIR) nuttx_setup $(NUTTX_HDRS) $(TARGETS)
 dirs: $(DL_DIR) $(BUILD_DIR) $(STAGING_DIR) $(NUTTX_DIR)
 
 .PHONY: all world dirs clean dirclean distclean source $(TARGETS) \
@@ -90,6 +90,7 @@ $(DL_DIR) $(BUILD_DIR) $(TOOL_BUILD_DIR):
 	@mkdir -p $@
 
 $(STAGING_DIR):
+	@mkdir -p $(STAGING_DIR)/bin
 	@mkdir -p $(STAGING_DIR)/lib
 	@mkdir -p $(STAGING_DIR)/include
 	@mkdir -p $(STAGING_DIR)/usr
