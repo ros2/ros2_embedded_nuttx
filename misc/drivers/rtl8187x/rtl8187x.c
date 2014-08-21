@@ -57,13 +57,13 @@
 #include <string.h>
 #include <semaphore.h>
 #include <time.h>
-#include <wdog.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <arpa/inet.h>
 
+#include <nuttx/wdog.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/clock.h>
