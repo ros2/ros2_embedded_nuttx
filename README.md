@@ -34,3 +34,19 @@ Debugging
     arm-none-eabi-gdb -tui nuttx -ex 'target remote localhost:3333' -ex 'monitor reset halt' -ex 'load'  -ex 'continue'
 
 
+Installing menuconfig
+--------------------
+
+```bash
+git clone http://ymorin.is-a-geek.org/git/kconfig-frontends
+cd kconfig-frontends/
+sudo apt-get install gperf
+sudo apt-get install flex
+sudo apt-get install bison
+sudo apt-get install libncurses5-dev
+./bootstrap
+./configure
+make
+sudo make install
+sudo /sbin/ldconfig -v
+```
