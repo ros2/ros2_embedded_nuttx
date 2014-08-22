@@ -1,0 +1,137 @@
+ifneq ($($(libcurl_INCLUDED)),1)
+
+override COMPONENT := tools.external.acme.libcurl
+
+libcurl_INCLUDES            := $$(libcurl_PREFIX/)installed/include
+libcurl_LIBS                := -L$$(libcurl_PREFIX/)installed/lib -lcurl -ldl $$(openssl_LIBS)
+
+ifeq ($(E_SIZEOF_LONG),4)
+#32bit
+libcurl.soname              := 5.3.0
+libcurl.major               := 5
+else
+#64bit
+libcurl.soname              := 4.3.0
+libcurl.major               := 4
+endif
+ifeq ($(E), HOSTDARWIN)
+libcurl.lib                 := libcurl.$(libcurl.major).dylib
+else
+libcurl.lib                 := libcurl.so.$(libcurl.soname)
+endif
+libcurl.a                   := libcurl.a
+
+ifeq ($(E), HOSTDARWIN)
+libcurl_PARTS_INSTALL       := \
+    $(libcurl.lib)@$$(libdir/)$(libcurl.lib):755 \
+    s:$(libcurl.lib)@$$(libdir/)libcurl.dylib
+else
+ifneq ($(TARG_OS), IOS)
+libcurl_PARTS_INSTALL       := \
+    $(libcurl.lib)@$$(libdir/)$(libcurl.lib):755 \
+    s:$(libcurl.lib)@$$(libdir/)libcurl.so.$(libcurl.major) \
+    s:$(libcurl.lib)@$$(libdir/)libcurl.so
+endif
+endif
+
+libcurl_BUILT_HEADERS_INSTALL:=installed/include/curl/curl.h@$$(incdir/)curl/curl.h:664 \
+                               installed/include/curl/curlver.h@$$(incdir/)curl/curlver.h:664 \
+			       installed/include/curl/curlbuild.h@$$(incdir/)curl/curlbuild.h:664 \
+			       installed/include/curl/curlrules.h@$$(incdir/)curl/curlrules.h:664 \
+			       installed/include/curl/easy.h@$$(incdir/)curl/easy.h:664 \
+			       installed/include/curl/multi.h@$$(incdir/)curl/multi.h:664 \
+			       installed/include/curl/typecheck-gcc.h@$$(incdir/)curl/typecheck-gcc.h:664
+
+
+libcurl_DEPS:=openssl
+
+include $(projectdir/)build/Makefile_component_top
+
+##< libcurl configuration
+libcurl.configure_opts :=
+#libcurl.configure_opts += --disable-debug
+#libcurl.configure_opts += --disable-optimize
+#libcurl.configure_opts += --disable-warnings
+#libcurl.configure_opts += --disable-werror
+#libcurl.configure_opts += --disable-curldebug
+libcurl.configure_opts += --disable-ares
+#libcurl.configure_opts += --disable-dependency-tracking
+libcurl.configure_opts += --disable-largefile
+libcurl.configure_opts += --disable-libtool-lock
+#libcurl.configure_opts += --disable-http
+#libcurl.configure_opts += --disable-ftp
+#libcurl.configure_opts += --disable-file
+libcurl.configure_opts += --disable-ldap
+libcurl.configure_opts += --disable-ldaps
+libcurl.configure_opts += --disable-rtsp
+#libcurl.configure_opts += --disable-proxy
+libcurl.configure_opts += --disable-dict
+libcurl.configure_opts += --disable-telnet
+libcurl.configure_opts += --disable-tftp
+libcurl.configure_opts += --disable-pop3
+libcurl.configure_opts += --disable-imap
+libcurl.configure_opts += --disable-smtp
+libcurl.configure_opts += --disable-gopher
+libcurl.configure_opts += --disable-manual
+libcurl.configure_opts += --disable-ipv6
+#libcurl.configure_opts += --disable-nonblocking
+libcurl.configure_opts += --disable-threaded-resolver
+#libcurl.configure_opts += --disable-verbose
+libcurl.configure_opts += --disable-sspi
+#libcurl.configure_opts += --disable-crypto-auth
+libcurl.configure_opts += --disable-cookies
+libcurl.configure_opts += --disable-soname-bump
+#libcurl.configure_opts += LIBS="-lssl -lcrypto -L$(libcurl_PREFIX/)installed/lib"
+libcurl.configure_opts += --without-zlib
+libcurl.configure_opts += --without-libidn
+ifeq ($(E_SIZEOF_LONG),8)
+#64bit compilation
+libcurl.configure_opts += --with-pic
+endif
+
+##>
+##< helper variables
+libcurl.libdir := $(libcurl_PREFIX/)installed/lib
+libcurl.incdir := $(libcurl_PREFIX/)installed/include
+##>
+
+##< tarball extraction
+libcurl.tarname        := curl-7.33.0
+libcurl.srcdir         := $(libcurl_PREFIX/)$(libcurl.tarname)
+##>
+
+$(libcurl.libdir)/$(libcurl.lib): $(openssl_PARTS)
+	mkdir -p $(libcurl_$(E_FROM_TARGET)_PREFIX/)src
+	tar -xzf $(libcurl_COMP_DIR)/$(libcurl.tarname).tar.gz -C $(libcurl_$(E_FROM_TARGET)_PREFIX/)src
+	export DYLD_LIBRARY_PATH=$(openssl_$(E_FROM_TARGET)_PREFIX) && export CONFIGURE_DIR=$(libcurl_$(E_FROM_TARGET)_PREFIX/)src/$(libcurl.tarname)/ && $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CONFIGURE) $(libcurl.configure_opts) --with-random=/dev/urandom
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_MAKE)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_INSTALL)
+
+$(libcurl.incdir)/curl/curl.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/curlver.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/curlbuild.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/curlrules.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/easy.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/multi.h: $(libcurl.libdir)/$(libcurl.lib)
+$(libcurl.incdir)/curl/typecheck-gcc.h: $(libcurl.libdir)/$(libcurl.lib)
+
+$(libcurl_PREFIX/)libcurl.so: $(libcurl_PREFIX/)$(libcurl.lib)
+
+$(libcurl_PREFIX/)$(libcurl.lib): $(libcurl_PREFIX/)installed/lib/$(libcurl.lib)
+	rm -f $@ && cp $< $@
+	cd $(@D) && ln -sf $(notdir $@) libcurl.so
+
+$(libcurl_PREFIX/)libcurl_pic.a: $(libcurl_PREFIX/)installed/lib/$(libcurl.a)
+	find $(libcurl_PREFIX) -name  "*.o" > $(libcurl_PREFIX)/libcurl_pic.lst
+	rm -f $@ && cp $< $@
+
+$(libcurl_PREFIX/)libcurl.a: $(libcurl_PREFIX/)installed/lib/$(libcurl.a)
+	find $(libcurl_PREFIX) -name  "*.o" > $(libcurl_PREFIX)/libcurl_pic.lst
+	rm -f $@ && cp $< $@
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

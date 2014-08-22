@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_qnx_4rp_tf">
+ <title>Technicolor DDS Type Support</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>In Technicolor DDS, static types are specified in an intermediate type description format,
+   which is basically an array of C-data structures.</p>
+  <p>This type description can be generated in different ways:<ul id="ul_1cp_gsp_tf">
+    <li>Created from the Qeo component framework, which is a layer on top of Technicolor DDS, and
+     which provides tools to generate this type description from an XML-based service
+     description.</li>
+    <li>A tool is available that can be used to generate the intermediate type from an IDL-based
+     type specification.</li>
+    <li>It can be hand-written, although the preferred way is of course to use one of the tools
+     described above.</li>
+   </ul></p>
+  <p>The intermediate type data structure is called the TSM format and has the following layout (as
+   defined in dds/dds_types.h):</p>
+  <codeblock>struct dds_typesupport_meta_st {
+      CDR_TypeCode_t             tc;     /* Type code. */
+      tsm_flags                  flags;  /* Key field, Dynamic data, ... */
+      const char                 *name;  /* Name of the field (info). */
+      size_t                     size;   /* Size of the corresponding 
+                                            container or C string. */
+      size_t                     offset; /* Offset of the field in its
+                                            corresponding container. */
+      unsigned int               nelem;  /* Number of elements in the
+                                            container. */
+      int                        label;  /* The label of a union member. */
+      const DDS_TypeSupport_meta *tsm;   /* When TYPEREF is instantiated. */
+};</codeblock>
+  <p>The actual data in this structure depends on the type code id, which can have the following
+   possible values as described below:</p>
+  <codeblock>typedef enum {
+      CDR_TYPECODE_SHORT = 1,    /* 16-bit signed integer. */
+      CDR_TYPECODE_USHORT,       /* 16-bit unsigned integer. */
+      CDR_TYPECODE_LONG,         /* 32-bit signed integer. */
+      CDR_TYPECODE_ULONG,        /* 32-bit unsigned integer. */
+      CDR_TYPECODE_LONGLONG,     /* 64-bit signed integer. */
+      CDR_TYPECODE_ULONGLONG,    /* 64-bit unsigned integer. */
+      CDR_TYPECODE_FLOAT,        /* 32-bit floating point number. */
+      CDR_TYPECODE_DOUBLE,       /* 64-bit floating point number. */
+#ifdef LONGDOUBLE
+      CDR_TYPECODE_LONGDOUBLE,   /* 128-bit floating point number. */
+#endif
+      CDR_TYPECODE_FIXED,        /* Fixed-point number. */
+      CDR_TYPECODE_BOOLEAN,      /* Boolean flag. */
+      CDR_TYPECODE_CHAR,         /* 8-bit character. */
+      CDR_TYPECODE_WCHAR,        /* 32-bit wide character. */
+      CDR_TYPECODE_OCTET,        /* 8-bit byte. */
+      CDR_TYPECODE_CSTRING,      /* 8-bit character string. */
+      CDR_TYPECODE_WSTRING,      /* 32-bit wide character string. */
+      CDR_TYPECODE_STRUCT,       /* C-struct. */
+      CDR_TYPECODE_UNION,        /* C-union. */
+      CDR_TYPECODE_ENUM,         /* C enumeration type. */
+      CDR_TYPECODE_SEQUENCE,     /* Variable length element array. */
+      CDR_TYPECODE_ARRAY,        /* Fixed length element array. */
+      CDR_TYPECODE_TYPEREF,      /* Nest another type inline. */
+      CDR_TYPECODE_TYPE          /* Refers to another type. */
+} CDR_TypeCode_t;
+</codeblock>
+  <p>The flags field currently has the following valid bits:</p>
+  <codeblock>#define TSMFLAG_KEY      1    /* Is a key field. */
+#define TSMFLAG_DYNAMIC  2    /* Container structure has dynamic data. */
+#define TSMFLAG_MUTABLE  4    /* Extra container fields can be added later. */
+#define TSMFLAG_OPTIONAL 8    /* Field is optional, i.e. is a pointer field that
+                                 can be skipped. */
+#define TSMFLAG_SHARED   16   /* Field is a pointer field instead of a real data
+                                 field. */
+#define TSMFLAG_GENID    32   /* Generate the memberId when mutable. */</codeblock>
+  <p>A constructed DDS type must always start with a <i>struct</i> TSM, which has additional TSMs
+   directly following the first for each individual field of the structure.</p>
+  <p>The significance of the TSM fields is described in the following table, depending on the type code:</p>
+  <p>
+   <table frame="all" id="table_jrs_typ_tf">
+    <title>TSM fields</title>
+    <tgroup cols="8">
+     <colspec colname="c1" colnum="1" colwidth="11.45*" colsep="1" rowsep="1"/>
+     <colspec colname="c2" colnum="2" colwidth="8.84*" colsep="1" rowsep="1"/>
+     <colspec colname="c3" colnum="3" colwidth="7.01*" colsep="1" rowsep="1"/>
+     <colspec colname="c4" colnum="4" colwidth="9.9*" colsep="1" rowsep="1"/>
+     <colspec colname="c5" colnum="5" colwidth="6.67*" colsep="1" rowsep="1"/>
+     <colspec colname="c6" colnum="6" colwidth="9.18*" colsep="1" rowsep="1"/>
+     <colspec colname="c7" colnum="7" colwidth="6.51*" colsep="1" rowsep="1"/>
+     <colspec colname="c8" colnum="8" colwidth="5.56*" colsep="1" rowsep="1"/>
+     <thead>
+      <row>
+       <entry>tc</entry>
+       <entry>flags</entry>
+       <entry>name</entry>
+       <entry>size</entry>
+       <entry>offset</entry>
+       <entry>nelem</entry>
+       <entry>label</entry>
+       <entry>tsm</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>SHORT</entry>
+       <entry>KEY</entry>
+       <entry>char pointer to name<fn>Although the type name is only really required for the
+         top-level TSM-struct, the name field will also be used when SQL content filter
+         specifications refer to these fields, in order to find the proper data offset in received
+         data samples.</fn>.</entry>
+       <entry>-</entry>
+       <entry>Container offset in bytes.</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>USHORT</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>LONG</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>Enum value (or not significant).</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>ULONG</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>LONGLONG</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>ULONGLONG</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>FLOAT</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>DOUBLE</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>LONGDOUBLE</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>FIXED</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>BOOLEAN</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>CHAR</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>WCHAR</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>OCTET</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>CSTRING</entry>
+       <entry>KEY, DYNAMIC</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>C-string size or 0 if dynamic (char *)</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>WSTRING</entry>
+       <entry>KEY, DYNAMIC</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>C-wstring size or 0 if dynamic (wchar *)</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>STRUCT</entry>
+       <entry>KEY, DYNAMIC, MUTABLE</entry>
+       <entry><i>idem</i></entry>
+       <entry>Total C-struct data size in bytes.</entry>
+       <entry><i>idem</i></entry>
+       <entry>Number of struct fields (that follow as TSMs).</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>UNION</entry>
+       <entry>KEY, DYNAMIC, MUTABLE</entry>
+       <entry><i>idem</i></entry>
+       <entry>Total C-union data size in bytes</entry>
+       <entry><i>idem</i></entry>
+       <entry>Number of union fields (that follow as TSMs).</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>ENUM</entry>
+       <entry>KEY, MUTABLE</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>Number of enum elements (which follows as LONG TSMs).</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>SEQUENCE</entry>
+       <entry>KEY, DYNAMIC, MUTABLE</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>Maximum number of sequence elements or 0. Sequence type follows as TSM.</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>ARRAY</entry>
+       <entry>KEY, DYNAMIC, MUTABLE</entry>
+       <entry><i>idem</i></entry>
+       <entry>Total C-array size in bytes.</entry>
+       <entry><i>idem</i></entry>
+       <entry>Number of array elements (type follows as additional TSM).</entry>
+       <entry>-</entry>
+       <entry>-</entry>
+      </row>
+      <row>
+       <entry>TYPEREF</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>Points to included type.</entry>
+      </row>
+      <row>
+       <entry>TYPE</entry>
+       <entry>KEY</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry><i>idem</i></entry>
+       <entry>-</entry>
+       <entry>-</entry>
+       <entry>Points to referred type.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+  <section><title>Notes on the flags field.</title><p>Fields with the TSMFLAG_OPTIONAL and
+    TSMFLAG_SHARED are converted to C-pointer types to actual data.  If the data is not present, a
+    NULL pointer will be used.</p><p>A field with TSMFLAG_GENID set will have its MemberId
+    calculated via a callback function.  Qeo typically uses a CRC32 function on the member name in
+    order to create MemberIds.  This MemberId is used in the context of stuctures and unions that
+    are declared as MUTABLE, specifying the index of the member.  If this flag is not set, the user
+    can specify it in the label field (non-zero label field), or let DDS generate the next MemberId
+    automatically (label set to zero).</p><p>Typically C-structs are allowed to embed substructures.
+    This can easily be expressed with the TSM mechanism by specifying fields of a
+    CDR_TYPECODE_STRUCT type, which are then followed again by structure field definitions in a
+    recursive manner.</p>The handling of the flags field in embedded structs as well as for
+   CDR_TYPECODE_TYPEREF and CDR_TYPECODE_TYPE referenced structs can become somewhat complex due to
+   this. The following rules are therefore used in Technicolor DDS to ensure a consistent behavior:<p>
+    <ul id="ul_4yt_fgm_5f">
+     <li>If a struct reference has the KEY attribute, but none of its fields has the KEY attribute,
+      this KEY attribute will automatically be applied to all structure fields, as if each field had
+      it set specifically.</li>
+     <li>If fields have the KEY attribute, but the struct reference doesn't, no fields will be used
+      as keys. The parent structure must thus always have the KEY attribute set in order for any of
+      its member fields to have this also.</li>
+     <li>The DYNAMIC attribute <b>must</b> be set for all structure fields that have pointer data,
+      such as dynamic strings (having a 0-length, i.e. indicating <i>char *</i>) and sequences.</li>
+     <li>The DYNAMIC attribute must be properly set for parents. I.e. if any field is dynamic, the
+      parent structure must have the DYNAMIC attribute as well, and this must propagate up to the
+      highest level container struct.</li>
+    </ul>
+   </p></section>
+  <section><title>Registering a type in DDS</title><p>Once a type is created as a list of TSMs, it can be used as the foundation of a new Technicolor
+    DDS type. This can be done using the <i>DDS_DynamicType_register()</i> function as follows:</p>
+   <codeblock>DDS_TypeSupport *DDS_DynamicType_register(const DDS_TypeSupport_meta *tc);</codeblock>
+   <p>Where <parmname>tc</parmname> is a pointer to the first TSM in the list.</p>
+   <p>When this function is successful, i.e. it has managed to convert the TSM list to the
+    type representation used internally in Technicolor DDS, a new type is returned that can be used
+    for registering the type within the DDS domains. If not successful, the function returns a NULL-
+    result.</p>
+   <p>For each domain where the type is to be used, the following function should to be called:</p>
+   <codeblock>DDS_ReturnCode_t DDS_DomainParticipant_register_type(
+        DDS_DomainParticipant self,
+        const DDS_TypeSupport *ts,
+        const char *type_name
+);</codeblock>
+   <p>Where <parmname>self</parmname> is the DomainParticipant which should have been created
+    previously, <parmname>ts</parmname> is the TypeSupport pointer that was registered via
+     <i>DDS_DynamicType_register()</i>, and <parmname>type_name</parmname> is the name of the type
+    within the domain.</p>
+   <p>If something went wrong with registering the type, a standard DDS error code will be
+    returned.</p>
+   <p>This function may be called multiple times, in case the type is needed in multiple
+    domains.</p>
+   <p>If a type is no longer needed in a domain, the <i>DDS_DomainParticipant_unregister_type()
+    </i>function can be used.  This is not really needed, however, since this unregister function is
+    used implicitly for each registered type while cleaning up DomainParticipants, when the
+     <i>DDS_DomainParticipant_delete_contained_entities()</i> function is used.</p>
+   <p>If the type is no longer needed in any DDS domain, the <i>DDS_DynamicType_free()</i> function
+    can be called to free all internal type representation data.</p>
+  </section>
+ </conbody>
+</concept>

@@ -1,0 +1,29 @@
+ifneq ($($(check_INCLUDED)),1)
+
+override COMPONENT := tools.external.acme.check
+
+# The license of this component
+
+check_INCLUDES              := $$(check_PREFIX/)installed/include
+check_LIBS                  := -L$$(check_PREFIX/)installed/lib -lcheck
+ifeq ($(E), HOSTDARWIN)
+check_PARTS_INSTALL         := installed/lib/libcheck.0.0.0.dylib@$$(libdir/)libcheck.0.0.0.dylib s:libcheck.0.0.0.dylib@$$(libdir/)libcheck.0.dylib s:libcheck.0.0.0.so@$$(libdir/)libcheck.dylib
+else
+check_PARTS_INSTALL         := installed/lib/libcheck.so.0.0.0@$$(libdir/)libcheck.so.0.0.0 s:libcheck.so.0.0.0@$$(libdir/)libcheck.so.0 s:libcheck.so.0.0.0@$$(libdir/)libcheck.so
+endif
+check_BUILT_HEADERS_INSTALL := installed/include/check.h@$$(incdir/)check.h:644
+check_CFLAGS                := -std=c99
+
+override check_COVERAGE:=0
+
+include $(projectdir/)build/Makefile_component_top
+
+$(check_PREFIX/)installed/include/check.h: $(check_PREFIX/)installed/lib/libcheck.so.0.0.0
+
+$(check_PREFIX/)installed/lib/libcheck.so.0.0.0: 
+	cd $(check_COMP_DIR/)src && $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CONFIGURE)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_MAKE)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_INSTALL)
+
+include $(projectdir/)build/Makefile_component_bot
+endif

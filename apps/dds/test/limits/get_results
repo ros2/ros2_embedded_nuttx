@@ -1,0 +1,19 @@
+cd results
+if [ 1 ]
+then
+MS_PRINT=ms_print
+else
+MS_PRINT=/home/users/jvoe/bin/ms_print
+fi
+$MS_PRINT massif.mgmt > mp.mgmt
+head -n 32 mp.mgmt > results.txt
+$MS_PRINT massif.linuxappl > mp.linuxappl
+head -n 32 mp.linuxappl >> results.txt
+for i in {1..48}
+do
+        $MS_PRINT massif.comp$i > mp.comp$i
+        head -n 32 mp.comp$i >> results.txt
+done
+$MS_PRINT massif.cdd > mp.cdd
+head -n 32 mp.cdd >> results.txt
+cd ..

@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_ln5_pfs_wf">
+ <title>Command Overview</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The Debug shell, once activated will show a prompt and will wait for debug commands.</p>
+  <p>For example, when remotely connected over telnet, the following will be displayed:</p>
+  <screen scale="80">Welcome to the TDDS Debug shell.
+Type 'help' for more information on available commands.
+></screen>
+  <p>Typing the 'help' command will show the list of all the DDS Debug commands that might be
+   supported in an active shell:</p>
+  <screen scale="80">TDDS Debug shell -- (c) Technicolor, 2012
+Following commands are available:
+    ssys                  Display system-specific data.
+    stimer                Display the timers.
+    sstr                  Display the string cache.
+    spool                 Display the pools.
+    spoola                Display the pools (extended).
+    scx [&lt;cx>]            Display connections.
+    scxa [&lt;cx>]           Display connections (extended).
+    scxq                  Display queued connections.
+    sloc                  Display locators.
+    sconfig               Display configuration data.
+    sdomain &lt;d> &lt;lf> &lt;rf> Display domain (d) info.
+                          &lt;lf> and &lt;rf> are bitmaps for local/remote info.
+                          1=Locator, 2=Builtin, 4=Endp, 8=Type, 10=Topic.
+    sdisc                 Display discovery info.
+    sdisca                Display all discovery info (sdisc + endpoints)
+    stypes [&lt;name>]       Display Type information.
+    sqos                  Display QoS parameters.
+    stopic &lt;d> [&lt;name>]   Display Topic information.
+    sendpoints            Display the DCPS/RTPS Readers/Writers.
+    scache &lt;ep>           Display an RTPS Endpoint Cache.
+    sdcache &lt;ep>          Display a DCPS Endpoint Cache.
+    qcache &lt;ep> &lt;query>   Query cache data of the specified endpoint:
+                          where: &lt;ep>: endpoint, &lt;query>: SQL Query string.
+    sproxy &lt;ep>           Display the Proxy contexts of an entry.
+    rproxy [&lt;ep>]         Restart Proxy context.
+    seqos &lt;ep>            Display endpoint QoS parameters.
+    scrypto &lt;ep>          Display entity crypto parameters.
+    sscache               Display security cache.
+    rehs                  Request a rehandshake.
+    srx                   Display the RTPS Receiver context.
+    stx                   Display the RTPS Transmitter context.
+    sfd                   Display the status of the file descriptors.
+    pause                 Pause traffic.
+    resume [&lt;n>]          Resume traffic [for &lt;n> samples].
+    delay &lt;n>             Set sleep time in ms.
+    asp &lt;d>               Assert participant.
+    ase &lt;ep>              Assert writer endpoint.
+    sdip                  Display the dynamic IP state.
+    dtls                  Display DTLS connection related info.
+    spdb                  Display the policy database.
+    spv                   Display the policy version numbers.
+    sfwd                  Display the forwarder state.
+    ftrace &lt;n>            Start forwarder tracing for &lt;n> events.
+    dtrace [&lt;t>]          Set/toggle default DDS tracing (t=0 or 1..15).
+    trace [&lt;ep> [&lt;t>]]    Set/toggle tracing on endpoints.
+	                      &lt;t>: 1=Frame, 2=Signal, 4=State, 8=Timer.
+    ditrace [&lt;t>]         Set/toggle default IP tracing (0 or 1).
+    itrace [&lt;h> [&lt;t>]]    Set/toggle tracing on IP connections (t:0/1).
+    cton                  Enable the cyclic trace buffer.
+    ctoff                 Disable the cyclic trace buffer.
+    ctclr                 Clear the cyclic trace buffer.
+    ctmode &lt;m>            Set tracing mode ('C'=cyclic/'S'=stop).
+    ctinfo                Display the state of the cyclic trace buffer.
+    ctaadd &lt;pos> &lt;name> &lt;dlen> [&lt;data>] &lt;action> {&lt;action>}
+	                      Add an action list to a tracepoint.
+    ctaclr                Clear all action lists.
+    ctalist               Display all actions lists.
+    ctainfo [&lt;id>]        Display all id or all id:index values.
+    ctcounters            Display all counters.
+    ctcclr                Clear all counters.
+    ctdump                Dump the cyclic trace buffer.
+    ctsave &lt;filename>     Save cyclic trace data to file.
+    profs                 Display profile results.
+    cprofs &lt;delay> &lt;dur>  Clear and restart profiling.
+    slstat                Display the status of all the locks.
+    d [&lt;p> [&lt;n>]]         Dump memory.
+    da [&lt;p> [&lt;n>]]        Dump memory in ASCII.
+    db [&lt;p> [&lt;n>]]        Dump memory in hex bytes.
+    ds [&lt;p> [&lt;n>]]        Dump memory in hex 16-bit values.
+    dl [&lt;p> [&lt;n>]]        Dump memory in hex 32-bit values.
+    dm [&lt;p> [&lt;n>]]        Dump memory in mixed hex/ASCII.
+    indent &lt;tab> &lt;n>      Set indent type (if &lt;tab>=1: use TABs).
+    taflags &lt;flags>       Set type attribute display flags.
+	                      &lt;flags>: 1=header, 2=size, 4=elsize, 8=ofs.
+    server [&lt;port>]       Start debug server.
+    env                   Display configuration data (same as sconf).
+    set &lt;var> &lt;value>     Set the configuration variable to given value.
+    unset &lt;var>           Unset the configuration variable.
+    suspend &lt;value>       Suspend with given mode.
+    activate &lt;value>      Activate with given mode.
+    help                  Display general help.
+    quit                  Quit main DDS program.
+    exit                  Close remote connection.
+></screen>
+  <note>This list includes all the commands that might be present in a DDS Debug enabled program.
+   However, a lot of these commands depend on various compile options so only a subset of these is
+  usually present.  Only the commands that are available will be displayed when the help command
+  is given.</note>
+  <p>Not all command characters need to be typed.  Following table shows
+   which command characters are significant and how to use them:</p>
+  <p>
+   <table frame="all" id="table_bh3_svh_vf">
+    <title>Debug shell commands.</title>
+    <tgroup cols="3">
+     <colspec colname="c1" colnum="1" colwidth="1*"/>
+     <colspec colname="c2" colnum="2" colwidth="2.28*"/>
+     <colspec colname="newCol3" colnum="3" colwidth="1.1*"/>
+     <thead>
+      <row>
+       <entry>Command</entry>
+       <entry>Description</entry>
+       <entry>Compile option</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><u>#</u></entry>
+       <entry>Lines starting with '#' or empty lines are seen as comments and are simply
+        ignored.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>ssy</u>s</entry>
+       <entry>Display system-specific data.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sti</u>mer</entry>
+       <entry>Displays all active timers in the Technicolor DDS middleware.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sst</u>r</entry>
+       <entry>Displays the string cache.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>spo</u>ol | <u>spoola</u>)</entry>
+       <entry>Display memory pool usage.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>scx</u> | <u>scxa</u> | <u>scxq</u>) [<i>&lt;cx></i>]</entry>
+       <entry>Display sockets that are in use.</entry>
+       <entry>RTPS_USED</entry>
+      </row>
+      <row>
+       <entry><u>slo</u>c</entry>
+       <entry>Display the locators cache.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sdo</u>main <i>&lt;d> &lt;lf> &lt;rf></i></entry>
+       <entry>Display all domain data corresponding to the domain id and the local/remote
+        flags.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>sdis</u>c | <u>sdisca</u>)</entry>
+       <entry>Display the local and discovered entities.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sty</u>pes [<i>&lt;name></i><cmdname>]</cmdname></entry>
+       <entry>Display registered types.</entry>
+       <entry>XTYPES_USED</entry>
+      </row>
+      <row>
+       <entry><u>sq</u>os</entry>
+       <entry>Display the QoS cache.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sto</u>pic <i>&lt;d></i> [<i>&lt;name></i>]</entry>
+       <entry>Display one or all Topics within the given domain.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>sen</u>dpoints | <u>sep</u>)</entry>
+       <entry>Display the Reader and Writer endpoints of all domains, local as well as
+        discovered.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>sca</u>che | <u>sdc</u>ache) &lt;ep></entry>
+       <entry>Display a local Reader or Writer cache.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>qc</u>ache <i>&lt;ep></i> [<i>&lt;query></i>]</entry>
+       <entry>Display local Reader or Writer cache data based on the given SQL-query
+        expression.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>spr</u>oxy <i>&lt;ep></i></entry>
+       <entry>Display the proxy Readers or proxy Writers corresponding with a local Writer or
+        Reader.</entry>
+       <entry>RTPS_USED</entry>
+      </row>
+      <row>
+       <entry><u>rpr</u>oxy <i>&lt;ep></i></entry>
+       <entry>Restart a proxy reader or writer for test purposes.</entry>
+       <entry>RTPS_USED</entry>
+      </row>
+      <row>
+       <entry><u>seq</u>os <i>&lt;ep></i></entry>
+       <entry>Display the QoS parameters of any created entity.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>scr</u>ypto <i>&lt;ep></i></entry>
+       <entry>Display entity crypto parameters.</entry>
+       <entry>DDS_NATIVE_SECURITY</entry>
+      </row>
+      <row>
+       <entry><u>ssc</u>ache</entry>
+       <entry>Display security cache.</entry>
+       <entry>DDS_NATIVE_SECURITY</entry>
+      </row>
+      <row>
+       <entry><u>reh</u>s</entry>
+       <entry>Request a rehandshake for test purposes.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>srx</u></entry>
+       <entry>Display the RTPS receive message context.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>stx</u></entry>
+       <entry>Display the RTPS transmitter context.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sfd</u></entry>
+       <entry>Display the status of the file descriptors.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>p</u>ause</entry>
+       <entry>Pause sending/receiving data.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>r</u>esume [<i>&lt;n></i>]</entry>
+       <entry>Resume sending/receiving data for the given number of samples, or continously if not
+        specified.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>de</u>lay <i>&lt;n></i></entry>
+       <entry>Sleep time between successive generated data samples (in milliseconds).</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>asp</u>
+        <i>&lt;d></i></entry>
+       <entry>Assert manual Participant Liveliness for the specified domain.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>ase</u>
+        <i>&lt;ep></i></entry>
+       <entry>Assert Topic Liveliness for the specified endpoint.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>sdip</u></entry>
+       <entry>Display the dynamic IP address handler state.</entry>
+       <entry>DDS_DYN_IP</entry>
+      </row>
+      <row>
+       <entry><u>dtls</u></entry>
+       <entry>Display DTLS connection related info.</entry>
+       <entry>DDS_SECURITY</entry>
+      </row>
+      <row>
+       <entry><u>spdb</u></entry>
+       <entry>Display the policy database.</entry>
+       <entry>DDS_NATIVE_SECURITY</entry>
+      </row>
+      <row>
+       <entry><u>spv</u></entry>
+       <entry>Display the policy version numbers.</entry>
+       <entry>DDS_QEO_TYPES</entry>
+      </row>
+      <row>
+       <entry><u>sf</u>wd</entry>
+       <entry>Display the forwarder state.</entry>
+       <entry>DDS_FORWARD</entry>
+      </row>
+      <row>
+       <entry><u>ft</u>race <i>&lt;n></i></entry>
+       <entry>Start forwarder tracing for &lt;n> events.</entry>
+       <entry>DDS_FORWARD</entry>
+      </row>
+      <row>
+       <entry><u>dt</u>race [<i>&lt;mode></i>]</entry>
+       <entry>Set the default tracing mode (default = no tracing) the the specified mode, or toggle
+        the default tracing mode (none &lt;-> all).</entry>
+       <entry>DDS_TRACE</entry>
+      </row>
+      <row>
+       <entry><u>tr</u>ace [<i>&lt;ep></i> [<i>&lt;mode></i>]]</entry>
+       <entry>Set the tracing mode of an endpoint (default = no tracing) to the specified mode, or
+        toggle the tracing mode of an endpoint (only &lt;ep> specified) or toggle the tracing mode
+        of all endpoints (if no arguments).</entry>
+       <entry>DDS_TRACE</entry>
+      </row>
+      <row>
+       <entry><u>dit</u>race [<i>&lt;t></i>]</entry>
+       <entry>Set/toggle default tracing of new IP connections.</entry>
+       <entry>MSG_TRACE</entry>
+      </row>
+      <row>
+       <entry><u>it</u>race [<i>&lt;h></i> [<i>&lt;t></i>]]</entry>
+       <entry>Set/toggle tracing on existing IP connections (t:0/1).</entry>
+       <entry>MSG_TRACE</entry>
+      </row>
+      <row>
+       <entry><u>cton</u></entry>
+       <entry>Start cyclic event tracing.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctof</u>f</entry>
+       <entry>Stop cyclic event tracing.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctcl</u>r</entry>
+       <entry>Clear the cyclic event trace buffer.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctm</u>ode <i>&lt;ctmode></i></entry>
+       <entry>Set cyclic trace mode to cyclic (&lt;ctmode> = 'c') or one-shot (&lt;ctmode> =
+        's').</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>cti</u>nfo</entry>
+       <entry>Display current cyclic trace settings and cyclic trace buffer filling level.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctaa</u>dd <i>&lt;pos></i>
+        <i>&lt;name> &lt;dlen></i> [<i>&lt;data></i>] <i>&lt;action></i>
+        {<i>&lt;action></i>}</entry>
+       <entry>Add an action list to a tracepoint.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctac</u>lr</entry>
+       <entry>Clear all action lists.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctal</u>ist</entry>
+       <entry>Display all actions lists.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctai</u>nfo [<i>&lt;id></i>]</entry>
+       <entry>Display all id or all id:index values.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctco</u>unters</entry>
+       <entry>Display all counters.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctcc</u>lr</entry>
+       <entry>Clear all counters.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>ctd</u>ump</entry>
+       <entry>Dump the contents of the cyclic event trace buffer.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>cts</u>ave <i>&lt;filename></i></entry>
+       <entry>Save the contents of the cyclic event trace buffer in a file.</entry>
+       <entry>CTRACE_USED</entry>
+      </row>
+      <row>
+       <entry><u>pro</u>fs</entry>
+       <entry>Display profiling statistics information.</entry>
+       <entry>PROFILE</entry>
+      </row>
+      <row>
+       <entry><u>cpro</u>f</entry>
+       <entry>Clear profiling statistics.</entry>
+       <entry>PROFILE</entry>
+      </row>
+      <row>
+       <entry><u>sls</u>tat</entry>
+       <entry>Display the status of the DDS locks.</entry>
+       <entry>LOCK_TRACE</entry>
+      </row>
+      <row>
+       <entry>(<u>d</u> | <u>da</u> | <u>db</u> | <u>ds</u> | <u>dl</u> | <u>dm</u>) [<i>&lt;p></i>
+         [<i>&lt;n></i>]]</entry>
+       <entry>Dump memory commands to dump data in ASCII, hex (8/16/32 bits) or mixed
+        hexadecimal/ASCII formats.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>ind</u>ent <i>&lt;tab> &lt;n></i></entry>
+       <entry>Set indent type (if &lt;tab>=1: use TABs).</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>taf</u>lags <i>&lt;flags></i></entry>
+       <entry>Set type attribute display flags.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>serv</u>er</entry>
+       <entry>Start a DDS Debug server for remote access.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>menu</u></entry>
+       <entry>Start the program menu screen.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>sco</u>nfig | <u>env</u>)</entry>
+       <entry>Display configuration data.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>set</u>
+        <i>&lt;var> &lt;value></i></entry>
+       <entry>Set the configuration variable to given value.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>unset</u>
+        <i>&lt;var></i></entry>
+       <entry>Unset the configuration variable.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>su</u>spend <i>&lt;value></i></entry>
+       <entry>Suspend with given mode.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>ac</u>tivate <i>&lt;value></i></entry>
+       <entry>Activate with given mode.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry>(<u>h</u>elp | <u>H</u> | <u>?</u>)</entry>
+       <entry>Display the debug commands.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>q</u>uit</entry>
+       <entry>Quit either the DDS Debug shell or the main program depending on the current
+        context.</entry>
+       <entry/>
+      </row>
+      <row>
+       <entry><u>exit</u></entry>
+       <entry>Exit from a remote debug shell connection.</entry>
+       <entry/>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+ </conbody>
+</concept>

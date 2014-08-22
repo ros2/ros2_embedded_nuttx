@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_zmb_gv1_vf">
+ <title>Bandwith program</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+    <p>The DDS bandwitdh test program (<cmdname>bw</cmdname>) is used to measure the bandwidth
+    between two or more DDS components, where one is a sender of data and the others are receivers
+    of the data.</p>
+  <p>It can be used to send timed data bursts at the Writer side in order to optimize the bandwidth
+    to reach the highest throughput for a predetermined time period.</p>
+  <p>A large number of test parameters can be tweaked:</p>
+  <p>
+   <ul id="ul_f1j_4x1_vf">
+    <li>Data is sent either reliably or in a best-effort manner.</li>
+    <li>The size of the data chunks can be selected up to 32KBytes per data item.</li>
+    <li>The number of data chunks in each burst is selectable.</li>
+    <li>The delay between successive data bursts is selectable.</li>
+    <li>The total delay of a test can be specified.</li>
+   </ul>
+  </p>
+  </section>
+  <section>
+   <title>Test methodology</title>
+   <p>The same bandwidth program can be used either as a data producer or as a data
+    consumber, or both, depending on the startup options given when the program is started.</p>
+   <p>It doesn't matter which of the two is started first, since the producer waits till all
+    consumers are present before starting with the data transfers.</p>
+   <p>Separate command and status topics are used to:</p>
+   <p>
+    <ol id="ol_ktn_xz1_vf">
+     <li>The data producer commands the data consumers that a test is initiated or stopped.</li>
+     <li>The producer retrieves status information from the data consumers as to whether samples are
+      missed.</li>
+    </ol>
+   </p>
+   <p>Once all consumers are ready, the producer sends data of the specified size in bursts
+   of a given length.  When a burst is finished, the producer delays for some configured time,
+   and while the test is not done yet, it repeats the burst.</p>
+   <p>When the test is finished, test results are displayed.</p>
+  </section>
+  <section>
+   <title>Starting the <cmdname>bw</cmdname> program</title>
+   <p>The <option>bw</option> program only runs from the command line and accepts a number of
+    program options that can be shown by typing <cmdname>bw -h</cmdname>:</p>
+   <p>
+    <table frame="all" id="table_jdg_q1b_vf">
+     <title><cmdname>bw</cmdname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="4.26*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-o</cmdname></entry>
+        <entry>Act as a data consumer.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-p</cmdname></entry>
+        <entry>Act as a data producer.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-op|po</cmdname></entry>
+        <entry>Act as both, i.e. producer and consumer are in the same process, and exchange
+         information locally.  This is the default mode of operation if no options are
+         given.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-n</cmdname>
+         <i>&lt;nrdrs></i></entry>
+        <entry>Number of data consumers listening for data. Default = 1.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-t</cmdname>
+         <i>&lt;time></i></entry>
+        <entry>Total test time in seconds.  Default test time = 5 seconds.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-s</cmdname>
+         <i>&lt;size></i></entry>
+        <entry>Size of each data chunk in bytes.  Default size = 1 byte.  Sizes can be specified
+         from 1 up to 32768 bytes.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-b</cmdname>
+         <i>&lt;count></i></entry>
+        <entry>Maximum number of data samples in each burst. Default burst size = 16.  Burst size
+         may be set from 1 up to 1000 data samples.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname>
+         <i>&lt;usec></i></entry>
+        <entry>Maximum delay in ųseconds between each successive data burst. Default delay =
+         100ųs.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-r</cmdname></entry>
+        <entry>If given, data transfers will be reliable, i.e. data will be retransmitted when
+         lost.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-q</cmdname>
+         <i>&lt;history></i></entry>
+        <entry>Number of samples to keep in the history.  Default is all samples.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-g</cmdname></entry>
+        <entry>Display a histogram of received samples in time.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-f</cmdname></entry>
+        <entry>Repeat the tests forever.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation - logs overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose - logs detailed functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Display some information on program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+   
+  </section>
+ </conbody>
+</concept>

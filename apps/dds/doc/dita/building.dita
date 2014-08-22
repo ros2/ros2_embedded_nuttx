@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_xfs_ftt_5f">
+ <title>Technicolor DDS components</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Technicolor DDS is delivered as a single build component, consisting of a dynamically loadable
+   shared library containing all core DDS functionality, with a number of prebuilt utility and demo
+   programs on the supported platforms.</p>
+  <p>There is usually no need for changing the component.  However, there are still some
+   compile/link-time options available for 'tweaking' the behavior somewhat. It is even possible to
+   link statically if there would be a need for it.</p>
+ </conbody>
+</concept>

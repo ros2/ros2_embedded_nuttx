@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_yj2_1gs_wf">
+ <title>Resource display commands</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The following DDS resources can be displayed:
+  </p><ul id="ul_3c1_5wq_wf">
+   <li>Timers. Use the <cmdname>stimer</cmdname> command to display the currently active
+    timers.</li>
+   <li>Strings. The <cmdname>sstring</cmdname> command can be used to display the string pool
+    contents.</li>
+   <li>File descriptors. The <cmdname>sfd</cmdname> command displays the currently used file
+    descriptors.</li>
+   <li>Memory pools. Use the <cmdname>spool</cmdname> or <cmdname>spoola</cmdname> command to
+    display the current memory usage.</li>
+   <li>IPv4 and IPv6 addresses.  The <cmdname>sdip</cmdname> command can be used to display the
+    currently assigned IP addresses.</li>
+   <li>IPv4 and IPv6 connections. The <cmdname>scx</cmdname> command is useful to retrieve some
+    socket statistics for a number of different IP connections (UDP, TCP, DTLS/UDP and TLS/TCP).
+    For DTLS/UDP connections, the <cmdname>dtls</cmdname> command gives more detailed
+    information.</li>
+   <li>Locators. RTPS locators are used extensively, and the contents of the locators pool can be
+    dumped with the <cmdname>sloc</cmdname> command.</li>
+   <li>Domain entities. The domain entities can be displayed using the <cmdname>sdomain</cmdname>,
+    <cmdname>sdisc</cmdname> and <cmdname>sdisca</cmdname> commands.</li>
+   <li>Types.  Registered types can be displayed with the <cmdname>stypes</cmdname> command.</li>
+   <li>QoS pools. The QoS parameters are kept in a central QoS pool, which can be displayed with
+    the <cmdname>sqos</cmdname> command.</li>
+   <li>QoS parameters. Individual QoS parameters for any DDS entity that has it can be displayed
+    with the <cmdname>seqos</cmdname> command.</li>
+   <li>Topics. Topics can be displayed in detail using the <cmdname>stopic</cmdname> command.</li>
+   <li>Endpoints. The created DataReader and DataWriter endpoints can be listed with the
+    <cmdname>sendpoints</cmdname> and <cmdname>sep</cmdname> commands.</li>
+   <li>History cache. The DDS history cache of both DataReader and DataWriter endpoints can be
+    displayed with the <cmdname>scache</cmdname> and <cmdname>sdcache</cmdname> commands. The
+    actual contents of a history cache can be queried with the <cmdname>qcache</cmdname>
+    command.</li>
+   <li>RTPS Proxy contexts. RTPS Proxy Reader and Proxy Writer contexts can be shown with the
+    <cmdname>sproxy</cmdname> command.</li>
+   <li>RTPS Receiver context. The RTPS Receiver context as well as some statistics and a small
+    error history can be dumped with the <cmdname>srx</cmdname> command.</li>
+   <li>RTPS Transmitter context. Similar to <cmdname>srx</cmdname>, the <cmdname>stx</cmdname>
+    command shows the RTPS Transmitter context.</li>
+   <li>Participant and Endpoint crypto data.  Crypto data can be displayed with the
+     <cmdname>scrypto</cmdname> and <cmdname>sscache</cmdname> commands.</li>
+   <li>Security policies.  The default security plugin allows to display its current configuration
+    with the <cmdname>spdb</cmdname> and <cmdname>spv</cmdname> commands.</li>
+  </ul><p>Some example resource display commands (taken from various running shapes and dds programs) will
+   be given, together with an explanation of what is displayed in response.</p>
+ </conbody>
+</concept>

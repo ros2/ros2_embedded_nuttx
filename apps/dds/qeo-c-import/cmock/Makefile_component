@@ -1,0 +1,20 @@
+ifneq ($($(cmock_INCLUDED)),1)
+# ifeq ($(E),<TARGET_PLATFORM_ENVIRONMENT_NAME>)
+override COMPONENT:= tools.external.acme.cmock
+
+cmock_DEPS := check
+cmock_PARTS_INSTALL := libcmock.so@$$(libdir/)libcmock.so:755
+cmock_INCLUDES := api/headers $$(check_INCLUDES)
+cmock_LIBS := -lcmock $$(check_LIBS)
+
+include $(projectdir/)build/Makefile_component_top
+# define CFLAGS genericly
+cmock.LIBRARIES := libcmock
+
+cmock.libcmock_LDADD := $(check_LIBS)
+cmock.libcmock_LOCALINCLUDES := src/src $(cmock_INCLUDES)
+cmock.libcmock_SRCS := $(addprefix src/src/, cmock.c)
+
+include $(projectdir/)build/Makefile_component_bot
+# endif
+endif

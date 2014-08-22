@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_jyg_m5s_wf">
+ <title>Endpoints</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>A list of endpoints and some condensed endpoint information can be displayed with the
+    <cmdname>sendpoints</cmdname> and <cmdname>sep</cmdname> commands as shown here:</p>
+  <screen scale="70">>sep
+DCPS:
+    0/000001-07 R{42}   0/2    Square/ShapeType
+    0/000002-07 R{43}   0/1    Triangle/ShapeType
+    0/000003-02 W{45}   1/1    Square/ShapeType
+    0/000003-c2 W{13}   1/1    SEDPbuiltinPublicationsWriter/discoveredWriterData
+    0/000003-c7 R{9}    0/0    SEDPbuiltinPublicationsReader/discoveredWriterData
+    0/000004-c2 W{15}   2/2    SEDPbuiltinSubscriptionsWriter/discoveredReaderData
+    0/000004-c7 R{11}   0/0    SEDPbuiltinSubscriptionsReader/discoveredReaderData
+    0/000100-c2 W{5}    1/1    SPDPbuiltinParticipantWriter/SPDPdiscoveredParticipantData
+    0/000100-c7 R{7}    0/0    SPDPbuiltinParticipantReader/SPDPdiscoveredParticipantData
+    0/000200-c2 W{19}   0/0    BuiltinParticipantMessageWriter/ParticipantMessageData
+    0/000200-c7 R{17}   0/0    BuiltinParticipantMessageReader/ParticipantMessageData
+RTPS:
+    0/000001-07 R{42}   0/2    Square/ShapeType
+                ->    GUID: c0a84080:00021ed3:03e80000-000001-2
+    0/000002-07 R{43}   0/1    Triangle/ShapeType
+                ->    GUID: c0a84080:00062810:03e80000-000003-2
+    0/000003-02 W{45}   0/1    Square/ShapeType
+                ->    GUID: c0a84080:00021ed3:03e80000-000002-7
+                ->    GUID: c0a84080:00062810:03e80000-000001-7
+    0/000003-c2 W{13}   0/1    SEDPbuiltinPublicationsWriter/discoveredWriterData
+                ->    GUID: c0a84080:00062810:03e80000-000003-c7
+                ->    GUID: c0a84080:00021ed3:03e80000-000003-c7
+    0/000003-c7 R{9}    0/0    SEDPbuiltinPublicationsReader/discoveredWriterData
+                ->    GUID: c0a84080:00062810:03e80000-000003-c2
+                ->    GUID: c0a84080:00021ed3:03e80000-000003-c2
+    0/000004-c2 W{15}   0/2    SEDPbuiltinSubscriptionsWriter/discoveredReaderData
+                ->    GUID: c0a84080:00062810:03e80000-000004-c7
+                ->    GUID: c0a84080:00021ed3:03e80000-000004-c7
+    0/000004-c7 R{11}   0/0    SEDPbuiltinSubscriptionsReader/discoveredReaderData
+                ->    GUID: c0a84080:00062810:03e80000-000004-c2
+                ->    GUID: c0a84080:00021ed3:03e80000-000004-c2
+    0/000100-c2 W{5}    1/1    SPDPbuiltinParticipantWriter/SPDPdiscoveredParticipantData
+                ->    Locator: UDP:239.255.0.1:7400
+    0/000100-c7 R{7}    0/0    SPDPbuiltinParticipantReader/SPDPdiscoveredParticipantData
+    0/000200-c2 W{19}   0/0    BuiltinParticipantMessageWriter/ParticipantMessageData
+                ->    GUID: c0a84080:00062810:03e80000-000200-c7
+                ->    GUID: c0a84080:00021ed3:03e80000-000200-c7
+    0/000200-c7 R{17}   0/0    BuiltinParticipantMessageReader/ParticipantMessageData
+                ->    GUID: c0a84080:00062810:03e80000-000200-c2
+                ->    GUID: c0a84080:00021ed3:03e80000-000200-c2</screen>
+  <p>Endpoints are displayed as two separate groups of endpoints:</p>
+  <p>
+   <ul id="ul_dfl_hxd_v4">
+    <li>The first group lists the endpoints as known on DCPS level. This typically includes all
+     endpoints that are defined in the domain without further information.</li>
+   </ul>
+  </p>
+  <p>
+   <ul id="ul_y4y_3xd_v4">
+    <li>The second group lists the endpoints that have RTPS connectivity with discovered endpoints.
+     For each of those, either the ReaderLocator instance (SPDPbuiltinParticipantWriter) or the
+     Proxy Reader or Writer contexts are shown as GUIDs.<note>Not all endpoints are expected to be
+      connected on RTPS. Technicolor DDS only creates RTPS Readers and RTPS Writers when remote
+      Writers and Readers are actually discovered.</note></li>
+   </ul>
+  </p>
+  <p>Endpoints are displayed as:</p>
+  <p>
+   <ul id="ul_gn2_pys_wf">
+    <li>A a Domain Id/Entity Id pair, followed by</li>
+    <li>the endpoint type (R or W) and handle,</li>
+    <li>summary history cache information as &lt;<i>number_of_samples</i>> /
+      &lt;<i>number_of_instances</i>>, followed by</li>
+    <li>Topic name / Type name strings.</li>
+   </ul>
+  </p>
+  <p>In the RTPS group, each matched endpoint is listed explicitly on separate lines.</p>
+  <p>The previous example listed all the endpoints within an open domain in which security was not
+   enabled. Secure endpoints in a secure domain are shown with extra security parameters as an extra
+   line specifying the security attributes, as shown in the following example:</p>
+  <p><screen scale="70">>sep
+DCPS:
+    7/000001-02 W{46}   3/3    HelloWorld/HelloWorldData
+    7/000002-07 R{48}   6/6    HelloWorld/HelloWorldData
+    7/000003-c2 W{13}   0/0    SEDPbuiltinPublicationsWriter/PublicationBuiltinTopicData
+    7/000003-c7 R{9}    0/0    SEDPbuiltinPublicationsReader/PublicationBuiltinTopicData
+    7/000004-c2 W{15}   0/0    SEDPbuiltinSubscriptionsWriter/SubscriptionBuiltinTopicData
+    7/000004-c7 R{11}   0/0    SEDPbuiltinSubscriptionsReader/SubscriptionBuiltinTopicData
+    7/000100-c2 W{5}    1/1    SPDPbuiltinParticipantWriter/ParticipantBuiltinTopicDataSecure
+    7/000100-c7 R{7}    0/0    SPDPbuiltinParticipantReader/ParticipantBuiltinTopicDataSecure
+    7/000200-c2 W{27}   1/1    BuiltinParticipantMessageWriter/ParticipantMessageData
+    7/000200-c7 R{25}   0/0    BuiltinParticipantMessageReader/ParticipantMessageData
+    7/000201-c3 W{33}     0    BuiltinParticipantStatelessMessageWriter/ParticipantStatelessMessage
+    7/000201-c4 R{35}     0    BuiltinParticipantStatelessMessageReader/ParticipantStatelessMessage
+    7/ff0003-c2 W{21}   1/1    SEDPbuiltinPublicationsSecureWriter/PublicationBuiltinTopicDataSecure
+    7/ff0003-c7 R{17}   0/0    SEDPbuiltinPublicationsSecureReader/PublicationBuiltinTopicDataSecure
+    7/ff0004-c2 W{23}   1/1    SEDPbuiltinSubscriptionsSecureWriter/SubscriptionBuiltinTopicDataSecure
+    7/ff0004-c7 R{19}   0/0    SEDPbuiltinSubscriptionsSecureReader/SubscriptionBuiltinTopicDataSecure
+    7/ff0200-c2 W{31}   0/0    BuiltinParticipantMessageSecureWriter/ParticipantMessageData
+    7/ff0200-c7 R{29}   0/0    BuiltinParticipantMessageSecureReader/ParticipantMessageData
+    7/ff0202-c3 W{37}     0    BuiltinParticipantVolatileMessageSecureWriter/ParticipantVolatileSecureMessage
+    7/ff0202-c4 R{39}     0    BuiltinParticipantVolatileMessageSecureReader/ParticipantVolatileSecureMessage
+    7/ff0401-c2 W{43}   1/1    QeobuiltinPolicyStateWriter/PolicyUpdaterMessageData
+    7/ff0401-c7 R{41}   0/1    QeobuiltinPolicyStateReader/PolicyUpdaterMessageData
+RTPS:
+    7/000001-02 W{46}   0/3    HelloWorld/HelloWorldData
+         Access control, Secure discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000002-7 {66}
+    7/000002-07 R{48}   0/6    HelloWorld/HelloWorldData
+     Access control, Secure discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000001-2 {67}
+    7/000003-c2 W{13}   0/0    SEDPbuiltinPublicationsWriter/PublicationBuiltinTopicData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000003-c7 {58}
+    7/000003-c7 R{9}    0/0    SEDPbuiltinPublicationsReader/PublicationBuiltinTopicData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000003-c2 {59}
+    7/000004-c2 W{15}   0/0    SEDPbuiltinSubscriptionsWriter/SubscriptionBuiltinTopicData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000004-c7 {60}
+    7/000004-c7 R{11}   0/0    SEDPbuiltinSubscriptionsReader/SubscriptionBuiltinTopicData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000004-c2 {61}
+    7/000100-c2 W{5}    3/1    SPDPbuiltinParticipantWriter/ParticipantBuiltinTopicDataSecure
+                ->    Locator: UDP:239.255.0.1:9150(12) {5}
+                ->    Locator: UDPv6:ff03::80:9150(13) {5}
+                ->    Locator: TCP:239.255.0.1:9150-(null)(C)(7) {5}
+    7/000100-c7 R{7}    0/0    SPDPbuiltinParticipantReader/ParticipantBuiltinTopicDataSecure
+    7/000200-c2 W{27}   0/1    BuiltinParticipantMessageWriter/ParticipantMessageData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000200-c7 {54}
+    7/000200-c7 R{25}   0/0    BuiltinParticipantMessageReader/ParticipantMessageData
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-000200-c2 {55}
+    7/000201-c3 W{33}     0    BuiltinParticipantStatelessMessageWriter/ParticipantStatelessMessage
+                ->    Locator: UDP:239.255.0.1:9150(12) {33}
+                ->    Locator: UDPv6:ff03::80:9150(13) {33}
+                ->    Locator: TCP:239.255.0.1:9150-(null)(C)(7) {33}
+    7/000201-c4 R{35}     0    BuiltinParticipantStatelessMessageReader/ParticipantStatelessMessage
+    7/ff0003-c2 W{21}   0/1    SEDPbuiltinPublicationsSecureWriter/PublicationBuiltinTopicDataSecure
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0003-c7 {62}
+    7/ff0003-c7 R{17}   0/0    SEDPbuiltinPublicationsSecureReader/PublicationBuiltinTopicDataSecure
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0003-c2 {63}
+    7/ff0004-c2 W{23}   0/1    SEDPbuiltinSubscriptionsSecureWriter/SubscriptionBuiltinTopicDataSecure
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0004-c7 {64}
+    7/ff0004-c7 R{19}   0/0    SEDPbuiltinSubscriptionsSecureReader/SubscriptionBuiltinTopicDataSecure
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0004-c2 {65}
+    7/ff0200-c2 W{31}   0/0    BuiltinParticipantMessageSecureWriter/ParticipantMessageData
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0200-c7 {56}
+    7/ff0200-c7 R{29}   0/0    BuiltinParticipantMessageSecureReader/ParticipantMessageData
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0200-c2 {57}
+    7/ff0202-c3 W{37}     0    BuiltinParticipantVolatileMessageSecureWriter/ParticipantVolatileSecureMessage
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0202-c4 {51}
+    7/ff0202-c4 R{39}     0    BuiltinParticipantVolatileMessageSecureReader/ParticipantVolatileSecureMessage
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0202-c3 {50}
+    7/ff0401-c2 W{43}   0/1    QeobuiltinPolicyStateWriter/PolicyUpdaterMessageData
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0401-c7 {52}
+    7/ff0401-c7 R{41}   0/1    QeobuiltinPolicyStateReader/PolicyUpdaterMessageData
+        No Access control, Normal discovery, Encryption: payload(AES128_HMAC_SHA1)
+                ->    GUID: 1752a037:2c14ac84:e9ddb9c7-ff0401-c2 {53}</screen></p>
+  <p>As can be seen from this example, there are a lot more topics present when DDS security is
+   used.</p>
+ </conbody>
+</concept>

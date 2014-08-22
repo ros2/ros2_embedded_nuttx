@@ -1,0 +1,77 @@
+   History cache.
+   --------------
+   This implementation of the history cache tries to keep the cache footprint
+   as small as possible using the following design principles:
+
+	1. The primary list of changes is maintained directly in the history
+	   cache structure, and consists of cache changes chained directly in
+	   sequence number order so that the head element has the smallest
+	   sequence number and the tail element the highest.
+	   All entries in this list use dual pointer linkage to allow easy
+	   and fast purging of cache changes that are located at random
+	   positions in the primary list.
+
+	   Advantages: - Much easier to enqueue the complete cache contents to
+	                 new readers.
+		       - Allows to get the min/max sequence numbers directly
+		         from the head/tail pointers - no need to search them.
+		       - Small cost: (2 pointers/cache change.)
+		       - Cache changes can easily be removed.
+
+	2. Secondary lists of changes are maintained usinge Cache Change
+	   Reference nodes in a linked list (CCREF and CCLIST).
+
+		- Per instance, a secondary list (in sequence number ordering)
+		  is kept.  When multiple instances are allowed, each instance
+		  has a separate secondary list.  The various instances each
+		  have an instance descriptor, that are linked together, either
+		  in a simple linked list when there are only a few entries or
+		  by using two skiplists when there are many instances.
+		  In the latter case, one skiplist is used for for searching on
+		  instance handle and the other is used for searching on hash
+		  key (16-byte).
+		  Otherwise, for single instance only, a separate secondary list
+		  is used.
+
+		- Per ReaderLocator/ProxyReader, a single separate secondary
+		  list (in sequence number ordering) is used to keep state of
+		  each cache change as needed for the appropriate Writer
+		  behavior.
+
+	3, Various other lists are needed for each ReaderLocator/ProxyReader to
+	   handle specific sublists of the secondary list such as:
+
+			- The sublist of unsent changes.
+			- The sublist of sent changes.
+			- The sublist of requested changes.
+
+	   These (tertiary) lists are managed using:
+
+	  	a. The state as kept for each change in the secondary list.
+		b. A pointer to the first element in the secondary list that
+		   corresponds to the start of the sublist or NULL if the
+		   sublist is empty.
+		c. Walking over subsequent entries in the secondary list while
+		   skipping entries (using secondary list state information)
+		   that are not useful.
+
+	4. In order to properly handle the lifetime of cache entries, a count
+	   of the number of users is maintained.  This count should be
+	   incremented whenever the cache change is added to a secondary list
+	   and decremented when removed from a secondary list.  When the number
+	   of users becomes 0, the cache entry can be deleted.
+
+   While few instances are used (n < MAX_INST_LLIST), instances are chained
+   directly together, and searching is simply by walking over the list, whether
+   when searching a key, or when searching an instance handle.
+   When the number of instances becomes larger, the cache is converted to a
+   dual skiplist for efficient searching:
+
+  	- The first skiplist is used to search instances based on the unique
+	  instance handle.  Since it is impossible to have duplicate handles,
+	  matching entries is very simple, i.e. no subchaining required.
+	- The second skiplist is used to implement a hash table, where the
+	  hash of a key (key itself if <= 16, or MD5(key)) is used to lookup
+	  an entry and with hash collision resolution by comparing keys in a
+	  direct instance chain (as before).
+

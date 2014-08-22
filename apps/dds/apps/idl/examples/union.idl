@@ -1,0 +1,7 @@
+
+struct myStructType {
+	union myUnion switch (long) {
+		case 'a':      string<100> aValue;
+		case 'b':      long bValue;
+	} aunion;
+};

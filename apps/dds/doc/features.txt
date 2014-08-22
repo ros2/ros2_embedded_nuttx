@@ -1,0 +1,408 @@
+DOMAIN
+	DomainParticipantFactory
+		create_participant()				DONE
+		delete_participant()				DONE
+		get_instance()					DONE
+		lookup_participant()				DONE
+		get_default_participant_qos()			DONE
+		set_default_participant_qos()			DONE
+		get_qos()					DONE
+		set_qos()					DONE
+
+	DomainParticipant
+		get_qos()					DONE
+		set_qos()					DONE
+		get_listener()					DONE
+		set_listener()					DONE
+		enable()					DONE*
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		create_publisher() 				DONE
+		delete_publisher() 				DONE
+		create_subscriber() 				DONE
+		delete_subscriber() 				DONE
+		create_topic() 					DONE
+		delete_topic() 					DONE
+		create_contentfilteredtopic() 			DONE
+		delete_contentfilteredtopic() 			DONE
+		create_multitopic() 					(NP)
+		delete_multitopic() 					(NP)
+		find_topic() 					DONE
+		lookup_topicdescription() 			DONE
+		get_builtin_subscriber() 			DONE
+		ignore_participant() 				DONE
+		ignore_topic() 					DONE
+		ignore_publication() 				DONE
+		ignore_subscription() 				DONE
+		delete_contained_entities() 			DONE
+		assert_liveliness()				DONE 
+		get_default_publisher_qos() 			DONE
+		set_default_publisher_qos() 			DONE
+		get_default_subscriber_qos() 			DONE
+		set_default_subscriber_qos() 			DONE
+		get_default_topic_qos() 			DONE
+		set_default_topic_qos() 			DONE
+		get_domain_id() 				DONE
+		get_discovered_participants() 			DONE
+		get_discovered_participant_data() 		DONE
+		get_discovered_topics() 			DONE
+		get_discovered_topic_data() 			DONE
+		contains_entity() 				DONE
+		get_current_time() 				DONE
+
+TOPIC DEFINITION
+	TopicDescription
+		get_participant()				DONE
+		get_type_name() 				DONE
+		get_name() 					DONE
+
+	Topic
+		enable()					DONE*
+		get_qos() 					DONE
+		set_qos() 					DONE
+		get_listener() 					DONE
+		set_listener() 					DONE
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		get_participant() 				DONE
+		get_type_name() 				DONE
+		get_name() 					DONE
+		get_inconsistent_topic_status() 		DONE
+
+	ContentFilteredTopic
+		attribute: filter_expression 			DONE
+		get_related_topic() 				DONE
+		get_expression_parameters() 			DONE
+		set_expression_parameters() 			DONE
+
+	MultiTopic
+		attribute: subscription_expression			(NP)
+		get_expression_parameters() 				(NP)
+		set_expression_parameters() 				(NP)
+
+	TypeSupport
+		register_type() 				DONE
+		unregister_type() 				DONE
+
+	Publisher
+		enable() 					DONE*
+		get_qos() 					DONE
+		set_qos() 					DONE
+		get_listener() 					DONE
+		set_listener() 					DONE
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		create_datawriter() 				DONE
+		delete_datawriter() 				DONE
+		lookup_datawriter() 				DONE
+		suspend_publications()					TODO
+		resume_publications()					TODO
+		begin_coherent_changes()				(NP)
+		end_coherent_changes()					(NP)
+		wait_for_acknowledgments() 			DONE
+		get_participant() 				DONE
+		delete_contained_entities() 			DONE
+		get_default_datawriter_qos()			DONE 
+		set_default_datawriter_qos() 			DONE
+		copy_from_topic_qos()				DONE
+
+	DataWriter
+		enable() 					DONE
+		get_qos() 					DONE
+		set_qos() 					DONE
+		get_listener() 					DONE
+		set_listener() 					DONE
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		register_instance() 				DONE
+		register_instance_w_timestamp() 		DONE
+		unregister_instance() 				DONE
+		unregister_instance_w_timestamp() 		DONE
+		get_key_value() 				DONE***
+		lookup_instance() 				DONE
+		write() 					DONE
+		write_w_timestamp() 				DONE
+		dispose() 					DONE
+		dispose_w_timestamp() 				DONE
+		wait_for_acknowledgements() 			DONE
+		get_liveliness_lost_status() 			DONE
+		get_offered_deadline_missed_status() 		DONE
+		get_offered_incompatible_qos_status() 		DONE
+		get_publication_matched_status() 		DONE
+		get_topic() 					DONE
+		get_publisher()					DONE
+		assert_liveliness() 				DONE
+		get_matched_subscriptions() 			DONE
+		get_matched_subscription_data() 		DONE
+
+SUBSCRIPTION
+	Subscriber
+		enable() 					DONE*
+		get_qos() 					DONE
+		set_qos() 					DONE
+		get_listener() 					DONE
+		set_listener() 					DONE
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		create_datareader() 				DONE
+		delete_datareader() 				DONE
+		lookup_datareader() 				DONE
+		begin_access() 						(NP)
+		end_access() 						(NP)
+		get_datareaders() 				DONE
+		notify_datareaders()				DONE
+		get_participant() 				DONE
+		delete_contained_entities() 			DONE
+		get_default_datareader_qos() 			DONE
+		set_default_datareader_qos() 			DONE
+		copy_from_topic_qos() 				DONE
+
+	DataReader
+		enable() 					DONE
+		get_qos() 					DONE
+		set_qos() 					DONE
+		get_listener() 					DONE
+		set_listener() 					DONE
+		get_statuscondition() 				DONE
+		get_status_changes() 				DONE
+		read() 						DONE
+		take() 						DONE
+		read_w_condition() 				DONE
+		take_w_condition() 				DONE
+		read_next_sample() 				DONE
+		take_next_sample() 				DONE
+		read_instance() 				DONE
+		take_instance() 				DONE
+		read_next_instance() 				DONE
+		take_next_instance() 				DONE
+		read_next_instance_w_condition() 		DONE
+		take_next_instance_w_condition() 		DONE
+		return_loan() 					DONE
+		get_key_value() 				DONE
+		lookup_instance() 				DONE
+		create_readcondition() 				DONE
+		create_querycondition()				DONE
+		delete_readcondition() 				DONE
+		get_liveliness_changed_status() 		DONE
+		get_requested_deadline_missed_status() 		DONE
+		get_requested_incompatible_qos_status() 	DONE
+		get_sample_lost_status() 			DONE
+		get_sample_rejected_status() 			DONE
+		get_subscription_matched_status() 		DONE
+		get_topicdescription() 				DONE
+		get_subscriber 					DONE
+		delete_contained_entities()			DONE 
+		wait_for_historical_data()			DONE
+		get_matched_publications() 			DONE
+		get_matched_publication_data() 			DONE
+
+	SampleInfo
+		sample_state 					DONE
+		view_state 					DONE
+		instance_state 					DONE
+		disposed_generation_count 			DONE
+		no_writer_generation_count 			DONE
+		sample_rank 					DONE
+		generation_rank 				DONE
+		absolute_generation_rank 			DONE
+		source_timestamp 				DONE
+		instance_handle 				DONE
+		publication_handle 				DONE
+		valid_data 					DONE
+
+	ReadCondition
+		get_datareader() 				DONE
+		get_sample_state_mask() 			DONE
+		get_view_state_mask() 				DONE
+		get_instance_state_mask() 			DONE
+
+	QueryCondition
+		get_query_expression() 				DONE
+		get_query_parameters() 				DONE
+		set_query_parameters() 				DONE
+
+QUALITY OF SERVICE
+	USER_DATA
+		sequence<octet>					DONE
+
+	TOPIC_DATA
+		sequence<octet>					DONE
+
+	GROUP_DATA
+		sequence<octet>					DONE
+
+	DURABILITY
+		kind=VOLATILE 					DONE
+		kind=TRANSIENT_LOCAL 				DONE
+		kind=TRANSIENT 						(NP)
+		kind=PERSISTENT 					(NP)
+
+	DURABILITY_SERVICE
+		service_cleanup_delay 					(NP)
+		history_kind 						(NP)
+		history_depth 						(NP)
+		max_samples 						(NP)
+		max_instances 						(NP)
+		max_samples_per_instance 				(NP)
+
+	PRESENTATION
+		access_scope=INSTANCE 				DONE
+		access_scope=TOPIC 				DONE
+		access_scope=GROUP					(NP)
+		coherent_access 					(NP)
+		ordered_access 					DONE
+
+	DEADLINE
+		period						DONE
+
+	LATENCY_BUDGET
+		duration					DONE**
+
+	OWNERSHIP
+		kind=SHARED					DONE
+		kind=EXCLUSIVE					DONE
+
+	OWNERSHIP_STRENGTH
+		value						DONE
+
+	LIVELINESS
+		kind=AUTOMATIC 					DONE
+		kind=MANUAL_BY_PARTICIPANT 			DONE
+		kind=MANUAL_BY_TOPIC 				DONE
+
+	TIME_BASED_FILTER
+		duration						TODO
+
+	PARTITION
+		sequence<string> name				DONE
+
+	RELIABILITY
+		kind=RELIABLE 					DONE
+		kind=BEST_EFFORT 				DONE
+
+	TRANSPORT_PRIORITY
+		int value					DONE****
+
+	LIFESPAN
+		duration						TODO
+
+	DESTINATION_ORDER
+		kind=BY_RECEPTION_TIMESTAMP 			DONE
+		kind=BY_SOURCE_TIMESTAMP 			DONE
+
+	HISTORY
+		kind=KEEP_LAST					DONE
+		kind=KEEP_ALL					DONE
+
+	RESOURCE_LIMITS
+		sample/instance count limits			DONE
+
+	ENTITY_FACTORY
+		autoenable_created_entities			DONE (True)
+
+	WRITER_DATA_LIFECYCLE
+		autodispose_unregistered_instances		DONE
+
+	READER_DATA_LIFECYCLE
+		autopurge_nowriter_samples_delay 			TODO
+		autopurge_disposed_samples_delay 			TODO
+
+LISTENERS
+	DomainParticipantListener
+		on_offered_deadline_missed() 			DONE
+		on_offered_incompatible_qos() 			DONE
+		on_liveliness_lost() 				DONE
+		on_publication_match() 				DONE
+		on_inconsistent_topic() 			DONE
+		on_requested_deadline_missed() 			DONE
+		on_requested_incompatible_qos(); 		DONE
+		on_sample_rejected() 				DONE
+		on_liveliness_changed() 			DONE
+		on_data_on_readers() 				DONE
+		on_data_available() 				DONE
+		on_subscription_match() 			DONE
+		on_sample_lost() 				DONE
+	
+	PublisherListener
+		on_offered_deadline_missed() 			DONE
+		on_offered_incompatible_qos() 			DONE
+		on_liveliness_lost() 				DONE
+		on_publication_match() 				DONE
+
+	DataWriterListener
+		on_offered_deadline_missed() 			DONE
+		on_offered_incompatible_qos() 			DONE
+		on_liveliness_lost() 				DONE
+		on_publication_match() 				DONE
+
+	TopicListener
+		on_inconsistent_topic()				DONE
+
+	SubscriberListener
+		on_data_on_readers() 				DONE
+		on_requested_deadline_missed() 			DONE
+		on_requested_incompatible_qos(); 		DONE
+		on_sample_rejected() 				DONE
+		on_liveliness_changed() 			DONE
+		on_data_available() 				DONE
+		on_subscription_match() 			DONE
+		on_sample_lost() 				DONE
+
+	DataReaderListener
+		on_requested_deadline_missed() 			DONE
+		on_requested_incompatible_qos()			DONE
+		on_sample_rejected() 				DONE
+		on_liveliness_changed() 			DONE
+		on_data_available()				DONE 
+		on_subscription_match() 			DONE
+		on_sample_lost() 				DONE
+
+TYPECODE
+	Basic Data Types
+		short 						DONE
+		long 						DONE
+		long long 					DONE
+		unsigned short 					DONE
+		unsigned long 					DONE
+		unsigned long long				DONE
+		float 						DONE
+ 		double 						DONE
+		long double 					DONE(opt)
+		char 						DONE
+		wchar 						DONE
+		boolean 					DONE
+		octet 						DONE
+
+	Structured Data Types
+		struct 						DONE
+		union 						DONE
+		sequence, bounded and unbounded 		DONE
+		fixed 						DONE
+
+	Other Data Types
+		enum 						DONE
+		string, bounded and unbounded 			DONE
+		wstring 					DONE
+		array 						DONE
+		constant 					DONE
+
+ADDITIONAL FEATURES
+	Central Discovery Handling				DONE
+	Directed Write						DONE
+
+TO DO:
+	Dynamic Data interface (X-types)
+		CDR							TODO
+		PL-CDR							TODO
+		XML							(NP)
+
+	Type Specification
+		TSM						DONE
+		IDL							TODO
+
+	Multilanguage API
+		C						DONE
+		C++ (C-API)					DONE
+		C++ (Native C++)					TODO
+		Java							TODO
+

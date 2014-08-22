@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_2vh_cjs_wf">
+ <title>Quality of Service</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Concept definition.</p>
+  <p>The <cmdname>sqos</cmdname> command shows the following output:</p>
+  <screen scale="80">>sqos
+5: 0x9b865b0*2 
+7: 0x9b86660*5 
+23: 0x9b86608*22 
+33: 0x9b866b8*2</screen>
+  <p>The QoS display is somewhat simplistic because it simply displays the address of the in-memory
+   unified QoS data container, following the hash key and followed by the reference counter.</p>
+  <p>It does however show that reusing QoS parameters is very advantageous in order to reduce the
+   overall memory footprint.</p>
+  <p>Displaying specific entity QoS parameters is much more appropriate, as can be done with the
+    <cmdname>seqos</cmdname> command.</p>
+  <p>In order to do this, the user needs to specify the handle of the entity that needs to be
+   displayed:</p>
+  <screen scale="80">>seq 42
+Reader QoS:
+    USER_DATA: &lt;empty>
+    DURABILITY: TRANSIENT_LOCAL
+    DEADLINE: &lt;inf>
+    LATENCY_BUDGET: 0s
+    OWNERSHIP: SHARED
+    LIVELINESS: AUTOMATIC, lease_duration=&lt;inf>
+    RELIABILITY: RELIABLE, max_blocking_time=0.100000000s
+    DESTINATION_ORDER: BY_RECEPTION_TIMESTAMP
+    HISTORY: KEEP_LAST, depth=1
+    RESOURCE_LIMITS: max_samples=&lt;inf>, max_inst=&lt;inf>, max_samples_per_inst=&lt;inf>
+    TIME_BASED_FILTER: minimum_separation=0s
+    READER_DATA_LIFECYCLE: autopurge_nowriter=&lt;inf>, autopurge_disposed=&lt;inf>
+G:  PARTITION: &lt;none>
+    GROUP_DATA: &lt;empty>
+T:  TOPIC_DATA: &lt;empty>
+>seq 45
+Writer QoS:
+    USER_DATA: &lt;empty>
+    DURABILITY: TRANSIENT_LOCAL
+    DURABILITY_SERVICE: 
+    DEADLINE: &lt;inf>
+    LATENCY_BUDGET: 0s
+    OWNERSHIP: SHARED
+    OWNERSHIP_STRENGTH: 0
+    LIVELINESS: AUTOMATIC, lease_duration=&lt;inf>
+    RELIABILITY: RELIABLE, max_blocking_time=0.100000000s
+    TRANSPORT_PRIORITY: 0
+    LIFESPAN: &lt;inf>
+    DESTINATION_ORDER: BY_RECEPTION_TIMESTAMP
+    HISTORY: KEEP_LAST, depth=1
+    RESOURCE_LIMITS: max_samples=&lt;inf>, max_inst=&lt;inf>, max_samples_per_inst=&lt;inf>
+    WRITER_DATA_LIFECYCLE: autodispose_unregistered_instances=1
+G:  PARTITION: &lt;none>
+    GROUP_DATA: &lt;empty>
+T:  TOPIC_DATA: &lt;empty></screen>
+  <note>The G: and T: references in the display refer to data that is effectively present in the
+   Group (Partition QoS and Group Data) and Topic (Topic Data) respectively.</note>
+  <note>This command is not restricted to DataReader and DataWriter QoS. It can be used to display
+   the QoS parameters of any entity in the DDS domains that has QoS parameters.  It is just a matter
+   of giving the correct instance handle.</note>
+ </conbody>
+</concept>

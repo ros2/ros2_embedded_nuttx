@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_k34_5mt_r4">
+    <title>Pool configuration parameters</title>
+    <body>
+      <p>The memory pools can be configured, both with the DDS_set_pool_constraints() function (see:
+        Configuring memory pools) as well as with Pool configuration parameters.</p>
+      <p>Following parameters are defined:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_vcg_fnt_r4">
+          <title>Pool configuration parameters</title>
+          <tgroup cols="3">
+            <colspec colname="c1" colnum="1" colwidth="1.98*"/>
+            <colspec colname="c2" colnum="2" colwidth="4.4*"/>
+            <colspec colname="c3" colnum="3" colwidth="1*"/>
+            <thead>
+              <row>
+                <entry>Parameter name</entry>
+                <entry>Description</entry>
+                <entry>Type</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>POOL_DOMAINS</entry>
+                <entry>Local DDS DomainParticipant</entry>
+                <entry>Number</entry>
+              </row>
+              <row>
+                <entry>POOL_SUBSCRIBERS</entry>
+                <entry>DDS Subscriber</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_PUBLISHERS</entry>
+                <entry>DDS Publisher</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_READERS</entry>
+                <entry>Local DDS Reader</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_WRITERS</entry>
+                <entry>Local DDS Writer</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TOPICS</entry>
+                <entry>DDS Topics</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_FILTERED</entry>
+                <entry>DDS Filtered Topics</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TYPES</entry>
+                <entry>DDS Types</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_RPROXIES</entry>
+                <entry>RTPS RemoteReader</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_WPROXIES</entry>
+                <entry>RTPS RemoteWriter</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_RPARTICIPANTS</entry>
+                <entry>Discovered DDS Participant</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_RREADERS</entry>
+                <entry>Discovered DDS Reader</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_RWRITERS</entry>
+                <entry>Discovered DDS Writer</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_POOL_DATA</entry>
+                <entry>Sample data buffers</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_RX_BUFFERS</entry>
+                <entry>Receive data buffers for RTPS</entry>
+                <entry>Number</entry>
+              </row>
+              <row>
+                <entry>POOL_CHANGES</entry>
+                <entry>Cache samples</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_INSTANCES</entry>
+                <entry>Cache instances</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_SAMPLES</entry>
+                <entry>Application sample references</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_LOCAL_MATCH</entry>
+                <entry>Locally matching readers/writers</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_CACHE_WAIT</entry>
+                <entry>Maximum threads waiting for a Cache.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_CACHE_XFER</entry>
+                <entry>Samples being queued between two local Data History Caches.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TIME_FILTERS</entry>
+                <entry>Active Time Filter.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TIME_INSTS</entry>
+                <entry>Time filter instance.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_STRINGS</entry>
+                <entry>Unique string descriptor</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_STRING_DATA</entry>
+                <entry>Unique string data area size</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_LOCATORS</entry>
+                <entry>Locator descriptor (see RTPS).</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_QOS</entry>
+                <entry>Unique DDS Quality of Service data set.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_LISTS</entry>
+                <entry>Dynamic list</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_LIST_NODES</entry>
+                <entry>Dynamic list node</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TIMERS</entry>
+                <entry>Timer</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_WAITSETS</entry>
+                <entry>DDS WaitSet</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_STATUSCONDS</entry>
+                <entry>DDS StatusCondition</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_READCONDS</entry>
+                <entry>DDS ReadCondition</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_QUERYCONDS</entry>
+                <entry>DDS QueryCondition</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_GUARDCONDS</entry>
+                <entry>DDS GuardCondition</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_NOTIFICATIONS</entry>
+                <entry>Outstanding Listener notification.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_TOPIC_WAITING</entry>
+                <entry>Threads waiting for a Topic</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_GUARDS</entry>
+                <entry>Used if any of the Liveliness, Deadline, Lifespan and AutoPurge QoS
+                  parameters are active.</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_DYN_TYPES</entry>
+                <entry>A DDS Dynamic type (see X-Types)</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_DYN_SAMPLES</entry>
+                <entry>A DDS Dynamic sample (see X-Types)</entry>
+                <entry>Range</entry>
+              </row>
+              <row>
+                <entry>POOL_GROWTH</entry>
+                <entry>Default growth factor</entry>
+                <entry>Number</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+      <p>Example:</p>
+      <p><b>export TDDS_POOL_GROWTH=200</b></p>
+      <p>Sets the default pool growth parameter to 200%.</p>
+    </body>
+  </topic>
+</dita>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_5wd_5hs_wf">
+ <title>Sockets</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The <cmdname>scx</cmdname> command shows the IP
+      resources:<screen scale="80">>scx
+# of IP receive events   = 67988
+# of DTLS server events  = 0
+# of DTLS receive events = 0
+Sending UDP socket:
+  UDP     0.0.0.0:0     fd:4      id:0  
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:887928/0  packets Tx/Rx:13865/0
+Locators:
+  UDP     10.0.0.29:7667  fd:7      id:1   USER UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:3613328/1293220  packets Tx/Rx:20308/20197
+  UDP     239.255.0.1:7651  fd:9      id:1   USER MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/7444856  packets Tx/Rx:0/47578
+  UDP     10.0.0.29:7666  fd:8      id:1   META UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:20644/4348  packets Tx/Rx:69/26
+  UDP     239.255.0.1:7650  fd:10      id:1   META MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/56988  packets Tx/Rx:0/187</screen></p>
+  <p>Where errors, empty, too_short and no_buffers indicate respectively the number of errors that
+   occurred, the number of unexpted empty reads, too short messages and times there was not enough
+   memory to handle reception properly.</p>
+  <p>The octets and packets statistics can be useful to determine how much traffic was present for
+   individual peers.</p>
+    <p>Following shows a more complex set of connections when the TLS/TCP protocol is used as well
+      as IPv6, using the spoola command:</p>
+  <p>
+    <screen scale="80">scxa
+# of IP receive events   = 33
+# of DTLS server events  = 0
+# of DTLS receive events = 0
+Sending UDP socket:
+  (0) UDP 0.0.0.0:0     fd:4      id:0  
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8ce9b0
+Sending UDPv6 socket:
+  (0) UDP :::0          fd:5  
+	    id:0  
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8d9e30
+TCP client:
+  (0) TLS.C 0.0.0.0:0   fd:21      id:0   SECURE
+	    mode:client  state:Established/C:Control
+	    dest:127.0.0.1:5400*  prefix:92767f10:00005c42:03e80000
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:636/792  packets Tx/Rx:13/13
+	    self:0x8cd4e0  clients:0x7fe474076ae0
+Locators:
+  (1) UDP 10.0.0.29:9175  fd:8      id:1   USER UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e2cf0
+  (2) UDP 2a02:a03f:669:3100:1c3c:6a97:d469:750:9175  fd:9  
+	    id:1   USER UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e2df0
+  (3) UDP 2a02:a03f:669:3100:92e6:baff:fe10:7817:9175  fd:10  
+	    id:1   USER UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e7bf0
+  (4) TCP.D 10.0.0.29:9175 (fd:0)     id:1   USER UCAST RX
+	    state:Closed/D:Idle
+	    prefix:1752a037:2c14ee02:1f1980b8
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/1180  packets Tx/Rx:0/11
+	    self:0x8e7cf0
+  (5) UDP 239.255.0.1:9151  fd:11      id:1   USER MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e7df0
+  (6) UDP ff03::80:9151  fd:12  
+	    id:1   USER MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e7ef0
+  (7) TCP.D 239.255.0.1:9150 (fd:0)     id:1   META MCAST SECURE RX
+	    state:Closed/D:Idle
+	    prefix:1752a037:2c14ee02:1f1980b8
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/9868  packets Tx/Rx:0/9
+	    self:0x8e4b10
+  (8) UDP 10.0.0.29:9174  fd:13      id:1   META UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:11924/0  packets Tx/Rx:11/0
+	    self:0x8e4c10
+  (9) UDP 2a02:a03f:669:3100:1c3c:6a97:d469:750:9174  fd:14  
+	    id:1   META UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:11924/0  packets Tx/Rx:11/0
+	    self:0x8e4d10
+  (10) UDP 2a02:a03f:669:3100:92e6:baff:fe10:7817:9174  fd:15  
+	    id:1   META UCAST SRC_MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:11924/0  packets Tx/Rx:11/0
+	    self:0x8e4e10
+  (11) TCP.D 10.0.0.29:9174 (fd:0)     id:1   META UCAST RX
+	    state:Closed/D:Idle
+	    prefix:1752a037:2c14ee02:1f1980b8
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/10792  packets Tx/Rx:0/40
+	    self:0x8e4f10
+  (12) UDP 239.255.0.1:9150  fd:16      id:1   META MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/11924  packets Tx/Rx:0/11
+	    self:0x8e5010
+  (13) UDP ff03::80:9150  fd:17  
+	    id:1   META MCAST
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/23848  packets Tx/Rx:0/22
+	    self:0x8e3000
+  (14) DTLS.S 10.0.0.29:4635  fd:18      id:1   USER META UCAST SECURE SERVER
+	    mode:server
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8e31b0  parent:0x8e31b0
+  (15) DTLS.S 2a02:a03f:669:3100:1c3c:6a97:d469:750:4635  fd:19  
+	    id:1   USER META UCAST SECURE SERVER
+	    mode:server
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8eb780  parent:0x8eb780
+  (16) DTLS.S 2a02:a03f:669:3100:92e6:baff:fe10:7817:4635  fd:20  
+	    id:1   USER META UCAST SECURE SERVER
+	    mode:server
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:0/0  packets Tx/Rx:0/0
+	    self:0x8eb880  parent:0x8eb880  next:0x8eb780
+  (17) TLS.D 0.0.0.0:9174  fd:23      id:1   META UCAST SECURE RX
+	    mode:client  state:Established/D:Data  dest:127.0.0.1:5400*
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:40/10976  packets Tx/Rx:1/41
+	    self:0x7fe47401d550  parent:0x8cd4e0  next:(19)  group:(11)  paired:(19)
+  (18) TLS.D 0.0.0.0:0  fd:24      id:1   USER UCAST SECURE TX
+	    mode:client  state:Established/D:Data
+	    prefix:1752a037:2c14ac84:e9ddb9c7
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:1332/1204  packets Tx/Rx:13/12
+	    self:0x7fe47403c7c0  parent:0x8cd4e0  next:(17)  paired:(20)
+  (19) TLS.D 0.0.0.0:0  fd:22      id:1   META UCAST SECURE TX
+	    mode:client  state:Established/D:Data
+	    prefix:1752a037:2c14ac84:e9ddb9c7
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:9860/10816  packets Tx/Rx:37/41
+	    self:0x7fe474042540  parent:0x8cd4e0  paired:(17)
+  (20) TLS.D 0.0.0.0:9175  fd:25      id:1   USER UCAST SECURE RX
+	    mode:client  state:Established/D:Data  dest:127.0.0.1:5400*
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:40/1248  packets Tx/Rx:1/12
+	    self:0x7fe47405a8f0  parent:0x8cd4e0  next:(18)  group:(4)  paired:(18)
+  (21) TLS.D 0.0.0.0:9150  fd:26      id:1   META MCAST SECURE RX
+	    mode:client  state:Established/D:Data  dest:127.0.0.1:5400*
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:40/2256  packets Tx/Rx:1/4
+	    self:0x7fe474068600  parent:0x8cd4e0  next:(20)  group:(7)  paired:(22)
+  (22) TLS.D 0.0.0.0:0  fd:27      id:1   META MCAST SECURE TX
+	    mode:client  state:Established/D:Data
+	    dest:239.255.0.1:9150*  prefix:1752a037:2c14ac84:e9ddb9c7
+	    r.errors:0  w.errors:0  empty:0  too_short:0  no buffers:0
+	    octets Tx/Rx:3304/2244  packets Tx/Rx:4/4
+	    self:0x7fe474076ae0  parent:0x8cd4e0  next:(21)  paired:(21)</screen>
+  </p>
+   <p><note>In this example, the <cmdname>dcps</cmdname> test program was used in domain 7 with DDS
+        security enabled, and a TCP/TLS connection to a remote secure TLS/TCP server. In practice,
+        this would lead to double encryption, i.e. the payload is encrypted by the DDS Security
+        mechanism and the RTPS messages are encrypted again over the TLS/TCP connections.</note>
+      <note>The 3 DTLS.S connections are secure DTLS server connections. The peer doesn't use UDP,
+        and even if it would, the native DDS Security still would take priority over DTLS/UDP if
+        both have native DDS security enabled as in this case. So these connections would only be
+        used between UDP entities using DTLS/UDP transport security.</note></p>
+   <p>The <cmdname>scx</cmdname> and <cmdname>scxa</cmdname> commands give the socket connections
+      that DDS is effectively using. It is sometimes interesting to be able to see other
+      information, such as the IP addresses that are available in the system and the file
+      descriptors that are effectively used by DDS.</p>
+    <p>The first can be shown with the <cmdname>sdip</cmdname> command:</p>
+    <p><screen scale="80">>sdip
+lo:       ?       IPv6  127.0.0.1, ::1
+eth0:     up   IP IPv6  10.0.0.29, fe80::92e6:baff:fe10:7817, 2a02:a03f:669:3100:92e6:baff:fe10:7817, 2a02:a03f:669:3100:1c3c:6a97:d469:750
+eth1:     down    IPv6	</screen></p>
+  <p>As can be seen from this output, there are two IP interfaces, apart from the loopback interface.</p>
+    <p>The first one, i.e. eth0, is up and has both a local IPv4 address and a number of IPv6
+      addresses enabled.</p>
+    <p>The second one, eth1, is down.</p>
+    <p>The sfd command then shows the actual file descriptors in use:</p>
+    <p><screen scale="60">>sfd
+0: [0] DDS.debug { POLLIN POLLPRI POLLERR POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLERR POLLHUP POLLNVAL} Rxfct=0x49b16e, U=0x8b9aa8
+1: [3] DDS.netlink { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x4b67fc, U=(nil)
+2: [6] DDS.wakeup { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x40a654, U=(nil)
+3: [8] DDS.UDPv4 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e2cf0
+4: [9] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e2df0
+5: [10] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e7bf0
+6: [11] DDS.UDPv4 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e7df0
+7: [12] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e7ef0
+8: [13] DDS.UDPv4 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e4c10
+9: [14] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e4d10
+10: [15] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e4e10
+11: [16] DDS.UDPv4 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e5010
+12: [17] DDS.UDPv6 { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x5055fa, U=0x8e3000
+13: [18] DDS.DTLS-S { POLLIN POLLPRI} -> { POLLIN POLLPRI} Rxfct=0x50d7fb, U=0x8e31b0
+14: [19] DDS.DTLS-S { POLLIN POLLPRI} -> { POLLIN POLLPRI} Rxfct=0x50d7fb, U=0x8eb780
+15: [20] DDS.DTLS-S { POLLIN POLLPRI} -> { POLLIN POLLPRI} Rxfct=0x50d7fb, U=0x8eb880
+16: [21] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x8cd4e0
+17: [22] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe474042540
+18: [23] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe47401d550
+19: [24] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe47403c7c0
+20: [25] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe47405a8f0
+21: [26] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe474068600
+22: [27] DDS.TLS-C { POLLIN POLLPRI POLLHUP POLLNVAL} -> { POLLIN POLLPRI POLLHUP POLLNVAL} Rxfct=0x51d041, U=0x7fe474076ae0</screen></p>
+ </conbody>
+</concept>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_hfc_f1v_sf">
+ <title>Centralized Discovery Daemon</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Ordinarily, DDS implementations learn all topics that are present in the DDS domains in which
+   they are interested, even though they usually are only interested in a subset of the collective
+   Topic data.</p>
+  <p>This is done, by design, because it is not known initially which topics will be referenced in
+   the future by applications.  It could be, for example, that Topics are discovered first, after
+   which they might be referenced by local Readers or Writers.  A strategy that simply throws away
+   Discovered data for which there is no local Topic yet, will not work at all.  The data that was
+   thrown out will not come back automatically afterwards, just like that.</p>
+  <p>The solution to this problem is a node-central Discovery manager, called the CDD component. The
+   Centralized Discovery Daemon is a stand-alone (daemonized) program that allows to optimize this
+   per-node Discovery data so that discovered data does not need to be kept in components that are
+   not interested in this data.</p>
+  <p>The CDD, when active, allows to communicate the state of Discovery data to other Technicolor
+   DDS components.  This way, those DDS components will be informed of matching discovery data the
+   moment they subscribe to Topics and there are already 'early joiners' for this topic.</p>
+ </conbody>
+</concept>

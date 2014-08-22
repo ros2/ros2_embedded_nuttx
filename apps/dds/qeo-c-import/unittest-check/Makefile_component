@@ -1,0 +1,55 @@
+ifneq ($($(unittest-check_INCLUDED)),1)
+# ifeq ($(E),<ARCHNAME>)
+
+override COMPONENT := technicolor.middleware.tools.internal.unittest-check
+
+# The license of this component
+
+# The exported header files for this component
+unittest-check_INCLUDES := $$(check_INCLUDES) api/headers
+
+# The compiler flags that have to be added to use the libraries of this component
+# unittest-check_CFLAGS := <list of defines>
+
+# The linker flags that have to be added to use the libraries of this component
+unittest-check_LIBS := $$(check_LIBS) -ldl
+ifeq ($(E), HOSTDARWIN)
+unittest-check_LIBS += -Wl, -undefined dynamic_lookup  
+endif
+
+# The parts (libraries and programs) that make up this component
+unittest-check_PARTS_INSTALL := \
+	unittest@$$(bindir/)unittest:755
+
+unittest-check_ELEM_INSTALL := \
+	src/test_run@$$(bindir/)test_run:755
+
+# unittest-check_PARTS := <list of parts not listed in the parts install rule>
+
+# Compile time and deploy time dependencies for parts
+unittest-check_DEPS      := check
+
+include $(projectdir/)build/Makefile_component_top
+
+unittest-check.PROGRAMS := unittest
+unittest-check.unittest_LDFLAGS           := -rdynamic
+# gc sections sometimes strips register_testsuites... disabled it for now...
+ifneq ($(E), HOSTDARWIN)
+unittest-check.unittest_LDFLAGS           += -Wl,--no-gc-sections
+endif
+unittest-check.unittest_SRCS              := $(addprefix src/, unittest.c)
+unittest-check.unittest_LDADD             := $(check_LIBS) -ldl
+unittest-check.unittest_LOCALINCLUDES     := $(check_INCLUDES) $(unittest-check_INCLUDES)
+ifeq ($(E),HOSTLINUX)
+unittest-check.unittest_LOCALDEFINES      := -DMCHECK_SUPPORT
+endif
+
+##>
+
+include $(projectdir/)build/Makefile_component_bot
+
+# endif # ifeq ($(E),<ARCHNAME>)
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

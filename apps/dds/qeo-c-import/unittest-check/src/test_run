@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Run the unit tests.
+SELF_DIR=$(cd $(dirname $0) > /dev/null; pwd)
+TESTSO_DIR="${SELF_DIR}/../lib/unittests"
+if [ ! -d "${TESTSO_DIR}" ]; then
+    TESTSO_DIR="${SELF_DIR}/../../lib/unittests"
+fi
+if [ ! -d "${TESTSO_DIR}" ]; then
+    echo "No unit tests found, exiting."
+    exit 0
+fi
+
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SELF_DIR}/../lib:${SELF_DIR}/../../lib"
+
+# Check Unresolved symbols
+MISSING_SYMBOLS=$(ldd -d ${TESTSO_DIR}/lib*.so 2>&1 | grep "^undefined symbol:" | egrep -v "register_testsuite|tcase_addtests|tcase_addlooptests|leakcheck_")
+if [ -n "${MISSING_SYMBOLS}" ]
+then
+    echo "${MISSING_SYMBOLS}" >&2
+    exit 1
+fi
+
+# Run tests
+export MALLOC_TRACE="unittest_mcheck"
+echo ---- Running unit tests
+${SELF_DIR}/unittest --suitedir ${TESTSO_DIR} --all "$@" 2> /dev/null
+
+if [ $? -ne 0 ]; then
+    echo "[FAIL] Some unit tests failed! Check the output above."
+    exit 1
+fi

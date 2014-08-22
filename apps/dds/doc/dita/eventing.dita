@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_rts_x3m_5f">
+ <title>WaitSets and Listeners</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>DDS allows two distinct methods in order to be notified of events, and both can be used
+   simultaneously, i.e. Listener functions and WaitSets.</p>
+  <p>There are advantages and disadvantages to each of these two mechanisms, and care must be taken
+   in order to properly handle additional DDS function calls in either case.</p>
+  <p>Following discussion will explain each mechanism in detail.</p>
+ </conbody>
+</concept>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_enc_c3t_r4">
+    <title>Global configuration parameters</title>
+    <body>
+      <p>A number of global DDS parameters can be configured:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_nc3_r3t_r4">
+          <title>Global parameters</title>
+          <tgroup cols="3">
+            <colspec colname="c1" colnum="1" colwidth="1*"/>
+            <colspec colname="c2" colnum="2" colwidth="4.13*"/>
+            <colspec colname="newCol3" colnum="3" colwidth="1*"/>
+            <thead>
+              <row>
+                <entry>Parameter name</entry>
+                <entry id="entry_srb_t3t_r4">Description</entry>
+                <entry>Type</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>NAME</entry>
+                <entry>Specifies the DDS name that will be used during discovery.</entry>
+                <entry>String</entry>
+              </row>
+              <row>
+                <entry>ENVIRONMENT</entry>
+                <entry>Identifies the DDS environment type. By default this is supposed to be the
+                  'C'-environment, but can be changed for other programming languages. DDS will try
+                  to optimize data transfers between participants with the same environment and
+                  endianness, and will try to avoid marshalling in that case.  See the environment
+                  definitions in <i>dds/dds_aux.h</i> for the numbers to use.</entry>
+                <entry>Number</entry>
+              </row>
+              <row>
+                <entry>PURGE_DELAY</entry>
+                <entry>Minimum time to delay to cleanup data when handling
+                    <i>*_delete_contained_entities()</i>. The default time is 50 us.</entry>
+                <entry>Number</entry>
+              </row>
+              <row>
+                <entry>SAMPLE_SIZE</entry>
+                <entry>Maximum size of data samples (in bytes). Default this is set to 256 Mbytes
+                  per sample.</entry>
+                <entry>Number</entry>
+              </row>
+              <row>
+                <entry>FORWARD</entry>
+                <entry>This is only meaningful when an application is compiled with -DDDS_FORWARD,
+                  to enable RTPS forwarding.  It should be set to the actual forwarding mode
+                  (typically, either 0 to disable forwarding, which is the default, or 15 to enable
+                  full forwarding). </entry>
+                <entry>Number</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+      <p>Examples:</p>
+      <p><b>EXPORT TDDS_FORWARD=15</b></p>
+      <p>Enables forwarding.</p>
+      <p><b>EXPORT TDDS_NAME="TDDS Simple Application"</b></p>
+      <p>Sets the DDS application name to "TDDS Simple Application".</p>
+    </body>
+  </topic>
+</dita>

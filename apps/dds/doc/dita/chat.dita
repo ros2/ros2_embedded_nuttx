@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_t1n_vbh_s4">
+ <title>Chat program</title>
+ <shortdesc/>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The <cmdname>chat</cmdname> program is an example of a typical publish-subscribe scenario. It
+    allows multiple users to send information on multiple chatrooms, where everyone entering a
+    chatroom can see all the messages that the other users are sending.</p>
+   <p>After starting the program, the user can just type messages.  Everything typed, that is
+    followed by an &lt;enter> will be sent immediately.  Messages that are received are displayed
+    immediately. </p>
+  </section>
+  <section>
+   <title>In-chat commands</title>
+   <p>While chatting, the user can give in-chat commands.  These all start with a '<b>!</b>'
+    character, followed by a specific command:</p>
+   <p>
+    <table frame="all" id="table_php_ddh_s4">
+     <title>In-chat commands</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3*"/>
+      <thead>
+       <row>
+        <entry>Command</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>!room</cmdname>
+         <i>&lt;room_name></i></entry>
+        <entry>Change the chatroom to the room with the given name.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!user</cmdname>
+         <i>&lt;user_name></i></entry>
+        <entry>Change the user name.  By default, the user name is called .pid.%u where %u is the
+         process id of the chat process.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!list</cmdname></entry>
+        <entry>List all the attendees that are seen.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!info</cmdname></entry>
+        <entry>Display the current chatroom and user name.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!busy</cmdname></entry>
+        <entry>Set the user state as busy.  The state will change back to normal once a new message
+         is sent.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!away</cmdname></entry>
+        <entry>Set the user state as not present.  The state will change back to normal once a new
+         message is sent.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!help</cmdname></entry>
+        <entry>Display a summary of all the chat commands.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!q[uit]</cmdname></entry>
+        <entry>Exit the chat program.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!!</cmdname><i>&lt;command></i></entry>
+        <entry>Execute a DDS Debug shell command.</entry>
+       </row>
+       <row>
+        <entry><cmdname>!$</cmdname><i>&lt;command></i></entry>
+        <entry>Execute an Operating System shell command.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+  <section>
+   <title>Starting the <cmdname>chat</cmdname> program</title>
+   <p>
+    <table frame="all" id="table_zvs_jvh_s4">
+     <title>Chat program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-r</cmdname>
+         <i>&lt;chatroom></i></entry>
+        <entry>Sets the chatroom name.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-u</cmdname>
+         <i>&lt;name></i></entry>
+        <entry>Sets the user name.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-i</cmdname>
+         <i>&lt;domain_id></i></entry>
+        <entry>Specify the domain identifier.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation. Logs overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose operation, logging detailed functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Show the program options.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+ </conbody>
+</concept>

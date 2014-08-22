@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_rg5_rm5_5f">
+ <title>Shapes demo</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The shapes demo works by creating per basic shape form a DDS DataWriter, having a different
+    instance per shape color (color = key), and periodically moving the shape in a specific
+    direction (by publishing new shape data with different X and Y coordinates) until a wall is hit,
+    whereafter the shape reverses direction.</p>
+   <p>Since only a limited number of shapes are defined, there are only up to 3 shape writers:<ul
+     id="ul_jcq_wtz_5f">
+     <li>square</li>
+     <li>circle</li>
+     <li>triangle</li>
+    </ul></p>
+   <p>Subscribing to a shape form is done by creating a DDS DataReader, which then monitors the
+    shape movements and draws the shape on the screen.  There are also only three shape readers due
+    to the limited number of shape forms.</p>
+   <p>The user is able to create new shapes dynamically via a builtin text GUI with context-specific
+    menus.</p>
+   <p>It is also possible to create shape readers and shape writers from the command line at program
+    startup.</p>
+   <p>A builtin debug shell can be enabled to monitor the DDS dynamic data usage, such as DataWriter
+    and DataReader cache contents as well as other data while the program is active.</p>
+   <p>The shapes program can be started in as many terminals and on as many nodes as required. All shape
+    writers will be able to communicate with every shape reader, whether locally, or over the network.</p>
+  </section>
+  <section><title>Starting <cmdname>shapes</cmdname>.</title>
+   <p>The <cmdname>shapes</cmdname> program can be run either using a full-screen text GUI
+    interface, or in batch mode, where it just displays updates as messages on standard output.</p>
+   <p>The program accepts a number of options as shown by typing <cmdname>shapes -h</cmdname>.</p>
+   <p>The following options can be given:</p>
+   <p>
+    <table frame="all" id="table_tk5_kwz_5f">
+     <title><cmdname>shapes</cmdname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.07*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-p</cmdname>
+         <i>&lt;shape &lt;color></i></entry>
+        <entry>Publish a shape (square, circle or triangle) with the given color (red, green,
+         yellow, blue, magenta, cyan).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-s</cmdname>
+         <i>&lt;shape></i></entry>
+        <entry>Subscribe to a shape (square, circle or triangle).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-t</cmdname></entry>
+        <entry>Trace messages, i.e. start in batch mode without a GUI.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-b</cmdname></entry>
+        <entry>Black-on-white display instead of the default white-on-black.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-x</cmdname>
+         <i>&lt;strength></i></entry>
+        <entry>Use exclusive ownership QoS with the given strength value.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname></entry>
+        <entry>Start in debug mode.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-i</cmdname>
+         <i>&lt;domainid></i></entry>
+        <entry>Specify the domain identifier (default = 0).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-y</cmdname></entry>
+        <entry>Use a dynamic type definition instead of a static one.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation flag: logs overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose flag: logs detailed functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Displays some information on program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+  <section>
+   <title>GUI mode</title>
+   <p>In GUI mode, the program starts up with the following screen:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>   <b><u>P</u></b>ublish  <b><u>S</u></b>ubscribe  <b><u>C</u></b>ommand  <b><u>Q</u></b>uit  
+                                  ┌───────────────────────────────────┐
+<u>Subscriptions:</u>                    │                                   │
+                                  │                                   │
+                                  │                                   │
+<u>Publications:</u>                     │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  └───────────────────────────────────┘
+</screen>
+   <p>A limited number of commands are accepted here, as single characters:</p>
+   <p>When '<b>p</b>' is typed, the Publish menu is displayed which gives the option to create a new
+    Shapes instance writer.  All local shape instance writers are listed under the
+     <u>Publications</u> header of the GUI screen.</p>
+   <p>If '<b>s</b>' is typed, the Subscribe menu is displayed which allows to create a new Shapes
+    reader, with the option of filtering received shapes based on shape coordinates. All local shape
+    readers are listed under the <u>Subscriptions:</u> header of the GUI screen.</p>
+   <p>If '<b>c</b>' is typed, the shapes program enters the DDS Debug Shell, and displays the shell
+    prompt. The user can then display DDS Debug commands and examine the debug responses. Published
+    shapes are still updated, and received shapes are still monitored, so this allows an in depth
+    examination of a running DDS application.</p>
+   <p>If '<b>q</b>' is typed, the program exits immediately.</p>   
+  </section>
+  <section>
+   <title>Publish menu</title>
+   <p>The Publish menu gives the user the opportunity to add new shape publications. It will query
+    the shape type (Square, Circle or Triangle) and the shape color, and allows the user to select
+    both parameters with a single keystroke from a menu of possible options.</p>
+   <p>It is entered via the '<b>p</b>' command from the main GUI screen.</p>
+   <p>Following example creates a red square:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>
+    
+    
+    <u>Publish</u>
+    
+    Shape type: 
+    
+        <b><u>S</u></b>quare  
+        <b><u>C</u></b>ircle  
+        <b><u>T</u></b>riangle  
+    
+        or &lt;esc> to return
+     
+          Choice? </screen>
+   <p>After '<b>s</b>' is typed, the following menu is presented:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>
+
+
+   <u>Publish</u>
+
+   Shape type = Square
+   Shape color:
+
+       <b><u>R</u></b>ed  
+       <b><u>G</u></b>reen  
+       <b><u>Y</u></b>ellow  
+       <b><u>B</u></b>lue  
+       <b><u>M</u></b>agenta  
+       <b><u>C</u></b>yan  
+
+       or &lt;esc> to return
+
+         Choice? </screen>
+   <p>After '<b>r</b>' is typed a red square is added to the list of local publications, together
+    with the current X and Y coordinates, which will constantly be updated while the program is
+    running.</p>
+   <p>No square shape will be visible on the map if there is no shapes reader for square shapes.
+    This needs to be created using the Subscribe menu.</p>
+  </section>
+  <section>
+   <title>Subscribe menu</title>
+   <p>The Subscribe menu allows the user to create new Shape readers, optionally specifying a
+    coordinate-based shape data filter.</p>
+   <p>It is entered via the '<b>s</b>' command in the main GUI screen.</p>
+   <p>Following example creates a Square shapes reader:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>
+
+
+   <u>Subscribe</u>
+
+   Shape type: 
+
+       <b><u>S</u></b>quare  
+       <b><u>C</u></b>ircle  
+       <b><u>T</u></b>riangle  
+
+       or &lt;esc> to return
+
+         Choice? </screen>
+   <p>After '<b>s</b>' is typed, the following is shown:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor
+</b>
+
+   <u>Subscribe</u>
+
+   Shape type = Square
+   Filter: 
+
+       <b><u>Y</u></b>es  
+       <b><u>N</u></b>o  
+
+       or &lt;esc> to return
+
+         Choice? </screen>
+   <p>If the user types '<b>n</b>', a non-filtered Shapes reader is created which is shown on the
+    top GUI screen.</p>
+   <p>If '<b>y</b>' is typed, the coordinates of the filter are requested. First the X-coordinate of
+    the left corner of the visible square, next the X-coordinate of the right corner of the visible
+    square, then the Y-coordinate of the top corner, followed by the Y-coordinate of the bottom
+    corner:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>
+
+
+   <u>Subscribe</u>
+
+   Shape type = Square
+   Filter = Yes
+   X1 (5..238) : 10
+   X2 (2..240) : 120
+   Y1 (5..254) : 50
+   Y2 (4..256) : 200</screen>
+   <p>After the final coordinate is specified (end each coordinate input with &lt;enter>), the
+    filtered reader is created and the top GUI screen shows the visual shape rectangle:</p>
+   <screen scale="80"><b>Shapes demo (c) 2011, Technicolor</b>   <b><u>P</u></b>ublish  <b><u>S</u></b>ubscribe  <b><u>C</u></b>ommand  <b><u>Q</u></b>uit  
+                                  ┌───────────────────────────────────┐
+<u>Subscriptions:</u>                    │                                   │
+                                  │                                   │
+   Square                         │                                   │
+                                  │ ┌─ ─ ─ ─ ─ ─ ─ ─┐                 │
+<u>Publications:</u>                     │ │               │                 │
+                                  │                                   │
+   Square   RED     115 202       │ │               │                 │
+                                  │                                   │
+                                  │ │               │                 │
+                                  │                                   │
+                                  │ │               │                 │
+                                  │                                   │
+                                  │ │               │                 │
+                                  │                                   │
+                                  │ └─ ─ ─ ─ ─ ─ ─ S┘                 │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  │                                   │
+                                  └───────────────────────────────────┘</screen>
+   <p>As can be seen from the screen display, whenever a reader is created and there are active
+    shape writers, whether they are locally defined or generated by other DDS shapes writers, these
+    shapes will be displayed on the top GUI screen in the map area.</p>
+   <p>Shapes are displayed in the map as a colored character, denoting the form of the shape ('S',
+    'C' or 'T'). The color of the square will correspond with the defined square color.</p>
+  </section>
+  <section>
+   <title>Command mode</title>
+   <p>The shapes command mode shows the builtin Debug shell as shown below:</p>
+   <screen scale="80">Shapes command shell -- type 'h' or '?' for help.
+></screen>
+   <p>Here, both the 'quit' command, as well as an additional 'menu' command is available to go
+    back to the main GUI screen.</p>
+   <p>Refer to the Debug shell chapter for more details on how to use the command shell.</p>
+  </section>
+ </conbody>
+</concept>

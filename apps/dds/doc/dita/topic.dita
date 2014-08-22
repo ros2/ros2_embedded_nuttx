@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_jnc_ttr_yg">
+ <title>Technicolor DDS memory handling</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The way in which Technicolor DDS uses its data internally can be configured extensively in
+   order optimize it for specific application components.</p>
+ </conbody>
+</concept>

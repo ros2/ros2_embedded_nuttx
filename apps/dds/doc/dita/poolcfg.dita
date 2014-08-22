@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_xly_sjs_yg">
+ <title>Configuring memory pools</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The memory pools can be configured from application components using the following Technicolor
+   DDS functions (located in <i>&lt;dds/dds_aux.h></i>:</p>
+  <codeblock scale="80">DDS_ReturnCode_t DDS_get_default_pool_constraints (DDS_PoolConstraints *pars,
+                                                   unsigned            max_factor,
+                                                   unsigned            grow_factor); </codeblock>
+  <p>This function will initialize the pars parameter, which is a structure containing all pool
+   parameters, to suitable values in accordance with the maximum and grow factors.</p>
+  <p>The max_factor specifies the relation between the total number of allocatable blocks and the
+   number of preallocated pool blocks as an extra percentage factor. I.e. if max_factor is set to 0,
+   the maximum number of blocks will be equal to the number of preallocated blocks. If max_factor is
+   set to 100, the maximum number of blocks will be twice the number of preallocated blocks.  If set
+   to ~0, the maximum number of blocks will not be limited and all available system memory may be
+   used.</p>
+  <p>The grow_factor specifies the maximum length of the grow list for each of the memory pools as a
+   percentage of the number of extra items that must not be returned.</p>
+  <codeblock scale="80">DDS_ReturnCode_t DDS_set_pool_constraints (const DDS_PoolConstraints *pars);</codeblock>
+  <p>This function should be used to apply the pool constraint parameters.</p>
+  <p/>
+  <note>These functions should be used before the first DDS DomainParticipant is created, or they
+   will not have any effect.</note>
+  <p>The following table summarizes the pool parameters that can be modified:</p>
+  <p>
+   <table frame="all" id="table_qtd_wms_yg">
+    <title>Memory Pool Parameters</title>
+    <tgroup cols="4">
+     <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+     <colspec colname="c2" colnum="2" colwidth="1.26*" rowsep="1" colsep="1"/>
+     <colspec colname="c4" colnum="3" colwidth="1.28*" colsep="1" rowsep="1"/>
+     <colspec colname="c6" colnum="4" colwidth="1.98*" rowsep="1" colsep="1"/>
+     <thead>
+      <row>
+       <entry>Name</entry>
+       <entry>Minimum</entry>
+       <entry>Maximum</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>Domain</entry>
+       <entry><i>&lt;na></i></entry>
+       <entry>max_domains</entry>
+       <entry>Local DDS DomainParticipant</entry>
+      </row>
+      <row>
+       <entry>Subscriber</entry>
+       <entry>min_subscribers</entry>
+       <entry>max_subscribers</entry>
+       <entry>Local DDS Subscriber</entry>
+      </row>
+      <row>
+       <entry>Publisher</entry>
+       <entry>min_publishers</entry>
+       <entry>max_publishers</entry>
+       <entry>Local DDS Publisher</entry>
+      </row>
+      <row>
+       <entry>LocalReader</entry>
+       <entry>min_local_readers</entry>
+       <entry>max_local_readers</entry>
+       <entry>Local DDS DataReader</entry>
+      </row>
+      <row>
+       <entry>LocalWriter</entry>
+       <entry>min_local_writers</entry>
+       <entry>max_local_writers</entry>
+       <entry>Local DDS DataWriter</entry>
+      </row>
+      <row>
+       <entry>Topic</entry>
+       <entry>min_topics</entry>
+       <entry>max_topics</entry>
+       <entry>DDS Topic</entry>
+      </row>
+      <row>
+       <entry>FilteredTopic</entry>
+       <entry>min_filtered_topics</entry>
+       <entry>max_filtered_topics</entry>
+       <entry>DDS Filtered Topic</entry>
+      </row>
+      <row>
+       <entry>TopicType</entry>
+       <entry>min_topic_types</entry>
+       <entry>max_topic_types</entry>
+       <entry>DDS Topic Type.</entry>
+      </row>
+      <row>
+       <entry>ReaderProxy</entry>
+       <entry>min_reader_proxies</entry>
+       <entry>max_reader_proxies</entry>
+       <entry>Remote DDS DataReader Proxy</entry>
+      </row>
+      <row>
+       <entry>WriterProxy</entry>
+       <entry>min_writer_proxies</entry>
+       <entry>max_writer_proxies</entry>
+       <entry>Remote DDS DataWriter Proxy</entry>
+      </row>
+      <row>
+       <entry>RemoteParticipant</entry>
+       <entry>min_remote_participants</entry>
+       <entry>max_remote_participants</entry>
+       <entry>Discovered DDS DomainParticipant</entry>
+      </row>
+      <row>
+       <entry>RemoteReader</entry>
+       <entry>min_remote_readers</entry>
+       <entry>max_remote_readers</entry>
+       <entry>Discovered DDS DataReader</entry>
+      </row>
+      <row>
+       <entry>RemoteWriter</entry>
+       <entry>min_remote_writers</entry>
+       <entry>max_remote_writers</entry>
+       <entry>Discovered DDS DataWriter</entry>
+      </row>
+      <row>
+       <entry>PoolData</entry>
+       <entry>min_pool_data</entry>
+       <entry>max_pool_data</entry>
+       <entry>Data Buffers for sample storage</entry>
+      </row>
+      <row>
+       <entry>RxBuffer</entry>
+       <entry><i>&lt;na></i></entry>
+       <entry>max_rx_buffers</entry>
+       <entry>Receive buffers for RTPS</entry>
+      </row>
+      <row>
+       <entry>Change</entry>
+       <entry>min_changes</entry>
+       <entry>max_changes</entry>
+       <entry>Cache Change descriptor.</entry>
+      </row>
+      <row>
+       <entry>Instance</entry>
+       <entry>min_instances</entry>
+       <entry>max_instances</entry>
+       <entry>Cache Instance descriptor.</entry>
+      </row>
+      <row>
+       <entry>ApplicationSample</entry>
+       <entry>min_application_samples</entry>
+       <entry>max_application_samples</entry>
+       <entry>Application sample references.</entry>
+      </row>
+      <row>
+       <entry>LocalMatch</entry>
+       <entry>min_local_match</entry>
+       <entry>max_local_match</entry>
+       <entry>Local matching DataReader for a DataWriter.</entry>
+      </row>
+      <row>
+       <entry>CacheWaiter</entry>
+       <entry>min_cache_waiters</entry>
+       <entry>max_cache_waiters</entry>
+       <entry>Maximum threads waiting for a Cache.</entry>
+      </row>
+      <row>
+       <entry>CacheTransfer</entry>
+       <entry>min_cache_transfers</entry>
+       <entry>max_cache_transfers</entry>
+       <entry>Samples being queued between two local Data History Caches.</entry>
+      </row>
+      <row>
+       <entry>TimeFilter</entry>
+       <entry>min_time_filters</entry>
+       <entry>max_time_filters</entry>
+       <entry>Active Time Filter.</entry>
+      </row>
+      <row>
+       <entry>TimeInstance</entry>
+       <entry>min_time_instances</entry>
+       <entry>max_time_instances</entry>
+       <entry>Time Filter Instance.</entry>
+      </row>
+      <row>
+       <entry>String</entry>
+       <entry>min_strings</entry>
+       <entry>max_strings</entry>
+       <entry>Unique string descriptor</entry>
+      </row>
+      <row>
+       <entry>StringData</entry>
+       <entry>min_string_data</entry>
+       <entry>max_string_data</entry>
+       <entry>Unique string data area</entry>
+      </row>
+      <row>
+       <entry>Locator</entry>
+       <entry>min_locators</entry>
+       <entry>max_locators</entry>
+       <entry>Locator descriptor (see RTPS).</entry>
+      </row>
+      <row>
+       <entry>QoS</entry>
+       <entry>min_qos</entry>
+       <entry>max_qos</entry>
+       <entry>Unique DDS Quality of Service data.</entry>
+      </row>
+      <row>
+       <entry>List</entry>
+       <entry>min_lists</entry>
+       <entry>max_lists</entry>
+       <entry>Dynamic list</entry>
+      </row>
+      <row>
+       <entry>ListNode</entry>
+       <entry>min_list_nodes</entry>
+       <entry>max_list_nodes</entry>
+       <entry>Dynamic list node.</entry>
+      </row>
+      <row>
+       <entry>Timer</entry>
+       <entry>min_timers</entry>
+       <entry>max_timers</entry>
+       <entry>Timer</entry>
+      </row>
+      <row>
+       <entry>IPSocket</entry>
+       <entry><i>&lt;na></i></entry>
+       <entry>max_ip_sockets</entry>
+       <entry>IP socket</entry>
+      </row>
+      <row>
+       <entry>IPv4Address</entry>
+       <entry><i>&lt;na></i></entry>
+       <entry>max_ipv4_addresses</entry>
+       <entry>IPv4 address</entry>
+      </row>
+      <row>
+       <entry>IPv6Address</entry>
+       <entry><i>&lt;na></i></entry>
+       <entry>max_ipv6_addresses</entry>
+       <entry>IPv6 address</entry>
+      </row>
+      <row>
+       <entry>WaitSet</entry>
+       <entry>min_waitsets</entry>
+       <entry>max_waitsets</entry>
+       <entry>DDS WaitSet</entry>
+      </row>
+      <row>
+       <entry>StatusCondition</entry>
+       <entry>min_statusconditions</entry>
+       <entry>max_statusconditions</entry>
+       <entry>DDS StatusCondition</entry>
+      </row>
+      <row>
+       <entry>ReadCondition</entry>
+       <entry>min_readconditions</entry>
+       <entry>max_readconditions</entry>
+       <entry>DDS ReadCondition</entry>
+      </row>
+      <row>
+       <entry>QueryCondition</entry>
+       <entry>min_queryconditions</entry>
+       <entry>max_queryconditions</entry>
+       <entry>DDS QueryCondition</entry>
+      </row>
+      <row>
+       <entry>GuardCondition</entry>
+       <entry>min_guardconditions</entry>
+       <entry>max_guardconditions</entry>
+       <entry>DDS GuardCondition</entry>
+      </row>
+      <row>
+       <entry>Notification</entry>
+       <entry>min_notifications</entry>
+       <entry>max_notifications</entry>
+       <entry>Outstanding Listener notification.</entry>
+      </row>
+      <row>
+       <entry>TopicWait</entry>
+       <entry>min_topicwaits</entry>
+       <entry>max_topicwaits</entry>
+       <entry>Threads waiting for a Topic</entry>
+      </row>
+      <row>
+       <entry>Guard</entry>
+       <entry>min_guards</entry>
+       <entry>max_guards</entry>
+       <entry>Used if any of the Liveliness, Deadline, Lifespan and AutoPurge QoS parameters are
+        active.</entry>
+      </row>
+      <row>
+       <entry>DynamicType</entry>
+       <entry>min_dyn_types</entry>
+       <entry>max_dyn_types</entry>
+       <entry>A DDS Dynamic type (see X-Types)</entry>
+      </row>
+      <row>
+       <entry>DynamicData</entry>
+       <entry>min_dyn_samples</entry>
+       <entry>max_dyn_samples</entry>
+       <entry>A DDS Dynamic sample (see X-Types)</entry>
+      </row>
+      <row>
+       <entry>DataHolder</entry>
+       <entry>min_data_holders</entry>
+       <entry>max_data_holders</entry>
+       <entry>A DDS DataHolder (Security: handshake/tokens)</entry>
+      </row>
+      <row>
+       <entry>Property</entry>
+       <entry>min_properties</entry>
+       <entry>max_properties</entry>
+       <entry>A DDS Property (Security)</entry>
+      </row>
+      <row>
+       <entry>BinaryProperty</entry>
+       <entry>min_binary_properties</entry>
+       <entry>max_binary_properties</entry>
+       <entry>A DDS Binary Property (Security)</entry>
+      </row>
+      <row>
+       <entry>HolderSequence</entry>
+       <entry>min_holder_sequences</entry>
+       <entry>max_holder_sequences</entry>
+       <entry>A DDS DataHolder contained sequence (Security)</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+  <note>To make it a bit more easy for the user to configure these pool parameters, the Technicolor DDS
+   debug shell can be used when an application has been running in steady-state for some time.  The
+   resulting <cmdname>spool</cmdname> (or <cmdname>spoola</cmdname>) debug command output can then
+   be used to figure out how much memory was actually used in DDS itself by looking at the
+    <parmname>MPUse</parmname> and <parmname>MXUse</parmname> parameters (see before).  The total
+   memory ever used will then be the sum of these two parameters.</note>
+ </conbody> 
+</concept>

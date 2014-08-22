@@ -1,0 +1,105 @@
+Last update: Mar 28, 2011
+This file is not completely up to date. Refer to the readme of the
+unittestCheck component for more up to date information.
+
+Unit tests
+----------
+
+** Compiling and running the tests
+
+To run the unit tests you can either use the Eclipse buttons after you imported
+the project, or you can use command line arguments.
+
+- Eclipse integration:
+First compile everything by clicking the build option "dds unittests".
+Then run the unit tests by clicking the run button "dds_run_unittests".
+
+- Command-line (from the project's root directory):
+  1. Compile everything using this command:
+clearmake -C gnu -f project/Makefile_component E=HOSTLINUX \
+OUTPUT_PREFIX=/middleware/core/servicefw/dds/output/ COVERAGE=1 \
+INSTALL_DIR=/middleware/core/servicefw/dds/output/install/ \
+recursive_test_install
+  2. Make the necessary environment variables are set:
+export MALLOC_TRACE=unittest_mcheck
+  3. Run all unit tests using this command:
+output/install/usr/local/bin/run
+
+Use a different output prefix and install directory if desired.
+
+** Overview of the unit test framework
+
+The directory unit contains the unit test framework for Technicolor's DDS
+implementation. The framework is completely analogous to the unit test
+framework used by the Rebus module. It uses the open source "Check"
+infrastructure to simplify test writing.
+
+All test suites are located in the testsuites directory. Each test suite
+resides in its own subdirectory. The naming scheme of this subdirectory is the
+name of the test suite prefixed with "suite_". For example, the dataset test
+suite is located in directory testsuites/suite_dataset.
+Each test case collection of a test suite is located in a subdirectory of the
+test suite directory. The naming scheme of this subdirectory is the name of the
+test case collection prefixed with "tcase_". For example, the cornercases test
+case collection of the cdr test suite is located in directory
+testsuites/suite_cdr/tcase_cornercases.
+
+Building the unit tests and the unittest utility program is done using
+cmake and the Makefile_component.
+
+Every test suite can define which DDS c-files will be compiled into the test
+suite. Stubs will need to be provided per test suite for all undefined symbols
+referenced in these ReBus functions. Specifying these c-files is currently done
+in the Makefile_component file.
+
+The results from the unit tests are locally available through:
+- output/install/tmp/reports/coverage/index.html
+- output/install/tmp/reports/test/index.html
+The coverage report is also available on the build management website:
+http://isf.edegem.eu.thmulti.com/BuildWebsite/CompilationOverview.do?project=CoreMW
+
+** Debugging unit tests
+
+The unittest utility program can be used directly to execute specific unit
+tests. For a list of the available test suites and the available options, do
+the following (assuming the tests were compiled using the default parameters):
+cd /middleware/core/servicefw/dds/output/install/usr/local/bin
+LD_LIBRARY_PATH=../lib:$LD_LIBRARY_PATH ./unittest --suitedir ../lib/unittests/ -h
+
+Running one specific test case in ddd without forking :
+First make sure you are using the correct check library:
+# Go to the directory containing the unittest binary (see above):
+# ddd ./unittest
+Before running the program, first set the command line arguments, e.g.:
+--suitedir usr/local/lib/unittests cdr --tcasecoll simpletests --tcase cdr_sequences3 --nf --nml
+
+With the above command line arguments, the test case named cdr_sequences3, which
+is a part of the test case collection simpletests of the test suite cdr will
+be executed without forking and memory checking.
+Also before starting the test, put a breakpoint after the dlopen in unittest.c.
+When the program reaches this breakpoint, you will be able to open the source
+files compiled for the dynamically linked test suite and you can set breakpoints
+in the specific test case.
+
+Memory leak checking:
+If mtrace is installed (mtrace-2.2.5-17.i586.rpm) and the environment variable
+MALLOC_TRACE is defined, the unittest tool will automatically check for memory
+leaks in each testcase.
+It is best to run the tests with the option --nml (no memory leak testing) if
+the --nf (no fork) option is also specified in order to prevent false positives.
+
+Other test programs
+-------------------
+
+These directories contain additional test programs:
+cdr
+  Basically consists of symlinks to dds unit tests so that these can be run
+  in standalone mode, without dependencies on check and the unit test framework.
+  We recommend working with the unit test framework instead (see the above
+  section).
+dcps
+  A dcps test program, for basic functionality testing. Creates either a reader,
+  a writer or both and allows communication between multiple program instances.
+  See dcps -h for more details about the configuration parameters.
+systest
+  System test directory.

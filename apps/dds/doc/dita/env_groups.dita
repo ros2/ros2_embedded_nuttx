@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_ihk_4gt_r4">
+    <title>Configuration groups</title>
+    <body>
+      <p>The following configuration parameter groups are currently defined:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_qxr_vgt_r4">
+          <title>Parameter groups</title>
+          <tgroup cols="2">
+            <colspec colname="c1" colnum="1" colwidth="1*"/>
+            <colspec colname="c2" colnum="2" colwidth="9.53*"/>
+            <thead>
+              <row>
+                <entry>Name</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry/>
+                <entry>DDS global parameters (no group prefix).</entry>
+              </row>
+              <row>
+                <entry>POOL</entry>
+                <entry>Memory pools configuration parameters.</entry>
+              </row>
+              <row>
+                <entry>RTPS</entry>
+                <entry>RTPS behaviour parameters.</entry>
+              </row>
+              <row>
+                <entry>IP</entry>
+                <entry>Internet Protocol parameters.</entry>
+              </row>
+              <row>
+                <entry>IPv6</entry>
+                <entry>IPv6 parameters</entry>
+              </row>
+              <row>
+                <entry>UDP</entry>
+                <entry>User Datagram Protocol (UDP) parameters.</entry>
+              </row>
+              <row>
+                <entry>TCP</entry>
+                <entry>Transmission Control Protocol (TCP) parameters.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+    </body>
+  </topic>
+</dita>

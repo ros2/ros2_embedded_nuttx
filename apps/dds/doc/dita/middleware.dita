@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_szs_2ws_sf">
+ <title>Need for a middleware</title>
+ <shortdesc/>
+ <conbody>
+  <p>Software applications are becoming increasingly distributed nowadays. Whereas previously
+   standalone application programs were sufficient for most purposes, this is no longer the case. </p>
+  <p>However, making a distributed application, even though it allows a much more powerful systems,
+   has an associated cost (nothing ever comes for free).</p>
+  <p>Not only does the application writer need to take into account the difficulties of
+   communication over LANs and WANs (with potential NAT issues), but communication needs to be
+   secure as well, using modern cryptography mechanisms.</p>
+  <p>We can envisage a distributed application on several data distribution levels:</p>
+  <p>
+   <ul id="ul_mvr_mxs_sf">
+    <li>Multiple threads within a process</li>
+    <li>Multiple processes within a single node</li>
+    <li>Multiple processes in distinct nodes.</li>
+   </ul>
+  </p>
+  <p>For each of these approaches there are advantages and disadvantages.</p>
+  <p>The first level, i.e. multiple threads communicating on, typically, shared data is one of the
+   easier approaches, when using a multi-threading library such as pthreads. There are, however a
+   number of problems associated with this:</p>
+  <p>
+   <ul id="ul_51b_bys_sf">
+    <li>A misbehaving thread can impact other well-behaving threads, making the resulting system a
+     lot less robust than expected.</li>
+    <li>It does not scale well, and leads to huge system components.</li>
+    <li>Makes it very hard to pull apart the different threads into different processes in a later
+     stage, since the possibility of data sharing is typically used in unexpected situations by the
+     application writers.</li>
+   </ul>
+  </p>
+  <p>For the second level of data distribution, e.g. multiple processes within a single node, there
+   are also some mechanisms, out of the box available on many systems, such as DBus. This mechanism
+   typically works very well within a single node, but it doesn't scale when an application outgrows
+   a single node, and when it becomes necessary to use multiple heterogenous nodes communicating
+   together. Take the example of a Technicolor Gateway, a Technicolor Settop box and some management
+   software running on a management PC. In this case, you automatically end up with multiple
+   heterogenous nodes, all needing to communicate with each other.</p>
+  <p>The third level of distribution is the most general but leads to a lot more complex
+   communication mechanisms. The communication overhead then becomes a heavy burden on application
+   writers, since they need to be constantly aware of it while developing their software.</p>
+  <p>The idea of the middleware now, is to shield the details of the communication and the
+   communication overhead from the application writers. Which data distribution level is used, then
+   becomes a last-minute build decision, instead of having this visible on application level.
+   Application writers simply use a standardized way of sharing their data with others, not knowing
+   where the other application components are located, be it in the same process, another process on
+   the same node, or on an entirely different node altogether. Not having to deal with the
+   communication then allows application writers to focus much more on the usage of their data,
+   which is a lot more important to them.</p>
+ </conbody>
+</concept>

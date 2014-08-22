@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_wfj_4qk_5f">
+ <title>Example Type usage</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section><title>Shapes type.</title>
+   <p>A very simple example from the shapes demo as an IDL type definition:</p>
+      <codeblock>const long MAXC = 127;
+
+struct Shape_t {
+    string&lt;MAXC> color;   //@Key
+    int          x;
+    int          y;
+    int          shapesize;
+};</codeblock>
+      <p>As a C-language type definition:</p>
+ <codeblock>#define MAXC 127
+
+typedef struct {
+    char  color[MAXC+1];   /*@Key*/ 
+    int   x;
+    int   y;
+    int   shapesize;
+} Shape_t;</codeblock>
+  <p>This would be specified as a static type definition in TSM format as:</p>
+  <codeblock>#include &lt;stddef.h>
+
+static DDS_TypeSupport_meta shape_tsm [] = {
+    { CDR_TYPECODE_STRUCT, TSMFLAG_KEY, "Shape_t", 
+      sizeof (Shape_t), 0, 4, 0, NULL },
+    { CDR_TYPECODE_CSTRING, TSMFLAG_KEY, "color",
+      MAXC+1, offsetof (Shape_t, color), 0, 0, NULL },
+    { CDR_TYPECODE_LONG, 0, "x", 
+      0, offsetof (Shape_t, x), 0, 0, NULL },
+    { CDR_TYPECODE_LONG, 0, "y",
+      0, offsetof (Shape_t, y), 0, 0, NULL },
+    { CDR_TYPECODE_LONG, 0, "shapesize",
+      0, offsetof (Shape_t, shapesize), 0, 0, NULL }
+};</codeblock>
+   <note>This conversion can be done either manually, or by using the IDL data compiler.</note>
+   <p>In order to use this type in a DDS client program, the type still needs to be converted to a DDS_TypeSupport type:</p>
+    <codeblock>     DDS_TypeSupport *shape_ts;
+
+     shape_ts = DDS_DynamicType_register (shape_tsm);
+     if (!shape_ts)
+          return (DDS_RETCODE_OUT_OF_RESOURCES);</codeblock>
+   <p>This type representation can be registered in a DDS Domain with the following function:</p>
+   <codeblock>     error = DDS_DomainParticipant_register_type (part, shape_ts, "ShapeType");
+     if (error)
+          return (error);</codeblock>
+   <p>Sending data of this type could then be done as follows:</p>
+   <codeblock>     Shape_t	data;
+
+     strcpy (data.color, "RED");
+     data.x = 10;
+     data.y = 50;
+     data.shapesize = 25;
+     error = DDS_DataWriter_write (w, &amp;data, 0);</codeblock>
+   <p>When a sample of this type is received, the following code might be used:</p>
+   <codeblock>     error = DDS_DataReader_take (dr, &amp;ssample, &amp;sinfo, 1, ss, vs, is);
+     if (!error &amp;&amp; DDS_SEQ_LENGTH (sinfo)) {
+          info = DDS_SEQ_ITEM (sinfo, 0);
+          if (info->valid_data) {
+               sample = DDS_SEQ_ITEM (ssample, 0);
+               printf ("%s x=%u, y=%u, size=%u, sample->color,
+                                                sample->x, sample->y,
+                                                sample->shapesize);
+          }
+          DDS_DataReader_return_loan (dr, &amp;ssample, &amp;sinfo);
+     }</codeblock>
+  </section>
+  
+  <section>
+   <title>Simple types and enums.</title>
+  <p>A slightly more complex example but using only simple types and an enumeration type:</p>
+      <p>First we show the IDL definition:</p>
+      <codeblock>enum anenum2 {
+    a,
+    b,
+    c
+};
+
+struct s1 {
+    unsigned short u16;
+    short i16;
+    unsigned long u32;
+    long i32;
+    unsigned long long u64;
+    long long i64;
+    float fl;
+    double d;
+    char ch;
+    bool b;
+    octet o;
+    anenum2 anenumelement;
+};</codeblock>
+    <p>The corresponding C-type:</p>
+  <codeblock>#include &lt;stdint.h>
+
+typedef enum {
+    a,
+    b,
+    c
+} anenum2;
+
+struct s1 {
+    uint16_t u16;
+    int16_t i16;
+    uint32_t u32;
+    int32_t i32;
+    uint64_t u64;
+    int64_t i64;
+    float fl;
+    double d;
+    char ch;
+    unsigned char b;
+    unsigned char o;
+    anenum2 anenumelement;
+};</codeblock>
+  <p>Resulting in the following TSM definitions<fn>This time we use the GCC extension for naming
+    fields in constant declarations.</fn>:</p>
+  <codeblock>#include &lt;stddef.h>
+
+static DDS_TypeSupport_meta tsm1[] = {
+    { .tc = CDR_TYPECODE_STRUCT, .name = "s1",
+      .size = sizeof(struct struct1), .nelem = 12 },
+    { .tc = CDR_TYPECODE_USHORT, .name = "u16",
+      .offset = offsetof(struct s1, u16) },
+    { .tc = CDR_TYPECODE_SHORT, .name = "i16",
+      .offset = offsetof(struct s1, i16) },
+    { .tc = CDR_TYPECODE_ULONG, .name = "u32",
+      .offset = offsetof(struct s1, u32) },
+    { .tc = CDR_TYPECODE_LONG, .name = "i32",
+      .offset = offsetof(struct s1, i32) },
+    { .tc = CDR_TYPECODE_ULONGLONG, .name = "u64",
+      .offset = offsetof(struct s1, u64) },
+    { .tc = CDR_TYPECODE_LONGLONG, .name = "i64",
+      .offset = offsetof(struct s1, i64) },
+    { .tc = CDR_TYPECODE_FLOAT, .name = "fl",
+      .offset = offsetof(struct s1, fl) },
+    { .tc = CDR_TYPECODE_DOUBLE, .name = "d",
+      .offset = offsetof(struct s1, d) },
+    { .tc = CDR_TYPECODE_CHAR, .name = "ch",
+      .offset = offsetof(struct s1, ch) },
+    { .tc = CDR_TYPECODE_BOOLEAN, .name = "b",
+      .offset = offsetof(struct s1, b) },
+    { .tc = CDR_TYPECODE_OCTET, .name = "o",
+      .offset = offsetof(struct s1, o) },
+    { .tc = CDR_TYPECODE_ENUM, .name = "anenumelement",
+      .offset = offsetof(struct s1, anenumelement), .nelem = 3 },
+    { .tc = CDR_TYPECODE_LONG, .name = "a", .label = a },
+    { .tc = CDR_TYPECODE_LONG, .name = "b", .label = b },
+    { .tc = CDR_TYPECODE_LONG, .name = "c", .label = c }
+};</codeblock>
+  </section>
+  <section><title>Arrays, sequences and strings</title>
+   <p>Following example contains some fixed, as well as dynamic array types and some dynamic and
+        static strings.</p>
+      <p>The example in IDL looks like this:</p>
+      <codeblock>const long MSGLEN = 20;
+
+struct s2 {
+    string&lt;MSGLEN>  message;
+    string          dynmsg;
+    double          darr [10][2];
+    sequence&lt;float> floats;
+};</codeblock>
+    <p>This example uses a dynamic array, called a sequence. Allthough sequences are handled in more
+        detail in the following chapter, a small introduction is given here in order to be able to
+        understand the next code fragments.</p>
+   <p>Since there is no direct C-language representation of a dynamic array, a macro is used to
+        define a sequence of float values.</p>
+    <codeblock>#include "dds/dds_seq.h"
+
+DDS_SEQUENCE (float, fseq);</codeblock>
+    <p>This macro will expand to the following C-type definition:</p>
+    <codeblock>typedef struct fseq_st {
+    unsigned _maximum;
+    unsigned _length;
+    unsigned _esize;
+    int      _own;
+    float    *_buffer;
+} fseq;</codeblock>
+   <note>Sequences should not be handled directly. There is a large set of sequence handling
+        prototypes defined in dds_seq.h that should be sufficient for the user and which allows
+        almost direct use of all the sequence fields. See the next chapter for details.</note>
+   <p>The example uses this defined sequence:</p>
+    <codeblock>#define MSGLEN 20
+
+struct s2 {
+    char message [MSGLEN];
+    char *dynmsg;
+    double darr [10][2];
+    fseq floats;
+};</codeblock>
+   <p>This will result in the following TSMs:</p>
+   <codeblock>#include &lt;stddef.h>
+
+static DDS_TypeSupport_meta tsm2[] = {
+    { .tc = CDR_TYPECODE_STRUCT, .flags = TSMFLAG_DYNAMIC, .name = "s2",
+      .size = sizeof (struct s2), .nelem = 4 },
+    { .tc = CDR_TYPECODE_CSTRING, .name = "message", .nelem = MSGLEN,
+      .offset = offsetof (struct s2, message) },
+    { .tc = CDR_TYPECODE_CSTRING, .flags = TSMFLAG_DYNAMIC,
+      .name = "dynmsg", .nelem = 0, },
+      .offset = offsetof (struct s2, dynmsg ) },
+    { .tc = CDR_TYPECODE_ARRAY,	.name = "darr", 
+      .size = sizeof (double) * 20, .nelem = 10,
+      .offset = offsetof (struct s2, darr)},
+    { .tc = CDR_TYPECODE_ARRAY, .size = sizeof (double) * 2, .nelem = 2 },
+    { .tc = CDR_TYPECODE_DOUBLE },
+    { .tc = CDR_TYPECODE_SEQUENCE, .flags = TSMFLAG_DYNAMIC,
+      .name = "floats", .nelem = 0,
+      .offset = offsetof (struct s2, fseq)},
+    { .tc = CDR_TYPECODE_FLOAT}
+};</codeblock>
+   <p>If a dynamic type, such as this, is given to the user via a DDS Reader, it is up to the user
+        to determine where the dynamic data will be located. How this works will be described when
+        sequences are discussed in more detail.</p>
+    <note>It is possible to constrain the size of embedded sequences in a TSM, if deemed necessary,
+      by simply setting the <i>nelem</i> field to the maximum allowed number of elements in the
+      sequence. If not constrained, the number of elements in the sequence may be unlimited, which is
+      clearly impractical.</note>
+  </section>
+  <section><title>Union types</title>
+    <p>Union types in DDS are handled somewhat differently from normal C-unions, since DDS requires
+        a special and unique discriminant value for each distinct union value. To make DDS union
+        handling therefore somewhat easier, the DDS_UNION macro should be used:</p>
+    <codeblock>DDS_UNION (union_type, discr_type, un);</codeblock>
+    <p>Which expands to:</p>
+    <codeblock>typedef struct un_st {
+    discr_type discriminant;  /* Extra discriminant field. */
+    union_type u;             /* Union data fields. */
+} un;</codeblock>
+    <p>The following example union will demonstrate how to handle TSMs for unions:</p>
+      <p>First we'll show the example using a union in IDL:</p>
+      <codeblock>enum discr {
+    ANINT,
+    ASTRING
+};
+
+const long STRLEN = 20;
+
+union dds_union switch (discr) {
+    case ANINT: int i;
+    case ASTRING: string&lt;STRLEN> str;
+};
+
+
+struct u1s {
+    dds_union aunion;
+};</codeblock>
+    <p>The same example, but resulting C-code:</p>
+    <codeblock>#include "dds/dds_types.h"
+
+typedef enum {
+    ANINT,
+    ASTRING
+} discr;
+
+#define STRLEN 20
+
+typedef union {
+    int  i;
+    char str [STRLEN+1];
+} u1;
+      
+DDS_UNION (u1, discr, dds_union);
+
+typedef struct u1s_st {
+    dds_union aunion;
+} u1s; </codeblock>
+    <p>Which will then result in the following TSMs:</p>
+    <codeblock>#include &lt;stddef.h>
+
+static DDS_TypeSupport_meta u1s_tsm[] = {
+    { .tc = CDR_TYPECODE_STRUCT, .name = "u1s",
+      .size = sizeof (u1s), .nelem = 1 },
+    { .tc = CDR_TYPECODE_UNION, .name = "aunion", .nelem = 2,
+      .size = sizeof (dds_union), .offset = offsetof (u1s, aunion) },
+    { .tc = CDR_TYPECODE_LONG, .name = "along",
+      .offset = offsetof (dds_union, u), .label = ANINT },
+    { .tc = CDR_TYPECODE_CSTRING, .name = "acstring",
+      .offset = offsetof (dds_union, u),
+      .size = STRLEN+1, .label = ASTRING }
+};</codeblock>
+  </section>
+ 
+ </conbody>
+</concept>

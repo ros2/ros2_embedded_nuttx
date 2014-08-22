@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_skl_tf5_sf">
+ <title>Overview</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>As described before, the publish-subscribe way of exchanging data between components is a very
+   powerful idea.</p>
+  <p>Of course, an idea is one thing, but an efficient implementation is another thing
+   altogether.</p>
+  <p>While examining DDS as a technology, it became apparent that current commercial DDS
+   implementations had huge memory and performance requirements, making them unfit for use on
+   embedded platforms. It also was not clear why exactly this seemed to be the case, since DDS does
+   (from our point of view) allow very efficient and memory-constrained implementations.</p>
+  <p>The focus of DDS vendors at that time was (not yet) intended for small platforms, but was
+   instead mainly driven by use cases like:</p>
+  <p><ul id="ul_5y3_gh5_sf">
+    <li>High-speed financial transaction processing.</li>
+    <li>Avionics industry</li>
+    <li>Defense industry</li>
+   </ul>Since most of these do not have tight memory requirements, although they do have high
+   performance requirements, this was not seen as a big issue.</p>
+  <p>Also, the speed aspects of DDS were seen as prevalent to resource usage. Optimizing an
+   implementation for speed typically sacrifices resources due to strategies such as heavy caching,
+   and overly preallocating receive buffers.</p>
+  <p>The result of all this is that it became necessary for Technicolor to build their own DDS
+   implementation in order for DDS to be optimally usable on the current Gateway and Settop box
+   platforms.</p>
+  <p>The current version of Technicolor DDS runs on multiple Operating Systems, i.e. Unix, Linux and
+   Windows and is able to run and is actively supported on x86 platforms in both 32-bit and 64-bit
+   modes. It has also been tested on ARM-based Android platforms and Apple OSX and iOS devices, and
+   is used on gateways, settop boxes and cable modems based on both big- and little-endian MIPS
+   processors and Intel Atom processors.</p>
+  <p>Currently, Technicolor DDS is an integral part of the Qeo Component Development framework.</p>
+  <p>Except for the following, not often used features, the complete DDS specification is
+    implemented:<ul id="ul_1cp_kml_r4">
+    <li>Because there was no real need for Persistent and Transient durability, and because it is a
+     quite complex feature to implement, these durability modes are currently not present.</li>
+    <li>No support for Multitopics.  Multitopics are only implemented by a few DDS vendors, are
+     quite complex, and there was no use case for them in Technicolor Qeo.</li>
+    <li>No support for coherent topic updates.  The Qeo API does not need this and a lot of DDS
+     vendors don't implement this, so this was not a priority either.</li>
+    <li>Because the DLRL layer requires an additional software layer on top of the DCPS API with
+     additional memory and performance requirements which does not bring much added value, and
+     because only a few DDS vendors support this, Technicolor DDS has chosen not to support this
+     API.</li>
+   </ul></p>
+  <p>The DCPS API for Technicolor DDS is available for the C, Java and Python programming
+   languages.</p>
+  <p>Data sample sizes are supported up to 256 MBytes per sample.  In Qeo, limits on the Android
+   platform reduced this to 4MBytes per sample, which is enough to transfer complete pictures as
+   single samples.</p>
+  <p>DDS Dynamic types (X-Types) are fully supported except for XML-based transport and reading of
+   XML-types at runtime.</p>
+  <p>Technicolor DDS has support for RTPS over UDP/IPv4 by default. Support for RTPS over UDP/IPv6 is
+   optional but it can easily be added at compile-time when the -DDDS_IPV6 compile option is used.
+   In the latter case, it can be controlled via either environment variables or other configuration
+   mechanisms as to which IP variant (or both) is to be used. When both are used simultaneously, it
+   is also selectable which protocol has precedence and which of the protocols will have discovery
+   enabled.</p>
+  <p>In addition to UDP, Technicolor DDS supports the following transport mechanisms:</p>
+  <p>
+   <ul id="ul_dbc_yx5_r4">
+    <li>DTLS/UDP (secure peer-to-peer transport)</li>
+    <li>Plain TCP and TLS/TCP (secure remote transport)</li>
+    
+   </ul>
+  </p>
+  <p>The latter two mechanisms are primarily used for remote DDS access over NAT/Firewalls, where
+   TCP connections are setup from within the NAT-ed LANs.</p>
+  <p>DDS Security is accomplished by means of:<ul id="ul_tyd_xjm_r4">
+    <li>Transport security (DTLS/UDP and TLS/TCP), and/or</li>
+    <li>Fine-grained security, based on the DDS Security specification, using either standard or
+     Qeo-specific handshaking mechanisms.</li>
+   </ul></p>
+  <p>In addition to simple peer-to-peer connectivity, Technicolor DDS supports a DDS forwarder (or
+   relay) functionality that allows to extend a local DDS domain/cloud in order to include devices
+   located remotely over Internet via TCP. This mechanism is invisible for application writers. DDS
+   takes care of all the routing aspects.</p>
+ </conbody>
+</concept>

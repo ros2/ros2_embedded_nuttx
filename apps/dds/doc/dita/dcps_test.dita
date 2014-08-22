@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_z3b_hrg_vf">
+ <title>The DCPS functionality test program </title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The dcps test program (<apiname>dds</apiname>) is used for testing of the Technicolor DDS
+    middleware.</p>
+   <p>It allows to configure various different QoS combinations and allows the use of
+    configurable data transfers between multiple DataReaders and DataWriters, locally,
+    as well as on multiple hosts.</p>
+  </section>
+  <section>
+   <title>Program usage</title>
+   <p>By default, the program will behave as a single DataReader, waiting for data to arrive.</p>
+   <p>If started with the <apiname>-w</apiname> option, the program will create both a DataReader
+    and a DataWriter, and unless the <apiname>-p</apiname> option is given, the program will start
+    sending data immediately at a rate of 1 data sample per second.</p>
+   <p>Depending upon the <apiname>-v</apiname> option, sent and received data samples will be
+    displayed on standard output.</p>
+   <p>Since the DDS Debug Shell is started by default, the user can examine DDS entities in detail
+    while the test is running.</p>
+   <p>Some extra shell commands are present to allow some program-specific interactions:</p>
+   <p>
+    <ul id="ul_pw2_qvg_vf">
+     <li>The '<keyword>pause</keyword>' command allows to stop sending data samples on a
+      DataWriter.</li>
+     <li>The '<cmdname>resume</cmdname><cmdname>
+      [</cmdname><i>&lt;nsamples></i><cmdname>]</cmdname>' command allows to continue sending data
+      samples on the DataWriter, either continously or for a given number of samples.</li>
+     <li>The '<cmdname>delay</cmdname>
+      <i>&lt;n></i>' command updates the delay between the generation of successive data samples.
+      Whereas this is by default set to 1 second, it can be set to values of 1 up to &lt;maxint>
+      milliseconds.</li>
+     <li>The '<cmdname>asp</cmdname>
+      <i>&lt;d></i>' command can be used to invoke a DDS_DomainParticipant_assert_liveliness()
+      function on the given domain.</li>
+     <li>The '<cmdname>ase</cmdname>
+      <i>&lt;endpoint></i>' command can be used to invoke a DDS_DataWriter_assert_liveliness()
+      function on the given endpoint handle.</li>
+     <li>The '<keyword>quit</keyword>' command can be used to exit the program, while properly
+      cleaning up all resources.</li>
+    </ul>
+   </p>
+  </section>
+  <section>
+   <title>Command line options</title>
+   <p>The program accepts a number of options as can be shown by typing <apiname>dds
+    -h</apiname>.</p>
+   <p>The following options can be specified:</p>
+   <p>
+    <table frame="all" id="table_tqz_kxg_vf">
+     <title><apiname>dds</apiname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="4.84*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-w</cmdname></entry>
+        <entry>Act as DataWriter, sending data samples.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-r</cmdname></entry>
+        <entry>Act as a DataReader.  This is the default, so doesn't need to be specified.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-0..3</cmdname></entry>
+        <entry>Number of local DataReaders in writer mode.  Default is 1.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-s</cmdname>
+         <i>&lt;size></i></entry>
+        <entry>Size of data samples sent in writer mode.  By default, a 4-byte counter is sent,
+         followed by string.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-m</cmdname>
+         <i>&lt;size></i></entry>
+        <entry>Maximum data size of data samples. If set, the data sample sizes will increase from
+         the <cmdname>-s</cmdname> argument and this one, and restart again.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-a</cmdname>
+         <i>&lt;offset></i></entry>
+        <entry>Offset to add for each size increment.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-n</cmdname>
+         <i>&lt;count></i></entry>
+        <entry>Maximum number of data samples to generate/receive. When the given amount is reached,
+         the program stops sending/receiving or quits, depending on the <cmdname>-q</cmdname>
+         option.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-b</cmdname>
+         <i>&lt;count></i></entry>
+        <entry>Number of messages per burst.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-q</cmdname></entry>
+        <entry>Quit when all packets are sent (writer side) or received (reader side).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-f</cmdname></entry>
+        <entry>Flood mode when given.  In flood mode, the writer doesn't wait, but sends as fast as
+         possible.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname>
+         <i>&lt;msec></i></entry>
+        <entry>Maximum delay to wait between sending samples in milliseconds.  Default delay is 1
+         second (1000.ms).  Minimum delay is 10ms.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-p</cmdname></entry>
+        <entry>For a DataWriter: start in paused state (i.e. wait until a
+         '<cmdname>resume</cmdname>' command is entered.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-t</cmdname></entry>
+        <entry>Trace transmitted/received messages.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-i </cmdname><i>&lt;domain></i></entry>
+        <entry>Domain Id to use.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-u</cmdname>
+         <i>&lt;count></i></entry>
+        <entry>Number of runs before exiting. Closes and reopens the domain for each subsequent
+         run.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-x</cmdname></entry>
+        <entry>Create an additional domain participant.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-l</cmdname></entry>
+        <entry>Disable lower-layer RTPS functionality, so it can be used on the build farm as one of
+         the tests in the automatic test suite.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-g [</cmdname><i>&lt;port></i><cmdname>]</cmdname></entry>
+        <entry>Start a debug server.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-y</cmdname>
+         <i>&lt;filename></i></entry>
+        <entry>Write received data to a file.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-o</cmdname>
+         <i>&lt;delay></i></entry>
+        <entry>Delay before it starts publishing in writer mode.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation, logging overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose operation, i.e. detailed functionality will be logged.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Displays program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+   
+  </section>
+ </conbody>
+</concept>

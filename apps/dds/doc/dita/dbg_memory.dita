@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_syx_kj5_wf">
+ <title>Memory dumps</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>A number of commands are available for dumping memory regions in a variety of formats.</p>
+  <p>The following commands can be used for this:</p>
+  <p>
+   <ul id="ul_jyx_rj5_wf">
+    <li><cmdname>d</cmdname> or <cmdname>dm</cmdname> display memory in mixed hexadecimal and ASCII
+     characters.</li>
+    <li><cmdname>db</cmdname> displays memory as a number of bytes in rows of 16 bytes.</li>
+    <li><cmdname>ds</cmdname> displays memory as a number of short words (16-bits) in rows of 8
+     words.</li>
+    <li><cmdname>dl</cmdname> displays memory as a number of long words (32-bits) in rows of 4 long
+     words.</li>
+   </ul>
+  </p>
+  <p>If no arguments are given with a command, the dump continues from the memory address that
+   follows the previous dump command, and dumps 64 bytes, e.g. 4 rows by default.<note> Make sure
+    that the first dump command that is given specifies a valid address, since the default memory
+    location is set to 0 if no dump command was specified yet!</note></p>
+  <p>If an address is specified, dumping starts from that location.</p>
+  <p>If a number follows the address, it indicates the length (in bytes) of the memory region that needs
+   to be dumped, otherwise the default 64-byte range is dumped.</p>
+  <note>Be very careful with these commands. If an inappropriate address is specified, segfaults
+   might occur!!</note>
+ </conbody>
+</concept>

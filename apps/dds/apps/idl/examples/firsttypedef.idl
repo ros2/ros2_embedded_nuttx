@@ -1,0 +1,12 @@
+typedef long myInt;
+
+typedef struct helaba
+{
+        long x;
+        myInt y;
+} blah;
+
+struct recursive {
+        blah blah1;
+        blah blah2;
+};

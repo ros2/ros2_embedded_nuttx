@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE map PUBLIC "-//OASIS//DTD DITA Map//EN" "map.dtd">
+<map audience="Intended for Technicolor DDS users"
+    domains="(topic delay-d)                          (map mapgroup-d)                           (topic indexing-d)                          (map glossref-d)                          (topic hi-d)                           (topic ut-d)                           (topic hazard-d)                          (topic abbrev-d)                          (topic pr-d)                           (topic sw-d)                          (topic ui-d)                         "
+    toc="yes">
+    <title>Technicolor DDS User Manual</title>
+    <topicref href="overview.dita"/>
+    <topicref href="middleware_concept.dita">
+        <topicref href="middleware.dita"/>
+        <topicref href="middleware_types.dita"/>
+        <topicref href="dds_essentials.dita"/>
+        <topicref href="dds_architecture.dita"/>
+    </topicref>
+    <topicref href="tdds_features.dita">
+        <topicref href="why_technicolor_dds.dita"/>
+        <topicref href="design_goals.dita"/>
+        <topicref href="central_discovery.dita"/>
+        <topicref href="debug_features.dita"/>
+    </topicref>
+    <topicref href="data_types.dita">
+        <topicref href="types_intro.dita"/>
+        <topicref href="dds_type.dita"/>
+        <topicref href="tsm_examples.dita"/>
+        <topicref href="sequences.dita"/>
+        <topicref href="dyn_examples.dita"/>
+    </topicref>
+    <topicref href="eventing.dita">
+        <topicref href="listeners.dita"/>
+        <topicref href="waitsets.dita"/>
+    </topicref>
+    <topicref href="memory.dita">
+        <topicref href="mempools.dita"/>
+        <topicref href="poolcfg.dita"/>
+    </topicref>
+    <topicref href="env_vars.dita">
+        <topicref href="config.dita"/>
+        <topicref href="env_groups.dita"/>
+        <topicref href="conf_global.dita"/>
+        <topicref href="cfg_pools.dita"/>
+        <topicref href="cfg_rtps.dita"/>
+        <topicref href="cfg_ip.dita"/>
+        <topicref href="multicast_env.dita"/>
+        <topicref href="addr_env.dita"/>
+        <topicref href="scope_env.dita"/>
+        <topicref href="mode_env.dita"/>
+        <topicref href="udp-cfg.dita"/>
+        <topicref href="tcp-cfg.dita"/>
+    </topicref>
+    <topicref href="building.dita">
+        <topicref href="components.dita"/>
+        <topicref href="cdd.dita"/>
+        <topicref href="shapes.dita"/>
+        <topicref href="bandwidth.dita"/>
+        <topicref href="latency.dita"/>
+        <topicref href="chat.dita"/>
+        <topicref href="dump-prog.dita"/>
+        <topicref href="idlparser.dita"/>
+        <topicref href="dcps_test.dita"/>
+        <topicref href="api_test.dita"/>
+        <topicref href="cmake_opts.dita"/>
+        <topicref href="secapps.dita"/>
+    </topicref>
+    <topicref href="debug_shell.dita">
+        <topicref href="shell_overview.dita"/>
+        <topicref href="commands.dita"/>
+        <topicref href="resource_cmds.dita">
+            <topicref href="dbg_timers.dita"/>
+            <topicref href="dbg_strings.dita"/>
+            <topicref href="dbg_pools.dita"/>
+            <topicref href="dbg_sockets.dita"/>
+            <topicref href="dbg_locators.dita"/>
+            <topicref href="dbg_qos.dita"/>
+            <topicref href="dbg_domain.dita"/>
+            <topicref href="dbg_topics.dita"/>
+            <topicref href="dbg_endpoints.dita"/>
+            <topicref href="dbg_cache.dita"/>
+            <topicref href="dbg_proxy.dita"/>
+            <topicref href="crypto.dita"/>
+            <topicref href="dbg_tx_rx.dita"/>
+            <topicref href="dbg_memory.dita"/>
+        </topicref>
+        <topicref href="dbg_control.dita"/>
+        <topicref href="dbg_tracing.dita"/>
+    </topicref>
+</map>

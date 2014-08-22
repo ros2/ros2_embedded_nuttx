@@ -1,0 +1,18 @@
+--- openssl-1.0.1e/ssl/d1_lib.c	2014-02-25 08:06:58.147279722 +0100
++++ openssl-1.0.1e-patched/ssl/d1_lib.c	2014-02-25 08:06:45.327280212 +0100
+@@ -176,9 +176,12 @@
+ 
+ 	while ( (item = pqueue_pop(s->d1->buffered_app_data.q)) != NULL)
+ 		{
+-		frag = (hm_fragment *)item->data;
+-		OPENSSL_free(frag->fragment);
+-		OPENSSL_free(frag);
++		rdata = (DTLS1_RECORD_DATA *) item->data;
++		if (rdata->rbuf.buf)
++		{
++			OPENSSL_free(rdata->rbuf.buf);
++		}
++		OPENSSL_free(item->data);
+ 		pitem_free(item);
+ 		}
+ 	}

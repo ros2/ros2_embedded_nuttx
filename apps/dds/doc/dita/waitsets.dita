@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_vx4_5sm_5f">
+ <title>WaitSets</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>WaitSets are a lot easier to work with and are a lot safer than listeners. In fact, a WaitSet
+   can be seen as a kind of 'overloaded' <i>select()</i> or <i>poll()</i> function call. Both
+   time-outs as well as waiting for data and waiting for other events, including notifications from
+   other threads, can be handled properly using this mechanism.</p>
+  <p>WaitSets don't have any of the restrictions that are specific to listener callbacks. Everything
+   can be done, i.e. every DDS function may be called, since everything occurs in the thread context
+   of the application thread.</p>
+  <p>Handling WaitSets requires a bit more preparation work, however. Before a WaitSet can be used,
+   it needs to be created properly, and this requires a number of function calls.</p>
+  <p>The typical workflow is as follows:</p>
+  <p>
+   <ul id="ul_kqs_ybn_5f">
+    <li>Call <i>DDS_WaitSet__alloc()</i> to create a new WaitSet.</li>
+    <li>Call <i>DDS_ConditionSeq__alloc()</i> or use <i>DDS_ConditionSeq__init()</i> on an already
+     existing variable to create/initialize an empty Condition sequence. This is needed in order to
+     add conditions that we are interested in to the WaitSet conditions.</li>
+    <li>Add one or more conditions using the <i>DDS_WaitSet_attach_condition()</i> function.
+     Conditions come in many flavors, such as:<ol id="ol_2kc_qcn_5f">
+      <li><u>ReadConditions</u>. These are DataReader conditions, where we specify a DataReader and
+       the set of View, Instance and Sample states that we are interested in.</li>
+      <li><u>QueryConditions</u>. A superset of a ReadCondition, where in addition to the states, it
+       is possible to specify an SQL-based expression on the data samples that we're interested in.
+       DDS will only signal that the condition is ready when both the expression matches and the
+       requested states are available.</li>
+      <li><u>StatusConditions</u>. Any state can be signalled as a condition on any entity, similar
+       to the various Listener callbacks:<table frame="all" id="table_czf_h2n_5f">
+        <title>Status bits</title>
+        <tgroup cols="3">
+         <colspec colname="c1" colnum="1" colwidth="27.91*" colsep="1" rowsep="1"/>
+         <colspec colname="c2" colnum="2" colwidth="24*" colsep="1" rowsep="1"/>
+         <colspec colname="c3" colnum="3" colwidth="4.97*" colsep="1" rowsep="1"/>
+         <thead>
+          <row>
+           <entry>Status</entry>
+           <entry>Description</entry>
+           <entry>Entity</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>INCONSISTENT_TOPIC_STATUS</entry>
+           <entry>Topic is not compatible with an existing topic, or with a discovered topic with
+            the same type.</entry>
+           <entry>Topic</entry>
+          </row>
+          <row>
+           <entry>OFFERED_DEADLINE_MISSED_STATUS</entry>
+           <entry>When Deadline QoS is enabled, Writer has missed a deadline for writing instance
+            data.</entry>
+           <entry>Writer</entry>
+          </row>
+          <row>
+           <entry>REQUESTED_DEADLINE_MISSED_STATUS</entry>
+           <entry>idem, where Reader missed a deadline for reading instance data.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>OFFERED_INCOMPATIBLE_QOS_STATUS</entry>
+           <entry>Offered Writer QoS settings are incompatible with Reader's QoS.</entry>
+           <entry>Writer</entry>
+          </row>
+          <row>
+           <entry>REQUESTED_INCOMPATIBLE_QOS_STATUS</entry>
+           <entry>Reader QoS settings are incompatible with Writer QoS.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>SAMPLE_LOST_STATUS</entry>
+           <entry>Sample was lost due to a slow/late reader.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>SAMPLE_REJECTED_STATUS</entry>
+           <entry>Sample was not accepted due to resource limits.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>DATA_ON_READERS_STATUS</entry>
+           <entry>One of the DataReaders has data available.</entry>
+           <entry>Subscriber</entry>
+          </row>
+          <row>
+           <entry>DATA_AVAILABLE_STATUS</entry>
+           <entry>Data is available for reading.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>LIVELINESS_LOST_STATUS</entry>
+           <entry>When Liveliness QoS is enabled, Writer was too slow with sending data.</entry>
+           <entry>Writer</entry>
+          </row>
+          <row>
+           <entry>LIVELINESS_CHANGED_STATUS</entry>
+           <entry>idem, where Reader is not responsive anymore.</entry>
+           <entry>Reader</entry>
+          </row>
+          <row>
+           <entry>PUBLICATION_MATCHED_STATUS</entry>
+           <entry>Writer has found a matching Reader.</entry>
+           <entry>Writer</entry>
+          </row>
+          <row>
+           <entry>SUBSCRIPTION_MATCHED_STATUS</entry>
+           <entry>Reader has found a matching Writer.</entry>
+           <entry>Reader</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </table></li>
+      <li><u>GuardConditions</u>. A guardcondition can be used to wakeup a thread that is waiting
+       for a number of Conditions in the WaitSet. An example use would be waiting for both one or
+       more sockets being ready as well as on a number of DDS Conditions. The main DDS waiting
+       thread would be blocked on the WaitSet, with an additional I/O monitoring thread waiting on
+        <i>select()</i>, <i>read()</i> or <i>fread()</i> functions. When data is available via the
+       I/O thread, this data/event could be appended to an input queue, followed by a
+        <i>set_trigger_value()</i> function call to unblock the main DDS waiting thread.</li>
+     </ol></li><li>Call <i>DDS_WaitSet_wait ()</i> with a suitable time-out.  This function will return only if
+     either of the given Conditions became active, or a time-out occurred.  It is easy to see which
+     Conditions were ready, since the list of ready Conditions is returned in a sequence of
+     Conditions which can be checked individually, based on the type of condition.  When processing
+     is done, the <i>DDS_WaitSet_wait()</i> can be called again, for as many times as needed, until
+     the program finishes.</li>
+   </ul>
+  </p>
+ </conbody>
+</concept>

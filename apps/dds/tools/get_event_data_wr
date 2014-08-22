@@ -1,0 +1,19 @@
+CTGET=$HOME/DDS/git/dds/tools/ctget
+
+$CTGET $1 USER:TxBurst 16 > /tmp/txburst.dat 
+$CTGET $1 USER:TxDelay 15 > /tmp/txdelay.dat
+$CTGET $1 DCPS:DataWriter_write 14 > /tmp/dww.dat
+$CTGET $1 RTPS:writer_new_change 13 > /tmp/wnch.dat
+$CTGET $1 RTPS:sfw_rel_new_change 12 > /tmp/relnch.dat
+$CTGET $1 DDS:W_CONT 11 > /tmp/wcont.dat
+$CTGET $1 DDS:W_EV 10 > /tmp/wev.dat
+$CTGET $1 DDS:W_RX 9 > /tmp/wrx.dat
+$CTGET $1 DDS:WAKEUP 8 > /tmp/wakeup.dat
+$CTGET $1 DDS:W_PROXY 7 > /tmp/wproxy.dat
+$CTGET $1 DDS:W_POLL 6 > /tmp/wpoll.dat
+$CTGET $1 RTPS:sch_w_prepare 5 > /tmp/wprep.dat
+$CTGET $1 RTPS:sfw_rel_send 4 > /tmp/rsend.dat
+$CTGET $1 RTPS:tx_data 3 > /tmp/txdata.dat
+$CTGET $1 RTPS:sch_loc_send 2 > /tmp/lsend.dat
+$CTGET $1 RTPS:sch_send_done 1 > /tmp/sendd.dat
+
