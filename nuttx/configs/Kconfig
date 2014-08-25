@@ -660,6 +660,12 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
 
+config ARCH_BOARD_STM32F4_PX4FMU_V1
+	bool "STMicro STM32F4-PX4 board"
+	depends on ARCH_CHIP_STM32F427V
+	---help---
+		STMicro STM32F427 board used at the PX4.
+
 config ARCH_BOARD_STM32F4_ROS
 	bool "STMicro STM32F4-ROS board"
 	depends on ARCH_CHIP_STM32F427V
@@ -913,6 +919,7 @@ config ARCH_BOARD
 	default "stm32f100rc_generic" if ARCH_BOARD_STM32F100RC_GENERIC
 	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
+	default "px4fmu-v1"		  	  if ARCH_BOARD_STM32F4_PX4FMU_V1	
 	default "stm32f4ros"    	  if ARCH_BOARD_STM32F4_ROS
 	default "stm32f429i-disco"    if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32ldiscovery"     if ARCH_BOARD_STM32L_DISCOVERY
@@ -1180,6 +1187,9 @@ source "configs/stm32f100rc_generic/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32F4_PX4FMU_V1
+source "configs/px4fmu-v1/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_ROS
 source "configs/stm32f4ros/Kconfig"
