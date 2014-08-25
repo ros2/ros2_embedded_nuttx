@@ -37,6 +37,7 @@
 #ifndef __CONFIG_STM32F4ROS_INCLUDE_BOARD_H
 #define __CONFIG_STM32F4ROS_INCLUDE_BOARD_H
 
+//#error "using ROS board.h"
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -56,8 +57,7 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* The STM32F4 Discovery board features a single 8MHz crystal.  Space is provided
- * for a 32kHz RTC backup crystal, but it is not stuffed.
+/* The STM32F4 ROS board features a 25MHz crystal. 
  *
  * This is the canonical configuration:
  *   System Clock source           : PLL (HSE)
@@ -66,8 +66,8 @@
  *   AHB Prescaler                 : 1            (STM32_RCC_CFGR_HPRE)
  *   APB1 Prescaler                : 4            (STM32_RCC_CFGR_PPRE1)
  *   APB2 Prescaler                : 2            (STM32_RCC_CFGR_PPRE2)
- *   HSE Frequency(Hz)             : 8000000      (STM32_BOARD_XTAL)
- *   PLLM                          : 8            (STM32_PLLCFG_PLLM)
+ *   HSE Frequency(Hz)             : 25000000      (STM32_BOARD_XTAL)
+ *   PLLM                          : 25            (STM32_PLLCFG_PLLM)
  *   PLLN                          : 336          (STM32_PLLCFG_PLLN)
  *   PLLP                          : 2            (STM32_PLLCFG_PLLP)
  *   PLLQ                          : 7            (STM32_PLLCFG_PLLQ)
@@ -82,7 +82,7 @@
 
 /* HSI - 16 MHz RC factory-trimmed
  * LSI - 32 KHz RC
- * HSE - On-board crystal frequency is 8MHz
+ * HSE - On-board crystal frequency is 25MHz
  * LSE - 32.768 kHz
  */
 
@@ -98,7 +98,7 @@
  *
  * PLL source is HSE
  * PLL_VCO = (STM32_HSE_FREQUENCY / PLLM) * PLLN
- *         = (8,000,000 / 8) * 336
+ *         = (25,000,000 / 25) * 336
  *         = 336,000,000
  * SYSCLK  = PLL_VCO / PLLP
  *         = 336,000,000 / 2 = 168,000,000
