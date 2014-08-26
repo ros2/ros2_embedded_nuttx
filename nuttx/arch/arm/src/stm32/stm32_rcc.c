@@ -138,6 +138,7 @@ void stm32_clockconfig(void)
   /* Enable peripheral clocking */
 
   rcc_enableperipherals();
+  //while (1) {}
 }
 
 /************************************************************************************

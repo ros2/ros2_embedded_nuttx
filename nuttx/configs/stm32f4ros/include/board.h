@@ -156,8 +156,10 @@
  * Note: TIM1,8 are on APB2, others on APB1
  */
 
-#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
-#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+//#define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
+//#define STM32_TIM27_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+#define STM32_TIM18_FREQUENCY   (2*STM32_PCLK2_FREQUENCY)
+#define STM32_TIM27_FREQUENCY   (2*STM32_PCLK1_FREQUENCY)
 
 /* LED definitions ******************************************************************/
 /* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
@@ -168,21 +170,14 @@
 
 #define BOARD_LED1        0
 #define BOARD_LED2        1
-#define BOARD_LED3        2
-#define BOARD_LED4        3
-#define BOARD_NLEDS       4
+#define BOARD_NLEDS       2
 
 #define BOARD_LED_GREEN   BOARD_LED1
 #define BOARD_LED_ORANGE  BOARD_LED2
-#define BOARD_LED_RED     BOARD_LED3
-#define BOARD_LED_BLUE    BOARD_LED4
 
 /* LED bits for use with stm32_setleds() */
-
 #define BOARD_LED1_BIT    (1 << BOARD_LED1)
 #define BOARD_LED2_BIT    (1 << BOARD_LED2)
-#define BOARD_LED3_BIT    (1 << BOARD_LED3)
-#define BOARD_LED4_BIT    (1 << BOARD_LED4)
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
  * stm32f4discovery.  The following definitions describe how NuttX controls the LEDs:
@@ -196,15 +191,6 @@
 #define LED_SIGNAL        5  /* LED2 + LED3 */
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* N/C  + N/C  + N/C + LED4 */
-
-/* Button definitions ***************************************************************/
-/* The STM32F4 Discovery supports one button: */
-
-#define BUTTON_USER        0
-
-#define NUM_BUTTONS        1
-
-#define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
 /* Alternate function pin selections ************************************************/
 
@@ -286,37 +272,6 @@ void stm32_boardinitialize(void);
 void stm32_ledinit(void);
 void stm32_setled(int led, bool ledon);
 void stm32_setleds(uint8_t ledset);
-#endif
-
-/************************************************************************************
- * Button support.
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
- *
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   up_irqbutton() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void);
-uint8_t up_buttons(void);
-#ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
-#endif
 #endif
 
 #undef EXTERN
