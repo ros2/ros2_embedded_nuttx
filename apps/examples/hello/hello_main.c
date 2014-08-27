@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include "console.h"
 
 /****************************************************************************
  * Definitions
@@ -58,7 +59,11 @@
 
 int hello_main(int argc, char *argv[])
 {
-  printf("Hello, World!!\n");
-  return 0;
+
+ 	console_init();
+ 	printf("Console initialized");
+
+  	printf("Hello, World!!\n");
+  	return 0;
 }
 

@@ -533,5 +533,6 @@ void os_start(void)
       /* Perform any processor-specific idle state operations */
 
       up_idle();
+  //while (1) {}
     }
 }

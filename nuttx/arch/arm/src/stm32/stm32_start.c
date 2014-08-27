@@ -302,6 +302,7 @@ void __start(void)
 #else
   /* Call os_start() */
 
+  // while (1) {}  
   os_start();
 
   /* Shoulnd't get here */
