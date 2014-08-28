@@ -59,10 +59,6 @@
 
 int hello_main(int argc, char *argv[])
 {
-
-/* 	console_init();
- 	printf("Console initialized");
-*/
   	printf("Hello, World!!\n");
   	return 0;
 }
