@@ -87,13 +87,18 @@ gdb_server: nuttx.bin
 gdb_server2: nuttx.bin
 	$(OPENOCD) -f board/stm32f4discovery.cfg -c "init; halt" 
 	#-select USB=0 -device STM32F405RG
-	
+
+gdb_server3:
+	st-util -V
+		
 gdb: nuttx.bin
 	$(CROSS_COMPILE)gdb nuttx -x ../tools/gdb_init_commands
 
 gdb2: nuttx.bin
 	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:3333'
 
+gdb3: nuttx.bin
+	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:4242'
 
 reset:
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; reset run; shutdown"
