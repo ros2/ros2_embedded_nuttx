@@ -75,14 +75,25 @@ emu: nuttx.bin
 program: nuttx.bin
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; flash write_image erase nuttx.bin 0x8000000; verify_image nuttx.bin 0x8000000; sleep 100; reset run; sleep 100; shutdown"
 
+program2: nuttx.bin
+	-$(OPENOCD) -f board/stm32f4discovery.cfg -c "init" -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000 bin" -c "reset run; exit"
+
 dump_flash:
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; dump_image nuttx.bin.dump 0x8000000 0x1000; reset run; shutdown"
 
 gdb_server: nuttx.bin
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt"
+
+gdb_server2: nuttx.bin
+	$(OPENOCD) -f board/stm32f4discovery.cfg -c "init; halt" 
+	#-select USB=0 -device STM32F405RG
 	
 gdb: nuttx.bin
 	$(CROSS_COMPILE)gdb nuttx -x ../tools/gdb_init_commands
+
+gdb2: nuttx.bin
+	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:3333'
+
 
 reset:
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; reset run; shutdown"

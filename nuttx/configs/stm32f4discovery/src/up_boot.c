@@ -71,6 +71,22 @@
 
 void stm32_boardinitialize(void)
 {
+
+
+  /*
+  On some architectures (like ARM Cortex-M3) Idle thread causes the core to stop using WFI 
+  (Wait For Interrupt) assembly instruction. This effectively stops clocking of the core, 
+  which is resumed only by some enabled interrupt. This causes hardware debuggers to believe 
+  that they were disconnected from the target, as they lose connection with the now stopped core...
+
+  Refer to http://nuttx.org/doku.php?id=wiki:howtos:jtag-debugging
+
+  JUST FOR DEVELOPMENT 
+  */
+  uint32_t cr = getreg32(STM32_DBGMCU_CR);
+  cr |= DBGMCU_CR_STANDBY | DBGMCU_CR_STOP | DBGMCU_CR_SLEEP;
+  putreg32(cr, STM32_DBGMCU_CR);
+
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
