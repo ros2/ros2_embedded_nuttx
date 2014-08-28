@@ -23,32 +23,30 @@ sudo /sbin/ldconfig -v
 
 Building
 ---------
-```
+```bash
     cd nuttx/
     make menuconfig
-    make CROSSDEV=arm-none-eabi-
+    make 
 ```
 
 
 Programming
 ------------
 
+```bash
+cd nuttx/
+make program2
 ```
-make program
-```
-
-(old instructions)
-
-    openocd -f board/stm32f4discovery.cfg -c "init" -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000 bin" -c "reset run" -c "exit"
-
 
 Debugging
 -------
 
-(old instructions)
-
-    openocd -f board/stm32f4discovery.cfg -c "init"
-    arm-none-eabi-gdb -tui nuttx -ex 'target remote localhost:3333' -ex 'monitor reset halt' -ex 'load'  -ex 'continue'
-
-
+```bash
+cd nuttx/
+make gdb_server2
+```
+In another terminal (same directory):
+```bash
+make gdb2
+```
 
