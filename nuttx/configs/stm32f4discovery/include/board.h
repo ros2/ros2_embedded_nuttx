@@ -246,14 +246,14 @@
 /* Ethernet *************************************************************************/
 /* We need to provide clocking to the MII PHY via MCO1 (PA8) */
 
-#error gets board
+//#error gets board
 
-/*#define BOARD_CFGR_MC01_SOURCE  RCC_CFGR_MCO1_HSE
+#define BOARD_CFGR_MC01_SOURCE  RCC_CFGR_MCO1_HSE
 #define BOARD_CFGR_MC01_DIVIDER RCC_CFGR_MCO1PRE_NONE
 #define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
 #define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
 #define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
-*/
+#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_2
 
 /************************************************************************************
  * Public Data
