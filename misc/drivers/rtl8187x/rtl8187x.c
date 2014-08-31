@@ -631,7 +631,7 @@ static inline FAR struct rtl8187x_state_s *rtl8187x_allocclass(void)
   FAR struct rtl8187x_state_s *priv;
 
   DEBUGASSERT(!up_interrupt_context());
-  priv = (FAR struct rtl8187x_state_s *)kmalloc(sizeof(struct rtl8187x_state_s));
+  priv = (FAR struct rtl8187x_state_s *)kmm_malloc(sizeof(struct rtl8187x_state_s));
   uvdbg("Allocated: %p\n", priv);;
   return priv;
 }
