@@ -1,0 +1,6 @@
+ChangeLog
+=========
+
+2014-9-1:  Removed support for 8051 from main source tree.
+
+  REASON: There are two: (1) The older 8051 architecture has a hardware stack and required special case handling throughout the OS.  With a current focus on supporting true processes, the limitations of the 8051 architecture are bacoming obstacles to the advancement of the design.
