@@ -246,24 +246,23 @@
 /* Ethernet *************************************************************************/
 /* We need to provide clocking to the MII PHY via MCO1 (PA8) */
 
-//#error gets board
+// Clock configuration
+//  External, kernel option CONFIG_STM32_RMII_EXTCLK used.
+ 
+// #define GPIO_ETH_RMII_TX_EN_1 (GPIO_ALT|GPIO_AF11
+//     |GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN11)
+#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
 
-#define BOARD_CFGR_MC01_SOURCE  RCC_CFGR_MCO1_HSE
-#define BOARD_CFGR_MC01_DIVIDER RCC_CFGR_MCO1PRE_NONE
+// #define GPIO_ETH_RMII_TXD0_1  (GPIO_ALT|GPIO_AF11
+//     |GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN12)
+#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_1
 
+// #define GPIO_ETH_RMII_TXD1_1  (GPIO_ALT|GPIO_AF11|
+//      GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN13)
+#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_1
+
+// Enable pulse-per-second (PPS) output signal
 #define GPIO_ETH_PPS_OUT    GPIO_ETH_PPS_OUT_1
-#define GPIO_ETH_MII_CRS    GPIO_ETH_MII_CRS_2
-#define GPIO_ETH_MII_COL    GPIO_ETH_MII_COL_2
-#define GPIO_ETH_MII_RX_ER  GPIO_ETH_MII_RX_ER_2
-#define GPIO_ETH_MII_RXD2   GPIO_ETH_MII_RXD2_2
-#define GPIO_ETH_MII_RXD3   GPIO_ETH_MII_RXD3_2
-#define GPIO_ETH_MII_TXD3   GPIO_ETH_MII_TXD3_1
-#define GPIO_ETH_MII_TX_EN  GPIO_ETH_MII_TX_EN_2
-#define GPIO_ETH_MII_TXD0   GPIO_ETH_MII_TXD0_2
-#define GPIO_ETH_MII_TXD1   GPIO_ETH_MII_TXD1_2
-#define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_2
-#define GPIO_ETH_RMII_TXD0  GPIO_ETH_RMII_TXD0_2
-#define GPIO_ETH_RMII_TXD1  GPIO_ETH_RMII_TXD1_2
 
 /************************************************************************************
  * Public Data
