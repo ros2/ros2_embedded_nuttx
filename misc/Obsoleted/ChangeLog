@@ -17,6 +17,21 @@ ChangeLog
   4. I do not thing that anyone has ever used the port and because of bit
      rot, it is not even certain that it is still function.
 
-  NEW HOME:  misc/Obsoleted/arch/8051 and misc/Obsoleted/configs/pjrc-8051
+  NEW HOME:
+    misc/Obsoleted/arch/8051 and misc/Obsoleted/configs/pjrc-8051
 
-  REMOVE PATCH:  misc/Obsoleted/Patches/Remove-8051-2014-9-1.patch
+  REMOVAL PATCH:
+    misc/Obsoleted/Patches/Remove-8051-2014-9-1.patch
+
+2014-9-5:  Removed support for the 16z board from the main source tree.
+
+  REASON:
+    The port is not yet ready for use.  It may return to the NuttX source
+    tree at some point in the future.
+
+  NEW HOME:
+    misc/Obsoleted/configs/16z
+
+  REMOVAL PATCH:
+    misc/Obsoleted/Patches/Remove-16z-2014-9-5.patch
+
