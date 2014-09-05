@@ -1,0 +1,165 @@
+diff --git a/nuttx/ChangeLog b/nuttx/ChangeLog
+index 3e618e3..c585036 100755
+--- a/nuttx/ChangeLog
++++ b/nuttx/ChangeLog
+@@ -8402,3 +8402,8 @@
+ 	  bundle up the user C startup file (crt0), not the kernel head object
+ 	  for the kernel and protected builds (2014-9-4).
+ 	* tools/mkexport.sh: Add .config file to export package (2014-9-5).
++	* configs/16z:  Support for this board has been removed from the NuttX
++	  source tree (but still can be found in the misc/Obsoleted directory).
++	  This port is not ready for usage but may return to the NuttX tree
++	  at some point in the future (2014-9-5).
++
+diff --git a/nuttx/Documentation/NuttX.html b/nuttx/Documentation/NuttX.html
+index 5bc5016..8b48a90 100644
+--- a/nuttx/Documentation/NuttX.html
++++ b/nuttx/Documentation/NuttX.html
+@@ -3962,7 +3962,7 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+     </li>
+     <li>
+       <p>
+-        <b>Toyaga 16z</b>.
++        <b>Toyaga 16z (obsoleted)</b>.
+         This port if for the <a href="https://github.com/toyaga/16z">Toyaga 16z</a> board that also use the Zilog ZNEOZ16F2811AL20EG microntroller with the Zilog ZDS-II Windows command line tools.
+         The development environment is either Windows native or Cygwin under Windows.
+       </p>
+@@ -3970,8 +3970,14 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
+         <b>STATUS:</b>
+         The initial release of support for the 16z board was made available in NuttX version 6.33.
+         Both the 16z board and the NuttX port are works in progress and are not ready for usage as of NuttX-7.2.
+-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/16z/README.txt">README</a> file for further information.
++        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/configs/16z/README.txt">README</a> file for further information.
+       </p>
++    <p>
++      <b><i>Obsoleted</i></b>.
++      This architecture has been <i>obsoleted</i>.
++      The code has been moved out of the NuttX source tree but can still be found be found in <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/Obsoleted/">Obsoleted</a> directory.
++      This support was obsoleted because of technical issues that make NuttX unusable on the board at least in the short term.  This configuration may return to the NuttX source tree at some time in the future.
++    </p>
+     </li>
+   </ul>
+   </td>
+diff --git a/nuttx/Documentation/README.html b/nuttx/Documentation/README.html
+index 50304cf..23e355f 100644
+--- a/nuttx/Documentation/README.html
++++ b/nuttx/Documentation/README.html
+@@ -51,8 +51,6 @@
+  |   |- audio/
+  |   |   `- <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/audio/README.txt"><b><i>README.txt</i></b></a>
+  |   |- configs/
+- |   |   |- 16z/
+- |   |   |   `- <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/16z/README.txt"><b><i>README.txt</i></b></a>
+  |   |   |- amber/
+  |   |   |   `- <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/amber/README.txt"><b><i>README.txt</i></b></a>
+  |   |   |- arduino-due/
+diff --git a/nuttx/README.txt b/nuttx/README.txt
+index fcd7e3e..a689ff0 100644
+--- a/nuttx/README.txt
++++ b/nuttx/README.txt
+@@ -918,8 +918,6 @@ nuttx
+  |   `-libpcode/
+  |       `-README.txt
+  |- configs/
+- |   |- 16z/
+- |   |   `- README.txt
+  |   |- amber/
+  |   |   `- README.txt
+  |   |- arduino-due/
+diff --git a/nuttx/configs/Kconfig b/nuttx/configs/Kconfig
+index 94b4dab..8b7aa81 100644
+--- a/nuttx/configs/Kconfig
++++ b/nuttx/configs/Kconfig
+@@ -12,15 +12,6 @@ choice
+ 		be available for selection.  Use ARCH_BOARD_CUSTOM to create a new
+ 		board configuration.
+ 
+-config ARCH_BOARD_16Z
+-	bool "16z Board"
+-	depends on ARCH_CHIP_Z16F2811
+-	select ARCH_HAVE_LEDS
+-	---help---
+-		This selection enables the port of NuttX port to the 16z board. The
+-		16z board is based on the ZiLOG ZNEO Z16F2811AL20EG part.  See
+-		https://github.com/toyaga/16z for further information.
+-
+ config ARCH_BOARD_AMBER
+ 	bool "Amber Web Server"
+ 	depends on ARCH_CHIP_ATMEGA128
+@@ -957,7 +948,6 @@ config ARCH_BOARD_CUSTOM_DIR
+ 
+ config ARCH_BOARD
+ 	string
+-	default "16z"                 if ARCH_BOARD_16Z
+ 	default "amber"               if ARCH_BOARD_AMBER
+ 	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
+ 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
+@@ -1107,9 +1097,6 @@ config NSH_MMCSDSPIPORTNO
+ 
+ comment "Board-Specific Options"
+ 
+-if ARCH_BOARD_16Z
+-source "configs/16z/Kconfig"
+-endif
+ if ARCH_BOARD_AMBER
+ source "configs/amber/Kconfig"
+ endif
+diff --git a/nuttx/configs/README.txt b/nuttx/configs/README.txt
+index 18e24a0..f64f63f 100644
+--- a/nuttx/configs/README.txt
++++ b/nuttx/configs/README.txt
+@@ -161,11 +161,6 @@ http://nuttx.org/Documentation/NuttXConfigVariables.html.
+ Supported Boards
+ ^^^^^^^^^^^^^^^^
+ 
+-configs/16z
+-  This is the port of NuttX port to the 16z board. The 16z board is based on
+-  the ZiLOG ZNEO Z16F2811AL20EG part.  See https://github.com/toyaga/16z for
+-  further information.
+-
+ configs/amber
+   This is placeholder for the SoC Robotics Amber Web Server that is based
+   on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
+diff --git a/nuttx/configs/z16f2800100zcog/README.txt b/nuttx/configs/z16f2800100zcog/README.txt
+index 2c0edbc..d5d7772 100644
+--- a/nuttx/configs/z16f2800100zcog/README.txt
++++ b/nuttx/configs/z16f2800100zcog/README.txt
+@@ -114,11 +114,6 @@ The patch can also be removed with:
+ 
+ See the section "Selecting Configurations" below.
+ 
+-UPDATE:  2014-4-27:  The configs/16z/nsh example still does not run
+-correctly.  This is believe to be caused by additional, undiagnosed
+-compiler errors.  At present, these compiler bugs do not seem to effect
+-the z16f2800100zcog.
+-
+ Serial Console
+ ==============
+ 
+diff --git a/nuttx/configs/z16f2800100zcog/include/board.h b/nuttx/configs/z16f2800100zcog/include/board.h
+index 5072759..5343f04 100644
+--- a/nuttx/configs/z16f2800100zcog/include/board.h
++++ b/nuttx/configs/z16f2800100zcog/include/board.h
+@@ -43,8 +43,8 @@
+ /****************************************************************************
+  * Definitions
+  ****************************************************************************/
+-/* The 16Z board has a 20MHz crystal.  The ZNEO clocking will be configured
+- * to use this crystal frequency directly as the clock source
++/* The Z16F2800100ZCOG board has a 20MHz crystal.  The ZNEO clocking will be
++ * configured to use this crystal frequency directly as the clock source
+  */
+ 
+ #define BOARD_XTAL_FREQUENCY   20000000 /* 20MHz */
+diff --git a/nuttx/configs/z16f2800100zcog/nsh/defconfig b/nuttx/configs/z16f2800100zcog/nsh/defconfig
+index 3f5410f..4abe21e 100644
+--- a/nuttx/configs/z16f2800100zcog/nsh/defconfig
++++ b/nuttx/configs/z16f2800100zcog/nsh/defconfig
+@@ -161,7 +161,6 @@ CONFIG_RAM_SIZE=65536
+ #
+ # Board Selection
+ #
+-# CONFIG_ARCH_BOARD_16Z is not set
+ CONFIG_ARCH_BOARD_Z16F2800100ZCOG=y
+ # CONFIG_ARCH_BOARD_CUSTOM is not set
+ CONFIG_ARCH_BOARD="z16f2800100zcog"
