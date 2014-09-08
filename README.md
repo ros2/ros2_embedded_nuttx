@@ -25,7 +25,7 @@ Building
 ---------
 ```bash
     cd nuttx/
-    make menuconfig
+    #make menuconfig
     make 
 ```
 
@@ -43,10 +43,10 @@ Debugging
 
 ```bash
 cd nuttx/
-make gdb_server2
+make gdb_server3
 ```
 In another terminal (same directory):
 ```bash
-make gdb2
+make gdb3
 ```
 
