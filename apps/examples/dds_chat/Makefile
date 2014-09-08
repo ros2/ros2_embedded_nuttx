@@ -1,58 +1,8 @@
-############################################################################
-# apps/examples/hello/Makefile
+#######################################################
 #
-#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+# Makefile for DDS chat application.
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 3. Neither the name NuttX nor the names of its contributors may be
-#    used to endorse or promote products derived from this software
-#    without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-#
-############################################################################
-
--include $(TOPDIR)/.config
--include $(TOPDIR)/Make.defs
-include $(APPDIR)/Make.defs
-
-# Hello, World! built-in application info
-
-APPNAME		= hello
-PRIORITY	= SCHED_PRIORITY_DEFAULT
-STACKSIZE	= 2048
-
-# Hello, World! Example
-
-ASRCS		=
-CSRCS		= hello_main.c console.c
-
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
-
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+#######################################################
 
 ALT_NUM = 0
 ALT_STR =
@@ -63,7 +13,7 @@ ALT_STR =
 
 EXECUTABLE = chat${ALT_NUM}
 
-BASE       = ../../src
+BASE       = ../../../dds/src/
 
 RTPS       = ${BASE}/rtps
 TRANS      = ${BASE}/trans
@@ -79,8 +29,8 @@ SQL        = ${BASE}/sql
 SECURITY   = ${BASE}/security
 NSEC	   = ${BASE}/nsec
 
-SECP       = ../../plugins/secplug
-NSECP      = ../../plugins/nsecplug
+SECP       = ../../../dds/plugins/secplug
+NSECP      = ../../../dds/plugins/nsecplug
 
 dds_CSRCS  = ${DDS}/dds.c ${DDS}/domain.c ${DDS}/locator.c ${DDS}/guid.c \
              ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c
@@ -139,7 +89,7 @@ prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_C
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../api/headers/dds/*.h chat_msg.h
+prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
 
 prog_OBJS  = ${prog_COBJS}
 
@@ -151,9 +101,10 @@ ${EXECUTABLE}:	${prog_OBJS}
 
 CC       = gcc
 
-INC_PATH = -I${BASE}/include -I../../api/headers -I/usr/include/libxml2 -I../../plugins/security/ -I${NSECP}/ -I../../../qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
+INC_PATH = -I${BASE}/include -I../../../dds/api/headers -I/usr/include/libxml2 -I../../../dds/plugins/security/ -I${NSECP}/ -I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
+
 #LIB_PATH =
-LIB_PATH = -L../../../qeo-c-import/openssl/output/install/usr/local/lib
+LIB_PATH = -L../../../dds/qeo-c-import/openssl/output/install/usr/local/lib
 LIBS     = 
 
 DEFINES  = -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
@@ -193,62 +144,37 @@ CFLAGS   = -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFIN
 LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
 # -lgcov
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  BIN		= ..\..\libapps$(LIBEXT)
-else
-ifeq ($(WINTOOL),y)
-  BIN		= ..\\..\\libapps$(LIBEXT)
-else
-  BIN		= ../../libapps$(LIBEXT)
-endif
-endif
+all: ${EXECUTABLE}
 
-ROOTDEPPATH	= --dep-path .
-
-
-#################################################
-# Common build
-#################################################
-
-VPATH		= 
-
-all: .built
-.PHONY: clean depend distclean
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-.built: $(OBJS) ${EXECUTABLE}
-	$(call ARCHIVE, $(BIN), $(OBJS))
-	@touch .built
-
-ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
-$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
-	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
-
-context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
-else
-context:
-endif
-
-.depend: Makefile $(SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
-	@touch $@
-	\makedepend ${INC_PATH} ../*/*.[ch]
-
-depend: .depend
+#######################################################
+# Rules for cleaning
 
 clean:
-	$(call DELFILE, .built)
-	$(call CLEAN)
 	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
 
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
+reallyclean: clean
+	\rm -f .tdds_log_* ${BASE}/*/tags Makefile.bak tags
 
--include Make.dep
+########################################################
+
+# Object sizes
+
+size:
+	\size ${prog_OBJS} ${EXECUTABLE}
+
+# coverage
+
+coverage:
+	cd ../api/coverage
+	lcov -b ../../dcps --directory=../../.. --capture --output-file api.info
+
+# Lint (if available)
+LINT=/home/jvoe/bin/flint
+
+lint:	${prog_CSRCS}
+	\${LINT} std.lnt ${prog_CSRCS}
+
+# Additional dependencies.
+
+depend:
+	\makedepend ${INC_PATH} ../*/*.[ch]

@@ -159,30 +159,34 @@ void trc_lock_info (void);
 
 #define	cond_t			int
 
-#elif defined (FREE_RTOS) /* OS: FreeRTOS */
+#elif defined (NUTTX) /* OS: NuttX */
 
-#define	thread_t		int
+#include <pthread.h>
 
-#define	lock_t			int
+#define	lock_t			pthread_mutex_t
+#define LOCK_STATIC_INIT	PTHREAD_MUTEX_INITIALIZER
 
-#define	lock_init_r(l,s)	l = 0
-#define	lock_init_nr(l,s)	l = 0
-#define	lock_try(l)		(!l) ? l=1, 1 : 0
-#define	lock_take(l)		(l) ? do { DDS_wait(1000); } while (l), l = 1 : l = 1
-#define	lock_release(l)		l = 0
-#define	lock_takef		lock_take
-#define	lock_releasef		lock_release
-#define lock_destroy(l)		l = -1
-#define lock_required(l)
+extern pthread_mutexattr_t	recursive_mutex;
 
-#define cond_t			int
+#ifdef LOCK_TRACE
 
-#define cond_init(c)		c = 0
-#define cond_wait(c,m)		while (!c) DDS_wait(1000); m = 1
-#define cond_wait_to(c,m,at)	if (!c) DDS_wait(at); m = 1
-#define cond_signal(c)		c = 1
-#define cond_signal_all(c)	c = 1
-#define cond_destroy(c)		c = -1
+int trc_lock_init (pthread_mutex_t *l, int rec, const char *name, const char *file, int line);
+int trc_lock_try (pthread_mutex_t *l, const char *file, int line);
+int trc_lock_take (pthread_mutex_t *l, const char *file, int line);
+int trc_lock_release (pthread_mutex_t *l, const char *file, int line);
+int trc_lock_destroy (pthread_mutex_t *l, const char *file, int line);
+int trc_lock_required (pthread_mutex_t *l, const char *file, int line);
+void trc_lock_info (void);
+
+#define	lock_init_r(l,s)	trc_lock_init(&l, 1, s, __FILE__, __LINE__)
+#define	lock_init_nr(l,s)	trc_lock_init(&l, 0, s, __FILE__, __LINE__)
+#define	lock_try(l)		trc_lock_try(&l, __FILE__, __LINE__)
+#define	lock_take(l)		trc_lock_take(&l, __FILE__, __LINE__)
+#define	lock_release(l)		trc_lock_release(&l, __FILE__, __LINE__)
+#define	lock_takef(l)		pthread_mutex_lock(&l)
+#define	lock_releasef(l)	pthread_mutex_unlock(&l)
+#define	lock_destroy(l)		trc_lock_destroy(&l, __FILE__, __LINE__)
+#define	lock_required(l)	trc_lock_required(&l, __FILE__, __LINE__)
 
 #else /* OS */
 

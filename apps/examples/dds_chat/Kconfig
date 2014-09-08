@@ -3,11 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config EXAMPLES_HELLO
-	bool "\"Hello, World!\" example"
+config EXAMPLES_DDS_CHAT
+	bool "A simple chat example using DDS"
 	default n
 	---help---
-		Enable the \"Hello, World!\" example
-
-if EXAMPLES_HELLO
-endif
+		Enable the EXAMPLES_DDS_CHAT
