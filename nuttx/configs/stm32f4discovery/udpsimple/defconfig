@@ -537,14 +537,14 @@ CONFIG_ETH0_PHY_NONE=n
 # CONFIG_ETH0_PHY_KSZ8051 is not set
 # CONFIG_ETH0_PHY_KSZ90x1 is not set
 # CONFIG_ETH0_PHY_DP83848C is not set
-# CONFIG_ETH0_PHY_LAN8720=y
+CONFIG_ETH0_PHY_LAN8720=y
 # CONFIG_ETH0_PHY_DM9161 is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
 # CONFIG_SERCOMM_CONSOLE is not set
-CONFIG_SERIAL=n
+CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
 CONFIG_ARCH_HAVE_USART2=y
@@ -1001,6 +1001,9 @@ CONFIG_READLINE_ECHO=y
 # Zmodem Commands
 #
 # CONFIG_SYSTEM_ZMODEM is not set
+
+# Application configuration
+
 
 # Application configuration
 
