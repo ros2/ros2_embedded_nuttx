@@ -244,11 +244,10 @@
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
 
 /* Ethernet *************************************************************************/
-/* We need to provide clocking to the MII PHY via MCO1 (PA8) */
-
+ 
 // Clock configuration
 //  External, kernel option CONFIG_STM32_RMII_EXTCLK used.
- 
+
 // #define GPIO_ETH_RMII_TX_EN_1 (GPIO_ALT|GPIO_AF11
 //     |GPIO_SPEED_100MHz|GPIO_PUSHPULL|GPIO_PORTB|GPIO_PIN11)
 #define GPIO_ETH_RMII_TX_EN GPIO_ETH_RMII_TX_EN_1
