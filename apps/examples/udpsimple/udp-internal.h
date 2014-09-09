@@ -48,10 +48,10 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-#define CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE          0x0a000002
-#define CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE        0x0a000001
+#define CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE          0xc0a80003
+#define CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE        0xc0a80002
 #define CONFIG_EXAMPLES_UDP_NETMASK_SIMPLE         0xffffff00
-#define CONFIG_EXAMPLES_UDP_SERVERIP_SIMPLE        0x0a000001
+#define CONFIG_EXAMPLES_UDP_SERVERIP_SIMPLE        0xc0a80002
 
 #ifdef CONFIG_EXAMPLES_UDP_HOST
    /* HTONS/L macros are unique to uIP */

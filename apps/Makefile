@@ -50,7 +50,7 @@ APPDIR = ${shell pwd}
 
 CONFIGURED_APPS =
 SUBDIRS  = examples graphics interpreters modbus builtin nshlib netutils
-SUBDIRS += platform system
+SUBDIRS += platform system dds
 
 # There are two different mechanisms for obtaining the list of configured
 # directories:
@@ -76,6 +76,7 @@ ifeq ($(CONFIG_NUTTX_NEWCONFIG),y)
 include builtin/Make.defs
 include examples/Make.defs
 include graphics/Make.defs
+include dds/Make.defs
 include interpreters/Make.defs
 include modbus/Make.defs
 include netutils/Make.defs

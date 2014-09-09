@@ -42,3 +42,7 @@ endmenu
 menu "System NSH Add-Ons"
 source "$APPSDIR/system/Kconfig"
 endmenu
+
+menu "DDS"
+source "$APPSDIR/dds/Kconfig"
+endmenu

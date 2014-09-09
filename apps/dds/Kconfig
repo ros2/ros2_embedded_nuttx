@@ -3,8 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config EXAMPLES_DDS_CHAT
+config DDS_CHAT
 	bool "A simple chat example using DDS"
 	default n
 	---help---
-		Enable the EXAMPLES_DDS_CHAT
+		Enable the DDS_CHAT

@@ -13,7 +13,7 @@ ALT_STR =
 
 EXECUTABLE = chat${ALT_NUM}
 
-BASE       = ../../../dds/src/
+BASE       = ../../dds/src/
 
 RTPS       = ${BASE}/rtps
 TRANS      = ${BASE}/trans
@@ -29,8 +29,8 @@ SQL        = ${BASE}/sql
 SECURITY   = ${BASE}/security
 NSEC	   = ${BASE}/nsec
 
-SECP       = ../../../dds/plugins/secplug
-NSECP      = ../../../dds/plugins/nsecplug
+SECP       = ../../dds/plugins/secplug
+NSECP      = ../../dds/plugins/nsecplug
 
 dds_CSRCS  = ${DDS}/dds.c ${DDS}/domain.c ${DDS}/locator.c ${DDS}/guid.c \
              ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c
@@ -89,7 +89,7 @@ prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_C
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
+prog_CHDRS = ${BASE}/include/*.h ../../dds/api/headers/dds/*.h chat_msg.h
 
 prog_OBJS  = ${prog_COBJS}
 
@@ -101,10 +101,10 @@ ${EXECUTABLE}:	${prog_OBJS}
 
 CC       = gcc
 
-INC_PATH = -I${BASE}/include -I../../../dds/api/headers -I/usr/include/libxml2 -I../../../dds/plugins/security/ -I${NSECP}/ -I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
+INC_PATH = -I${BASE}/include -I../../dds/api/headers -I/usr/include/libxml2 -I../../dds/plugins/security/ -I${NSECP}/ -I../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
 
 #LIB_PATH =
-LIB_PATH = -L../../../dds/qeo-c-import/openssl/output/install/usr/local/lib
+LIB_PATH = -L../../dds/qeo-c-import/openssl/output/install/usr/local/lib
 LIBS     = 
 
 DEFINES  = -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
