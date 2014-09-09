@@ -1010,4 +1010,12 @@ CONFIG_READLINE_ECHO=y
 
 # Application configuration
 
+
+# Application configuration
+
 CONFIG_APPS_DIR="../apps"
+
+#
+# DDS
+#
+CONFIG_DDS_CHAT=y
