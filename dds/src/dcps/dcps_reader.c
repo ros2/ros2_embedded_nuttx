@@ -378,11 +378,7 @@ static void *dcps_get_cdata_cdr (void                *bufp,
 
 	tp = ts->ts_cdr;
 #endif
-#ifdef XTYPES_USED
 	alloc_size = cdr_unmarshalled_size (sdata, 4, tp, 0, 0, swap, 0, NULL);
-#else
-	alloc_size = cdr_unmarshalled_size (sdata, 4, tp, 0, 0, swap, NULL);	
-#endif
 	if (!alloc_size) {
 		log_printf (DCPS_ID, 0, "dds_get_cdata: cdr_unmarshalled_size failed (writer=%u)!\r\n", cp->c_writer);
 		/*log_print_region (RTPS_ID, 0, cp->c_data, cp->c_length, 1, 1);*/
@@ -421,11 +417,7 @@ static void *dcps_get_cdata_cdr (void                *bufp,
 		ddbp = NULL;
 		*auxp = dp;
 	}
-#ifdef XTYPES_USED
 	*error = cdr_unmarshall (dp, sdata, 4, tp, 0, 0, swap, 0);
-#else
-	*error = cdr_unmarshall (dp, sdata, 4, tp, 0, 0, swap);
-#endif
 	if (*error) {
 		log_printf (DCPS_ID, 0, "dds_get_cdata: error %d unmarshalling CDR data (writer=%u)!\r\n", *error, cp->c_writer);
 		/*log_print_region (RTPS_ID, 0, cp->c_data, cp->c_length, 1, 1);*/

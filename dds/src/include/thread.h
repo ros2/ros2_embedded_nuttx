@@ -19,7 +19,6 @@
 
 void thread_init (void);
 
-/* OS */
 #ifdef _WIN32
 
 #include "win.h"
@@ -142,7 +141,7 @@ void trc_lock_info (void);
 
 #define	THREADS_USED
 
-#elif defined (NO_LOCKS) /* OS: No Windows and no locks */
+#elif defined (NO_LOCKS)
 
 #define	lock_t			int
 #define LOCK_STATIC_INIT	0
@@ -159,36 +158,7 @@ void trc_lock_info (void);
 
 #define	cond_t			int
 
-#elif defined (NUTTX) /* OS: NuttX */
-
-#include <pthread.h>
-
-#define	lock_t			pthread_mutex_t
-#define LOCK_STATIC_INIT	PTHREAD_MUTEX_INITIALIZER
-
-extern pthread_mutexattr_t	recursive_mutex;
-
-#ifdef LOCK_TRACE
-
-int trc_lock_init (pthread_mutex_t *l, int rec, const char *name, const char *file, int line);
-int trc_lock_try (pthread_mutex_t *l, const char *file, int line);
-int trc_lock_take (pthread_mutex_t *l, const char *file, int line);
-int trc_lock_release (pthread_mutex_t *l, const char *file, int line);
-int trc_lock_destroy (pthread_mutex_t *l, const char *file, int line);
-int trc_lock_required (pthread_mutex_t *l, const char *file, int line);
-void trc_lock_info (void);
-
-#define	lock_init_r(l,s)	trc_lock_init(&l, 1, s, __FILE__, __LINE__)
-#define	lock_init_nr(l,s)	trc_lock_init(&l, 0, s, __FILE__, __LINE__)
-#define	lock_try(l)		trc_lock_try(&l, __FILE__, __LINE__)
-#define	lock_take(l)		trc_lock_take(&l, __FILE__, __LINE__)
-#define	lock_release(l)		trc_lock_release(&l, __FILE__, __LINE__)
-#define	lock_takef(l)		pthread_mutex_lock(&l)
-#define	lock_releasef(l)	pthread_mutex_unlock(&l)
-#define	lock_destroy(l)		trc_lock_destroy(&l, __FILE__, __LINE__)
-#define	lock_required(l)	trc_lock_required(&l, __FILE__, __LINE__)
-
-#else /* OS */
+#else
 
 #define	lock_t			int
 
@@ -210,9 +180,7 @@ void trc_lock_info (void);
 #define cond_signal(c)		c = 1
 #define cond_signal_all(c)	c = 1
 #define cond_destroy(c)		c = -1
-
-#endif 
-/* OS */
+#endif
 
 void rcl_access (void *p);
 

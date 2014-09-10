@@ -1974,7 +1974,6 @@ void DDS_Debug_dump_static (unsigned indent,
 #endif
 }
 
-#ifdef XTYPES_USED
 void DDS_Debug_dump_dynamic (unsigned indent,
 			     DDS_DynamicTypeSupport ts,
 			     DDS_DynamicData data,
@@ -2001,7 +2000,7 @@ void DDS_Debug_dump_dynamic (unsigned indent,
 	ARG_NOT_USED (field_names)
 #endif
 }
-#endif
+
 
 DDS_ReturnCode_t DDS_Trace_set (DDS_Entity entity, unsigned mode)
 {

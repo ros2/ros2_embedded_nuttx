@@ -90,7 +90,7 @@ void sock_fd_udata_socket (SOCKET s, void *udata);
 
 /* Update the notified user data on a socket. */
 
-#else // Linux
+#else
 
 int sock_fd_add (int fd, short events, RHDATAFCT fct, void *udata, const char *name);
 
