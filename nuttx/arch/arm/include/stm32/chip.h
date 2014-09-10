@@ -317,7 +317,7 @@
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* 16-bit general timers TIM2,3,4 with DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
-// TODO: there are also 3 additional timers (15-17) that don't fit any existing category
+/* TODO: there are also 3 additional timers (15-17) that don't fit any existing category */
 #  define STM32_NDMA                     1   /* DMA1 */
 #  define STM32_NSPI                     2   /* SPI1-2 */
 #  define STM32_NI2S                     0   /* No I2S */
@@ -352,7 +352,7 @@
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    3   /* 16-bit general timers TIM2,3,4 with DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
-// TODO: there are also 3 additional timers (15-17) that don't fit any existing category
+/* TODO: there are also 3 additional timers (15-17) that don't fit any existing category */
 #  define STM32_NDMA                     1   /* DMA1 */
 #  define STM32_NSPI                     2   /* SPI1-2 */
 #  define STM32_NI2S                     0   /* No I2S */
@@ -390,7 +390,7 @@
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
-// TODO: there are also 6 additional timers (12-17) that don't fit any existing category
+/* TODO: there are also 6 additional timers (12-17) that don't fit any existing category */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
 #  define STM32_NI2S                     0   /* No I2S */
@@ -426,7 +426,7 @@
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM                    4   /* 16-bit general timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    2   /* 2 basic timers: TIM6, TIM7 */
-// TODO: there are also 6 additional timers (12-17) that don't fit any existing category
+/* TODO: there are also 6 additional timers (12-17) that don't fit any existing category */
 #  define STM32_NDMA                     2   /* DMA1-2 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
 #  define STM32_NI2S                     0   /* No I2S */
