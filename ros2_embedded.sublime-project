@@ -1,0 +1,49 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"file_exclude_patterns":
+			[
+				"*.o",
+				"*.a",
+				"*.d",
+				".built",
+				".context",
+				".depend",
+				".config",
+				".version",
+				"Make.dep",
+				".configured",
+				"*.sublime-project",
+				"*.sublime-workspace",
+				"*.tmLanguage",
+				".project",
+				".cproject",
+				"cscope.out"
+			],
+			"folder_exclude_patterns":
+			[
+				".settings",
+				"nuttx/arch/arm/src/board",
+				"nuttx/arch/arm/src/chip"
+			]
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4,
+		"translate_tabs_to_spaces": false,
+	       "highlight_line": true
+	},
+	"build_systems":
+	[
+		{
+			"name": "ros_nuttx",
+			"working_dir": "${project_path}/nuttx",
+			"file_regex": "^(?:CMake (?:Error|Warning) at |  )?([^:]+):([0-9]+).*$",
+			"syntax": "ros2_embedded.tmLanguage",
+			"cmd": ["make"]
+		}
+	]
+}
