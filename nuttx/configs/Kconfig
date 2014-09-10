@@ -666,12 +666,6 @@ config ARCH_BOARD_STM32F4_PX4FMU_V1
 	---help---
 		STMicro STM32F427 board used at the PX4.
 
-config ARCH_BOARD_STM32F4_ROS
-	bool "STMicro STM32F4-ROS board"
-	depends on ARCH_CHIP_STM32F427V
-	---help---
-		STMicro STM32F427 board based used for ROS 2 development.
-
 config ARCH_BOARD_STM32F429I_DISCO
 	bool "STMicro STM32F429I-Discovery board"
 	depends on ARCH_CHIP_STM32F429Z
@@ -920,7 +914,6 @@ config ARCH_BOARD
 	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
 	default "px4fmu-v1"		  	  if ARCH_BOARD_STM32F4_PX4FMU_V1	
-	default "stm32f4ros"    	  if ARCH_BOARD_STM32F4_ROS
 	default "stm32f429i-disco"    if ARCH_BOARD_STM32F429I_DISCO
 	default "stm32ldiscovery"     if ARCH_BOARD_STM32L_DISCOVERY
 	default "mikroe-stm32f4"      if ARCH_BOARD_MIKROE_STM32F4
@@ -1190,9 +1183,6 @@ source "configs/stm32f4discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_PX4FMU_V1
 source "configs/px4fmu-v1/Kconfig"
-endif
-if ARCH_BOARD_STM32F4_ROS
-source "configs/stm32f4ros/Kconfig"
 endif
 if ARCH_BOARD_STM32F429I_DISCO
 source "configs/stm32f429i-disco/Kconfig"

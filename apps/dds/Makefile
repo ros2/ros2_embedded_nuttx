@@ -99,7 +99,8 @@ ${EXECUTABLE}:	${prog_OBJS}
 #######################################################
 # Setup Compile Environment
 
-CC       = gcc
+#CC       = gcc
+CC       = arm-none-eabi-gcc
 
 INC_PATH = -I${BASE}/include -I../../dds/api/headers -I/usr/include/libxml2 -I../../dds/plugins/security/ -I${NSECP}/ -I../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
 
