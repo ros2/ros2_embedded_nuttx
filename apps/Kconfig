@@ -46,3 +46,7 @@ endmenu
 menu "DDS"
 source "$APPSDIR/dds/Kconfig"
 endmenu
+
+menu "UDP simple"
+source "$APPSDIR/udpsimple/Kconfig"
+endmenu

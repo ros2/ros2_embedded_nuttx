@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/udp/nettest.c
+ * examples/udp/udp-internal.h
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,56 +33,62 @@
  *
  ****************************************************************************/
 
+#ifndef __EXAMPLES_UIP_INTERNAL_H
+#define __EXAMPLES_UIP_INTERNAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdio.h>
-#include <debug.h>
-
-#include <nuttx/net/uip/uip.h>
-#include <apps/netutils/uiplib.h>
-
-#include "udp-internal.h"
+#ifdef CONFIG_EXAMPLES_UDP_HOST
+#else
+# include <debug.h>
+#endif
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+#define CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE          0xc0a80003
+#define CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE        0xc0a80002
+#define CONFIG_EXAMPLES_UDP_NETMASK_SIMPLE         0xffffff00
+#define CONFIG_EXAMPLES_UDP_SERVERIP_SIMPLE        0xc0a80002
+
+#ifdef CONFIG_EXAMPLES_UDP_HOST
+   /* HTONS/L macros are unique to uIP */
+
+#  define HTONS(a)       htons(a)
+#  define HTONL(a)       htonl(a)
+
+   /* Used printf for debug output */
+
+#  define message(...)   printf(__VA_ARGS__)
+
+   /* Have SO_LINGER */
+
+#else
+
+   /* If debug is enabled, use the synchronous lowsyslog so that the
+    * program output does not get disassociated in the debug output.
+    */
+
+#  ifdef CONFIG_DEBUG
+#    define message(...) lowsyslog(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+
+#endif
+
+#define PORTNO     5471
+
+#define ASCIISIZE  (0x7f - 0x20)
+#define SENDSIZE   (ASCIISIZE+1)
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+extern void send_client(void);
+extern void recv_server(void);
 
-/****************************************************************************
- * udp_main
- ****************************************************************************/
-
-int udp_main(int argc, char *argv[])
-{
-  struct in_addr addr;
-
-  /* Set up our host address */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE);
-  uip_sethostaddr("eth0", &addr);
-
-  /* Set up the default router address */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE);
-  uip_setdraddr("eth0", &addr);
-
-  /* Setup the subnet mask */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK_SIMPLE);
-  uip_setnetmask("eth0", &addr);
-
-  //recv_server();
-  send_client();
-
-  return 0;
-}
+#endif /* __EXAMPLES_UIP_INTERNAL_H */

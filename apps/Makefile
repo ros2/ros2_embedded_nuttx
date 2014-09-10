@@ -50,7 +50,7 @@ APPDIR = ${shell pwd}
 
 CONFIGURED_APPS =
 SUBDIRS  = examples graphics interpreters modbus builtin nshlib netutils
-SUBDIRS += platform system dds
+SUBDIRS += platform system dds udpsimple
 
 # There are two different mechanisms for obtaining the list of configured
 # directories:
@@ -84,6 +84,7 @@ include nshlib/Make.defs
 include platform/Make.defs
 include system/Make.defs
 -include external/Make.defs
+-include udpsimple/Make.defs
 
 # INSTALLED_APPS is the list of currently available application directories.  It
 # is the same as CONFIGURED_APPS, but filtered to exclude any non-existent

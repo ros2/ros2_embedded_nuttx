@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/udp/nettest.c
+ * examples/udp/host.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -37,18 +37,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdio.h>
-#include <debug.h>
-
-#include <nuttx/net/uip/uip.h>
-#include <apps/netutils/uiplib.h>
-
 #include "udp-internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -59,30 +48,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * udp_main
+ * main
  ****************************************************************************/
 
-int udp_main(int argc, char *argv[])
+int main(int argc, char **argv, char **envp)
 {
-  struct in_addr addr;
-
-  /* Set up our host address */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE);
-  uip_sethostaddr("eth0", &addr);
-
-  /* Set up the default router address */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE);
-  uip_setdraddr("eth0", &addr);
-
-  /* Setup the subnet mask */
-
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK_SIMPLE);
-  uip_setnetmask("eth0", &addr);
-
-  //recv_server();
+#ifdef CONFIG_EXAMPLES_UDP_SERVER
   send_client();
+#else
+  recv_server();
+#endif
 
   return 0;
 }

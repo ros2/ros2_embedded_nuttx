@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config UDP_SIMPLE
+	bool "UDP example simple"
+	default n
+	---help---
+		Enable the UDP SIMPLE example
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * examples/udp/nettest.c
+ * examples/udp/udp-client.c
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
+ * 3. Neither the name Gregory Nutt nor the names of its contributors may be
  *    used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -37,52 +37,97 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <stdio.h>
-#include <debug.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-#include <nuttx/net/uip/uip.h>
-#include <apps/netutils/uiplib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #include "udp-internal.h"
 
 /****************************************************************************
- * Definitions
+ * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+static inline void fill_buffer(unsigned char *buf, int offset)
+{
+  int ch;
+  int j;
+
+  buf[0] = offset;
+  for (ch = 0x20, j = offset + 1; ch < 0x7f; ch++, j++)
+    {
+      if (j >= SENDSIZE)
+        {
+          j = 1;
+        }
+      buf[j] = ch;
+    }
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * udp_main
- ****************************************************************************/
-
-int udp_main(int argc, char *argv[])
+void send_client(void)
 {
-  struct in_addr addr;
+  struct sockaddr_in server;
+  unsigned char outbuf[SENDSIZE];
+  int sockfd;
+  int nbytes;
+  int offset;
 
-  /* Set up our host address */
+  /* Create a new TCP socket */
 
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR_SIMPLE);
-  uip_sethostaddr("eth0", &addr);
+  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  if (sockfd < 0)
+    {
+      message("client socket failure %d\n", errno);
+      exit(1);
+    }
 
-  /* Set up the default router address */
+  /* Then send and receive 256 messages */
 
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR_SIMPLE);
-  uip_setdraddr("eth0", &addr);
+  for (offset = 0; offset < 256; offset++)
+    {
+      /* Set up the output buffer */
 
-  /* Setup the subnet mask */
+      fill_buffer(outbuf, offset);
 
-  addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK_SIMPLE);
-  uip_setnetmask("eth0", &addr);
+      /* Send the message */
 
-  //recv_server();
-  send_client();
+      server.sin_family      = AF_INET;
+      server.sin_port        = HTONS(PORTNO);
+      server.sin_addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_SERVERIP_SIMPLE);
 
-  return 0;
+      message("client: %d. Sending %d bytes\n", offset, SENDSIZE);
+      nbytes = sendto(sockfd, outbuf, SENDSIZE, 0,
+                      (struct sockaddr*)&server, sizeof(struct sockaddr_in));
+      message("client: %d. Sent %d bytes\n", offset, nbytes);
+
+      if (nbytes < 0)
+        {
+          message("client: %d. sendto failed: %d\n", offset, errno);
+          close(sockfd);
+          exit(-1);
+        }
+      else if (nbytes != SENDSIZE)
+        {
+          message("client: %d. Bad send length: %d Expected: %d\n",
+                  offset, nbytes, SENDSIZE);
+          close(sockfd);
+          exit(-1);
+        }
+
+      /* Now, sleep a bit.  No packets should be dropped due to overrunning
+       * the server.
+       */
+
+      sleep(2);
+    }
+  close(sockfd);
 }
