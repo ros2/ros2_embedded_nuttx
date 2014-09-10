@@ -102,15 +102,20 @@ ${EXECUTABLE}:	${prog_OBJS}
 #CC       = gcc
 CC       = arm-none-eabi-gcc
 
-INC_PATH = -I${BASE}/include -I../../dds/api/headers -I/usr/include/libxml2 -I../../dds/plugins/security/ -I${NSECP}/ -I../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
+NUTTX_BASE = ../../nuttx
+NUTTX_HEADERS = ${NUTTX_BASE}/include
+INC_PATH = -I${BASE}/include -I../../dds/api/headers -I/usr/include/libxml2 \
+			-I../../dds/plugins/security/ -I${NSECP}/ \
+			-I../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
+			-I${NUTTX_HEADERS}
 
 #LIB_PATH =
 LIB_PATH = -L../../dds/qeo-c-import/openssl/output/install/usr/local/lib
 LIBS     = 
 
-DEFINES  = -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
+DEFINES  = -DNUTTX_RTOS -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
 	   -DEXTRA_STATS -DLOG_FILE -DXTYPES_USED -DDDS_IPV6 -DDDS_TYPECODE -DDDS_TCP \
-	   -DBIGDATA -DDDS_FORWARD  -DDDS_SECURITY -DDDS_NATIVE_SECURITY -DMSECPLUG_WITH_SECXML
+	   -DBIGDATA -DDDS_FORWARD -DDDS_NATIVE_SECURITY -DMSECPLUG_WITH_SECXML
 
 #-DDDS_BUILTINS -
 #-DDDS_AUTO_LIVELINESS

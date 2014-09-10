@@ -155,6 +155,10 @@ typedef unsigned long ULONG;
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __BYTE_ORDER    BYTE_ORDER
+#ifdef NUTTX_RTOS
+#define __LITTLE_ENDIAN 1234
+#define __BIG_ENDIAN    4321
+#define __BYTE_ORDER __LITTLE_ENDIAN
 #else /* Linux */
 #define NETLINK_SUPPORT
 #include <endian.h>
