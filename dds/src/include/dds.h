@@ -119,7 +119,8 @@ void dds_attach_notifier (unsigned nclass, DDSNOTFCT fct);
 
 /* Add a notifier function for notifications of the given class. */
 
-void dds_notify (unsigned nclass, Entity_t *ep, NotificationType_t type);
+void dds_notify (unsigned class, Entity_t *ep, unsigned status);
+//void dds_notify (unsigned nclass, Entity_t *ep, NotificationType_t type);
 
 /* Notify a listener for the given status. */
 
