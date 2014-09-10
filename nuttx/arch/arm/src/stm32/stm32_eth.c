@@ -2574,8 +2574,8 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   /* Assume 10MBps and half duplex */
 
-  priv->mbps100 = 0;
-  priv->fduplex = 0;
+  priv->mbps100 = 1;
+  priv->fduplex = 1;
 
   /* Setup up PHY clocking by setting the SR field in the MACMIIAR register */
 

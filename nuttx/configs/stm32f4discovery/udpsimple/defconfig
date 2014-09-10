@@ -316,26 +316,11 @@ CONFIG_STM32_PHYINIT=y
 
 # CONFIG_STM32_AUTONEG - Use PHY autonegotion to determine speed and mode
 CONFIG_STM32_AUTONEG=y
-
-# CONFIG_STM32_ETH100MBPS - If CONFIG_STM32_AUTONEG is not defined, then this
-#   may be defined to select 100 MBps speed.  Default: 10 Mbps
-# CONFIG_STM32_PHYSR - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  The PHY status register address may diff from PHY to PHY.  This
-#   configuration sets the address of the PHY status register.
-# CONFIG_STM32_PHYSR_SPEED - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides bit mask indicating 10 or 100MBps speed.
-# CONFIG_STM32_PHYSR_100MBPS - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides the value of the speed bit(s) indicating 100MBps speed.
-# CONFIG_STM32_PHYSR_MODE - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provide bit mask indicating full or half duplex modes.
-# CONFIG_STM32_PHYSR_FULLDUPLEX - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides the value of the mode bits indicating full duplex mode.
-
 CONFIG_STM32_PHYADDR=0
 CONFIG_STM32_PHYSR=31
 
-CONFIG_STM32_PHYSR_SPEED=0x0003
-CONFIG_STM32_PHYSR_100MBPS=0x0003
+CONFIG_STM32_PHYSR_SPEED=0x0004
+CONFIG_STM32_PHYSR_100MBPS=0x0004
 CONFIG_STM32_PHYSR_MODE=0x0004
 CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
 CONFIG_STM32_RMII=y
@@ -904,8 +889,8 @@ CONFIG_NSH_CONSOLE=y
 # CONFIG_NSH_CONDEV is not set
 # CONFIG_NSH_ARCHINIT is not set
 # CONFIG_NSH_DHCPC is not set
-CONFIG_NSH_IPADDR=0x0a000002
-CONFIG_NSH_DRIPADDR=0x0a000001
+CONFIG_NSH_IPADDR=0xc0a80003
+CONFIG_NSH_DRIPADDR=0xc0a80002
 CONFIG_NSH_NETMASK=0xffffff00
 # CONFIG_NSH_DNS is not set
 # CONFIG_NSH_NOMAC is not set
@@ -1002,6 +987,9 @@ CONFIG_READLINE_ECHO=y
 # Zmodem Commands
 #
 # CONFIG_SYSTEM_ZMODEM is not set
+
+# Application configuration
+
 
 # Application configuration
 
