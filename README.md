@@ -50,3 +50,9 @@ In another terminal (same directory):
 make gdb3
 ```
 
+UDP
+-------
+Test UDP traffic. On the remote machine do:
+```bash
+ sudo mz eth0 -c 10 -A 192.168.0.2 -B 192.168.0.3 -t udp -p 100
+```
