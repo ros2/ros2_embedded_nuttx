@@ -21,6 +21,9 @@
 #include "win.h"
 #define random	rand
 #define srandom	srand
+#elif defined (NUTTX_RTOS)
+#include <unistd.h>
+#include <arpa/inet.h> 
 #else
 #include <unistd.h>
 #include <arpa/inet.h>

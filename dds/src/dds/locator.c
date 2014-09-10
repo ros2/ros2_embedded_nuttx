@@ -22,6 +22,9 @@
 #include "Ws2IpDef.h"
 #include "Ws2tcpip.h"
 #include "Iphlpapi.h"
+#elif defined (NUTTX_RTOS)
+#include <arpa/inet.h>
+#include <sys/socket.h> 
 #else
 #include <arpa/inet.h>
 #endif
