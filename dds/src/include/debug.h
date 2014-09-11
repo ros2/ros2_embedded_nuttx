@@ -21,6 +21,10 @@
 #include "rtps.h"
 #include "sock.h"
 
+// Avoid conflicts with dbg_printf
+#define PRId64	"lld"
+#define PRIu64	"llu"
+
 /* Some utility functions: */
 
 void dbg_print_uclist (unsigned nchars, const unsigned char *cp, int hex);
