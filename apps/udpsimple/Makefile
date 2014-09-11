@@ -1,7 +1,7 @@
 ############################################################################
-# apps/examples/udp/Makefile
+# apps/examples/udpsimple/Makefile
 #
-#   Copyright (C) 2007-2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,82 +37,68 @@
 -include $(TOPDIR)/Make.defs
 include $(APPDIR)/Make.defs
 
-# UDP Test
+# UDP simple! UDP client/server built-in application info
 
-TARG_ASRCS	= 
+APPNAME		= udpsimple
+PRIORITY	= SCHED_PRIORITY_DEFAULT
+STACKSIZE	= 2048
 
-TARG_CSRCS	= target.c
-#TARG_CSRCS	+= udp-server.c
-TARG_CSRCS	+= udp-client.c
 
-TARG_AOBJS	= $(TARG_ASRCS:.S=$(OBJEXT))
-TARG_COBJS	= $(TARG_CSRCS:.c=$(OBJEXT))
+ASRCS		=
+CSRCS		= target.c udp-client.c
 
-TARG_SRCS	= $(TARG_ASRCS) $(TARG_CSRCS)
-TARG_OBJS	= $(TARG_AOBJS) $(TARG_COBJS)
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+COBJS		= $(CSRCS:.c=$(OBJEXT))
+
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  TARG_BIN	= ..\libapps$(LIBEXT)
+  BIN		= ..\..\libapps$(LIBEXT)
 else
 ifeq ($(WINTOOL),y)
-  TARG_BIN	= ..\\libapps$(LIBEXT)
+  BIN		= ..\\..\\libapps$(LIBEXT)
 else
-  TARG_BIN	= ../libapps$(LIBEXT)
+  BIN		= ../../libapps$(LIBEXT)
 endif
 endif
-
-HOSTCFLAGS	+= -DCONFIG_EXAMPLES_UDP_HOST=1
-ifeq ($(CONFIG_EXAMPLES_UDP_SERVER),y)
-HOSTCFLAGS	+= -DCONFIG_EXAMPLES_UDP_SERVER=1 \
-		   -DCONFIG_EXAMPLES_UDP_SERVERIP="$(CONFIG_EXAMPLES_UDP_SERVERIP)"
-endif
-
-HOST_SRCS	= host.c
-#HOST_SRCS	+= udp-client.c
-HOST_SRCS	+= udp-server.c
-
-HOST_OBJS	= $(HOST_SRCS:.c=.o)
-HOST_BIN	= host
 
 ROOTDEPPATH	= --dep-path .
 
 # Common build
+
 VPATH		= 
 
 all: .built
-.PHONY:	clean depend distclean
+.PHONY: clean depend distclean
 
-$(TARG_AOBJS): %$(OBJEXT): %.S
+$(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
-$(TARG_COBJS): %$(OBJEXT): %.c
+$(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-"$(TARG_BIN)": $(TARG_OBJS) $(HOST_BIN)
-	$(call ARCHIVE, $@, $(TARG_OBJS))
-
-$(HOST_OBJS): %.o: %.c
-	$(HOSTCC) -c $(HOSTCFLAGS) $< -o $@
-
-$(HOST_BIN): $(HOST_OBJS)
-	$(HOSTCC) $(HOSTLDFLAGS) $(HOST_OBJS) -o $@
-
-.built: $(TARG_BIN) $(HOST_BIN)
+.built: $(OBJS)
+	$(call ARCHIVE, $(BIN), $(OBJS))
 	@touch .built
 
-context:
+ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
+$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
 
-.depend: Makefile $(TARG_SRCS)
-	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(TARG_SRCS) >Make.dep
+context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
+else
+context:
+endif
+
+.depend: Makefile $(SRCS)
+	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
 	@touch $@
 
 depend: .depend
 
 clean:
 	$(call DELFILE, .built)
-	$(call DELFILE, $(TARG_BIN))
-	$(call DELFILE, $(HOST_BIN))
-	$(call DELFILE, *.dSYM)
 	$(call CLEAN)
 
 distclean: clean
@@ -120,4 +106,3 @@ distclean: clean
 	$(call DELFILE, .depend)
 
 -include Make.dep
-

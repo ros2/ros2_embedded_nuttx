@@ -62,7 +62,7 @@
  * udp_main
  ****************************************************************************/
 
-int udp_main(int argc, char *argv[])
+int udpsimple_main(int argc, char *argv[])
 {
   struct in_addr addr;
 

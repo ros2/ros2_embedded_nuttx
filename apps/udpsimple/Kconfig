@@ -3,9 +3,11 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config UDP_SIMPLE
+config EXAMPLES_UDP_SIMPLE
 	bool "UDP example simple"
 	default n
 	---help---
 		Enable the UDP SIMPLE example
 
+if EXAMPLES_UDP
+endif
