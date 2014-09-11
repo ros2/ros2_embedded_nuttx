@@ -31,6 +31,9 @@ __BEGIN_DECLS
 #endif
 
 
+/* Length of the entries in 'struct utsname' is 256.  */
+# define _UTSNAME_LENGTH 256
+
 #ifndef _UTSNAME_NODENAME_LENGTH
 # define _UTSNAME_NODENAME_LENGTH _UTSNAME_LENGTH
 #endif
