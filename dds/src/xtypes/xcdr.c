@@ -18,7 +18,12 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
+
+#if defined (NUTTX_RTOS)
+#else
 #include <wctype.h>
+#endif
+
 #ifdef _WIN32
 #include "win.h"
 #else

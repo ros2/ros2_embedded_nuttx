@@ -225,6 +225,10 @@ typedef int32_t      suseconds_t;
 
 typedef int (*main_t)(int argc, char *argv[]);
 
+/* Define wint_t 
+typedef unsigned int wint_t;
+*/
+
 #endif
 
 /****************************************************************************
