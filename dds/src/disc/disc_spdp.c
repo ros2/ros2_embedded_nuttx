@@ -24,7 +24,11 @@
 #include "log.h"
 #include "error.h"
 #include "dds.h"
+#if defined (NUTTX_RTOS)
+#include "dds/dds_plugin.h"
+#else
 #include "dds/dds_security.h"
+#endif
 #ifdef DDS_SECURITY
 #include "security.h"
 #ifdef DDS_NATIVE_SECURITY

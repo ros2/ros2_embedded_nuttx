@@ -28,7 +28,11 @@
 #include "pool.h"
 #include "str.h"
 #include "error.h"
+#if defined (NUTTX_RTOS)
+#include "dds/dds_plugin.h"
+#else
 #include "dds/dds_security.h"
+#endif
 #include "dds/dds_dcps.h"
 #include "dds_data.h"
 #include "domain.h"

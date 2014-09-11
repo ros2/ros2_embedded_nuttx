@@ -12,7 +12,11 @@
  * See LICENSE file for more details.
  */
 
+#if defined (NUTTX_RTOS)
+#include "dds/dds_plugin.h"
+#else
 #include "dds/dds_security.h"
+#endif
 #include "dds/dds_xtypes.h"
 #include "dds/dds_dwriter.h"
 #include "dds/dds_dreader.h"

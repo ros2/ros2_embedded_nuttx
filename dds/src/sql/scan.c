@@ -25,6 +25,7 @@
 #include "error.h" 
 #include "pool.h" 
 #include "scan.h"
+#include "debug.h"
 
 #define	MAXHASH	16
 

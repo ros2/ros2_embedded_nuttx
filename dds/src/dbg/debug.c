@@ -2002,8 +2002,10 @@ static void dbg_sessions_cleanup (void)
 void debug_start (void)
 {
 #ifndef _WIN32
+#if !defined (NUTTX_RTOS)
 	if (!isatty (STDIN_FILENO))
 		return;
+#endif
 #endif
 	/* Initialize the TTY in raw mode. */
 	tty_init ();
@@ -2011,6 +2013,8 @@ void debug_start (void)
 	debug_session_create (tty_stdin,
 #ifdef _WIN32
 				(HANDLE) 1, 0,
+#elif defined (NUTTX_RTOS)		
+				(HANDLE) 1,
 #else
 				STDOUT_FILENO,
 #endif
@@ -2023,6 +2027,8 @@ void debug_start_fct (HANDLE inh, RHDATAFCT fct)
 	debug_session_create (inh,
 #ifdef _WIN32
 			      (HANDLE) 1, 0,
+#elif defined (NUTTX_RTOS)		
+				(HANDLE) 1,
 #else
 			      STDOUT_FILENO,
 #endif
