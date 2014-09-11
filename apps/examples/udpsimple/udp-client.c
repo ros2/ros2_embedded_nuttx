@@ -90,9 +90,9 @@ void send_client(void)
       exit(1);
     }
 
-  /* Then send and receive 256 messages */
+  /* Then send and receive 2 messages */
 
-  for (offset = 0; offset < 256; offset++)
+  for (offset = 0; offset < 2; offset++)
     {
       /* Set up the output buffer */
 
