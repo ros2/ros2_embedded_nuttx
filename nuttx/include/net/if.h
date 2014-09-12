@@ -111,6 +111,15 @@ struct ifreq
   } ifr_ifru;
 };
 
+struct ifconf 
+{
+  int                       ifc_len;                   /* size of buffer */
+  union {
+    char *                  ifc_buf;                   /* buffer address */
+    struct ifreq*           ifc_req;                   /* array of structures */
+  };
+};
+
 #define ifr_addr            ifr_ifru.ifru_addr        /* IP address */
 #define ifr_dstaddr         ifr_ifru.ifru_dstaddr     /* P-to-P Address */
 #define ifr_broadaddr       ifr_ifru.ifru_broadaddr   /* Broadcast address */
