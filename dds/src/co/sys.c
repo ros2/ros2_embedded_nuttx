@@ -25,7 +25,7 @@
 #include <direct.h>
 #include <process.h>
 #include <ws2tcpip.h>
-#else
+#else /* non-WIN32*/
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -103,6 +103,9 @@ char *sys_username (char *buf, size_t length)
 
 	memcpy (buf, ts, len);
 	buf [len] = '\0';
+#elif defined (NUTTX_RTOS)
+	ARG_NOT_USED (length)
+	strcpy (buf, "NuttX_username");
 #else
 	char	*cp = getlogin ();
 
@@ -121,7 +124,12 @@ char *sys_username (char *buf, size_t length)
 
 char *sys_hostname (char *buf, size_t length)
 {
+#if defined (NUTTX_RTOS)
+	ARG_NOT_USED (length)
+	strcpy (buf, "NuttX_hostname");
+#else
 	gethostname (buf, length);
+#endif
 	return (buf);
 }
 
@@ -141,6 +149,8 @@ char *sys_osname (char *buf, size_t length)
 	strcpy (buf, "FreeBSD");
 #elif defined (__OpenBSD__)
 	strcpy (buf, "OpenBSD");
+#elif defined (NUTTX_RTOS)
+	strcpy (buf, "NuttX");
 #else
 	strcpy (buf, "Linux");
 #endif
@@ -173,6 +183,10 @@ char *sys_osrelease (char *buf, size_t length)
 
 	snprintf(buf, length, "%s", un.release);
 	return buf;
+#elif defined (NUTTX_RTOS)
+	ARG_NOT_USED (buf)
+	ARG_NOT_USED (length)
+	return ("NuttX: 6.33 2014-xx-xx");
 #else
 #include <unistd.h>
 #if defined (NetBSD) || defined (__FreeBSD__) || defined (__OpenBSD__)
@@ -224,6 +238,8 @@ unsigned sys_uid (void)
 	for (i = 0; i < strlen (buf); i++)
 		uid = (uid << 2) + buf [i];
 	return (uid);
+#elif defined (NUTTX_RTOS)
+	return ((unsigned) 6);
 #else
 	return ((unsigned) getuid ());
 #endif
@@ -242,6 +258,8 @@ unsigned sys_hostid (void)
 	for (i = 0; i < strlen (buf); i++)
 		hid = (hid << 2) + buf [i];
 	return (hid);
+#elif defined (NUTTX_RTOS)
+	return 0
 #else
 #ifndef NOHOSTID
 	return ((unsigned) gethostid ());
@@ -257,6 +275,9 @@ unsigned sys_pid (void)
 {
 #ifdef _WIN32
 	return ((unsigned) _getpid ());
+#elif defined (NUTTX_RTOS)
+	/* direct casting from pid_t to unsigned */
+	return ((unsigned) getpid ());
 #else
 	return ((unsigned) getpid ());
 #endif
@@ -391,7 +412,10 @@ unsigned sys_own_ipv4_addr (unsigned char *addr,
 	}
 	freeifaddrs (ifa);
 	return (naddr);
-#else
+#elif defined(NUTTX_RTOS)
+	/* TODO */
+	exit (1);
+#else /* Linux */
 	struct ifconf		ifc;
 	struct ifreq		*ifr, *r;
 	struct sockaddr_in	*in4;
@@ -783,6 +807,10 @@ const char *sys_getenv (const char *var_name)
 
 	getenv_s (&n, buffer, sizeof (buffer), var_name);
 	return (n ? buffer : NULL);
+#elif defined (NUTTX_RTOS)
+	/* Concept of environmental variable in NuttX doesn't seem to make much
+	sense. Maybe within NSH? */
+	exit (1);
 #else
 	return (getenv (var_name));
 #endif
