@@ -19,6 +19,12 @@
 #include <stdlib.h>
 #ifdef _WIN32
 #include "win.h"
+#elif defined (NUTTX_RTOS)
+#include <fcntl.h>
+#include <unistd.h>
+#include <netinet/in.h>
+/* #include <netinet/tcp.h> */
+#include <poll.h> 
 #else
 #include <fcntl.h>
 #include <unistd.h>
@@ -441,7 +447,7 @@ void sock_fd_poll (unsigned poll_time)
 	}
 }
 
-#else
+#else /* if not WIN */
 
 #ifndef FD_MAX_SIZE
 #define	FD_INC_SIZE	1024
@@ -467,11 +473,17 @@ int sock_fd_init (void)
 
 	if (fds)
 		return (0);
-
+#if defined (NUTTX_RTOS)
+	fds = malloc (sizeof (struct pollfd) * FD_INC_SIZE);
+	fcts = malloc (sizeof (RSDATAFCT) * FD_INC_SIZE);
+	ud = malloc (sizeof (void *) * FD_INC_SIZE);
+	names = malloc (sizeof (const char *) * FD_INC_SIZE);
+#else
 	fds = xmalloc (sizeof (struct pollfd) * FD_INC_SIZE);
 	fcts = xmalloc (sizeof (RSDATAFCT) * FD_INC_SIZE);
 	ud = xmalloc (sizeof (void *) * FD_INC_SIZE);
 	names = xmalloc (sizeof (const char *) * FD_INC_SIZE);
+#endif	
 	if (!fds || !fcts || !ud || !names)
 		return (1);
 
@@ -490,10 +502,17 @@ int sock_fd_init (void)
 
 void sock_fd_final (void)
 {
+#if defined (NUTTX_RTOS)
+	free (fds);
+	free (fcts);
+	free (ud);
+	free (names);
+#else	
 	xfree (fds);
 	xfree (fcts);
 	xfree (ud);
 	xfree (names);
+#endif	
 	atomic_set_w (num_fds, 0);
 	atomic_set_w (max_fds, 0);
 	fds = NULL;
@@ -516,9 +535,15 @@ int sock_fd_add (int fd, short events, RSDATAFCT rx_fct, void *udata, const char
 		}
 		lock_take (poll_lock);
 		atomic_add_w (max_fds, FD_INC_SIZE);
+#if defined (NUTTX_RTOS)		
+		fds = realloc (fds, sizeof (struct pollfd) * max_fds);
+		fcts = realloc (fcts, sizeof (RSDATAFCT) * max_fds);
+		ud = realloc (ud, sizeof (void *) * max_fds);
+#else
 		fds = xrealloc (fds, sizeof (struct pollfd) * max_fds);
 		fcts = xrealloc (fcts, sizeof (RSDATAFCT) * max_fds);
-		ud = xrealloc (ud, sizeof (void *) * max_fds);
+		ud = xrealloc (ud, sizeof (void *) * max_fds);		
+#endif
 		lock_release (poll_lock);
 		if (!fds || !fcts || !ud)
 			fatal_printf ("rtps_fd_add: can't realloc()!");
@@ -763,4 +788,5 @@ int sock_set_tcp_nodelay (int fd)
 	return (1);
 }
 
-#endif
+#endif 
+/* OS */
