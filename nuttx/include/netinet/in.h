@@ -144,12 +144,18 @@ struct in_addr
   in_addr_t       s_addr;      /* Address (network byte order) */
 };
 
+#define __SOCK_SIZE__   16              /* sizeof(struct sockaddr)      */
 struct sockaddr_in
 {
   sa_family_t     sin_family;  /* Address family: AF_INET */
   uint16_t        sin_port;    /* Port in network byte order */
   struct in_addr  sin_addr;    /* Internet address */
+
+/* Pad to size of `struct sockaddr'. */
+  unsigned char   __pad[__SOCK_SIZE__ - sizeof(short int) -
+                       sizeof(unsigned short int) - sizeof(struct in_addr)];
 };
+#define sin_zero        __pad           /* for BSD UNIX compatibility      */
 
 /* IPv6 Internet address */
 
@@ -170,6 +176,10 @@ struct sockaddr_in6
   struct in6_addr sin6_addr;   /* IPv6 internet address */
 };
 
+struct ip_mreq  {
+  struct in_addr imr_multiaddr;   /* IP multicast address of group */
+  struct in_addr imr_interface;   /* local IP address of interface */
+};
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
