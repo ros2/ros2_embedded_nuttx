@@ -17,7 +17,9 @@
 
 #include "strseq.h"
 #include "netinet/in.h"
+#if !defined(NUTTX_RTOS)
 #include "openssl/ssl.h"
+#endif
 #include "dds_data.h"
 #include "dds/dds_security.h"
 

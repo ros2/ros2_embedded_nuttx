@@ -19,8 +19,10 @@
 
 #include "dds/dds_dcps.h"
 #include "dds/dds_plugin.h"
+#if !defined(NUTTX_RTOS)
 #include "openssl/safestack.h"
 #include "openssl/ossl_typ.h"
+#endif
 
 #ifdef  __cplusplus
 extern "C" {
