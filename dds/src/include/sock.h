@@ -148,5 +148,9 @@ void sock_fd_dump (void);
 
 /* Debug only: dump all file descriptor contexts. */
 
+#if defined (NUTTX_RTOS)
+#define TCP_NODELAY     1       /* don't delay send to coalesce packets */
+#endif
+
 #endif /* !__sock_h_ */
 
