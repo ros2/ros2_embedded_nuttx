@@ -94,7 +94,7 @@ prog_CHDRS = ${BASE}/include/*.h ../../dds/api/headers/dds/*.h chat_msg.h
 prog_OBJS  = ${prog_COBJS}
 
 ${EXECUTABLE}:	${prog_OBJS}
-		gcc -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
+		${CC} -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
 
 #######################################################
 # Setup Compile Environment
@@ -115,7 +115,7 @@ LIBS     =
 
 DEFINES  = -DNUTTX_RTOS -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
 	   -DEXTRA_STATS -DXTYPES_USED  -DDDS_TYPECODE \
-	   -DBIGDATA -DDDS_FORWARD -DMSECPLUG_WITH_SECXML -DNOIPC -DNO_SYSLOG -DDDS_TCP
+	   -DBIGDATA -DDDS_FORWARD -DMSECPLUG_WITH_SECXML -DNOIPC -DNO_SYSLOG
 
 #-DDDS_TCP
 #-DDDS_IPV6
@@ -150,7 +150,8 @@ OPTTYPE  = -O0
 # -fprofile-arcs -ftest-coverage
 
 CFLAGS   = -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFINES} ${ALT_STR} -g
-LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
+#LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
+LDFLAGS  = ${LIB_PATH} ${LIBS} -g
 # -lgcov
 
 all: ${EXECUTABLE}
