@@ -16,6 +16,7 @@ CONFIG_HOST_LINUX=y
 #
 # Build Configuration
 #
+CONFIG_APPS_DIR="../apps"
 # CONFIG_BUILD_2PASS is not set
 
 #
@@ -52,7 +53,7 @@ CONFIG_DEBUG_NET=y
 # CONFIG_DEBUG_LIB is not set
 # CONFIG_DEBUG_BINFMT is not set
 # CONFIG_DEBUG_GRAPHICS is not set
-CONFIG_DEBUG_IRQ=n
+# CONFIG_DEBUG_IRQ is not set
 # CONFIG_DEBUG_STACK is not set
 # CONFIG_DEBUG_HEAP is not set
 
@@ -311,41 +312,23 @@ CONFIG_STM32_USART=y
 #
 # Ethernet MAC configuration
 #
+CONFIG_STM32_PHYADDR=0
+# CONFIG_STM32_PHYINIT is not set
 # CONFIG_STM32_MII is not set
-CONFIG_STM32_PHYINIT=y
-
-# CONFIG_STM32_AUTONEG - Use PHY autonegotion to determine speed and mode
 CONFIG_STM32_AUTONEG=y
-
-# CONFIG_STM32_ETH100MBPS - If CONFIG_STM32_AUTONEG is not defined, then this
-#   may be defined to select 100 MBps speed.  Default: 10 Mbps
-# CONFIG_STM32_PHYSR - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  The PHY status register address may diff from PHY to PHY.  This
-#   configuration sets the address of the PHY status register.
-# CONFIG_STM32_PHYSR_SPEED - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides bit mask indicating 10 or 100MBps speed.
-# CONFIG_STM32_PHYSR_100MBPS - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides the value of the speed bit(s) indicating 100MBps speed.
-# CONFIG_STM32_PHYSR_MODE - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provide bit mask indicating full or half duplex modes.
-# CONFIG_STM32_PHYSR_FULLDUPLEX - This must be provided if CONFIG_STM32_AUTONEG is
-#   defined.  This provides the value of the mode bits indicating full duplex mode.
-
-CONFIG_STM32_PHYADDR=0x00
 CONFIG_STM32_PHYSR=31
-
-CONFIG_STM32_PHYSR_SPEED=0x0003 			# 100 MHz
-CONFIG_STM32_PHYSR_100MBPS=0x0003
-CONFIG_STM32_PHYSR_MODE=0x0004
-CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
-CONFIG_STM32_RMII=y
-CONFIG_STM32_RMII_EXTCLK=y
-
-# CONFIG_STM32_PHYSR_ALTCONFIG is not set
+CONFIG_STM32_PHYSR_ALTCONFIG=y
+CONFIG_STM32_PHYSR_ALTMODE=0x001c
+CONFIG_STM32_PHYSR_10HD=0x0004
+CONFIG_STM32_PHYSR_100HD=0x0008
+CONFIG_STM32_PHYSR_10FD=0x0014
+CONFIG_STM32_PHYSR_100FD=0x0018
 # CONFIG_STM32_ETH_PTP is not set
-# CONFIG_STM32_RMII_MCO1
+CONFIG_STM32_RMII=y
+# CONFIG_STM32_RMII_MCO1 is not set
 # CONFIG_STM32_RMII_MCO2 is not set
-# CONFIG_STM32_ETHMAC_REGDEBUG=y
+CONFIG_STM32_RMII_EXTCLK=y
+# CONFIG_STM32_ETHMAC_REGDEBUG is not set
 
 #
 # USB Host Configuration
@@ -532,19 +515,19 @@ CONFIG_NET_DUMPPACKET=y
 #
 # External Ethernet PHY Device Support
 #
-CONFIG_ETH0_PHY_NONE=n
+# CONFIG_ETH0_PHY_NONE is not set
 # CONFIG_ETH0_PHY_KS8721 is not set
 # CONFIG_ETH0_PHY_KSZ8051 is not set
 # CONFIG_ETH0_PHY_KSZ90x1 is not set
 # CONFIG_ETH0_PHY_DP83848C is not set
-# CONFIG_ETH0_PHY_LAN8720=y
+CONFIG_ETH0_PHY_LAN8720=y
 # CONFIG_ETH0_PHY_DM9161 is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
 # CONFIG_SERCOMM_CONSOLE is not set
-CONFIG_SERIAL=n
+CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
 CONFIG_ARCH_HAVE_USART2=y
@@ -758,7 +741,7 @@ CONFIG_BUILTIN_PROXY_STACKSIZE=1024
 # CONFIG_EXAMPLES_MOUNT is not set
 # CONFIG_EXAMPLES_NRF24L01TERM is not set
 CONFIG_EXAMPLES_NSH=y
-CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+# CONFIG_EXAMPLES_NSH_CXXINITIALIZE is not set
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
 # CONFIG_EXAMPLES_NXCONSOLE is not set
@@ -785,7 +768,7 @@ CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
 # CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
 # CONFIG_EXAMPLES_TOUCHSCREEN is not set
-CONFIG_EXAMPLES_UDP=y
+# CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_UDP_SIMPLE is not set
 # CONFIG_EXAMPLES_DISCOVER is not set
 # CONFIG_EXAMPLES_UIP is not set
@@ -903,8 +886,8 @@ CONFIG_NSH_CONSOLE=y
 # CONFIG_NSH_CONDEV is not set
 # CONFIG_NSH_ARCHINIT is not set
 # CONFIG_NSH_DHCPC is not set
-CONFIG_NSH_IPADDR=0x0a000002
-CONFIG_NSH_DRIPADDR=0x0a000001
+CONFIG_NSH_IPADDR=0xc0a80003
+CONFIG_NSH_DRIPADDR=0xc0a80002
 CONFIG_NSH_NETMASK=0xffffff00
 # CONFIG_NSH_DNS is not set
 # CONFIG_NSH_NOMAC is not set
@@ -1002,20 +985,11 @@ CONFIG_READLINE_ECHO=y
 #
 # CONFIG_SYSTEM_ZMODEM is not set
 
-# Application configuration
-
-
-# Application configuration
-
-
-# Application configuration
-
-
-# Application configuration
-
-CONFIG_APPS_DIR="../apps"
-
 #
 # DDS
 #
 CONFIG_DDS_CHAT=y
+
+#
+# UDP simple
+#
