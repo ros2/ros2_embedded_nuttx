@@ -27,6 +27,19 @@
 #include "dds/dds_aux.h"
 #include "tty.h"
 
+
+#if defined(NUTTX_RTOS)
+#ifndef STDIN_FILENO
+#  define STDIN_FILENO 0
+#endif
+#ifndef STDOUT_FILENO
+#  define STDOUT_FILENO 1
+#endif
+#ifndef STDERR_FILENO
+#  define STDERR_FILENO 2
+#endif
+#endif
+
 #ifdef _WIN32
 static int	new_console;
 DWORD		old_tty_mode;
