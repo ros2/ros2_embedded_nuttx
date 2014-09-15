@@ -161,7 +161,6 @@ typedef unsigned long ULONG;
 #define __BYTE_ORDER __LITTLE_ENDIAN
 
 #define CLOCK_MONOTONIC	0
-#define CLOCK_REALTIME	1
 
 #else /* Linux */
 #define NETLINK_SUPPORT

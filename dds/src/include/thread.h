@@ -109,6 +109,8 @@ void trc_lock_info (void);
 
 #else
 
+/* NuttX interface match */
+
 #define	lock_init_r(l,s)	pthread_mutex_init(&l,&recursive_mutex)
 #define	lock_init_nr(l,s)	pthread_mutex_init(&l,NULL)
 #define	lock_try(l)		(pthread_mutex_trylock(&l) != EBUSY)
@@ -158,7 +160,7 @@ void trc_lock_info (void);
 
 #define	cond_t			int
 
-#else
+#else /* No PTHEADS, neither NO_LOCKS */
 
 #define	lock_t			int
 
