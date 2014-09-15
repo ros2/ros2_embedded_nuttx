@@ -259,7 +259,7 @@ unsigned sys_hostid (void)
 		hid = (hid << 2) + buf [i];
 	return (hid);
 #elif defined (NUTTX_RTOS)
-	return 0
+	return 0;
 #else
 #ifndef NOHOSTID
 	return ((unsigned) gethostid ());

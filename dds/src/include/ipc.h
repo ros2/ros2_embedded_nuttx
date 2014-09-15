@@ -16,7 +16,7 @@
 	    Following IPC classes are currently defined:
 
 	    	- Semaphores
-		- Shared Memory
+			- Shared Memory
  */
 
 #ifndef __ipc_h_

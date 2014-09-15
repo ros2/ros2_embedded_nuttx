@@ -31,11 +31,15 @@
 #include "error.h"
 #include "ipc.h"
 
+#if defined (NUTTX_RTOS)
+#include <semaphore.h>
+#endif
+
 #ifndef __APPLE__
 
 union semun {
-	int		val;
-	struct semid_ds	*buf;
+	int				val;
+	struct 			semid_ds	*buf;
 	unsigned short	*array;
 };
 
@@ -61,9 +65,17 @@ intptr_t sem_get (unsigned name,	/* Id of semaphore (system-wide). */
 		sem_id = (intptr_t) CreateSemaphoreA (NULL, 1, 1, sem_name);
 	if (!sem_id)
 		return (-1);
+#elif defined (NUTTX_RTOS)
+	/* ToDo - continue here if IPC desires to be ported.
+	 		for now the -DNOIPC flag is used. Apparently this
+	 		leads to a less efficient performance.
+	*/
+	int sem_init(sem_t *sem, int pshared, unsigned int value);
+	sem_t *sem_open(const char *name, int oflag, ...);
+
 #else
 	int		s_flags = (int) perms;
-	union semun	sem_union;
+	union 	semun	sem_union;
 
 	if ((flags & SEMF_PRIVATE) != 0)
 		name = IPC_PRIVATE;
