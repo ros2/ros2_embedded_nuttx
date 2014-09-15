@@ -82,8 +82,8 @@ sql_CSRCS  = ${SQL}/scan.c ${SQL}/parse.c ${SQL}/bytecode.c
 dbg_CSRCS  = ${DBG}/debug.c
 
 prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
-             ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${dynip_CSRCS} ${co_CSRCS} \
-	     ${sec_CSRCS} ${splug_CSRCS}
+             ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${dynip_CSRCS} ${co_CSRCS}	     
+#	      ${sec_CSRCS} ${splug_CSRCS}
 
 #comment the following && don't define RTPS_USED to drop RTPS/Discovery
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
