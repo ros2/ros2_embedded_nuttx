@@ -424,6 +424,11 @@ pthread_mutexattr_t	recursive_mutex;
 #define PTHREAD_MUTEX_RECURSIVE_NP	PTHREAD_MUTEX_RECURSIVE
 #endif
 
+#if defined (NUTTX_RTOS)
+#include <pthread.h>
+#define PTHREAD_MUTEX_RECURSIVE_NP	PTHREAD_MUTEX_RECURSIVE
+#endif
+
 static lock_t		rclock;
 
 void thread_init (void)
