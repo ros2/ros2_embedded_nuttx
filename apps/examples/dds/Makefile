@@ -4,6 +4,17 @@
 #
 #######################################################
 
+-include $(TOPDIR)/.config
+-include $(TOPDIR)/Make.defs
+include $(APPDIR)/Make.defs
+
+# A simple DDS chat example
+
+APPNAME         = dds_chat
+PRIORITY        = SCHED_PRIORITY_DEFAULT
+STACKSIZE       = 2048
+
+
 ALT_NUM = 0
 ALT_STR =
 #ALT_NUM = 1
@@ -13,7 +24,7 @@ ALT_STR =
 
 EXECUTABLE = chat${ALT_NUM}
 
-BASE       = ../../dds/src/
+BASE       = ../../../dds/src
 
 RTPS       = ${BASE}/rtps
 TRANS      = ${BASE}/trans
@@ -29,11 +40,11 @@ SQL        = ${BASE}/sql
 SECURITY   = ${BASE}/security
 NSEC	   = ${BASE}/nsec
 
-SECP       = ../../dds/plugins/secplug
-NSECP      = ../../dds/plugins/nsecplug
+SECP       = ../../../dds/plugins/secplug
+NSECP      = ../../../dds/plugins/nsecplug
 
 dds_CSRCS  = ${DDS}/dds.c ${DDS}/domain.c ${DDS}/locator.c ${DDS}/guid.c \
-             ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c
+             ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c  
 type_CSRCS = ${TYPE}/xtypecode.c ${TYPE}/xtypes.c ${TYPE}/xdata.c \
              ${TYPE}/xcdr.c ${TYPE}/tsm.c ${TYPE}/pl_cdr.c ${TYPE}/pid.c \
              ${TYPE}/xtopic.c ${TYPE}/builtin.c ${TYPE}/vtc.c
@@ -89,9 +100,34 @@ prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_C
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../dds/api/headers/dds/*.h chat_msg.h
+prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
 
 prog_OBJS  = ${prog_COBJS}
+
+${EXECUTABLE}:	${prog_OBJS}
+		${CC} -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
+
+# Include NuttX apps typical syntaxis
+
+ASRCS		=
+CSRCS		= ${prog_CSRCS}
+
+AOBJS		= $(ASRCS:.S=$(OBJEXT))
+COBJS		= $(CSRCS:.c=$(OBJEXT))
+
+SRCS		= $(ASRCS) $(CSRCS)
+OBJS		= $(AOBJS) $(COBJS)
+
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  BIN		= ..\..\libapps$(LIBEXT)
+else
+ifeq ($(WINTOOL),y)
+  BIN		= ..\\..\\libapps$(LIBEXT)
+else
+  BIN		= ../../libapps$(LIBEXT)
+endif
+endif
+
 
 #######################################################
 # Setup Compile Environment
@@ -99,15 +135,15 @@ prog_OBJS  = ${prog_COBJS}
 #CC       = gcc
 CC       = arm-none-eabi-gcc
 
-NUTTX_BASE = ../../nuttx
+NUTTX_BASE = ../../../nuttx
 NUTTX_HEADERS = ${NUTTX_BASE}/include
-INC_PATH = -I${BASE}/include -I../../dds/api/headers -I/usr/include/libxml2 \
-			-I../../dds/plugins/security/ -I${NSECP}/ \
-			-I../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
+INC_PATH = -I${BASE}/include -I../../../dds/api/headers -I/usr/include/libxml2 \
+			-I../../../dds/plugins/security/ -I${NSECP}/ \
+			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
 			-I${NUTTX_HEADERS}
 
 #LIB_PATH =
-LIB_PATH = -L../../dds/qeo-c-import/openssl/output/install/usr/local/lib
+LIB_PATH = -L../../../dds/qeo-c-import/openssl/output/install/usr/local/lib
 LIBS     = 
 
 DEFINES  = -DNUTTX_RTOS -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED -DCDD_USED -DDDS_DEBUG \
@@ -148,67 +184,12 @@ OPTTYPE  = -O0
 
 CFLAGS   = -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFINES} ${ALT_STR} -g
 #LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
-LDFLAGS  = ${LIB_PATH} ${LIBS} -g -L../../nuttx/lib -larch -lsched -lc -lcxx -lmm
+LDFLAGS  = -nodefaultlibs ${LIB_PATH} ${LIBS} -g -L../../../nuttx/lib -lsched -lgcc -larch -lc -lcxx -lmm  
+
+#-nodefaultlibs -lgcc -lc
 # -lgcov
 
-
-
-
-#######################################################
-#		DDS compilation rules
-#######################################################
-#
-#${EXECUTABLE}:	${prog_OBJS}
-#		${CC} -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
-#
-#all: ${EXECUTABLE}
-#
-## Rules for cleaning
-#
-#clean:
-#	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
-#
-#reallyclean: clean
-#	\rm -f .tdds_log_* ${BASE}/*/tags Makefile.bak tags
-#
-#
-## Object sizes
-#
-#size:
-#	\size ${prog_OBJS} ${EXECUTABLE}
-#
-## coverage
-#
-#coverage:
-#	cd ../api/coverage
-#	lcov -b ../../dcps --directory=../../.. --capture --output-file api.info
-#
-## Lint (if available)
-#LINT=/home/jvoe/bin/flint
-#
-#lint:	${prog_CSRCS}
-#	\${LINT} std.lnt ${prog_CSRCS}
-#
-## Additional dependencies.
-#
-#depend:
-#	\makedepend ${INC_PATH} ../*/*.[ch]
-#
-#######################################################
-
-#######################################################
-#		NuttX compilation mechanism
-#######################################################
-
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  BIN		= ..\..\libapps$(LIBEXT)
-else
-ifeq ($(WINTOOL),y)
-  BIN		= ..\\..\\libapps$(LIBEXT)
-else
-  BIN		= ../../libapps$(LIBEXT)
-endif
-endif
+###########################################################
 
 ROOTDEPPATH	= --dep-path .
 
@@ -217,29 +198,40 @@ ROOTDEPPATH	= --dep-path .
 VPATH		= 
 
 all: .built
-.PHONY: context depend clean distclean
+.PHONY: clean depend distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
+#	${CC} -c $(CFLAGS) -o ${COBJS} ${LDFLAGS}
 
-.built: $(prog_OBJS)
-	$(call ARCHIVE, $(BIN), $(prog_OBJS))
-	$(Q) touch .built
+.built: $(OBJS)
+	$(call ARCHIVE, $(BIN), $(OBJS) ${LDFLAGS})
+	@touch .built
 
+ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
+$(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat: $(DEPCONFIG) Makefile
+	$(call REGISTER,$(APPNAME),$(PRIORITY),$(STACKSIZE),$(APPNAME)_main)
+
+context: $(BUILTIN_REGISTRY)$(DELIM)$(APPNAME)_main.bdat
+else
 context:
+endif
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- ${prog_CSRCS} ${LDFLAGS} >Make.dep
-	$(Q) touch $@
+	@$(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+	@touch $@
 
 depend: .depend
 
+#clean:
+#	$(call DELFILE, .built)
+#	$(call CLEAN)
+
 clean:
-	$(call DELFILE, .built)
-	$(call CLEAN)
+	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
 
 distclean: clean
 	$(call DELFILE, Make.dep)

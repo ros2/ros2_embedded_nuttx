@@ -37,7 +37,7 @@
 
 # Sub-directories
 
-SUBDIRS  = adc buttons can cc3000 cxxtest dhcpd discover elf flash_test
+SUBDIRS  = adc buttons can cc3000 cxxtest dhcpd dds discover elf flash_test
 SUBDIRS += ftpc ftpd hello helloxx hidkbd igmp i2schar json keypadtest
 SUBDIRS += lcdrw mm modbus mount mtdpart nettest nrf24l01_term nsh null nx
 SUBDIRS += nxconsole nxffs nxflat nxhello nximage nxlines nxtext ostest 
@@ -53,7 +53,7 @@ SUBDIRS += wget wgetjson xmlrpc
 CNTXTDIRS = pwm
 
 ifeq ($(CONFIG_NSH_BUILTIN_APPS),y)
-CNTXTDIRS += adc can cc3000 cxxtest dhcpd discover flash_test ftpd
+CNTXTDIRS += adc can cc3000 cxxtest dhcpd discover dds flash_test ftpd
 CNTXTDIRS += hello helloxx i2schar json keypadtestmodbus lcdrw mtdpart
 CNTXTDIRS += nettest nx nxhello nximage nxlines nxtext nrf24l01_term
 CNTXTDIRS += ostest random relays qencoder slcd smart_test tcpecho telnetd

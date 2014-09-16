@@ -4,6 +4,17 @@
 #
 #######################################################
 
+-include $(TOPDIR)/.config
+-include $(TOPDIR)/Make.defs
+include $(APPDIR)/Make.defs
+
+# A simple DDS chat example
+
+APPNAME         = dds_chat
+PRIORITY        = SCHED_PRIORITY_DEFAULT
+STACKSIZE       = 2048
+
+
 ALT_NUM = 0
 ALT_STR =
 #ALT_NUM = 1
@@ -93,6 +104,7 @@ prog_CHDRS = ${BASE}/include/*.h ../../dds/api/headers/dds/*.h chat_msg.h
 
 prog_OBJS  = ${prog_COBJS}
 
+
 #######################################################
 # Setup Compile Environment
 
@@ -150,99 +162,44 @@ CFLAGS   = -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFIN
 #LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
 LDFLAGS  = ${LIB_PATH} ${LIBS} -g -L../../nuttx/lib -larch -lsched -lc -lcxx -lmm
 # -lgcov
-
-
-
-
 #######################################################
 #		DDS compilation rules
 #######################################################
-#
-#${EXECUTABLE}:	${prog_OBJS}
-#		${CC} -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
-#
-#all: ${EXECUTABLE}
-#
-## Rules for cleaning
-#
-#clean:
-#	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
-#
-#reallyclean: clean
-#	\rm -f .tdds_log_* ${BASE}/*/tags Makefile.bak tags
-#
-#
-## Object sizes
-#
-#size:
-#	\size ${prog_OBJS} ${EXECUTABLE}
-#
-## coverage
-#
-#coverage:
-#	cd ../api/coverage
-#	lcov -b ../../dcps --directory=../../.. --capture --output-file api.info
-#
-## Lint (if available)
-#LINT=/home/jvoe/bin/flint
-#
-#lint:	${prog_CSRCS}
-#	\${LINT} std.lnt ${prog_CSRCS}
-#
-## Additional dependencies.
-#
-#depend:
-#	\makedepend ${INC_PATH} ../*/*.[ch]
-#
-#######################################################
 
-#######################################################
-#		NuttX compilation mechanism
-#######################################################
+${EXECUTABLE}:	${prog_OBJS}
+		${CC} -o ${EXECUTABLE} ${prog_OBJS} ${LDFLAGS}
 
-ifeq ($(CONFIG_WINDOWS_NATIVE),y)
-  BIN		= ..\..\libapps$(LIBEXT)
-else
-ifeq ($(WINTOOL),y)
-  BIN		= ..\\..\\libapps$(LIBEXT)
-else
-  BIN		= ../../libapps$(LIBEXT)
-endif
-endif
+all: ${EXECUTABLE}
 
-ROOTDEPPATH	= --dep-path .
-
-# Common build
-
-VPATH		= 
-
-all: .built
-.PHONY: context depend clean distclean
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-.built: $(prog_OBJS)
-	$(call ARCHIVE, $(BIN), $(prog_OBJS))
-	$(Q) touch .built
-
-context:
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(ROOTDEPPATH) "$(CC)" -- $(CFLAGS) -- ${prog_CSRCS} ${LDFLAGS} >Make.dep
-	$(Q) touch $@
-
-depend: .depend
+# Rules for cleaning
 
 clean:
-	$(call DELFILE, .built)
-	$(call CLEAN)
+	\rm -f ${prog_OBJS} ${EXECUTABLE} core.*
 
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
+reallyclean: clean
+	\rm -f .tdds_log_* ${BASE}/*/tags Makefile.bak tags
 
--include Make.dep
+
+# Object sizes
+
+size:
+	\size ${prog_OBJS} ${EXECUTABLE}
+
+# coverage
+
+coverage:
+	cd ../api/coverage
+	lcov -b ../../dcps --directory=../../.. --capture --output-file api.info
+
+# Lint (if available)
+LINT=/home/jvoe/bin/flint
+
+lint:	${prog_CSRCS}
+	\${LINT} std.lnt ${prog_CSRCS}
+
+# Additional dependencies.
+
+depend:
+	\makedepend ${INC_PATH} ../*/*.[ch]
+
+#######################################################

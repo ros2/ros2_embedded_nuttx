@@ -478,7 +478,7 @@ static void cleanup_security (void)
 
 #endif
 
-int dds_main (int argc, const char **argv)
+int main (int argc, const char **argv)
 {
 	DDS_DataWriterQos 	wr_qos;
 	DDS_DataReaderQos	rd_qos;
