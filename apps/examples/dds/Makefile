@@ -65,8 +65,10 @@ rtps_CSRCS = ${RTPS}/rtps_main.c ${RTPS}/rtps_mux.c ${RTPS}/rtps_msg.c \
 	     ${RTPS}/rtps_sfrw.c ${RTPS}/rtps_clist.c ${RTPS}/rtps_frag.c \
 	     ${RTPS}/rtps_dbg.c ${RTPS}/rtps_trace.c ${RTPS}/rtps_ft.c \
 	     ${RTPS}/rtps_fwd.c
+
 trans_CSRCS= ${TRANS}/ip/rtps_ip.c ${TRANS}/ip/ri_udp.c ${TRANS}/ip/ri_dtls.c \
 	     ${TRANS}/ip/ri_tcp.c ${TRANS}/ip/ri_tcp_sock.c ${TRANS}/ip/ri_tls.c
+
 co_CSRCS   = ${CO}/pool.c ${CO}/sys.c ${CO}/error.c ${CO}/ipc.c ${CO}/timer.c \
              ${CO}/sock.c ${CO}/skiplist.c ${CO}/str.c ${CO}/heap.c ${CO}/md5.c \
              ${CO}/db.c ${CO}/handle.c ${CO}/tty.c ${CO}/log.c ${CO}/ctrace.c \
@@ -89,12 +91,12 @@ splug_CSRCS= ${NSECP}/sp_auth.c ${NSECP}/sp_crypto.c \
 	     ${NSECP}/sp_access_populate.c ${NSECP}/sp_sys_cert_none.c \
 	     ${NSECP}/sp_sys.c
 sql_CSRCS  = ${SQL}/scan.c ${SQL}/parse.c ${SQL}/bytecode.c
-#dynip_CSRCS= ${DYNIP}/di_main.c ${DYNIP}/di_linux.c
+dynip_CSRCS= ${DYNIP}/di_main.c ${DYNIP}/di_linux.c
 dbg_CSRCS  = ${DBG}/debug.c
 
 prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
-             ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${dynip_CSRCS} ${co_CSRCS}	     
-#	      ${sec_CSRCS} ${splug_CSRCS}
+             ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${co_CSRCS}	     
+#	      ${sec_CSRCS} ${splug_CSRCS} ${dynip_CSRCS}
 
 #comment the following && don't define RTPS_USED to drop RTPS/Discovery
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
@@ -137,10 +139,11 @@ CC       = arm-none-eabi-gcc
 
 NUTTX_BASE = ../../../nuttx
 NUTTX_HEADERS = ${NUTTX_BASE}/include
-INC_PATH = -I${BASE}/include -I../../../dds/api/headers -I/usr/include/libxml2 \
+INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
 			-I../../../dds/plugins/security/ -I${NSECP}/ \
 			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
 			-I${NUTTX_HEADERS}
+#-I/usr/include/libxml2 
 
 #LIB_PATH =
 LIB_PATH = -L../../../dds/qeo-c-import/openssl/output/install/usr/local/lib
@@ -184,7 +187,8 @@ OPTTYPE  = -O0
 
 CFLAGS   = -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFINES} ${ALT_STR} -g
 #LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
-LDFLAGS  = -nodefaultlibs ${LIB_PATH} ${LIBS} -g -L../../../nuttx/lib -lsched -lgcc -larch -lc -lcxx -lmm  
+LDFLAGS  = -nodefaultlibs ${LIB_PATH} ${LIBS} -g -L../../../nuttx/lib -lsched \
+				 -lgcc -larch -lc -lcxx -lmm
 
 #-nodefaultlibs -lgcc -lc
 # -lgcov
