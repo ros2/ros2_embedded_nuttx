@@ -244,9 +244,9 @@
  * These pins selections, however, conflict with pin usage on the STM32F4DIS-BB.
  */
 
-#ifndef CONFIG_STM32F4DISBB
-#  define GPIO_USART2_RX GPIO_USART2_RX_1
-#  define GPIO_USART2_TX GPIO_USART2_TX_1
+#ifdef CONFIG_STM32F4DISBB
+#  define GPIO_USART2_RX GPIO_USART2_RX_2
+#  define GPIO_USART2_TX GPIO_USART2_TX_2
 #endif
 
 /* UART6:
