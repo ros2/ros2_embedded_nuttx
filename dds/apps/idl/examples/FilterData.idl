@@ -1,0 +1,38 @@
+struct AnotherStruct {
+        long x;
+        long y;
+};
+
+
+struct FilterData {
+	char aChar;
+        string anubStringmain[3]; //@Key
+	struct inner_st {
+		short aShort;
+		unsigned short anuShort;
+		long aLong;
+		unsigned long anuLong;
+		long long aLongLong;
+		unsigned long long anuLongLong;
+		float aFloat;
+		double aDouble;
+		boolean aBoolean;
+		octet anOctet;
+		string<10> aString; //@Key
+		string anubString; //@Key
+		string anubStringarr[10];
+		string anubStringarrarr[10][20];
+		string<10> aStringarr[10];
+                sequence<char, 50> charlist; 
+                sequence<octet, 50> keyseq; //@Key 
+                sequence<sequence <char,30>, 50> charlist2; 
+                sequence<string<10>,10> weirdkeys;//@Key
+                AnotherStruct withtyperef;
+                AnotherStruct typerefarr[10];
+		enum myEnum {
+			enumVal1,
+			enumVal2,
+			enumVal3
+		} anEnum;
+	} aStruct;
+};

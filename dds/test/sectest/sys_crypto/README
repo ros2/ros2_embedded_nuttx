@@ -1,0 +1,1 @@
+In order to test the static functions easily, I included a c file in the test file. This works as long as the same c file is not included by the Makefile.

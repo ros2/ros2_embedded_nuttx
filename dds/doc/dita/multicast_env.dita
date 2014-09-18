@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_bzk_b4v_sf">
+ <title>IPv4 Multicast configuration parameters</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <table frame="all" id="table_qhw_2qv_sf">
+   <title>Multicast configuration parameters</title>
+   <tgroup cols="2">
+    <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+    <colspec colname="c2" colnum="2" colwidth="4.87*" colsep="1" rowsep="1"/>
+    <thead>
+     <row>
+      <entry>DDS configuration parameter</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>IP_MCAST_TTL</entry>
+      <entry>Can be used to change the default Time-To-Live value for multicast datagrams. If not
+       specified, this TTL value is set to 1. Possible values: 1..255.</entry>
+     </row>
+     <row>
+      <entry>IP_MCAST_SRC</entry>
+      <entry>Specifies the IP addresses of the interfaces that may be used as a source interface for
+       Multicast IP packets.</entry>
+     </row>
+     <row>
+      <entry>IP_MCAST_DEST</entry>
+      <entry>Specifies the IP address of the interface that must be used in order to route Multicast
+       IP packets. This variable must be set in cases when there is no default gateway defined and
+       there is no valid Multicast route present in the system. If set, it strictly overrides any
+       automatic Multicast forwarding mechanisms that are present in the system, and can thus be
+       used to restrict DDS access to other interfaces. It is allowed to specify the loopback
+       address (e.g. 127.0.0.1) as a crude way of preventing Technicolor DDS from reaching other
+       nodes outside the own node.</entry>
+     </row>
+     <row>
+      <entry>IP_NO_MCAST</entry>
+      <entry>This environment variable can be set to indicate which DDS peers do not accept
+       Multicast traffic or on which networks it is not wise to use Multicast traffic (such as
+       wireless networks). The argument can be a combination of IP address and IP network
+       specifications similar to the specification that is used in <b>TDDS_IP_ADDRESS</b> and
+        <b>TDDS_IP_NETWORK </b>(see further).</entry>
+     </row>
+     <row>
+      <entry>IPV6_MCAST_HOPS</entry>
+      <entry>Specifies the maximum number of hops for outgoing IPv6 multicast packets. It should be
+       set to a value between 0 and 255.</entry>
+     </row>
+     <row>
+      <entry>IPV6_MCAST_INTF</entry>
+      <entry>This option can be used to set the default outgoing interface for IPv6 multicast
+       packets. Contrary to the <b>TDDS_IP_MCAST_DEST</b> environment variable, the argument should
+       be a valid interface name (such as lo or eth0).</entry>
+     </row>
+     <row>
+      <entry>IPV6_GROUP</entry>
+      <entry>This variable should be used in case the default IPv6 Discovery multicast address
+       (FF03::80) is not available. It should be set as a normal IPv6 address specification.</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <p><b>Examples</b>:</p>
+  <p><b>export TDDS_IP_MCAST_TTL=2</b>
+  </p>
+  <p>Sets the Time-To-Live value for IPv4 Multicast datagrams to 2, so Multicast IP packets will be
+   able to be routed 1 node further from the own node, but not further. </p>
+  <p><b>export TDDS_IP_MCAST_DEST=10.0.0.64</b></p>
+  <p>Set the Multicast route to the IP interface on which the address 10.0.0.64 is present,
+   disregarding default IP Multicast routes. Note that this interface must be present for Multicast
+   routing to be possible.</p>
+  <p><b>export TDDS_IP_NO_MCAST=10.0.0.32+31;144.11.0.12</b></p>
+  <p>Technicolor DDS will not send Multicast datagrams to DDS peers in the range
+   10.0.0.32..10.0.0.63, nor to a DDS peer located on 144.11.0.12.</p>
+  <p>The mechanism that Technicolor DDS uses to send data to multiple peers depends on this
+   environment variable. If a datagram must be sent to a group of DDS peers with at least one peer
+   in the given range, Technicolor DDS will choose to use specific Unicast packets to each
+   individual destination within the group, even to those that do allow Multicast. If none of the
+   destinations is mentioned in the variable, multicast will still be used.</p>
+ </conbody>
+</concept>

@@ -1,0 +1,4 @@
+struct CoverageType4 {
+	long key; //@Key
+	string sarr[4]; 
+};

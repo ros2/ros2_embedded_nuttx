@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_cvb_13s_wf">
+ <title>Locators</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The <cmdname>sloc</cmdname> command gives the following output:</p>
+  <screen scale="80">>sloc
+UDP:10.0.0.29:4635-DTLS(S)(14)*2
+UDP:239.255.0.1:9150(12)*25
+UDP:239.255.0.1:9151(5)*4
+UDP:10.0.0.29:9174(8)*22
+UDP:10.0.0.29:9175(1)*2
+UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:4635-DTLS(S)(15)*2
+UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:4635-DTLS(S)(16)*2
+UDPv6:ff03::80:9150(13)*25
+UDPv6:ff03::80:9151(6)*4
+UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:9174(9)*22
+UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:9174(10)*22
+UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:9175(2)*2
+UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:9175(3)*2
+TCP:10.0.0.29:5400-TLS(S)*1
+TCP:239.255.0.1:9150-(null)(C)(7)*5
+TCP:10.0.0.29:9166(19)*17
+TCP:10.0.0.29:9167(18)*3
+TCP:10.0.0.29:9174(11)*22
+TCP:10.0.0.29:9175(4)*2</screen>
+  <p>Each locator as displayed as:</p>
+  <p>
+   <ul id="ul_xft_r3s_wf">
+    <li>Protocol type.</li>
+    <li>The protocol specific address (unicast or multicast IP address).</li>
+    <li>A protocol specific port number (:port).</li>
+        <li>If transport security is used, this is indicated (-DTLS(&lt;mode>) or -TLS(&lt;mode>)),
+          where &lt;mode> is either C: client, S: server, or H: handled by server.</li>
+        <li>If the locator is associated with an IP connection (see scx and scxa), the connection
+          handle is given as (&lt;handle>).</li>
+    <li>How many times the locator is referenced (the *n).</li>
+   </ul>
+  </p>
+  <p>As can be seen from the display, locators are reused a lot.</p>
+ </conbody>
+</concept>

@@ -1,0 +1,2 @@
+typedef float myType;
+typedef unsigned long long myLongType;

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dds>
+ <security>
+  <domain id="7">
+   <access>secret</access>
+   <membership>exclusive</membership>
+   <transport protocol="UDP">
+    <local>DTLS</local>
+    <remote>DTLS</remote>
+   </transport>
+   <transport protocol="TCP">
+    <local>TLS</local>
+    <remote>TLS</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>restrict</mode>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <domain id="*">
+   <access>unclassified</access>
+   <membership>open</membership>
+   <transport>
+    <local>open</local>
+    <remote>open</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>open</mode>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <participant name="DCPS Test program">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>HelloWorld</name>
+     <create>yes</create>
+     <read>read_write</read>
+    </topic>
+   </domain>
+  </participant>
+  <domain id="5">
+   <access>secret</access>
+   <membership>open</membership>
+   <transport>
+    <local>open</local>
+    <remote>open</remote>
+   </transport>
+   <partition>
+    <name>toBeDeleted</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+ </security>
+</dds>

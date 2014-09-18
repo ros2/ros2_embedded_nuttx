@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_2lh_13h_vf">
+ <title>The DCPS API test suite</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The DCPS API test suite (api) attempts to test all public DDS DCPS API functions with a number of
+    different parameters.</p>
+   <p>It is intended to be run as a batch test, testing the total DCPS functionality, topic by
+    topic.  However, it is also possible to indicate specific topics in order to test only those
+    specific functionalities.</p>
+  </section>
+  <section>
+   <title>Test methodology</title>
+   <p>Simple tests, if possible, just call functions within the to be tested topic.</p>
+   <p>More complex tests typically requires prologue and epilogue code to setup the edge conditions
+    to be able to call a specific API function.  Sometimes this requires quite an elaborate setup
+    consisting of DomainParticipants, Topics, Publishers, Subscribers, DataReaders and DataWriters.</p>
+   <p>For the more complex tests, such as the discovery and data tests, up to 3 different domain
+    participants within the same domain need to be created.</p>
+   <p>The advantage of this method is that everything runs in a single test program, while still
+   enabling fundamental DDS functions such as RTPS messaging and state machines as well as active DDS
+   Discovery mechanisms.</p>
+  </section>
+  <section>
+   <title>Starting the test suite</title>
+   <p>As mentioned above, the API test suite is divided in a number of individual test topics. These
+    test topics can be shown with the <apiname>api -l</apiname> command, which then lists all the
+    available topics:</p>
+   <p>
+    <table frame="all" id="table_p34_q4h_vf">
+     <title>API test suite topics.</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="2.85*"/>
+      <thead>
+       <row>
+        <entry>Topic</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><apiname>extra</apiname></entry>
+        <entry>Auxiliary functions, e.g. Technicolor DDS-specific extensions to the DDS DCPS
+         API.</entry>
+       </row>
+       <row>
+        <entry><apiname>seq</apiname></entry>
+        <entry>Tests for the Technicolor DDS-specific sequence functions.</entry>
+       </row>
+       <row>
+        <entry><apiname>type</apiname></entry>
+        <entry>Type registration tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>factory</apiname></entry>
+        <entry>DomainParticipantFactory tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>participant</apiname></entry>
+        <entry>DomainParticipant tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>topic</apiname></entry>
+        <entry>Topic tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>filter</apiname></entry>
+        <entry>Content-filtered topic tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>multitopic</apiname></entry>
+        <entry>Multitopic tests<fn>Since Technicolor DDS doesn't support Multitopics yet, this just
+          tests that the correct error codes are returned.</fn>.</entry>
+       </row>
+       <row>
+        <entry><apiname>pub</apiname></entry>
+        <entry>Publisher tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>sub</apiname></entry>
+        <entry>Subscriber tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>writer</apiname></entry>
+        <entry>DataWriter tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>reader</apiname></entry>
+        <entry>DataReader tests.</entry>
+       </row>
+       <row>
+        <entry><apiname>data</apiname></entry>
+        <entry>Complex Data exchange tests.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+   <p>If the program is started with as arguments a number of these topics, only the given topics
+    will be tested.</p>
+   <p>The test suite accepts a number of startup options, that can be displayed with <apiname>api
+     -h</apiname>.</p>
+   <p>Following options can be specified:</p>
+   <p>
+    <table frame="all" id="table_spl_gqh_vf">
+     <title>API test suite options.</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="11.91*"/>
+      <colspec colname="c2" colnum="2" colwidth="38.44*"/>
+      <colspec colnum="3" colname="c3" colwidth="1*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><apiname>-l</apiname></entry>
+        <entry>Lists all test topics.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname>
+         <i>&lt;msec></i></entry>
+        <entry>Maximum delay to wait for responses (10..10000 milliseconds).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-n</cmdname>
+         <i>&lt;num></i></entry>
+        <entry>Total number of times that the tests need to run.</entry>
+       </row>
+       <row>
+        <entry><apiname>-r</apiname></entry>
+        <entry>Disable the lower-layer RTPS functionality.</entry>
+        <entry/>
+       </row>
+       <row>
+        <entry><apiname>-s</apiname></entry>
+        <entry>Enable the DDS Debug Shell.</entry>
+       </row>
+       <row>
+        <entry><apiname>-v</apiname></entry>
+        <entry>Verbose operation, logging overall functionality.</entry>
+       </row>
+       <row>
+        <entry><apiname>-vv</apiname></entry>
+        <entry>Very verbose, i.e. tries to log detailed test funtionality.</entry>
+       </row>
+       <row>
+        <entry><apiname>-h</apiname></entry>
+        <entry>Display program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+   <note>
+    Since this program enforces severe restrictions on the number of discovered
+    participants and discovered topics (it is a test program after all), it should
+    only be used in clean environments, i.e. where there are no other participants
+    active.
+   </note>
+  </section>
+ </conbody>
+</concept>

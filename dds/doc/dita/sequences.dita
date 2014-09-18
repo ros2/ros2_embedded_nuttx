@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_rj3_vlr_5f">
+ <title>Using Sequences</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section><title>Introduction</title>
+  <p>Support for dynamic arrays, called sequences in DDS is supported directly via a set of sequence
+   handling functions and macros.  There is really no need for direct access to the sequence type
+   itself, since the support functions should be able to provide all required accesses.</p>
+  <p>Sequences are strictly typed.  Any previously defined type can be used as the element of a
+   sequence, even sequences of sequences are allowed.</p>
+  <p>Whereas a number of programming languages have direct support for sequences, not all of them
+   do.  In C++, sequences are handled using templates and overloading of standard operators.  In C,
+   there is no direct support in the programming language, and a macro is used to define the
+   sequence and a set of access functions and macros is used for working with it.</p></section>
+  <section>
+   <title>Creating a new sequence type</title>
+   <p>Creating a new sequence type is done via the following macro:</p>
+   <codeblock>#include "dds/dds_seq.h"
+
+DDS_SEQUENCE(&lt;element_type>, &lt;sequence_type>);</codeblock>
+   <p>Where the <parmname>&lt;element_type></parmname> can be whatever previously defined type.</p>
+   <p>The result will be the following type definition:</p>
+   <codeblock>typedef struct name &lt;sequence_type>_st {
+    unsigned       _maximum;
+    unsigned       _length;
+    unsigned       _esize;
+    int            _own;
+    &lt;element_type> *_buffer;
+} &lt;sequence_type>;</codeblock>
+   <note>Although we will describe each sequence field in detail, it is not the intention that the
+    user accesses these fields directly. This is just for understanding how sequences work. Actual
+    handling of sequences should be via the access functions and macros, since this is an internal
+    representation which might still be changed in future revisions of the software. Using the
+    access functions and macros will thus ensure portability of user code to new Technicolor DDS
+    versions.</note>
+   <p>The <parmname>_maximum</parmname> field specifies the maximum number of sequence elements that
+    are currently available in <parmname>_buffer</parmname>. If the length of
+     <parmname>_buffer</parmname> changes due to more elements being added to the sequence, the
+     <parmname>_maximum</parmname> field will be adapted appropriately.</p>
+   <p>The <parmname>_length</parmname> field specifies the actual number of elements in the
+    sequence. The <parmname>_length</parmname> field might vary between 0 and _maximum, but it may
+    never be larger than <parmname>_maximum</parmname>. Resetting a sequence can be done simply by
+    setting <parmname>_length</parmname> to 0. No memory needs to be allocated for adding elements
+    unless the sequence contains (<parmname>_length</parmname> == <parmname>_maximum</parmname>)
+    elements. In that case the <parmname>_buffer</parmname> field as well as
+     <parmname>_maximum</parmname> will need to be updated before the element can be added.</p>
+   <p>The <parmname>_esize</parmname> field specifies the size of a sequence element. It is usually
+    set when the instance is created, and initialized with <i>sizeof (&lt;element_type>).</i></p>
+   <note>Although one might expect that the <parmname>_esize</parmname> type, which indicates the size of a
+    particular sequence element, would be defined as a <i>size_t</i> type, this is not the case.
+    This was a design choice. On 64-bit machines the compiler typically generates a 32-bit type for
+    unsigned types, and a 64-bit type for <i>size_t</i> types, which we feel is clearly impractical
+    in the context of DDS, where memory savings are more important, even on 64-bit machines.
+    Besides, a 32-bit type is already capable of representing up to 4 Gigabytes of memory, and
+    transfering chunks of more than 4 Gigabytes in a single message is clearly out of the
+    question.</note>
+   <p>The <parmname>_own</parmname> field specifies ownership of the sequence element data. If
+     <parmname>_own</parmname> is set, it means that the user of the sequence may change any element
+    within the sequence. If not set, the sequence was passed to the called function by reference
+    only, and the function is not supposed to change the sequence contents. See further for some
+    specific use-cases.</p>
+   <p>The <parmname>_buffer</parmname> field is a pointer to an array of sequence elements.  This array will initially be
+    set to NULL, but will be allocated and reallocated appropriately when elements are subsequently
+    appended to the sequence.</p>
+   </section>
+   
+  <section><title>Creating and deleting sequences</title>
+   <p>Sequences can be either statically initialized when declared, or initialized explicitly.
+    Static initialization is done using the DDS_SEQ_INITIALIZER() macro:</p>
+   <codeblock>#include "dds/dds_seq.h"
+
+DDS_SEQUENCE(float, FloatSeq);
+
+static FloatSeq fs = DDS_SEQ_INITIALIZER(float);</codeblock>
+   <p>The alternative explicit initialization uses the DDS_SEQ_INIT() macro:</p>
+   <codeblock>#include "dds/dds_seq.h"
+
+DDS_SEQUENCE(double, DoubleSeq);
+
+int test(void)
+{
+    DoubleSeq dseq;
+
+    DDS_SEQ_INIT(dseq);
+    ...
+}</codeblock>
+   <p>Once a sequence has been used, i.e. elements were appended to it, it can be reset for reuse
+    with the following generic function:</p>
+   <codeblock>void dds_seq_reset(void *seq);</codeblock>
+   <p>This function doesn't really cleanup all data, it just resets the sequence so that it becomes
+    empty.</p>
+   <p>If a sequence is no longer needed, all its contained data can be disposed completely with the
+    following generic function:</p><codeblock>void dds_seq_cleanup(void *seq);</codeblock>
+   <note>Both functions will only update the sequence descriptor. If the element type is a pointer
+    type, the user should take care that all pointed to data is also disposed, possibly by walking
+    over the sequence first, freeing the data that is pointed to, before calling the
+    functions.</note>
+   <note>Don't use the <i>dds_seq_reset/cleanup()</i> functions on sequences that are created by
+    Technicolor DDS.  They are really meant for user-created sequences only.  For DDS-originated
+    sequences, although these functions might or might not work, depending on the element type,
+    there are specific cleanup functions predefined that know exactly how to handle a correct
+    cleanup. Therefore it is prudent to use only the DDS-specific cleanup functions in those
+    situations, as described further.</note>
+   </section>
+  <section><title>Handling sequence elements</title><p>Once a sequence is initialized, data can be added to it, element by element in the following
+    manner:</p><codeblock>DDS_ReturnCode_t dds_seq_append(void *seq, void *value);
+DDS_ReturnCode_t dds_seq_prepend(void *seq, void *value);
+DDS_ReturnCode_t dds_seq_insert(void *seq, unsigned pos, void *value);</codeblock><p>The first function adds an element at the end of the sequence, the second prepends an element,
+    before all the existing elements, by shifting all these elements one position further in the
+    sequence. The last function inserts a sequence element at a specified position in the sequence,
+    hereby shifting all existing elements from that position onwards one position further.</p>
+   <p>A sequence can be completely initialized from an array of elements, sequence data can be
+    stored in an array, using the following functions:</p>
+   <codeblock>DDS_ReturnCode_t dds_seq_from_array(void *seq, void *array, unsigned len);
+unsigned dds_seq_to_array(void *seq, void *array, unsigned len);</codeblock>
+   <p>The first populates an empty sequence with array data.  Note that the sequence must be empty
+    for this to work properly.  The second copies existing sequence data to an array, without
+    changing the sequence contents.</p>
+   <p>Any existing element in a sequence can be replaced using the <i>dds_seq_replace()</i>
+    function:</p>
+   <codeblock>DDS_ReturnCode_t dds_seq_replace(void *seq, unsigned pos, void *value);</codeblock><p>Removing
+    elements from a sequence can be done with the following
+    functions:</p><codeblock>DDS_ReturnCode_t dds_seq_remove_first(void *seq, void *value);
+DDS_ReturnCode_t dds_seq_remove_last(void *seq, void *value);
+DDS_ReturnCode_t dds_seq_remove(void *seq, unsigned pos, void *value);</codeblock><p>These
+    functions remove elements from the sequence from the first, the last or from an arbitrary
+    position in the sequence respectively.</p><p>Processing sequence elements often requires walking
+    over the sequence, element by element. There are a number of ways to do
+   this:</p><codeblock>DDS_SEQ_FOREACH(seq,i) { ... }
+DDS_SEQ_FOREACH_ENTRY(seq,i,ptr) { ... }</codeblock>
+   <p>The first macro sets <parmname>i</parmname> initially at 0 and keeps incrementing it until the
+    sequence end is reached. If the sequence is empty, nothing is done, otherwise the statement body
+    will be called for each element in succession.</p>
+   <p>The difference between the two macros is that the latter sets <parmname>ptr</parmname> to the
+    location of each element while walking over the sequence.</p><p>A more structured way of walking is with the following function:</p>
+   <codeblock>void dds_seq_every(void *seq, 
+                   void (*func)(void *ptr, void *data),
+                   void *data);</codeblock><p>The <i>dds_seq_every()</i> function will call the subfunction <parmname>func</parmname> for each
+    element, with the element pointer as the first argument and the passed <parmname>data</parmname>
+    pointer as the second.</p>
+   <p>Although these functions are very generic, sometimes it is necessary to handle sequence
+    elements in a more direct manner. Following macros give access to a sequence element at a
+    specified position:</p>
+   <codeblock>DDS_SEQ_ITEM(seq,i)
+DDS_SEQ_ITEM_SET(seq,i,v)
+DDS_SEQ_ITEM_PTR(seq,i)</codeblock>
+   <p>The first simply returns the element of a sequence at position <parmname>i</parmname>. The
+    second replaces the element at the given position with <parmname>v</parmname>.</p>
+   <note>Neither <i>DDS_SEQ_ITEM()</i> nor <i>DDS_SEQ_ITEM_SET()</i> validates the given element
+    position. This must have been checked by the caller upfront.</note>
+   <p>The last macro returns a pointer to a sequence element location or NULL if the element is not
+    in the sequence, so this does check the position.</p>
+   <p>Direct access to the sequence descriptor fields is possible using a number of macros, although
+    one should take extreme care when using these.</p>
+   <codeblock>DDS_SEQ_LENGTH(seq)
+DDS_SEQ_MAXIMUM(seq)
+DDS_SEQ_OWNED(seq)
+DDS_SEQ_OWNED_SET(seq,o)
+DDS_SEQ_ELEM_SIZE(seq)</codeblock>
+    <p>The <i>DDS_SEQ_LENGTH()</i> returns the current sequence length, so this could be used to
+    implement an alternative iterator. The <i>DDS_SEQ_MAXIMUM()</i> returns the current element
+    buffer size. The <i>DDS_SEQ_OWNED() </i>and <i>DDS_SEQ_OWNED_SET()</i> are getter and setter
+    functions for the sequence ownership field.  <i>DDS_SEQ_ELEM_SIZE()</i> returns the size in
+    bytes of a sequence element.</p>
+  </section>
+  <section>
+   <title>DDS-specific sequences</title>
+   <p>The former sequence operations are of course general manipulations of any sequence,
+    user-defined or Technicolor DDS derived.</p>
+   <p>In practice, however, the user will also be confronted with the sequences that are defined in
+    DDS itself. Technicolor DDS uses and has already defined a number of DDS sequences and sequence
+    operations for specific DDS purposes.</p>
+   <p>Many of these sequences have a set of associated type-specific functions defined to make it
+    easier for the user to create and dispose of them.</p>
+   <p>These functions come in a number of flavors and typically have the following prototypes:</p>
+   <codeblock>&lt;seq_type> *&lt;seq_type>__alloc(void);
+void &lt;seq_type>__free(&lt;seq_type> *arg);
+void &lt;seq_type>__init(&lt;seq_type> *arg);
+void &lt;seq_type>__clear(&lt;seq_type> *arg);</codeblock>
+   <p>Here, the <i>&lt;seq_type>__alloc()</i> function will attempt to allocate from the heap and
+    reset appropriately a new sequence of the given type. If there is no more memory, a NULL value
+    will be returned.</p>
+   <p>The <i>&lt;seq_type>__free()</i> function is the reverse of the previous operation and will
+    cleanly dispose the full sequence contents before releasing the sequence back to the heap.</p>
+   <p>The <i>&lt;seq_type>__init()</i> function can be used to initialize a variable of the specific
+    sequence type for the first time. It should not be called on an already initialized sequence
+    since this will destroy (and leak) the contained data.</p>
+   <p>The last function, i.e. <i>&lt;seq_type>__clear() </i>can be used to properly dispose of
+    existing sequence data. It results in a clean empty sequence.</p>
+   <p>These functions are defined in Technicolor DDS for the following sequence types as well as for
+    a number of container types that contain sequences:</p>
+   <p>
+    <table frame="all" id="table_fnc_42s_5f">
+     <title>DDS Sequences and container types</title>
+     <tgroup cols="3">
+      <colspec colname="c1" colnum="1" colwidth="1.48*" colsep="1" rowsep="1"/>
+      <colspec colname="c2" colnum="2" colwidth="1*" colsep="1" rowsep="1"/>
+      <colspec colname="newCol3" colnum="3" colwidth="1.89*" colsep="1" rowsep="1"/>
+      <thead>
+       <row>
+        <entry>Sequence or Container type</entry>
+        <entry>Element Type</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>DDS_OctetSeq</entry>
+        <entry>unsigned char</entry>
+        <entry>Byte sequence, used as QoS parameter for User, Topic and Group data.</entry>
+       </row>
+       <row>
+        <entry>DDS_StringSeq</entry>
+        <entry>char *</entry>
+        <entry>A sequence of strings.</entry>
+       </row>
+       <row>
+        <entry>DDS_DataSeq</entry>
+        <entry>void *</entry>
+        <entry>An abstract data sequence.</entry>
+       </row>
+       <row>
+        <entry>DDS_SampleInfoSeq</entry>
+        <entry>DDS_SampleInfo *</entry>
+        <entry>Sequence of sample information as used in <i>_read</i>/<i>_take()</i> and
+          <i>_return_loan()</i> functions.</entry>
+       </row>
+       <row>
+        <entry>DDS_InstanceHandleSeq</entry>
+        <entry>DDS_InstanceHandle_t</entry>
+        <entry>Sequence of instance handles.</entry>
+       </row>
+       <row>
+        <entry>DDS_DataReaderSeq</entry>
+        <entry>DDS_DataReader</entry>
+        <entry>Sequence of DataReaders.</entry>
+       </row>
+       <row>
+        <entry>DDS_GroupDataQosPolicy</entry>
+        <entry>-</entry>
+        <entry>Group data QoS contains a DDS_OctetSeq.</entry>
+       </row>
+       <row>
+        <entry>DDS_PartitionQosPolicy</entry>
+        <entry>-</entry>
+        <entry>Partition QoS contains a DDS_StringSeq.</entry>
+       </row>
+       <row>
+        <entry>DDS_TopicDataQosPolicy</entry>
+        <entry>-</entry>
+        <entry>Topic data QoS contains a DDS_OctetSeq.</entry>
+       </row>
+       <row>
+        <entry>DDS_UserDataQosPolicy</entry>
+        <entry>-</entry>
+        <entry>User data QoS contains a DDS_OctetSeq.</entry>
+       </row>
+       <row>
+        <entry>DDS_ParticipantBuiltinTopicData</entry>
+        <entry>-</entry>
+        <entry>Contains a DDS_UserDataQosPolicy element.</entry>
+       </row>
+       <row>
+        <entry>DDS_TopicBuiltinTopicData</entry>
+        <entry>-</entry>
+        <entry>Contains various dynamic data elements.</entry>
+       </row>
+       <row>
+        <entry>DDS_PublicationBuiltinTopicData</entry>
+        <entry>-</entry>
+        <entry>Contains various dynamic data elements.</entry>
+       </row>
+       <row>
+        <entry>DDS_SubscriptionBuiltinTopicData</entry>
+        <entry>-</entry>
+        <entry>Contains various dynamic data elements.</entry>
+       </row>
+       <row>
+        <entry>DDS_DomainParticipantQos</entry>
+        <entry>-</entry>
+        <entry>Contains a UserDataQosPolicy element.</entry>
+       </row>
+       <row>
+        <entry>DDS_TopicQos</entry>
+        <entry>-</entry>
+        <entry>Contains a TopicDataQosPolicy element.</entry>
+       </row>
+       <row>
+        <entry>DDS_SubscriberQos</entry>
+        <entry>-</entry>
+        <entry>Contains various dynamic data elements.</entry>
+       </row>
+       <row>
+        <entry>DDS_PublisherQos</entry>
+        <entry>-</entry>
+        <entry>Contains various dynamic data elements.</entry>
+       </row>
+       <row>
+        <entry>DDS_DataReaderQos</entry>
+        <entry>-</entry>
+        <entry>Contains a DDS_UserDataQosPolicy element.</entry>
+       </row>
+       <row>
+        <entry>DDS_DataWriterQos</entry>
+        <entry>- </entry>
+        <entry>Contains a DDS_UserDataQosPolicy element.</entry>
+       </row>
+       <row>
+        <entry>DDS_ConditionSeq</entry>
+        <entry>DDS_Condition</entry>
+        <entry>Sequence of Conditions.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+  <section>
+   <title>Using the <parmname>_own</parmname> field in DDS DataReader functions</title>
+   <p>In practice, the _own field is only used in the <i>DDS_DataReader_read/take()</i> functions to
+    indicate to which layer the data buffers in the sequence belong. The following three mechanisms
+    can be distinguished:</p>
+   <p>
+    <ol id="ol_mzx_ksl_5f">
+     <li>The user specifies own sample data buffers (<parmname>_own</parmname> = 1 in
+      <i>DDS_DataReader_read/_take()</i> functions), and the dynamic contained data areas will be
+      already allocated by the user, by setting the individual pointer fields to a non-NULL value.
+      For the above example, the <i>dynmsg</i> and <i>dptr</i> fields and the
+      <parmname>floats._buffer</parmname> would already be populated with pointers to valid and
+      large enough data areas. The sequence maximum length (<parmname>_maximum</parmname>) must then
+      also be sufficiently large to contain the maximum size of received elements. No
+      <i>DDS_DataReader_return_loan()</i> is necessary after processing of the data samples and the
+      user is completely responsible for managing its own data.</li>
+     <li>The user specifies, as before, sample data buffers (<parmname>_own</parmname> = 1 in
+      <i>DDS_DataReader_read/_take()</i> functions), but the dynamic data fields, i.e.
+      <i>dynmsg</i> and <i>dptr</i> fields and the <parmname>floats._buffer</parmname> are initialized to NULL.
+      In this case, Technicolor DDS will allocate the dynamic memory using the builtin C-memory
+      allocator (typically <i>malloc()</i><fn>In the future, the memory allocator function will be
+       settable by the user, but this is not the case yet.</fn>). When done processing the samples,
+      the user is responsible for cleaning up the data using the free memory function of the
+      C-memory allocator (typically <i>free()</i>). As in the first case, no
+      <i>DDS_DataReader_return_loan()</i> is necessary after processing of the data samples.</li>
+     <li>The user doesn't give sample data buffers (<parmname>_own</parmname> = 0 or both sample
+      data and sample info sequences initialized to empty) in <i>DDS_DataReader_read/_take()</i>
+      functions,. In this case Technicolor DDS is responsible for allocating all data, typically
+      using another, more efficient but not disclosed, allocation strategy. Note that the use of
+      this mechanism is a lot easier from the point of view of the caller, but it does mandate the
+      use of <i>DDS_DataReader_return_loan()</i> when processing of data samples is done. It is also
+      the more efficient method of processing received data since no copying is necessary - the user
+      merely 'borrows' the buffers from DDS.</li>
+    </ol>
+   </p>
+  </section>
+ </conbody>
+</concept>

@@ -1,0 +1,272 @@
+struct CoverageType1 {
+	string<128> key; //@Key
+	char a;
+	short aShort;
+	unsigned short anuShort;
+	long aLong;
+	unsigned long anuLong;
+	long long aLongLong;
+	unsigned long long anuLongLong;
+	float aFloat;
+	double aDouble;
+	boolean aBoolean;
+	octet anOctet;
+	string dynamic;
+	union myUnion switch (long) {
+		case 'a':      string<100> aValue;
+		case 'b':      long bValue;
+	} aunion;
+};
+struct CoverageType2 {
+        string<128> key; 
+        char a; //@Key
+	short aShort; //@Key
+	unsigned short anuShort; //@Key
+	long aLong; //@Key
+	unsigned long anuLong; //@Key
+	long long aLongLong; //@Key
+	unsigned long long anuLongLong; //@Key
+	float aFloat; //@Key
+	double aDouble; //@Key
+	boolean aBoolean; //@Key
+	octet anOctet; //@Key
+	enum myKeyedEnum {
+		enumKeyVal1,
+		enumKeyVal2,
+		enumKeyVal3
+	} anEnum; //@Key
+
+};
+struct CoverageType2b {
+        string<128> key; //@Key 
+        char a; //@Key
+	short aShort; //@Key
+	unsigned short anuShort; //@Key
+	long aLong; //@Key
+	unsigned long anuLong; //@Key
+	long long aLongLong; //@Key
+	unsigned long long anuLongLong; //@Key
+	float aFloat; //@Key
+	double aDouble; //@Key
+	boolean aBoolean; //@Key
+	octet anOctet; //@Key
+	string unbound; //@Key
+};
+struct CoverageType3 {
+	char a[5]; //@Key
+	long nonkey;
+	enum myEnum {
+		enumVal1,
+		enumVal2,
+		enumVal3
+	} anEnum;
+};
+struct CoverageType4 {
+	string dynkey; //@Key
+	long nonkey;
+};
+struct CoverageType5 {
+	long key; //@Key
+	string sarr[4]; 
+};
+struct CoverageType6 {
+	long key; 
+	string sarr[4]; //@Key 
+};
+struct CoverageType7 {
+	long key; 
+	string <10> sarr[4]; //@Key 
+};
+
+struct CoverageType8 {
+	long key;  //@Key
+	string <10> sarr[4];
+};
+
+struct CoverageType9 {
+	long x;
+	long y;
+};
+
+/* Forced key example */
+struct CoverageType10 {
+	long test;
+	CoverageType9 cool; //@Key
+};
+
+typedef CoverageType9 indirectType;
+
+
+/* Forced key example -> Does not work 
+struct CoverageType11 {
+	long test;
+	CoverageType9 cool[3][3]; //@Key
+};
+*/
+
+struct CoverageType12 {
+	long test; //@Key
+	sequence <long> huh;
+};
+
+/* Few.... there she goes -> crashes 
+struct CoverageType12b {
+	long test; 
+	sequence <long> huh;//@Key
+};
+*/
+
+struct Keyed {
+	long key; //@Key
+	long nokey; 
+};
+
+struct Keyless {
+	Keyed keyed;
+	long extra;
+};
+
+struct CoverageType13 {
+	Keyless key; //@Key
+	long extra;
+};
+/* Potentially very long key */
+struct CoverageType14 {
+	string<300> key; //@Key
+	char a;
+	short aShort;
+};
+
+/* Over the top */
+struct CoverageType15 {
+	long x00; //@Key
+	long x01; //@Key
+	long x02; //@Key
+	long x03; //@Key
+	long x04; //@Key
+	long x05; //@Key
+	long x06; //@Key
+	long x07; //@Key
+	long x08; //@Key
+	long x09; //@Key
+	long x10; //@Key
+	long x11; //@Key
+	long x12; //@Key
+	long x13; //@Key
+	long x14; //@Key
+	long x15; //@Key
+	long x16; //@Key
+	long x17; //@Key
+	long x18; //@Key
+	long x19; //@Key
+	long x20; //@Key
+	long x21; //@Key
+	long x22; //@Key
+	long x23; //@Key
+	long x24; //@Key
+	long x25; //@Key
+	long x26; //@Key
+	long x27; //@Key
+	long x28; //@Key
+	long x29; //@Key
+	long x30; //@Key
+	long x31; //@Key
+	long x32; //@Key
+	long x33; //@Key
+	long x34; //@Key
+	long x35; //@Key
+	long x36; //@Key
+	long x37; //@Key
+	long x38; //@Key
+	long x39; //@Key
+	long x40; //@Key
+	long x41; //@Key
+	long x42; //@Key
+	long x43; //@Key
+	long x44; //@Key
+	long x45; //@Key
+	long x46; //@Key
+	long x47; //@Key
+	long x48; //@Key
+	long x49; //@Key
+	long x50; //@Key
+	long x51; //@Key
+	long x52; //@Key
+	long x53; //@Key
+	long x54; //@Key
+	long x55; //@Key
+	long x56; //@Key
+	long x57; //@Key
+	long x58; //@Key
+	long x59; //@Key
+	long x60; //@Key
+	long x61; //@Key
+	long x62; //@Key
+	long x63; //@Key
+	long x64; //@Key
+	long x65; //@Key
+	long x66; //@Key
+	long x67; //@Key
+	long x68; //@Key
+	long x69; //@Key
+	long x70; //@Key
+	long x71; //@Key
+	long x72; //@Key
+	long x73; //@Key
+	long x74; //@Key
+	long x75; //@Key
+	long x76; //@Key
+	long x77; //@Key
+	long x78; //@Key
+	long x79; //@Key
+	long x80; //@Key
+	long x81; //@Key
+	long x82; //@Key
+	long x83; //@Key
+	long x84; //@Key
+	long x85; //@Key
+	long x86; //@Key
+	long x87; //@Key
+	long x88; //@Key
+	long x89; //@Key
+};
+
+
+struct AnotherStruct {
+        long x;
+        long y;
+};
+
+
+struct FilterData {
+	char aChar;
+        string anubStringmain[3]; //@Key
+	struct inner_st {
+		short aShort;
+		unsigned short anuShort;
+		long aLong;
+		unsigned long anuLong;
+		long long aLongLong;
+		unsigned long long anuLongLong;
+		float aFloat;
+		double aDouble;
+		boolean aBoolean;
+		octet anOctet;
+		string<10> aString; //@Key
+		string anubString; //@Key
+		string anubStringarr[10];
+		string anubStringarrarr[10][20];
+		string<10> aStringarr[10];
+                sequence<char, 50> charlist; 
+                sequence<octet, 50> keyseq;
+                sequence<sequence <char,30>, 50> charlist2; 
+                sequence<string<10>,10> weirdkeys;
+                AnotherStruct withtyperef;
+                AnotherStruct typerefarr[10];
+		enum myEnum2 {
+			enum2Val1,
+			enum2Val2,
+			enum2Val3
+		} anEnum;
+	} aStruct;
+};

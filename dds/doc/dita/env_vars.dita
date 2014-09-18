@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_qtl_gpv_sf">
+ <title>Configuration variables</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Technicolor DDS can be configured extensibly.  This can be done with system environment
+   variables, configuration files and specific API functions.</p>
+ </conbody>
+</concept>

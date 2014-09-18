@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_h44_hj5_sf">
+ <title>DDS in a nutshell</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>So what exactly does DDS deliver to applications?</p>
+  <p>The DDS publish-subscribe model connects information producers (publishers) with information
+   consumers (subscribers).</p>
+  <p>The overall distributed application is typically composed of processes called "participants,"
+   each running in a separate address space, possibly on different computers and in different
+   execution environments. A DDS participant may simultaneously publish and subscribe to a number of
+   typed data 'topics'.</p>
+  <p>Type safety is an important aspect in DDS and the data interface to and from the applications,
+   and even between different participants is therefore strongly typed.</p>
+  <p>Topic data types are described either statically (at compile time) or dynamically while the
+   appplication program is executing (X-Types).</p>
+  <p>The first is achieved using a data type definition language that is programming language
+   independent.  This can be either XML-based or a language that closely resembles the familiar
+   C/C++ data definition notations (IDL file). Later on, an off-line tool allows generation of
+   typecode data and type-specific functions appropriate for a specific destination execution
+   environment.</p>
+  <p>This has a number of benefits:</p>
+  <p>
+   <ol id="ol_1tz_cl5_sf">
+    <li>Since DDS knows about the data types, it can not only take care of the differences between
+     little- and big-endian machines, but it can overcome the different data representations between
+     multiple execution environments, such as C, C++, Java, etc.</li>
+    <li>Static typed data interfaces are generated, functions as well as data structure definitions,
+     making the DDS API for applications less error-prone.</li>
+    <li>Data types can be "keyed" by marking specific fields in the type as "key" fields, so that
+     multiple instances of data, e.g. multiple data streams can be possible, identified by its
+     "key".</li>
+    <li>All data types are communicated over the wire and verified to ensure that types in both
+     reader and writer are compatible.</li>
+   </ol>
+  </p>
+  <p>Dynamic types are more difficult to use, since every type detail needs to be fully described by
+   the application.  This is mainly used to dynamically create DDS types from type descriptions done
+   in higher order languages (ex. Java introspection), or from foreign data definitions (ex.
+   JSON).</p>
+  <p>Due to the powerful introspection possibilities of Dynamic types, they can even be used to
+   discover and use as yet unknown types that are discovered in the DDS domain.</p>
+  <p>Both static types and dynamic types can work seamlessly together.  It doesn't matter how types
+   are defined.  One application using a dynamically created type can communicate with another
+   application using the static type definition.</p>
+  <p>The DDS standard defines a communications relationship between the various publishers and
+   subscribers. The data communications are decoupled in space (nodes can be anywhere), time
+   (delivery may be immediately after publication or later), and flow (delivery may be reliably or
+   best-effort and made at controlled bandwidths).</p>
+  <p>To increase scalability, topics may contain multiple independent data channels identified by
+   "keys". This allows nodes to subscribe to many, possibly thousands, of similar data streams with
+   a single subscription. When the data arrives, the middleware can sort it by the key and deliver
+   it for efficient processing.</p>
+  <p>There is no requirement for a one-to-one relationship between publishers and subscribers.  On
+   the contrary, an any-to-any relationship is the overall model.</p>
+  <p>The DDS standard is fundamentally designed to work over both unreliable transports, such as UDP
+   or wireless networks as well as over other transport mechanisms such as plain or encrypted TCP.
+   Efficient, direct, peer-to-peer communications, or multicasting, will be used to optimize data
+   transfers, reliable (even over multicast) or best-effort.</p>
+  <p>The communication aspects are typically specified by the application when subscribing to data
+   topics. This is done with optional so-called Quality of Service parameters.</p>
+  <p>Filtering of received data samples is possible, either on data contents (using SQL-like
+   expressions) or by specifying the requested rate of received data.  Whether this filtering occurs
+   on the publisher side or on the subscriber side depends on the DDS implementation.  Good DDS
+   implementations are able to do both.</p>
+  <p>DDS data security is very important and can be done either on individual transport connections
+   (DTLS/UDP or TLS/TCP) or very fine-grained using the DDS Security standard which provides the
+   following additional features:<ul id="ul_31y_fll_r4">
+    <li>Data can be plain, encrypted and signed (AES128/SHA1 or AES256/SHA256), or signed (SHA1 or
+     SHA256).</li>
+    <li>Encryption and signing can be done either on a full RTPS message (disallowing DDS
+     routers/forwarders), on individual Reader/Writer Submessages, or only the Payload data is
+     encrypted/signed.</li>
+    <li>All this is selectable per Topic and encryption keys are different for different
+     topics.</li>
+   </ul></p>
+   <p>Standard DDS securitity requires Certificate-based authentication of participants, and uses
+   signed permissions data.</p>
+ </conbody>
+</concept>

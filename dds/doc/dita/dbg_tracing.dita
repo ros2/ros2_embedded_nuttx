@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_j54_pg5_wf">
+ <title>Tracing and Profiling commands</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Various classes of tracing and profiling are supported in Technicolor DDS:</p>
+  <p>
+   <ul id="ul_1x2_tg5_wf">
+    <li>RTPS Messages, Finite State Machine state changes, Control and Timer tracing can be used
+     while debugging (DDS Debugging must be enabled for this) in order to verify correct operation
+     of selective endpoints. The <cmdname>dtrace</cmdname> and <cmdname>trace</cmdname><i>
+      &lt;endpoint></i> commands are provided for this.</li>
+    <li>Cyclic tracing can optionally be enabled via an additional compilation option
+     (-DCTRACE_USED) to provide for DDS-wide event tracing via the <cmdname>cton</cmdname>,
+      <cmdname>ctoff</cmdname>, <cmdname>ctclr</cmdname>, <cmdname>ctmode</cmdname>,
+      <cmdname>ctinfo</cmdname>, <cmdname>ctdump</cmdname> and <cmdname>ctsave</cmdname>
+     commands.</li>
+    <li>Lock tracing can optionally be enabled via another compilation option (-DLOCK_TRACE) to
+     provide for tracing of locks, in order to find out the cause of some deadlocks.  The
+      <cmdname>slstat</cmdname> can then be used to see which locks were taken, by whom and who's
+     waiting for these locks.</li>
+    <li>Profiling can be enabled on selecive operations within the DDS Middleware via another
+     conditional compilation option (-DPROFILE).  The commands to control profiling are
+      <cmdname>profs</cmdname> and <cmdname>cprofs</cmdname>.</li>
+   </ul>
+  </p>
+  <p>We will not go into more detail here on these features, since they are quite advanced and
+   require some deep insights into the working of Technicolor DDS, and are not intended for casual
+   users.</p>
+ </conbody>
+</concept>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_gdx_tbs_yg">
+ <title>Memory pools</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>In order to speed up regular allocations and deallocations of memory blocks, a generic pool
+   mechanism was introduced in Technicolor DDS.</p>
+  <p>For each type of often used memory, a pool is defined that is able to group a collection of
+   preallocated memory chunks, chained together as a linked list of identical sized blocks.</p>
+  <p>Whenever a memory block is requested from a pool, the first available block is returned and the
+   linked list contains one less element.</p>
+  <p>If a memory block is requested, but the pool has been drained completely, it is configurable as
+   to what will happen then.</p>
+  <p>
+   <ul id="ul_lj4_vds_yg">
+    <li>If the pool limit was set to exactly the number of preallocated memory blocks for that pool,
+     a NULL pointer is returned and an internal out-of-memory statistics counter is
+     incremented.</li>
+    <li>If the limit is higher than the number of preallocated memory blocks, a second list (the
+     grow list) is checked for spare memory blocks.   If there are memory blocks in that list, the
+     new block will be taken from the grow list.</li>
+    <li>If the grow list is empty and the memory constraints allow it, a new block will be allocated
+     via a standard memory allocation function and that one will be returned.</li>
+   </ul>
+  </p>
+  <p>When a memory block is released back to a pool from which it was allocated, it is either:</p>
+  <p>
+   <ul id="ul_w1l_rgs_yg">
+    <li>Put back in front of the preallocated block linked list, if it was effectively a
+     preallocated block, or</li>
+    <li>it was allocated and the grow list is not full yet, it is added to the grow list, or</li>
+    <li>it is released via a standard memory release function.</li>
+   </ul>
+  </p>
+  <p>It is fully configurable by the user as to:</p>
+  <p>
+   <ul id="ul_lfq_chs_yg">
+    <li>How many memory blocks are preallocated in a pool.</li>
+    <li>What the absolute limit of blocks is that may be in use for a pool.</li>
+    <li>The maximum size of the grow list in relation to the preallocated list size (as a
+     percentage, i.e. 0..infinity).</li>
+   </ul>
+  </p>
+  <p>A number of statistics are kept per pool, as shown in the following table:</p>
+  <p>
+   <table frame="all" id="table_x4b_c3s_yg">
+    <title>Memory Pool statistics </title>
+    <tgroup cols="2">
+     <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+     <colspec colname="c2" colnum="2" colwidth="4.26*" colsep="1" rowsep="1"/>
+     <thead>
+      <row>
+       <entry>Name</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>MPUse</entry>
+       <entry>Maximum number of blocks that were ever allocated from the preallocated block
+        list.</entry>
+      </row>
+      <row>
+       <entry>CPUse</entry>
+       <entry>Number of preallocated blocks that are currently in use (i.e. allocated).</entry>
+      </row>
+      <row>
+       <entry>MXUse</entry>
+       <entry>Maximum number of extra blocks that ever needed to be allocated in addition to the
+        preallocated blocks.</entry>
+      </row>
+      <row>
+       <entry>CXUse</entry>
+       <entry>Number of extra blocks that are currently in use.</entry>
+      </row>
+      <row>
+       <entry>Alloc</entry>
+       <entry>Total number of extra block allocations that were done.</entry>
+      </row>
+      <row>
+       <entry>NoMem</entry>
+       <entry>Total number of times that a block was requested, but the pool was empty.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+  <note>The names in the table correspond with the names that are displayed in the output of the
+    '<cmdname>spool</cmdname>' or '<cmdname>spoola</cmdname>' debug commands.</note>
+  <note>If the -DFORCE_MALLOC compile option is given when Technicolor DDS is built, no preallocated
+   blocks will be allocated and all allocations/frees will use the standard heap memory allocater,
+   although it will still do accounting on the allocated pool blocks.</note>
+ </conbody>
+</concept>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_fvm_c2b_vf">
+ <title>Latency program</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The DDS latency test program (<cmdname>latency</cmdname>) is used to measure the latency, i.e.
+    the end-to-end time delay that is consumed before samples are actually delivered from a data
+    producer to a data consumer over DDS.</p>
+  </section>
+  <section>
+   <title>Test methodology</title>
+   <p>Testing latency is done using three distinct test entities:</p>
+   <p>
+    <ol id="ol_4vd_qfb_vf">
+     <li>A <i>Controller</i>, which controls the next two entities.</li>
+     <li>A <i>Looper</i>, which just loops back data to whoever sends data to it.</li>
+     <li>A <i>Generator</i>, which sends the samples to the looper entity.</li>
+    </ol>
+   </p>
+   <p>The controller entity waits until all entities are present before starting a new test by
+    sending a <i>START</i> command to the Generator.</p>
+   <p>The generator, on receiving this command, starts sending data samples periodically to the
+    looper.  When the looper receives a sample, it simply returns it.</p>
+   <p>When all samples are sent and looped, the generator stops and a latency report is
+    generated.</p>
+   <p>All test entities can be combined in one program run by specifying appropriate options.
+    Typical run examples are:</p>
+   <p>
+    <ul id="ul_1mn_zkb_vf">
+     <li><cmdname>latency -ogl -s 1024</cmdname> would run all functionalities in one program
+      instance locally and test latency for a 1K sample size.</li>
+     <li><cmdname>latency -og -n 100</cmdname> on one node and <cmdname>latency -l</cmdname> on
+      another node would test latency between two nodes, with the controller and generator combined
+      in the first program, sending 100 samples.</li>
+    </ul>
+   </p>
+  </section>
+  <section>
+   <title>Starting the <cmdname>latency</cmdname> program</title>
+   <p>The latency program only runs from the command line and accepts a number of program options
+    that can be shown by typing <cmdname>latency -h</cmdname>:</p>
+   <p>
+    <table frame="all" id="table_2vg_1jb_vf">
+     <title><cmdname>latency</cmdname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.26*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-o</cmdname></entry>
+        <entry>Controller mode (controls the other entities).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-g</cmdname></entry>
+        <entry>Generator mode (sends data samples periodically and measures the latency from the
+         returned, i.e. looped data sample.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-l</cmdname></entry>
+        <entry>Looper mode (default setting if no mode is specified).  In this mode, the program
+         simply loops samples back to the generator.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-n</cmdname>
+         <i>&lt;nsamples></i></entry>
+        <entry>Number of samples to sent for latency calculation. If not specified, 50 samples are
+         sent.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-s</cmdname>
+         <i>&lt;size></i></entry>
+        <entry>Data sample size in bytes.  Default size = 1.  Data sizes can range from 1 up to and
+         including 32768.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname>
+         <i>&lt;msec></i></entry>
+        <entry>Delay between each successive sample in milliseconds (default = 100ms).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-r</cmdname></entry>
+        <entry>Use reliable transfers instead of best-effort operation.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-q</cmdname>
+         <i>&lt;history></i></entry>
+        <entry>Number of samples to keep in the history.  Default history is to keep all
+         samples.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-i</cmdname></entry>
+        <entry>Dump latency information for each sample.  If not specified, only summary data
+         containing minimum, maximum, average and median latency information is given.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation.  Logs overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose operation, logging detailed functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Display some information on program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+ </conbody>
+</concept>

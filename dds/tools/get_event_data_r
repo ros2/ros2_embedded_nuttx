@@ -1,0 +1,17 @@
+CTGET=$HOME/DDS/git/dds/tools/ctget
+
+$CTGET $1 RTPS:receive 13 > /tmp/rrx.dat
+$CTGET $1 RTPS:rx_info_ts 12 > /tmp/infts.dat
+$CTGET $1 RTPS:rx_data 11 > /tmp/data.dat
+$CTGET $1 RTPS:sfr_be_data 10 > /tmp/sfbdata.dat
+$CTGET $1 DCPS:notify_data_avail 9 > /tmp/ndavail.dat
+$CTGET $1 DDS:NOTIFY 8 > /tmp/notif.dat
+$CTGET $1 DDS:W_CONT 7 > /tmp/wcont.dat
+$CTGET $1 DDS:W_EV 6 > /tmp/wev.dat
+$CTGET $1 DDS:W_RX 5 > /tmp/wrx.dat
+#$CTGET $1 DDS:WAKEUP 5 > /tmp/wakeup.dat
+$CTGET $1 DDS:W_NOTIF 4 > /tmp/wnotif.dat
+$CTGET $1 DDS:W_POLL 3 > /tmp/wpoll.dat
+$CTGET $1 DCPS:DataReader_take 2 > /tmp/take.dat
+$CTGET $1 DCPS:DataReader_return_loan 1 > /tmp/rloan.dat
+

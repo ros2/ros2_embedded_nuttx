@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_g1c_b2c_s4">
+ <title>Using secure domains</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>All of the standalone programs can be run easily in any non-secure DDS domain. Some,
+    however, have support for using secure domains as well, using extra command line options to
+    specify the security parameters and using a special XML-based security policy file.</p>
+  <p>Most of the programs described in the previous chapters are security enabled:</p>
+  <p>
+   <ul id="ul_21y_33c_s4">
+    <li><cmdname>shapes</cmdname></li>
+    <li><cmdname>bw</cmdname></li>
+    <li><cmdname>latency</cmdname></li>
+    <li><cmdname>chat</cmdname></li>
+    <li><cmdname>fwd</cmdname></li>
+    <li><cmdname>dcps</cmdname></li>
+    <li><cmdname>cdd</cmdname></li>
+    <li><cmdname>dump</cmdname></li>
+   </ul>
+  </p>
+  <p>To enable operation in a secure domain, the following options can be used:</p>
+   <p>
+    <table frame="all" rowsep="1" colsep="1" id="table_cxj_xsv_r4">
+     <title>Security options for standalone programs</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.43*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-e</cmdname>
+        <i>&lt;name></i></entry>
+        <entry>Security engine name (deprecated)</entry>
+       </row>
+       <row>
+        <entry><cmdname>-c</cmdname>
+        <i>&lt;path></i></entry>
+        <entry>Path of the certificate to use</entry>
+       </row>
+       <row>
+        <entry><cmdname>-k</cmdname>
+        <i>&lt;path></i></entry>
+        <entry>Path of the private key to use</entry>
+       </row>
+       <row>
+        <entry><cmdname>-z</cmdname>
+        <i>&lt;realm></i></entry>
+        <entry>Optional Qeo realm name</entry>
+       </row>
+       <row>
+        <entry><cmdname>-j</cmdname>
+        <i>&lt;filename></i></entry>
+        <entry>Filename of an XML-based security policy file.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  <p>If the <cmdname>-j</cmdname> option is not given, the <i>security.xml</i> file is searched in
+   the current directory.</p>
+  <p>An example <i>security.xml</i> file that can be used for the <cmdname>dcps</cmdname> test
+   program and which allows secure operation in domain <b>7</b> for topic <i>HelloWorld</i>, using
+   DDS payload encryption:</p>
+  <p><codeblock>&lt;?xml version="1.0" encoding="utf-8"?>
+&lt;dds>
+ &lt;security>
+  &lt;domain id="7">
+   &lt;access>secret&lt;/access>
+   &lt;membership>exclusive&lt;/membership>
+   &lt;controlled>yes&lt;/controlled>
+   &lt;encryption>none&lt;/encryption>
+   &lt;transport protocol="UDP">
+    &lt;local>DDSSEC&lt;/local>
+    &lt;remote>DDSSEC&lt;/remote>
+   &lt;/transport>
+   &lt;transport protocol="TCP">
+    &lt;local>TLS&lt;/local>
+    &lt;remote>TLS&lt;/remote>
+   &lt;/transport>
+   &lt;topic>
+    &lt;name>*&lt;/name>
+    &lt;mode>restrict&lt;/mode>
+    &lt;controlled>no&lt;/controlled>
+    &lt;discovery>secure&lt;/discovery>
+    &lt;encryption>payload&lt;/encryption>
+    &lt;method>HMAC_SHA256&lt;/method>
+   &lt;/topic>
+   &lt;partition>
+    &lt;name>*&lt;/name>
+    &lt;mode>open&lt;/mode>
+   &lt;/partition>
+  &lt;/domain>
+  &lt;domain id="*">
+   &lt;access>unclassified&lt;/access>
+   &lt;membership>open&lt;/membership>
+   &lt;transport>
+    &lt;local>open&lt;/local>
+    &lt;remote>open&lt;/remote>
+   &lt;/transport>
+   &lt;topic>
+    &lt;name>*&lt;/name>
+    &lt;mode>open&lt;/mode>
+   &lt;/topic>
+   &lt;partition>
+    &lt;name>*&lt;/name>
+    &lt;mode>open&lt;/mode>
+   &lt;/partition>
+  &lt;/domain>
+  &lt;participant name="DCPS Test program">
+   &lt;access>secret&lt;/access>
+   &lt;domain id="7">
+    &lt;topic>
+     &lt;name>HelloWorld&lt;/name>
+     &lt;create>yes&lt;/create>
+     &lt;read>read_write&lt;/read>
+     &lt;controlled>yes&lt;/controlled>
+     &lt;discovery>secure&lt;/discovery>
+     &lt;encryption>payload&lt;/encryption>
+     &lt;method>AES128_HMAC_SHA1&lt;/method>
+    &lt;/topic>
+   &lt;/domain>
+  &lt;/participant>
+  &lt;participant name="7fef45661ffa779f 9283 21a6">
+   &lt;access>secret&lt;/access>
+   &lt;domain id="7">
+    &lt;topic>
+     &lt;name>HelloWorld&lt;/name>
+     &lt;create>yes&lt;/create>
+     &lt;read>read_write&lt;/read>
+    &lt;/topic>
+   &lt;/domain>
+  &lt;/participant>
+  &lt;participant name="7fef45661ffa779f 9050 21a5">
+   &lt;access>secret&lt;/access>
+   &lt;domain id="7">
+    &lt;topic>
+     &lt;name>HelloWorld&lt;/name>
+     &lt;create>yes&lt;/create>
+     &lt;read>read_write&lt;/read>
+    &lt;/topic>
+   &lt;/domain>
+  &lt;/participant>
+ &lt;/security>
+&lt;/dds></codeblock></p>
+  <p>Note that there is still a need for both a valid certificate and a corresponding valid private key.</p>
+  <p>To start up the dcps test program with security enabled, the following command line could then
+   be used:</p>
+  <p><codeblock>./dds -k private_key.pem -c certificate.pem -i 7 -vwp</codeblock></p>
+ </conbody>
+</concept>

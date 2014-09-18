@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_4fy_jms_wf">
+ <title>Domain data</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>There are three commands for displaying domain data:</p>
+  <p>
+   <ul id="ul_4tt_4ms_wf">
+    <li>The <cmdname>sdomain</cmdname> command is the most versatile, but requires some
+     arguments.</li>
+    <li>The <cmdname>sdisc</cmdname> and <cmdname>sdisca</cmdname> commands don't expect arguments.
+     The <cmdname>sdisc</cmdname> command shows minimal info, the <cmdname>sdisca</cmdname> command
+     shows most available info.</li>
+   </ul>
+  </p>
+  <p>The sdomain command accepts 3 arguments:</p>
+  <p>
+   <ul id="ul_ygz_zms_wf">
+    <li>The domain identifier.</li>
+    <li>The local information to display as a hexadecimal bitmap.</li>
+    <li>The discovered information to display as a hexadecimal bitmap.</li>
+   </ul>
+  </p>
+  <p>The bitmap has following values:</p>
+  <p>
+   <table frame="all" id="table_vp3_gns_wf">
+    <title>Domain Information bitmap flags</title>
+    <tgroup cols="2">
+     <colspec colname="c1" colnum="1" colwidth="1*"/>
+     <colspec colname="c2" colnum="2" colwidth="5.9*"/>
+     <thead>
+      <row>
+       <entry>Flag</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>1</entry>
+       <entry>Include Locators</entry>
+      </row>
+      <row>
+       <entry>2</entry>
+       <entry>Include Builtin endpoints</entry>
+      </row>
+      <row>
+       <entry>4</entry>
+       <entry>Include Types.</entry>
+      </row>
+      <row>
+       <entry>8</entry>
+       <entry>Include Topics.</entry>
+      </row>
+      <row>
+       <entry>16</entry>
+       <entry>Include Guard records.</entry>
+      </row>
+      <row>
+       <entry>32</entry>
+       <entry>Include Peer participants.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+  <p>Some examples without security enabled, using domain id 1:</p>
+  <screen scale="80">>sdisc
+Domain 1 (pid=10): {1}
+    GUID prefix: 92767f10:010a6e9e:03e80000
+    RTPS Protocol version: v2.1
+    Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+    Technicolor DDS version: 4.0-0, Forward: 0
+    SecureTransport: none
+    Authorisation: Authenticated
+    Entity name: Technicolor Shapes
+    Flags: Enabled
+    Type: C
+    Meta Unicast: 
+        UDP:10.0.0.29:7680(3) {MD,UC} H:3
+    Meta Multicast: 
+        UDP:239.255.0.1:7650(4) {MD,MC} H:4
+    Default Unicast: 
+        UDP:10.0.0.29:7681(1) {UD,UC} H:1
+    Default Multicast: 
+        UDP:239.255.0.1:7651(2) {UD,MC} H:2
+    Manual Liveliness: 0
+    Lease duration: 50.000000000s
+    Endpoints: 11 entries (6 readers, 5 writers).
+    Security: level=Unclassified, access=any, RTPS=clear
+    Resend period: 10.000000000s
+    Destination Locators: 
+        UDP:239.255.0.1:7650(4) {MD,MC} H:4
+        TCP:239.255.0.1:7650 {MD,MC}
+    Discovered participants:
+      Peer #0: {20} - Local activity: 3.07s
+        GUID prefix: 92767f10:01086e8c:03e80000
+        RTPS Protocol version: v2.1
+        Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+        Technicolor DDS version: 4.0-0, Forward: 0
+        SecureTransport: remote: DDSSEC, local: DDSSEC
+        Authorisation: Authenticated
+        Entity name: Technicolor Shapes
+        Meta Unicast: 
+            UDP:10.0.0.29:7676 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7676 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7676 {MD,UC}
+        Meta Multicast: 
+            UDP:239.255.0.1:7650(4) {MD,MC} H:4
+            UDPv6:ff03::80:7650 {MD,MC}
+        Default Unicast: 
+            UDP:10.0.0.29:7677 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7677 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7677 {UD,UC}
+        Default Multicast: 
+            UDP:239.255.0.1:7651(2) {UD,MC} H:2
+            UDPv6:ff03::80:7651 {UD,MC}
+        Manual Liveliness: 0
+        Lease duration: 50.000000000s
+        Endpoints: 9 entries (5 readers, 4 writers).
+        Source: 
+            UDP:10.0.0.29:7676 {MD,UC}
+        Timer = 46.24s
+      Peer #1: {27} - Local activity: 3.07s
+        GUID prefix: 92767f10:01096e8f:03e80000
+        RTPS Protocol version: v2.1
+        Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+        Technicolor DDS version: 4.0-0, Forward: 0
+        SecureTransport: remote: DDSSEC, local: DDSSEC
+        Authorisation: Authenticated
+        Entity name: Technicolor Shapes
+        Meta Unicast: 
+            UDP:10.0.0.29:7678 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7678 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7678 {MD,UC}
+        Meta Multicast: 
+            UDP:239.255.0.1:7650(4) {MD,MC} H:4
+            UDPv6:ff03::80:7650 {MD,MC}
+        Default Unicast: 
+            UDP:10.0.0.29:7679 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7679 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7679 {UD,UC}
+        Default Multicast: 
+            UDP:239.255.0.1:7651(2) {UD,MC} H:2
+            UDPv6:ff03::80:7651 {UD,MC}
+        Manual Liveliness: 0
+        Lease duration: 50.000000000s
+        Endpoints: 8 entries (4 readers, 4 writers).
+        Source: 
+            UDP:10.0.0.29:7678 {MD,UC}
+        Timer = 46.24s
+
+>sdisca
+Domain 1 (pid=10): {1}
+    GUID prefix: 92767f10:010a6e9e:03e80000
+    RTPS Protocol version: v2.1
+    Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+    Technicolor DDS version: 4.0-0, Forward: 0
+    SecureTransport: none
+    Authorisation: Authenticated
+    Entity name: Technicolor Shapes
+    Flags: Enabled
+    Type: C
+    Meta Unicast: 
+        UDP:10.0.0.29:7680(3) {MD,UC} H:3
+    Meta Multicast: 
+        UDP:239.255.0.1:7650(4) {MD,MC} H:4
+    Default Unicast: 
+        UDP:10.0.0.29:7681(1) {UD,UC} H:1
+    Default Multicast: 
+        UDP:239.255.0.1:7651(2) {UD,MC} H:2
+    Manual Liveliness: 0
+    Lease duration: 50.000000000s
+    Endpoints: 11 entries (6 readers, 5 writers).
+        000001-7, {36}, InlineQoS: No, Reader, Square/ShapeType
+        000002-7, {38}, InlineQoS: No, Reader, Triangle/ShapeType
+        000003-2, {40}, InlineQoS: No, Writer, Square/ShapeType
+    Topics: 
+        BuiltinParticipantMessageReader/ParticipantMessageData 
+        BuiltinParticipantMessageWriter/ParticipantMessageData 
+        SEDPbuiltinPublicationsReader/PublicationBuiltinTopicData 
+        SEDPbuiltinPublicationsWriter/PublicationBuiltinTopicData 
+        SEDPbuiltinSubscriptionsReader/SubscriptionBuiltinTopicData 
+        SEDPbuiltinSubscriptionsWriter/SubscriptionBuiltinTopicData 
+        SPDPbuiltinParticipantReader/ParticipantBuiltinTopicData 
+        SPDPbuiltinParticipantWriter/ParticipantBuiltinTopicData 
+        Square/ShapeType Triangle/ShapeType 
+    Security: level=Unclassified, access=any, RTPS=clear
+    Resend period: 10.000000000s
+    Destination Locators: 
+        UDP:239.255.0.1:7650(4) {MD,MC} H:4
+        TCP:239.255.0.1:7650 {MD,MC}
+    Discovered participants:
+      Peer #0: {20} - Local activity: 3.02s
+        GUID prefix: 92767f10:01086e8c:03e80000
+        RTPS Protocol version: v2.1
+        Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+        Technicolor DDS version: 4.0-0, Forward: 0
+        SecureTransport: remote: DDSSEC, local: DDSSEC
+        Authorisation: Authenticated
+        Entity name: Technicolor Shapes
+        Meta Unicast: 
+            UDP:10.0.0.29:7676 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7676 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7676 {MD,UC}
+        Meta Multicast: 
+            UDP:239.255.0.1:7650(4) {MD,MC} H:4
+            UDPv6:ff03::80:7650 {MD,MC}
+        Default Unicast: 
+            UDP:10.0.0.29:7677 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7677 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7677 {UD,UC}
+        Default Multicast: 
+            UDP:239.255.0.1:7651(2) {UD,MC} H:2
+            UDPv6:ff03::80:7651 {UD,MC}
+        Manual Liveliness: 0
+        Lease duration: 50.000000000s
+        Endpoints: 9 entries (5 readers, 4 writers).
+            000001-7, {43}, InlineQoS: No, Reader, Square/ShapeType
+            000002-7, {44}, InlineQoS: No, Reader, Triangle/ShapeType
+            000003-2, {45}, InlineQoS: No, Writer, Triangle/ShapeType
+        Topics: 
+            Square/ShapeType Triangle/ShapeType 
+        Source: 
+            UDP:10.0.0.29:7676 {MD,UC}
+        Timer = 46.76s
+      Peer #1: {27} - Local activity: 3.02s
+        GUID prefix: 92767f10:01096e8f:03e80000
+        RTPS Protocol version: v2.1
+        Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+        Technicolor DDS version: 4.0-0, Forward: 0
+        SecureTransport: remote: DDSSEC, local: DDSSEC
+        Authorisation: Authenticated
+        Entity name: Technicolor Shapes
+        Meta Unicast: 
+            UDP:10.0.0.29:7678 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7678 {MD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7678 {MD,UC}
+        Meta Multicast: 
+            UDP:239.255.0.1:7650(4) {MD,MC} H:4
+            UDPv6:ff03::80:7650 {MD,MC}
+        Default Unicast: 
+            UDP:10.0.0.29:7679 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:7679 {UD,UC}
+            UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:7679 {UD,UC}
+        Default Multicast: 
+            UDP:239.255.0.1:7651(2) {UD,MC} H:2
+            UDPv6:ff03::80:7651 {UD,MC}
+        Manual Liveliness: 0
+        Lease duration: 50.000000000s
+        Endpoints: 8 entries (4 readers, 4 writers).
+            000001-2, {41}, InlineQoS: No, Writer, Square/ShapeType
+            000002-7, {42}, InlineQoS: No, Reader, Square/ShapeType
+        Topics: 
+            Square/ShapeType 
+        Source: 
+            UDP:10.0.0.29:7678 {MD,UC}
+        Timer = 46.76s</screen>
+  <note>Instance handles are displayed as {n}, where n is a decimal number. This number can be
+   referenced when using other commands such as <cmdname>seqos</cmdname> and
+    <cmdname>sdcache</cmdname> (see further).</note>
+  <p>As can be seen in this example, the shapes program has discovered two remote participants, with
+   the first having a square writer and a square reader, and the other having both square and
+   triangle readers and a triangle writer.</p>
+  <p>Another example showing the two DCPS test programs with security enabled and connected over
+            TLS/TCP:</p>
+  <p><screen scale="80">>sdisca
+Domain 7 (pid=7): {1}
+    GUID prefix: 1752a037:2c14ee02:1f1980b8
+    RTPS Protocol version: v2.1
+    Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+    Technicolor DDS version: 4.0-0, Forward: 0
+    SecureTransport: remote: DTLS+TLS+DDSSEC, local: DTLS+TLS+DDSSEC
+    Authorisation: Authenticated
+    Identity tokens:
+        Auth:DTLS-Name:
+            4443505320546573742070726f6772616d00
+        DDS:Auth:X.509-PEM-SHA256:
+            e860bfff08c8ea17172adc7bcb2e6672cc1ddf4ab703074e8f4f933b1fb7976a
+        Qeo:Auth:X.509-PEM-SHA256:
+            e860bfff08c8ea17172adc7bcb2e6672cc1ddf4ab703074e8f4f933b1fb7976a
+    Permission tokens:
+        Access:DTLS-Name-MD5:
+            ce9423c1697e44dc749b6249209a5a27
+        DDS:Access:PKI-Signed-XML-Permissions-SHA256:
+            3e5fd7cf259ff0282a998286549ed44cc3f2a991412f9d804dfd477103ff3134
+        Qeo:Access:PKI-Signed-Policy-SHA256:
+            3e5fd7cf259ff0282a998286549ed44cc3f2a991412f9d804dfd477103ff3134
+    Entity name: Technicolor DCPS Tester
+    Flags: NoMCast, Enabled
+    Type: C
+    Meta Unicast: 
+        UDP:10.0.0.29:9174(8) {MD,UC} H:8
+        UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:9174(9) {MD,UC} H:9
+        UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:9174(10) {MD,UC} H:10
+        TCP:10.0.0.29:9174(11) {MD,UC} H:11
+    Meta Multicast: 
+        UDP:239.255.0.1:9150(12) {MD,MC} H:12
+        UDPv6:ff03::80:9150(13) {MD,MC} H:13
+    Default Unicast: 
+        UDP:10.0.0.29:9175(1) {UD,UC} H:1
+        UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:9175(2) {UD,UC} H:2
+        UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:9175(3) {UD,UC} H:3
+        TCP:10.0.0.29:9175(4) {UD,UC} H:4
+    Default Multicast: 
+        UDP:239.255.0.1:9151(5) {UD,MC} H:5
+        UDPv6:ff03::80:9151(6) {UD,MC} H:6
+    Secure Tunnel: 
+        UDP:10.0.0.29:4635-DTLS(S)(14) {UD,MD,UC,E,S} H:14 DTLS
+        UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:4635-DTLS(S)(15) {UD,MD,UC,E,S} H:15 DTLS
+        UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:4635-DTLS(S)(16) {UD,MD,UC,E,S} H:16 DTLS
+    Manual Liveliness: 0
+    Lease duration: 50.000000000s
+    Endpoints: 22 entries (11 readers, 11 writers).
+        000001-2, {46}, InlineQoS: No, Writer, HelloWorld/HelloWorldData
+        000002-7, {48}, InlineQoS: No, Reader, HelloWorld/HelloWorldData
+    Topics: 
+        BuiltinParticipantMessageReader/ParticipantMessageData 
+        BuiltinParticipantMessageSecureReader/ParticipantMessageData 
+        BuiltinParticipantMessageSecureWriter/ParticipantMessageData 
+        BuiltinParticipantMessageWriter/ParticipantMessageData 
+        BuiltinParticipantStatelessMessageReader/ParticipantStatelessMessage 
+        BuiltinParticipantStatelessMessageWriter/ParticipantStatelessMessage 
+        BuiltinParticipantVolatileMessageSecureReader/ParticipantVolatileSecureMessage 
+        BuiltinParticipantVolatileMessageSecureWriter/ParticipantVolatileSecureMessage 
+        HelloWorld/HelloWorldData 
+        QeobuiltinPolicyStateReader/PolicyUpdaterMessageData 
+        QeobuiltinPolicyStateWriter/PolicyUpdaterMessageData 
+        SEDPbuiltinPublicationsReader/PublicationBuiltinTopicData 
+        SEDPbuiltinPublicationsSecureReader/PublicationBuiltinTopicDataSecure 
+        SEDPbuiltinPublicationsSecureWriter/PublicationBuiltinTopicDataSecure 
+        SEDPbuiltinPublicationsWriter/PublicationBuiltinTopicData 
+        SEDPbuiltinSubscriptionsReader/SubscriptionBuiltinTopicData 
+        SEDPbuiltinSubscriptionsSecureReader/SubscriptionBuiltinTopicDataSecure 
+        SEDPbuiltinSubscriptionsSecureWriter/SubscriptionBuiltinTopicDataSecure 
+        SEDPbuiltinSubscriptionsWriter/SubscriptionBuiltinTopicData 
+        SPDPbuiltinParticipantReader/ParticipantBuiltinTopicDataSecure 
+        SPDPbuiltinParticipantWriter/ParticipantBuiltinTopicDataSecure 
+    Security: level=Secret, access=enforce, RTPS=clear
+    Resend period: 10.000000000s
+    Destination Locators: 
+        UDP:239.255.0.1:9150(12) {MD,MC} H:12
+        UDPv6:ff03::80:9150(13) {MD,MC} H:13
+        TCP:239.255.0.1:9150-(null)(C)(7) {MD,MC,E} H:7
+    Discovered participants:
+      Peer #0: {49}
+        GUID prefix: 1752a037:2c14ac84:e9ddb9c7
+        RTPS Protocol version: v2.1
+        Vendor Id: 1.14 - Technicolor, Inc. - Qeo
+        Technicolor DDS version: 4.0-0, Forward: 0
+        SecureTransport: remote: DTLS+TLS+DDSSEC, local: DTLS+TLS+DDSSEC
+        Authorisation: Authenticated
+        Identity tokens:
+            Qeo:Auth:X.509-PEM-SHA256 (*2):
+                e860bfff08c8ea17172adc7bcb2e6672cc1ddf4ab703074e8f4f933b1fb7976a
+            DDS:Auth:X.509-PEM-SHA256:
+                e860bfff08c8ea17172adc7bcb2e6672cc1ddf4ab703074e8f4f933b1fb7976a
+            Auth:DTLS-Name:
+                4443505320546573742070726f6772616d00
+        Permission tokens:
+            Qeo:Access:PKI-Signed-Policy-SHA256 (*2):
+                3e5fd7cf259ff0282a998286549ed44cc3f2a991412f9d804dfd477103ff3134
+            DDS:Access:PKI-Signed-XML-Permissions-SHA256:
+                3e5fd7cf259ff0282a998286549ed44cc3f2a991412f9d804dfd477103ff3134
+            Access:DTLS-Name-MD5:
+                ce9423c1697e44dc749b6249209a5a27
+        Entity name: Technicolor DCPS Tester
+        Flags: NoMCast
+        Meta Unicast: 
+            TCP:10.0.0.29:9166(19) {MD,UC} H:19
+        Default Unicast: 
+            TCP:10.0.0.29:9167(18) {UD,UC} H:18
+        Secure Tunnel: 
+            TCP:10.0.0.29:5400-TLS(S) {UD,MD,UC,E,S} TLS
+        Manual Liveliness: 0
+        Lease duration: 50.000000000s
+        Endpoints: 18 entries (9 readers, 9 writers).
+            000001-2, {67}, InlineQoS: No, Writer, HelloWorld/HelloWorldData
+            000002-7, {66}, InlineQoS: No, Reader, HelloWorld/HelloWorldData
+        Topics: 
+            HelloWorld/HelloWorldData 
+        Source: 
+            TCP:239.255.0.1:9150-(null)(C)(7) {MD,MC,E} H:7
+        Timer = 46.62s</screen>
+      <note>The output shows that there are 3 sets of security mechanisms that could be used (3
+                security token types). The first two are the Qeo security plugin and the standard
+                DDS security plugin, both using native DDS security.  The third uses transport
+                security over DTLS/UDP. Since both peers support the Qeo handshake in combination
+                with native DDS security, that one is selected.</note></p>
+ </conbody>
+</concept>

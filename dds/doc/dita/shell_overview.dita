@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_jsd_gfs_wf">
+ <title>Introduction</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The DDS debug shell can be activated in a number of ways and allows users to examine/verify the
+   internal workings of the Technicolor DDS middleware component.</p>
+  <p>It can be started, either directly from a specific application program linked to the
+   Technicolor DDS middleware, or remotely via the DDS Debug server over a Telnet session. Both ways
+   to connect to the shell result in approximately the same command interface with only minor
+   differences.</p>
+ </conbody>
+</concept>

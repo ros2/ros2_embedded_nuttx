@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_c1b_frv_sf">
+ <title>IPv4 interface configuration parameters</title>
+ <shortdesc></shortdesc>
+ <conbody>
+    <p>The general behavior of Technicolor DDS as to the use of IP interface addresses is very
+   simple. On startup, all active IP interfaces are queried, and if a valid IP address is found,
+   this will be used. If no valid IP address is found, Technicolor DDS will wait until a valid IP
+   address is assigned.<fn>If addresses change (due to a DHCP lease being lost or due to some
+    explicit configuration changes), connectivity might be temporarily lost. However, once the IP
+    interfaces are stable again, data transfers will resume. Technicolor DDS monitors IP address
+    changes and automatically copes with changes when they occur.</fn><fn>Only IPv4 addresses can be
+    specified currently with these environment variables. Since public IPv6 addresses are not
+    assigned by default to an IPv6 connection, and since Link-Local IPv6 addresses (which are
+    generated automatically at startup) are not picked up by Technicolor DDS (see IPV6_SCOPE), this
+    is not seen as a problem. When there is a clearly perceived need for IPv6 address selection,
+    support for this might still be added by introducing new environment variables.</fn></p>
+    <p>In practice, this means that all IP addresses on a device will be used, even some that are
+     really not meant to be used (such as <i>vmWare</i> addresses when a <i>vmWare</i> player is
+     operating in bridged mode). This makes Technicolor DDS extremely open to the IP-network for all
+     DDS domains, which might not always be a good idea from a security point of view.</p>
+    <p>To alleviate these issues somewhat, there are two ways to cope with this.</p>
+    <p>Firstly, it is possible to configure Technicolor DDS at build time to always filter away
+      <i>vmWare</i> addresses. Since this is only useful in environments where we know that the
+      <i>vmWare</i> addresses are effectively an issue, and is even wrong when <i>vmWare</i> is used
+     in other modes (routing with or without NAT), this is rather crude and somewhat of a hack.</p>
+    <p>Another, second, mechanism was therefore introduced which is a lot more powerful and which
+   allows the user to specify allowed addresses with a high degree of freedom.</p>
+    <p>This advanced mechanism is based on two parameters: <b>IP_ADDRESS</b> and <b>IP_NETWORK</b>,
+   which together allow the user to create address and network blacklists as well as whitelists.</p>
+  <table frame="all" id="table_hzr_4rv_sf">
+   <title>IP addresses parameter</title>
+   <tgroup cols="2">
+    <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+    <colspec colname="c2" colnum="2" colwidth="2.69*" colsep="1" rowsep="1"/>
+    <thead>
+     <row>
+      <entry>Parameter name</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>IP_ADDRESS</entry>
+      <entry>This variable can be used to specify IP addresses which may (whitelist) or may not
+       (blacklist) be used. Multiple addresses can be specified, and addresses can even differ per
+       DDS domain. </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <note>This is a filter specification which is applied to the found IP interface addresses in the
+   system. It can not be used to override existing network addresses.</note>
+  <p> The EBNF syntax of the <b>IP_ADDRESS</b> parameter is as follows:</p>
+    <codeblock>  &lt;tdds_addr_par> = "IP_ADDRESS=" &lt;address_spec> {';' &lt;address_spec> }
+  &lt;address_spec> = [&lt;not>] [&lt;domain_id> ':'] &lt;ipv4addr>
+  &lt;not> = '~' | '^'
+  &lt;domain_id> = &lt;number>                           -- 0..230
+  &lt;ipv4addr> = &lt;ipv4octet> { '.' &lt;ipv4octet> }     -– 2..4 IPv4 octets
+  &lt;ipv4octet> = &lt;number>                           -– 0..255</codeblock>
+   <note>If less than 4
+     octets are specified, 0's will be inserted between the last octet and the octet before that one
+     in order to get to a length of 4 octets.  Example: 10.5 is converted to 10.0.0.5.</note>
+    <p><b>Examples:</b></p>
+    <p><b>export TDDS_IP_ADDRESS=10.100;120.10.6.90</b></p>
+    <p>Only addresses 10.0.0.100 and 120.10.6.90 may be used by Technicolor DDS.</p>
+    <p><b>export TDDS_IP_ADDRESS=100:10.1.0.200</b></p>
+    <p>For domain 100, only address 10.1.0.200 may be used. Other domains can use any address.</p>
+    <p><b>export TDDS_IP_ADDRESS=^10:10.5;10.5</b></p>
+    <p>For domain 10, all addresses except 10.0.0.5 may be used. Other domains may only use
+     10.0.0.5.</p>
+  <table frame="all" id="table_jqn_1sv_sf">
+   <title>IP networks parameter</title>
+   <tgroup cols="2">
+    <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+    <colspec colname="c2" colnum="2" colwidth="2.69*" rowsep="1" colsep="1"/>
+    <thead>
+     <row>
+      <entry>Parameter name</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>IP_NETWORK</entry>
+      <entry>This variable can be used to define IP networks which may or may not be used. Similar
+       to IP_ADDRESS, multiple specifications may be given, and the specification may differ per DDS
+       domain. </entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+   <p> The EBNF syntax of the <b>IP_NETWORK</b> parameter is as follows:</p>
+  <codeblock>  &lt;tdds_net_par> = IP_NETWORK=&lt;network_spec> {';' &lt;network_spec> }
+  &lt;network_spec> = [&lt;not>] [&lt;domain_id> ':'] &lt;ipv4net>
+  &lt;ipv4net> = &lt;ipv4addr> |                 -- A single IPv4 address
+                 &lt;ipv4addr> '/' &lt;width> |  -- A masked IPv4 subnet.
+                 &lt;ipv4addr> '+' &lt;count>    -- Range of IPv4 addresses.
+  &lt;width> = &lt;number>                       -- 4..31 mask bits.
+  &lt;count> = &lt;number>                       -- 1..64K-1 extra addresses.</codeblock>
+   <note>Contrary to IPv4 address
+     specifications, specifying less than 4 octets in a network address will result in 0-byte padding
+     after the last octet to get a length of 4 octets. Example: 10.5 is converted to
+     10.5.0.0.</note>
+    <p><b>Examples:</b></p>
+    <p><b>export TDDS_IP_NETWORK=10/8</b></p>
+    <p>Only addresses in the range 10.0.0.0 to 10.255.255.255 may be used.</p>
+    <p><b>export TDDS_IP_NETWORK=10/8;~10.1/16;50:100.10/14;10.1.1.20+24</b></p>
+    <p>All addresses in the range 10.0.0.0 to 10.255.255.255 that are not in the range 10.1.0.0 to
+     10.1.255.255, with the exception of 10.1.1.20 to 10.1.1.44 may be used for all domains. In
+     addition, domain 50 may use addresses in the range 100.10.0.0 to 100.13.255.255.</p>
+    <p>Both <b>IP_ADDRESS</b> and <b>IP_NETWORK</b> can be used simultaneously, giving the
+   opportunity to the user to specify both addresses and network ranges.</p>
+    <p>If none of these environment variables is specified, all valid interface addresses that are
+     detected will be used.</p>
+    <p>The existence of address and/or network specification environment variables implies that
+     filtering is used on all the detected interface IP addresses. This filtering uses a matching
+     algorithm that operates in the following manner:</p>
+    <ul id="ul_ktr_3rv_sf">
+     <li>
+      <p>If no match is found with any address or network specifications, the address will not be
+       used.</p>
+     </li>
+     <li>
+      <p>If a single match occurs, the address or network specification will either accept the
+     address or reject it, depending on the presence of the &lt;not> operator. If &lt;not> was given
+     in the specification, the address is rejected, otherwise it is accepted.</p>
+     </li>
+     <li>
+      <p>If multiple matches occur, the first valid match with the longest prefix mask will be
+       used.</p>
+     </li>
+    </ul>
+    <p>Both blacklisting (using the &lt;not> operator) and whitelisting (listing usable
+   addresses/networks) can be used simultaneously as described above.</p>
+ </conbody>
+</concept>

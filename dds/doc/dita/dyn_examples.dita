@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_3h5_yvl_kh">
+ <title>Using Dynamic types</title>
+ <conbody>
+  <section> <title>Dynamic Shapes type.</title> <p>The same Shapes type as defined before, can be constructed using the Extended types API <fn>The
+                    Extended types API is available when Technicolor DDS has been built with the
+                    -DXTYPES_USED build flag.</fn> as demonstrated in the following code
+                    samples<fn>In order not to clutter the code with error handling, the following
+                    examples don't properly cleanup all the resources in case errors should occur.
+                    Actual error handling when using dynamic types in production code should really
+                    be done somewhat more rigidly.</fn>:</p>
+   <codeblock>#include "dds/dds_xtypes.h"
+
+DDS_ReturnCode_t create_dyn_shape (void)
+{
+    DDS_TypeDescriptor       *desc;
+    DDS_MemberDescriptor     *md;
+    DDS_DynamicTypeMember    *dtm;
+    DDS_AnnotationDescriptor *key_ad;
+    DDS_DynamicTypeBuilder   sb, ssb;
+    DDS_DynamicType          s, ss;
+
+    desc = DDS_TypeDescriptor__alloc ();
+    if (!desc)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    md = DDS_MemberDescriptor__alloc ();
+    if (!md)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    key_ad = DDS_AnnotationDescriptor__alloc ();
+    if (!key_ad)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    key_ad->type = DDS_DynamicTypeBuilderFactory_get_builtin_annotation ("Key");
+    if (!key_ad->type)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    desc->kind = DDS_STRUCTURE_TYPE;
+    desc->name = "ShapeType";
+    sb = DDS_DynamicTypeBuilderFactory_create_type (desc);
+    if (!sb)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    ssb = DDS_DynamicTypeBuilderFactory_create_string_type (128);
+    if (!ssb)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    ss = DDS_DynamicTypeBuilder_build (ssb);
+    if (!ss)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    md->name = "color";
+    md->index = md->id = 0;
+    md->type = ss;
+    md->default_value = NULL;
+    if (!md->type)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    error = DDS_DynamicTypeBuilder_add_member (sb, md);
+    if (error)
+        return (error);
+
+    dtm = DDS_DynamicTypeMember__alloc ();
+    if (!dtm)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    error = DDS_DynamicTypeBuilder_get_member (sb, dtm, 0);
+    if (error)
+        return (error);
+
+    error = DDS_DynamicTypeMember_apply_annotation (dtm, key_ad);
+    if (error)
+        return (error);
+
+    free (dtm->descriptor.name);
+    dtm->descriptor.name = NULL;
+    DDS_DynamicTypeBuilderFactory_delete_type (dtm->descriptor.type);
+    dtm->descriptor.type = NULL;
+    md->name = "x";
+    md->index = md->id = 1;
+    md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type
+                                                    (DDS_INT_32_TYPE);
+    if (!md->type)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    error = DDS_DynamicTypeBuilder_add_member (sb, md);
+    if (error)
+        return (error);
+
+    md->name = "y";
+    md->index = md->id = 2;
+    md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type
+                                                    (DDS_INT_32_TYPE);
+    if (!md->type)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    error = DDS_DynamicTypeBuilder_add_member (sb, md);
+    if (error)
+        return (error);
+
+    md->name = "shapesize";
+    md->index = md->id = 3;
+    md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type
+                                                    (DDS_INT_32_TYPE);
+    if (!md->type)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    error = DDS_DynamicTypeBuilder_add_member (sb, md);
+    if (error)
+        return (error);
+
+    s = DDS_DynamicTypeBuilder_build (sb);
+    if (!s)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    DDS_DynamicTypeBuilderFactory_delete_type (ssb);
+    DDS_DynamicTypeBuilderFactory_delete_type (sb);
+    dtype = s;
+    shape_ts = DDS_DynamicTypeSupport_create_type_support (s);
+    DDS_DynamicTypeBuilderFactory_delete_type (ss);
+    DDS_TypeDescriptor__free (desc);
+    DDS_MemberDescriptor__free (md);
+    DDS_AnnotationDescriptor__free (key_ad);
+    DDS_DynamicTypeMember__free (dtm);
+    return (DDS_RETCODE_OK);
+}</codeblock>
+   <p>A Shapes dynamic data sample can then be constructed and written as shown in the following code fragment<fn>The
+    DDS_DynamicData_get_member_id_by_name() function calls are not really required since the id value is
+   fixed when the type is created and is typically known in the program.</fn>:</p>
+   <codeblock>    DDS_DynamicData dd;
+
+    dd = DDS_DynamicDataFactory_create_data (dtype);
+    if (!dd)
+        fatal_printf ("Can't create dynamic data!");
+
+    id = DDS_DynamicData_get_member_id_by_name (dd, "color");
+    rc = DDS_DynamicData_set_string_value (dd, id, "RED");
+    if (rc)
+        fatal_printf ("Can't add data member(color)!");
+
+    id = DDS_DynamicData_get_member_id_by_name (dd, "x");
+    rc = DDS_DynamicData_set_int32_value (dd, id, 10);
+    if (rc)
+				    fatal_printf ("Can't add data member(x)!");
+
+    id = DDS_DynamicData_get_member_id_by_name (dd, "y");
+    rc = DDS_DynamicData_set_int32_value (dd, id, 60);
+    if (rc)
+        fatal_printf ("Can't add data member(y)!");
+
+    id = DDS_DynamicData_get_member_id_by_name (dd, "shapesize");
+    rc = DDS_DynamicData_set_int32_value (dd, id, 25);
+    if (rc)
+        fatal_printf ("Can't add data member(shapesize)!");
+
+    rc = DDS_DynamicDataWriter_write (w, dd, handle);</codeblock>
+   <p>When a dynamic data is received, its member fields can be retrieved as shown in the following code:</p>
+   <codeblock>    error = DDS_DynamicDataReader_take (dr, &amp;sample, &amp;info, 1, ss, vs, is);
+    if (error) {
+        if (error != DDS_RETCODE_NO_DATA)
+            printf ("Unable to read: error = %s!\r\n", DDS_error (error));
+        return;
+    }
+    if (DDS_SEQ_LENGTH (info)) {
+        inf = DDS_SEQ_ITEM (info, 0);
+        if (inf->valid_data &amp;&amp; dyn_data) {
+            dd = DDS_SEQ_ITEM (sample, 0);
+            if (!dd)
+                fatal_printf ("Empty dynamic sample!");
+
+            id = DDS_DynamicData_get_member_id_by_name (dd, "color");
+            error = DDS_DynamicData_get_string_value (dd, color, id);
+            if (error)
+                fatal_printf ("Can't get data member(color)!");
+
+            id = DDS_DynamicData_get_member_id_by_name (dd, "x");
+            error = DDS_DynamicData_get_int32_value (dd, &amp;x, id);
+            if (error)
+                fatal_printf ("Can't get data member(x)!");
+
+            id = DDS_DynamicData_get_member_id_by_name (dd, "y");
+            error = DDS_DynamicData_get_int32_value (dd, &amp;y, id);
+            if (error)
+                fatal_printf ("Can't get data member(y)!");
+
+            id = DDS_DynamicData_get_member_id_by_name (dd, "shapesize");
+            error = DDS_DynamicData_get_int32_value (dd, &amp;shapesize, id);
+            if (error)
+                fatal_printf ("Can't get data member(shapesize)!");
+
+            /* ... do something with the sample (color/x/y/shapesize) ... */
+        }
+    }</codeblock>
+  </section>
+  <section>
+   <title>Dynamic sparse data type:</title>
+   <p>The sparse type with the following IDL specification:</p>
+   <codeblock>//@Extensibility(MUTABLE_EXTENSIBILITY)
+struct struct2m {
+    uint16_t u16;   //@ID(10) //@Key
+    int16_t i16;    //@ID(20)
+    uint32_t u32;   //@Key
+    int32_t i32;    //@ID(50)
+    uint64_t u64;
+    int64_t i64;
+    float fl;
+    double d;
+    char ch;        //@ID(5) //@Key
+};</codeblock>
+   <p>can be constructed using the given C-code:</p>
+   <codeblock>#include "dds/dds_xtypes.h"
+
+#define ADD_FIELD(s,md,n,idx,i,t) md->name=n; md->index=idx; md->id=i;\
+         md->type=DDS_DynamicTypeBuilderFactory_get_primitive_type(t);\
+         fail_unless(md->type != NULL); \
+         rc = DDS_DynamicTypeBuilder_add_member (s,md); \
+         if (rc) return (rc)
+
+DDS_ReturnCode_t set_key_annotation (DDS_DynamicTypeBuilder b,
+                                     const char             *name)
+{
+    DDS_DynamicTypeMember           dtm;
+    DDS_ReturnCode_t                ret;
+    static DDS_AnnotationDescriptor ad = { NULL, };
+
+    if (!b &amp;&amp; ad.type) {
+        DDS_AnnotationDescriptor__clear (&amp;ad);
+        return (DDS_RETCODE_OK);
+    }
+    DDS_DynamicTypeMember__init (&amp;dtm);
+    if (!ad.type) {
+        ad.type = DDS_DynamicTypeBuilderFactory_get_builtin_annotation ("Key");
+        if (ad.type == NULL)
+            return (DDS_RETCODE_OUT_OF_RESOURCES);
+    }
+    ret = DDS_DynamicTypeBuilder_get_member_by_name (b, &amp;dtm, name);
+    if (ret)
+        return (ret);
+
+    ret = DDS_DynamicTypeMember_apply_annotation (&amp;dtm, &amp;ad);
+    if (ret)
+        return (ret);
+
+    free (dtm.descriptor.name);
+    dtm.descriptor.name = NULL;
+    DDS_DynamicTypeBuilderFactory_delete_type (dtm.descriptor.type);
+    dtm.descriptor.type = NULL;
+    return (DDS_RETCODE_OK);
+}
+
+DDS_ReturnCode_t set_id_annotation (DDS_DynamicTypeBuilder b,
+                                    const char             *name,
+                                    DDS_MemberId           id)
+{
+    DDS_DynamicTypeMember           dtm;
+    DDS_ReturnCode_t                ret;
+    unsigned                        n;
+    char                            buf [12];
+    static DDS_AnnotationDescriptor ad = { NULL, };
+
+    if (!b &amp;&amp; ad.type) {
+        DDS_AnnotationDescriptor__clear (&amp;ad);
+        return (DDS_RETCODE_OK);
+    }
+    DDS_DynamicTypeMember__init (&amp;dtm);
+    if (!ad.type) {
+        ad.type = DDS_DynamicTypeBuilderFactory_get_builtin_annotation ("ID");
+        if (!ad.type)
+            return (DDS_RETCODE_OUT_OF_RESOURCES);
+    }
+    n = snprintf (buf, sizeof (buf), "%u", id);
+    if (!n)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    ret = DDS_AnnotationDescriptor_set_value (&amp;ad, "value", buf);
+    if (ret)
+        return (ret);
+
+    ret = DDS_DynamicTypeBuilder_get_member_by_name (b, &amp;dtm, name);
+    if (ret)
+        return (ret);
+
+    ret = DDS_DynamicTypeMember_apply_annotation (&amp;dtm, &amp;ad);
+    if (ret)
+        return (ret);
+
+    free (dtm.descriptor.name);
+    dtm.descriptor.name = NULL;
+    DDS_DynamicTypeBuilderFactory_delete_type (dtm.descriptor.type);
+    dtm.descriptor.type = NULL;
+    return (DDS_RETCODE_OK);
+}
+
+DDS_ReturnCode_t set_ext_annotation (DDS_DynamicTypeBuilder b,
+                                     const char             *ext)
+{
+    DDS_ReturnCode_t                ret;
+    static DDS_AnnotationDescriptor ad = { NULL, };
+
+    if (!b &amp;&amp; ad.type) {
+        DDS_AnnotationDescriptor__clear (&amp;ad);
+        return (DDS_RETCODE_OK);
+    }
+    if (!ad.type) {
+        ad.type = DDS_DynamicTypeBuilderFactory_get_builtin_annotation
+                                                              ("Extensibility");
+        if (!ad.type)
+            return (DDS_RETCODE_OUT_OF_RESOURCES);
+    }
+    ret = DDS_AnnotationDescriptor_set_value (&amp;ad, "value", ext);
+    if (ret)
+        return (ret);
+
+    ret = DDS_DynamicTypeBuilder_apply_annotation (b, &amp;ad);
+    return (ret);
+}
+
+DDS_ReturnCode_t create_dyn_struct2m (void)
+{
+    DDS_TypeSupport        *ts;
+    DDS_DynamicTypeBuilder sb2;
+    DDS_DynamicType        s2;
+    DDS_TypeDescriptor     *desc;
+    DDS_MemberDescriptor   *md;
+    DDS_ReturnCode_t       rc;
+
+    /* 1. Create the type. */
+    desc = DDS_TypeDescriptor__alloc ();
+    if (!desc)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    desc->kind = DDS_STRUCTURE_TYPE;
+    desc->name = "dstruct2m";
+
+    sb2 = DDS_DynamicTypeBuilderFactory_create_type (desc);
+    if (!sb2)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    md = DDS_MemberDescriptor__alloc ();
+    if (!md)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    ADD_FIELD (sb2, md, "i16", 0, 99, DDS_INT_16_TYPE);
+    rc = set_id_annotation (sb2, "i16", 20);
+    if (rc) return (rc);
+
+    ADD_FIELD (sb2, md, "u32", 1, 21, DDS_UINT_32_TYPE);
+    rc = set_key_annotation (sb2, "u32");
+    if (rc) return (rc);
+
+    ADD_FIELD (sb2, md, "i32", 2, 100, DDS_INT_32_TYPE);
+    rc = set_id_annotation (sb2, "i32", 50);
+    if (rc) return (rc);
+
+    ADD_FIELD (sb2, md, "u16", 0, DDS_MEMBER_ID_INVALID, DDS_UINT_16_TYPE);
+    rc = set_id_annotation (sb2, "u16", 10);
+    if (rc) return (rc);
+
+    rc = set_key_annotation (sb2, "u16");
+    if (rc) return (rc);
+
+    ADD_FIELD (sb2, md, "u64", 5, 51, DDS_UINT_64_TYPE);
+    ADD_FIELD (sb2, md, "i64", 5, DDS_MEMBER_ID_INVALID, DDS_INT_64_TYPE);
+    ADD_FIELD (sb2, md, "fl",  6, 53, DDS_FLOAT_32_TYPE);
+    ADD_FIELD (sb2, md, "d",   7, 54, DDS_FLOAT_64_TYPE);
+    ADD_FIELD (sb2, md, "ch",  8, 55, DDS_CHAR_8_TYPE);
+    rc = set_id_annotation (sb2, "ch", 5);
+    if (rc) return (rc);
+
+    rc = set_ext_annotation (sb2, "MUTABLE_EXTENSIBILITY");
+    if (rc) return (rc);
+
+    s2 = DDS_DynamicTypeBuilder_build (sb2);
+    if (!s2) return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    DDS_DynamicTypeBuilderFactory_delete_type (sb2);
+
+    ts = DDS_DynamicTypeSupport_create_type_support (s2);
+    if (!ts) return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+    DDS_TypeDescriptor__free (desc);
+    DDS_MemberDescriptor__free (md);
+    return (DDS_RETCODE_OK):
+}</codeblock>
+   <p>A data sample of this type can then be constructed as follows:</p>
+   <codeblock>#define SET_FIELD(dd,id,type,v) rc=DDS_DynamicData_set_##type##_value (dd,id,v);\
+         if (rc) return (rc)
+
+DDS_ReturnCode_t write_sample(DDS_DynamicType s2,
+                              DDS_DataWriter  w,
+                              DDS_HANDLE      h)
+{
+    DDS_DynamicData        dd;
+    DDS_ReturnCode_t       rc;
+
+    dd = DDS_DynamicDataFactory_create_data (s2);
+    if (!dd)
+        return (DDS_RETCODE_OUT_OF_RESOURCES;
+
+   	SET_FIELD (dd, 50, int32, -5);
+   	SET_FIELD (dd, 10, uint16, 0xDEAD);
+	   SET_FIELD (dd, 20, int16, INT16_MIN);
+	   SET_FIELD (dd, 21, uint32, UINT32_MAX);
+	   SET_FIELD (dd, 52, int64, 100);
+	   SET_FIELD (dd, 53, float32, 0.5f);
+	   SET_FIELD (dd, 54, float64, 100e-5);
+	   SET_FIELD (dd, 5, char8, 'd');
+	   SET_FIELD (dd, 51, uint64, 5010000);
+
+    rc = DDS_DynamicDataWriter_write (w, dd, h);
+    return (rc);
+}</codeblock>
+  </section>
+ </conbody>
+</concept>

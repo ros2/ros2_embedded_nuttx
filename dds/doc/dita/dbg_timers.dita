@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_tdh_qgs_wf">
+ <title>Timers</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Using the <cmdname>stimer</cmdname> command shows the following information:</p><screen scale="70">>stimer
+DDS running for 116.56s
+# of timers started/stopped/active = 5387/2469/13
+# of timeouts = 2905, busy-locks = 0
+Now = 1351522, Timers: 
+	0x1992b40: time = 1351529 (0.07s), user = 26815056, tcbf = 0x406cab, name = 'P:Square(Yellow)'
+	0x1992cb0: time = 1351530 (0.08s), user = 26815424, tcbf = 0x406cab, name = 'P:Circle(Blue)'
+	0x196ccd0: time = 1351530 (0.08s), user = 26814800, tcbf = 0x406cab, name = 'P:Square(Red)'
+	0x753320: time = 1351571 (0.49s), user = 0, tcbf = 0x40c4f5, name = 'SharedMemory'
+	0x1977310: time = 1351944 (4.22s), user = 26777384, tcbf = 0x4a27f7, name = 'RTPS-Resend'
+	0x7f83bc001150: time = 1352011 (4.89s), user = 140203771564752, tcbf = 0x40782c, name = 'S:Square(MAGENTA)'
+	0x7f83bc0010c0: time = 1352017 (4.95s), user = 140203771563984, tcbf = 0x40782c, name = 'S:Square(GREEN)'
+	0x7f83bc000d70: time = 1352017 (4.95s), user = 140203771563136, tcbf = 0x40782c, name = 'S:Square(YELLOW)'
+	0x7f83bc001400: time = 1352018 (4.96s), user = 140203771565504, tcbf = 0x40782c, name = 'S:Circle(CYAN)'
+	0x7f83bc000f30: time = 1352018 (4.96s), user = 140203771563584, tcbf = 0x40782c, name = 'S:Circle(BLUE)'
+	0x7f83bc000a70: time = 1352018 (4.96s), user = 140203771562880, tcbf = 0x40782c, name = 'S:Square(RED)'
+	0x1984110: time = 1355946 (44.24s), user = 26754896, tcbf = 0x47f08b, name = 'DiscParticipant'
+	0x1983e18: time = 1355946 (44.24s), user = 26754136, tcbf = 0x47f08b, name = 'DiscParticipant'
+></screen>
+ </conbody>
+</concept>

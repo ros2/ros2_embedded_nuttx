@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_hcx_5kv_r4">
+    <title>TCP configuration parameters</title>
+    <body>
+      <p>The following parameters can be configured for RTPS over TCP:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_oyj_1lv_r4">
+          <title>TCP configuration parameters</title>
+          <tgroup cols="4">
+            <colspec colname="c1" colnum="1" colwidth="1.0*"/>
+            <colspec colname="c2" colnum="2" colwidth="1.0*"/>
+            <colspec colname="c3" colnum="3" colwidth="1.0*"/>
+            <colspec colname="c4" colnum="4" colwidth="1.0*"/>
+            <thead>
+              <row>
+                <entry>Parameter name</entry>
+                <entry>Description</entry>
+                <entry>Type</entry>
+                <entry>Default</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>TCP_MODE</entry>
+                <entry>Specifies whether UDP is enabled</entry>
+                <entry>Mode</entry>
+                <entry>enabled</entry>
+              </row>
+              <row>
+                <entry>TCP_PORT</entry>
+                <entry>TCP Server mode: server port.</entry>
+                <entry>Number</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>TCP_SERVER</entry>
+                <entry>TCP Client mode: server URL:port</entry>
+                <entry>String</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>TCP_SEC_PORT</entry>
+                <entry>TLS/TCP Server mode: server port</entry>
+                <entry>Number</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>TCP_SEC_SERVER</entry>
+                <entry>TLS/TCP Client mode: server URL:port</entry>
+                <entry>String</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>TCP_PUBLIC</entry>
+                <entry>Public TCP/IP address behind NAT-Firewall</entry>
+                <entry>String (IPv4 address[':'port])</entry>
+                <entry>If not defined, port is assumed to be 7400</entry>
+              </row>
+              <row>
+                <entry>TCP_PRIVATE</entry>
+                <entry>Allow to connect to private IP addresses for TCP connectivity.</entry>
+                <entry>Mode</entry>
+                <entry>Disabled</entry>
+              </row>
+              <row>
+                <entry>TCP_PB</entry>
+                <entry>RTPS Port base.</entry>
+                <entry>Number</entry>
+                <entry>7400</entry>
+              </row>
+              <row>
+                <entry>TCP_DG</entry>
+                <entry>RTPS DomainId Gain.</entry>
+                <entry>Number</entry>
+                <entry>250</entry>
+              </row>
+              <row>
+                <entry>TCP_PG</entry>
+                <entry>RTPS ParticipantId Gain.</entry>
+                <entry>Number</entry>
+                <entry>2</entry>
+              </row>
+              <row>
+                <entry>TCP_D0</entry>
+                <entry>RTPS D0 parameter</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>TCP_D1</entry>
+                <entry>RTPS D1 parameter</entry>
+                <entry>Number</entry>
+                <entry>10</entry>
+              </row>
+              <row>
+                <entry>TCP_D2</entry>
+                <entry>RTPS D2 parameter</entry>
+                <entry>Number</entry>
+                <entry>1</entry>
+              </row>
+              <row>
+                <entry>TCP_D3</entry>
+                <entry>RTPS D3 parameter</entry>
+                <entry>Number</entry>
+                <entry>11</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+      <p>To enable plain TCP server mode on a DDS application, it is sufficient to set the server
+        port on which the TCP server will listen:</p>
+      <p><b>export TDDS_TCP_PORT=7400</b></p>
+      <p>On the other DDS application that needs to communicate in TCP client mode to the first DDS
+        application, you only need to set the server URL and port:</p>
+      <p><b>export TDDS_TCP_SERVER=my-home.dynip.com:7400</b></p>
+      <p>It might be necessary to configure the home gateway for port forwarding through the
+        NAT-firewall, in order to enable reachability to the in-LAN TCP-server DDS application.</p>
+      <p>An alternative scenario is connectivity to a public DDS TCP server from within a local LAN
+        behind a NAT-firewall.</p>
+      <p>In this case it would be sufficient to enable the server on the public DDS host, and just
+        configure the local LAN DDS with the URL of the public DDS TCP server.  No port forwarding
+        needs to be enabled in this case, since all TCP connections are setup from the client to the
+        server.</p>
+      <p>In the Qeo case, there is already support for a forwarder in a LAN, using the TCP mechanism
+        to configure a TCP server on the forwarder, automatically punching a hole in the local
+        NAT-firewall, and publishing the TCP URL on a location server somewhere in the cloud.</p>
+      <p>This server can be a small always-on device, like a Raspberry Pi.  Qeo supports this.</p>
+    </body>
+  </topic>
+</dita>

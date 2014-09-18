@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_g3w_blg_vf">
+ <title>IDL to TSM converter</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The TSM type that is used in Technicolor DDS was not really intended to be hand-written by
+    users, although it is certainly possible to do so. It should really be seen as an intermediate
+    type representation that is typically generated using special-purpose tools.</p>
+   <p>The complete core middleware development framework allows users to specify application
+    components from an XML-definition file.  This file contains sufficient information on the data
+    types that will be used by applications.  TSMs are then typically generated from this XML file
+    using special core middleware tools.</p>
+   <p>In order to allow proper testing of the Technicolor DDS typecode framework, a need for a
+    standalone TSM generation tool was identified.</p>
+   <p>The choice of a source type definition language fell on IDL, since it is a standardized data
+    type mechanism that is source language independent, and using this would allow Technicolor DDS
+    to take advantage of already existing IDL-based type definitions.  An additional pleasant
+    side-effect, of course, is that it is now possible to use Technicolor DDS as a standalone DDS
+    middleware as well.</p>
+  </section>
+  <section>
+   <title>Using the <cmdname>idlparser</cmdname> program</title>
+   <p>The IDL parser program expects an IDL input, which is specified with the filename argument.
+    If not specified, the parser will read from standard input.</p>
+   <p>If no output file is specified (using <cmdname>-o</cmdname>), the parser assumes<i> out.c
+    </i>as the default output file, which will be automatically created or overwritten if it already
+    exists.</p>
+   <p>The parser accepts a number of program options that can be seen by typing <cmdname>idlparser
+     -h</cmdname>:</p>
+   <p>
+    <table frame="all" id="table_jr3_w4g_vf">
+     <title><cmdname>idlparser</cmdname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.08*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-o</cmdname>
+         <i>&lt;outfile></i></entry>
+        <entry>Specifies the output file.  If not specified, <i>out.c</i> is assumed.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-t</cmdname></entry>
+        <entry>Generate test code for testing the generated type.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Display program usage and options.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+  <section>
+   <title>Example usage</title><p>Suppose the following input is used in
+   <i>shapes.idl</i>:</p><codeblock>struct ShapeType {
+   string&lt;128> color; //@Key
+   long x;
+   long y;
+   long shapesize;
+};</codeblock>Then
+   giving the command: <cmdname>idlparser -o shapes.c shapes.idl</cmdname>
+   <p>Would result in the following <i>shapes.c</i> file
+   contents:</p><codeblock>#include &lt;stdlib.h>
+#include &lt;stdio.h>
+#include &lt;dds/dds_dcps.h>
+
+typedef struct _ShapeType_st {
+   char color[128];
+   int x;
+   int y;
+   int shapesize;
+} ShapeType;
+
+static DDS_TypeSupport_meta ShapeType_tsm [] = {
+{CDR_TYPECODE_STRUCT   , TSMFLAG_KEY, "ShapeType", sizeof (struct _ShapeType_st), 0, 4, 0, NULL},
+{CDR_TYPECODE_CSTRING  , TSMFLAG_KEY, "color", 128, offsetof (struct _ShapeType_st, color), 0, 0, NULL},
+{CDR_TYPECODE_LONG     , 0, "x", 0, offsetof (struct _ShapeType_st, x), 0, 0, NULL},
+{CDR_TYPECODE_LONG     , 0, "y", 0, offsetof (struct _ShapeType_st, y), 0, 0, NULL},
+{CDR_TYPECODE_LONG     , 0, "shapesize", 0, offsetof (struct _ShapeType_st, shapesize), 0, 0, NULL}
+};</codeblock>
+  </section>
+ </conbody>
+</concept>

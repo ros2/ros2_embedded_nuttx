@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_ywl_frt_r4">
+    <title>RTPS configuration parameters</title>
+    <body>
+      <p>The RTPS layer of DDS can be configured indirectly via a number of configuration
+        parameters.</p>
+      <note>Although the DDS RTPS specification combines both RTPS and RTPS transport mechanisms
+        (UDP/IP), the configuration parameters for the transport layers are defined within the IP,
+        UDP and TCP groups.</note>
+      <p>Following parameters are defined:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_cfr_lrt_r4">
+          <title>RTPS parameters</title>
+          <tgroup cols="4">
+            <colspec colname="c1" colnum="1" colwidth="2.34*"/>
+            <colspec colname="c2" colnum="2" colwidth="4.14*"/>
+            <colspec colname="newCol3" colnum="3" colwidth="1*"/>
+            <colspec colname="c3" colnum="4" colwidth="1.14*"/>
+            <thead>
+              <row>
+                <entry>Parameter name</entry>
+                <entry>Description</entry>
+                <entry>Type</entry>
+                <entry>Default</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>RTPS_MODE</entry>
+                <entry>Mode of operation.</entry>
+                <entry>Mode</entry>
+                <entry>Enabled</entry>
+              </row>
+              <row>
+                <entry>RTPS_SL_RETRIES</entry>
+                <entry>Number of stateless fast (200ms) retransmissions of SPDP messages. Used both
+                  when a participant starts up for the first time and when it sees another
+                  participant for the first time, in order to minimize the chance of packet loss
+                  that would necessitate having to wait for RTPS_RESEND_TIME before a new attempt to
+                  communicate is done.</entry>
+                <entry>Number</entry>
+                <entry>2</entry>
+              </row>
+              <row>
+                <entry>RTPS_RESEND_TIME</entry>
+                <entry>Normal delay between successive SPDP messages (in seconds).</entry>
+                <entry>Number</entry>
+                <entry>10s</entry>
+              </row>
+              <row>
+                <entry>RTPS_HB_TIME</entry>
+                <entry>Heartbeat retransmission time (ms).</entry>
+                <entry>Number</entry>
+                <entry>100ms</entry>
+              </row>
+              <row>
+                <entry>RTPS_NACK_RESP_TIME</entry>
+                <entry>Nack response time (ms). The delay before Data/Gaps are sent upon receiving
+                  an AckNack requesting data.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>RTPS_NACK_SUPP_TIME</entry>
+                <entry>Nack suppression time (ms). The delay within AcnNack messages are silently
+                  discarded by a Writer.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>RTPS_LEASE_TIME</entry>
+                <entry>Default lease time before remote participants are forgotten.</entry>
+                <entry>Number</entry>
+                <entry>30s</entry>
+              </row>
+              <row>
+                <entry>RTPS_HB_RESP_TIME</entry>
+                <entry>Heartbeat response time (ms). The delay before an AckNack is set in response
+                  to a received Heartbeat message.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>RTPS_HB_SUPP_TIME</entry>
+                <entry>Heartbeat suppression time (ms). The delay within Heartbeat messages are
+                  silently discarded by a Reader when received too fast after a previous
+                    Heartbeat<fn>This parameter is currently not yet implemented in Technicolor
+                    DDS</fn>.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>RTPS_MSG_SIZE</entry>
+                <entry>The maximum RTPS message length that determines whether RTPS submessages will
+                  be appended to a message.</entry>
+                <entry>Number</entry>
+                <entry>1452</entry>
+              </row>
+              <row>
+                <entry>RTPS_FRAG_SIZE</entry>
+                <entry>The default Fragment size for fragmented messages.</entry>
+                <entry>Number</entry>
+                <entry>8192</entry>
+              </row>
+              <row>
+                <entry>RTPS_FRAG_BURST</entry>
+                <entry>The maximum number of fragments that can be sent in a single burst.</entry>
+                <entry>Number</entry>
+                <entry>512</entry>
+              </row>
+              <row>
+                <entry>RTPS_FRAG_DELAY</entry>
+                <entry>The delay between bursts of fragments.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+              <row>
+                <entry>RTPS_DTRACE</entry>
+                <entry>Default tracing mode of new created endpoints.</entry>
+                <entry>Number</entry>
+                <entry>0</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+      <note>The RTPS_HB_TIME has a randomized exponential backoff mechanism behind it in order not
+        to flood the network in case of unresponsive readers. This means that subsequent
+        retransmission times can double up to 256 times the initial value (which is 25.6 seconds
+        with the default settings).</note>
+      <p>Examples:</p>
+      <p><b>export TDDS_RTPS_FRAG_SIZE=1024</b></p>
+      <p>Sets the default fragment size to 1024 bytes.</p>
+    </body>
+  </topic>
+</dita>

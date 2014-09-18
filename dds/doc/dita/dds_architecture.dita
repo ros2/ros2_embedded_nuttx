@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_p3v_yjj_tf">
+ <title>DDS Architecture</title>
+ <shortdesc/>
+ <conbody>
+  <p>As can be seen in the figure below, a DDS middleware is structured in a number of layers:</p>
+  <p><image href="dds_arch.jpg" id="image_cwv_ft4_tf"/></p>
+  <p>The DDS specification gives a choice of 2 distinct APIs to the user, allthough most DDS vendors
+   implement only one of those APIs.</p>
+  <p>The most common API, which every DDS vendor currently supports, is called the Data Centric
+   Publish Subscribe (DCPS) API, which is the most basic of the two.</p>
+  <p>The second API is the Data Local Reconstruction Layer (DLRL) API, an optional layer on top of
+   DCPS, which is a lot more Object-Oriented. It allows applications to describe objects with
+   methods as well as attributes, which are either local or shared. DLRL does not do RPCs however,
+   all methods are local.  Also, since only a few DDS vendors support DLRL, using this API would
+   lead to interoperability issues with different DDS vendors.</p>
+  <p>For both APIs, the OMG standard gives a description in a language-independent format (IDL) in
+   order to allow multiple execution environments and also to allow multiple programming languages.
+   Due to this choice, the conversion from this format to an effective programming language API
+   still leaves some design choices open. A disadvantage of this approach thus means that a specific
+   programming language DCPS API may differ slightly from one DDS vendor to the next.</p>
+  <p>In order to avoid these minor differences, and also because for object-oriented languages it is
+   possible to wrap the DCPS API into language-specific class-based APIs which are of course a lot
+   easier to work with, OMG has standardized some specific programming language specifications for
+   the DCPS API. Specifications are defined for both C++ and Java.</p>
+  <p>The DDS specification allows many different types of data durability, from volatile up to
+   persistent durability. The first will remove data as fast as possible from the data caches. The
+   persistent durability stores data automatically on a storage medium (such as a disk) without the
+   users intervention.</p>
+  <p>For effective communication over a network, an additional software layer below DCPS is
+   responsible This layer, which is called the Real-Rime Publish Subscribe (RTPS) layer is able to
+   exchange data between DDS components in a standardized manner, providing necessary compatibility
+   between different DDS vendors.</p>
+  <p>RTPS is responsible for coping with the differences between different nodes (big/little
+   endianess) and between subtle different data layouts between different execution environments.
+   This is achieved in practice by marshalling local data representations into a network-specific
+   format, which is execution environment agnostic, before sending the data on the wire. On
+   reception of messages, the data is unmarshalled to the local specific execution environment data
+   representation.</p>
+  <p>Since RTPS is designed to operate over multiple networking protocols, there is no requirement
+   for a specific networking protocol, and DDS thus allows both operation over local LANs as well as
+   over Wide Area Networks (WAN), typically using different protocols.</p>
+  <p>Only the interface between RTPS and UDP/IP is defined in the DDS standards, but in practice,
+   many vendors offer support for IPv6, secure transports, TCP, and even shared-memory transports
+   within device nodes.</p>
+ </conbody>
+</concept>

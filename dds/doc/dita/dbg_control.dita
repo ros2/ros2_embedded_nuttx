@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_nll_z15_wf">
+ <title>Control commands</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The DDS Debug Shell provides a number of commands that can be used to control application
+   programs directly:</p>
+  <p>
+   <ul id="ul_n1j_cf5_wf">
+    <li>The <cmdname>pause</cmdname>, <cmdname>resume</cmdname>, <cmdname>delay</cmdname>,
+      <cmdname>menu</cmdname> and <cmdname>quit</cmdname> commands can be used, for example, to
+     control the <cmdname>dcps</cmdname> test program and the <cmdname>shapes</cmdname> demo
+     program.  This is described in the chapters on these programs. Other application programs can
+     register themselves in the Shell to enable some of these commands selectively (see
+     dds/dds_debug.h).</li>
+    <li>The <cmdname>server</cmdname> command can be used to start the DDS Debug server in order to
+     provide remote access to the shell via the <cmdname>telnet</cmdname> protocol.</li>
+    <li>Remotely connected telnet sessions should be closed via the <cmdname>exit</cmdname>
+     command.</li>
+    <li>The <cmdname>ase</cmdname> and <cmdname>asp</cmdname> commands can be used to assert Topic
+     and Participant Liveliness, but should only be used in the context of the
+      <cmdname>dcps</cmdname> test program.</li>
+    <li>RTPS proxy contexts can be reset with the <cmdname>rproxy</cmdname> command.</li>
+    <li>Security rehandshaking can be forced with the <cmdname>rehs</cmdname> command.</li>
+    <li>The suspend state can be entered and exited with <cmdname>suspend</cmdname> and
+      <cmdname>activate</cmdname> commands.</li>
+    <li>Configuration parameters can be added, changed and removed with the <cmdname>set</cmdname>
+     and <cmdname>unset</cmdname> commands.</li>
+   </ul>
+  </p>
+  <note>A number of these commands (<cmdname>ase</cmdname>, <cmdname>asp</cmdname>,
+    <cmdname>rproxy</cmdname>, <cmdname>rehs</cmdname>, <cmdname>suspend</cmdname> and
+    <cmdname>activate</cmdname>, <cmdname>set</cmdname> and <cmdname>unset</cmdname>) are very
+   dangerous and should not be used on deployed systems (for obvious reasons) unless you know
+   exactly what you are doing.  They are mainly present for testing purposes.</note>
+ </conbody>
+</concept>

@@ -1,0 +1,3 @@
+./get_event_data_p provider.ctrc
+gnuplot "plot_data_p.gp"
+
