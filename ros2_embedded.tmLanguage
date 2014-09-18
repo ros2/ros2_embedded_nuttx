@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array/>
+	<key>name</key>
+	<string>ros2 embedded build</string>
+	<key>repository</key>
+	<dict>
+		<key>filenameWithLine</key>
+		<dict>
+			<key>comment</key>
+			<string>Filename and line number separated by a colon</string>
+			<key>match</key>
+			<string>/[^:]+:[0-9]+</string>
+			<key>name</key>
+			<string>storage.type</string>
+		</dict>
+		<key>filenameWithLineInCallStack</key>
+		<dict>
+			<key>comment</key>
+			<string>Filename and line number separated by a colon</string>
+			<key>match</key>
+			<string>/[^:]+:[0-9]+</string>
+			<key>name</key>
+			<string>entity.name.filename</string>
+		</dict>
+		<key>packageName</key>
+		<dict>
+			<key>comment</key>
+			<string>Package name</string>
+			<key>match</key>
+			<string>[a-z][a-z_0-9]*</string>
+			<key>name</key>
+			<string>entity.name.class</string>
+		</dict>
+	</dict>
+	<key>patterns</key>
+	<array>
+		<!--<dict>
+			<key>comment</key>
+			<string>Topological Order</string>
+			<key>begin</key>
+			<string>^# Topological order$</string>
+			<key>end</key>
+			<string>^$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#packageName</string>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Building / skipping: package</string>
+			<key>begin</key>
+			<string>^# (Building|Skipping):</string>
+			<key>end</key>
+			<string>$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#packageName</string>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Build package with context</string>
+			<key>match</key>
+			<string>^Build package '(.+)' with context:$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.class</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Context</string>
+			<key>begin</key>
+			<string>^-+$</string>
+			<key>end</key>
+			<string>^-+$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>comment</key>
+					<string>Arrow</string>
+					<key>match</key>
+					<string>^.*(=&gt;).*$</string>
+					<key>name</key>
+					<string>sublimelinter.gutter-mark</string>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>meta.diff</string>
+						</dict>
+					</dict>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Building package</string>
+			<key>match</key>
+			<string>^\+\+\+ Building '(.+)'$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.class</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Installing package</string>
+			<key>match</key>
+			<string>^\+\+\+ Installing '(.+)'$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.class</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Invoking command</string>
+			<key>match</key>
+			<string>^==&gt; '(.+)' in '(.+)'$</string>
+			<key>name</key>
+			<string>comment</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>support.function</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>meta.structure.dictionary.json string.quoted.double.json</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>CMake call stack</string>
+			<key>begin</key>
+			<string>^Call Stack \(most recent call first\):$</string>
+			<key>end</key>
+			<string>^$</string>
+			<key>name</key>
+			<string>sublimelinter.mark.warning</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#filenameWithLineInCallStack</string>
+				</dict>
+			</array>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>CMake warning</string>
+			<key>begin</key>
+			<string>^CMake Warning(?: at (/[^:]+:[0-9]+).*|:)$</string>
+			<key>end</key>
+			<string>^$</string>
+			<key>name</key>
+			<string>sublimelinter.mark.warning</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.filename</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>CMake error</string>
+			<key>begin</key>
+			<string>^CMake Error at (/[^:]+:[0-9]+).*$</string>
+			<key>end</key>
+			<string>^$</string>
+			<key>name</key>
+			<string>message.error</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>variable.parameter</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>CMake configure incomplete</string>
+			<key>match</key>
+			<string>^-- Configuring incomplete, errors occurred!$</string>
+			<key>name</key>
+			<string>message.error</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Make error</string>
+			<key>match</key>
+			<string>^make(\[\d+\])?: \*\*\* \[.+\] Error \d+$</string>
+			<key>name</key>
+			<string>message.error</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Compiler warning</string>
+			<key>begin</key>
+			<string>^(/[^:]+:[0-9]+):[0-9]+: warning:.+$</string>
+			<key>end</key>
+			<string>^ *\^$</string>
+			<key>name</key>
+			<string>sublimelinter.mark.warning</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.filename</string>
+				</dict>
+			</dict>
+		</dict>-->
+		<dict>
+			<key>comment</key>
+			<string>Compiler error</string>
+			<key>begin</key>
+			<string>^([^:]+:[0-9]+):[0-9]+: error:.+$</string>
+			<key>end</key>
+			<string>^ *\^$</string>
+			<key>name</key>
+			<string>message.error</string>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>variable.parameter</string>
+				</dict>
+			</dict>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Comment</string>
+			<key>match</key>
+			<string>^#.*$</string>
+			<key>name</key>
+			<string>comment</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>text.ros2_embedded</string>
+	<key>uuid</key>
+	<string>cd48f328-42ba-8350-1c7e-3c38bea5a228</string>
+</dict>
+</plist>
