@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_DDS_CHAT
+	bool "A simple chat example using DDS over NSH"
+	default n
+	---help---
+		Enable the EXAMPLE_DDS_CHAT
