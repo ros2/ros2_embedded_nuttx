@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_lrb_zjv_r4">
+    <title>UDP configuration parameters</title>
+    <body>
+      <p>The following parameters can be configured for UDP/IP:</p>
+              <p>
+                <table frame="all" rowsep="1" colsep="1" id="table_kxp_51v_r4">
+                  <title>UDP configuration parameters</title>
+                  <tgroup cols="4">
+                    <colspec colname="c1" colnum="1" colwidth="1.0*"/>
+                    <colspec colname="c2" colnum="2" colwidth="1.0*"/>
+                    <colspec colname="newCol3" colnum="3" colwidth="1*"/>
+                    <colspec colname="c3" colnum="4" colwidth="1.0*"/>
+                    <thead>
+                      <row>
+                        <entry>Parameter name</entry>
+                        <entry>Description</entry>
+                        <entry>Type</entry>
+                        <entry>Default</entry>
+                      </row>
+                    </thead>
+                    <tbody>
+                      <row>
+                        <entry>UDP_MODE</entry>
+                        <entry>Specifies whether UDP is enabled</entry>
+                        <entry>Mode</entry>
+                        <entry>enabled</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_PB</entry>
+                        <entry>RTPS Port Base</entry>
+                        <entry>Number</entry>
+                        <entry>7400</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_DG</entry>
+                        <entry>RTPS DomainId gain</entry>
+                        <entry>Number</entry>
+                        <entry>250</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_PG</entry>
+                        <entry>RTPS ParticipantId gain</entry>
+                        <entry>Number</entry>
+                        <entry>2</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_D0</entry>
+                        <entry>RTPS D0 parameter</entry>
+                        <entry>Number</entry>
+                        <entry>0</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_D1</entry>
+                        <entry>RTPS D1 parameter</entry>
+                        <entry>Number</entry>
+                        <entry>10</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_D2</entry>
+                        <entry>RTPS D2 parameter</entry>
+                        <entry>Number</entry>
+                        <entry>1</entry>
+                      </row>
+                      <row>
+                        <entry>UDP_D3</entry>
+                        <entry>RTPS D3 parameter</entry>
+                        <entry>Number</entry>
+                        <entry>11</entry>
+                      </row>
+                    </tbody>
+                   </tgroup>
+                </table>
+              </p>
+      <p>The RTPS parameters are used to construct UDP port numbers, as described in the
+        specification.</p>
+    </body>
+  </topic>
+</dita>

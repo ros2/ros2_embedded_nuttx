@@ -1,0 +1,27 @@
+QoS parameters and where they're used.
+--------------------------------------
+			Part Pub Sub Top W   R   DT  DW  DR   I Size
+			---- --- --- --- -   -   --  --  --   - ----
+USER_DATA		X                X   X	     X   X    S   16/4
+TOPIC_DATA		             X	         X   X   X    S   16/4
+GROUP_DATA		     X   X                   X   X    S   16/4
+DURABILITY		             X   X   X   X   X   X    <    4->2b
+DURABILITY_SERVICE	             X   X       X?  X	      <   28
+PRESENTATION		     X   X                   X   X    <   12->4b
+DEADLINE		             X   X   X   X   X   X    <    8
+LATENCY_BUDGET		             X   X   X   X   X   X    <    8
+OWNERSHIP		             X   X   X   X   X   X    <    4->1b
+OWNERSHIP_STRENGTH	                 X           X	      <    4
+LIVELINESS		             X   X   X   X   X   X    <   12->8+1b
+TIME_BASED_FILTER	                     X   X       X         8
+PARTITION		     X   X                   X   X    S   16/4
+RELIABILITY		             X   X   X   X   X   X    <   12->8+1b
+TRANSPORT_PRIORITY	             X   X       X   	      <    4->1
+LIFESPAN		             X   X       X   X	      <    8
+DESTINATION_ORDER	             X   X   X   X   X   X    <    4->1b
+HISTORY			             X   X   X   X	      <    8->4+1b
+RESOURCE_LIMITS		             X   X   X   X	      <   12
+ENTITY_FACTORY		X    X   X                                 4
+WRITER_DATA_LIFECYCLE	                 X                         4
+READER_DATA_LIFECYCLE	                     X                    16
+                                                              *  128  105+11b

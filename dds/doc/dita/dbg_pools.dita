@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_q43_jhs_wf">
+ <title>Pools</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The <cmdname>spool</cmdname> command shows the following info:</p>
+  <screen scale="80">>spool
+  Name          PSize  BSize  Rsrvd    Max MPUse CPUse MXUse CXUse Alloc  NoMem
+  ----          -----  -----  -----    --- ----- ----- ----- ----- -----  -----
+List:
+  SLIST          1152    144      8      *     0     0     0     0     0      0
+  SL0            6144     32    192      *    58    58     0     0     0      0
+  SL1            2304     48     48      *    12    12     0     0     0      0
+  SL2             768     64     12      *     0     0     0     0     0      0
+  SL3             240     80      3      *     0     0     0     0     0      0
+  SL4              96     96      1      *     0     0     0     0     0      0
+  SL5             112    112      1      *     0     0     0     0     0      0
+  SL6             128    128      1      *     0     0     0     0     0      0
+  SL7             144    144      1      *     0     0     0     0     0      0
+String:
+  STRING         1536     24     64      *    64    64    14    14    14      0
+  STR_REF        1184     16     74      *    74    74     4     4     4      0
+Timer:
+  TIMER          1536     48     32      *     7     1     0     0     0      0
+Buffers:
+  DATA_BUF(0)    8216   8216      1      *     0     0     0     0     0      0
+  DATA_BUF(1)    4120   4120      1      *     0     0     0     0     0      0
+  DATA_BUF(2)    2072   2072      1      *     0     0     0     0     0      0
+  DATA_BUF(3)    2096   1048      2      *     0     0     0     0     0      0
+  DATA_BUF(4)    2144    536      4      *     2     0     0     0     0      0
+  DATA_BUF(5)    2240    280      8      *     8     7     1     0   716      0
+  DATA_BUF(6)    2432    152     16      *     0     0     0     0     0      0
+  DATA_BUF(7)    2816     88     32      *     0     0     0     0     0      0
+Locators:
+  LOCREF         1184     16     74      *    74    70     1     1     1      0
+  LOCATOR        1280     40     32      *     9     9     0     0     0      0
+QoS:
+  QOS_REF        1344     16     84      *     3     3     0     0     0      0
+  QOS_DATA       1792    112     16      *     3     3     0     0     0      0
+Cache:
+  HIST_CACHE     5200    200     26      *    12    12     0     0     0      0
+  CHANGE         4096     64     64      *    19    15     0     0     0      0
+  INSTANCE       4864    152     32      *    15    14     0     0     0      0
+  CCREF          4096     32    128      *    30    28     0     0     0      0
+  CREF             32     16      2      *     2     2     0     0     0      0
+  CWAIT           208    104      2      *     0     0     0     0     0      0
+  CXFER           144     72      2      *     0     0     0     0     0      0
+  XFLIST          112     56      2      *     0     0     0     0     0      0
+  FILTER          240    120      2      *     0     0     0     0     0      0
+  FINST           128     64      2      *     0     0     0     0     0      0
+Domain:
+  DOMAIN         1688   1688      1      5     1     1     0     0     0      0
+  DPARTICIPANT   6080    760      8      *     2     2     0     0     0      0
+  TYPE            320     32     10      *     5     5     0     0     0      0
+  TOPIC          2304    144     16      *    10    10     0     0     0      0
+  FILTER_TOPIC    240    240      1      *     0     0     0     0     0      0
+  PUBLISHER       528    264      2      *     2     2     0     0     0      0
+  SUBSCRIBER      544    272      2      *     2     2     0     0     0      0
+  WRITER         1920    240      8      *     6     6     0     0     0      0
+  READER         4224    352     12      *     6     6     0     0     0      0
+  DWRITER        1920     80     24      *     9     9     0     0     0      0
+  DREADER        2304     96     24      *    10    10     0     0     0      0
+  GUARD           224     56      4      *     0     0     0     0     0      0
+  PREFIX          320     40      8      *     1     0     0     0     0      0
+DDS:
+  NOTIFICATION    192     24      8      *     2     0     0     0     0      0
+  WS_DEFERED       24     24      1      *     0     0     0     0     0      0
+  CFG_UPDATE       24     24      1      *     0     0     0     0     0      0
+DCPS:
+  SAMPLE_INFO    1792     56     32      *     2     2     0     0     0      0
+  WAITSET         240    120      2      *     0     0     0     0     0      0
+  STATUS_COND     112     56      2      *     0     0     0     0     0      0
+  READ_COND       128     64      2      *     0     0     0     0     0      0
+  QUERY_COND      304    152      2      *     0     0     0     0     0      0
+  GUARD_COND       96     48      2      *     0     0     0     0     0      0
+  TOPIC_WAIT      160     80      2      *     0     0     0     0     0      0
+RTPS:
+  READER         1080     72     15      *     6     6     0     0     0      0
+  WRITER          968     88     11      *     6     6     0     0     0      0
+  REM_READER     2320    232     10      *    10    10     2     2     2      0
+  REM_WRITER     2080    208     10      *     9     9     0     0     0      0
+  CCREF          3072     48     64      *    10     2     0     0     0      0
+  MSG_BUF        7168    224     32      *     5     0     0     0     0      0
+  MSG_ELEM_BUF  10240    160     64      *     5     0     0     0     0      0
+  MSG_REF         256     16     16      *     0     0     0     0     0      0
+IP:
+  IP_CX        246000    240   1025   1025     5     5     0     0     0      0
+XTYPES:
+  DYNTYPE         192     24      8      *     0     0     0     0     0      0
+  DYNDREF          64     16      4      *     0     0     0     0     0      0
+SECURITY:
+  DATA_HOLDER     224     56      4      *     0     0     0     0     0      0
+  PROPERTY         64     16      4      *     0     0     0     0     0      0
+  BIN_PROPERTY    128     32      4      *     0     0     0     0     0      0
+  HOLDER_SEQ       96     24      4      *     0     0     0     0     0      0
+
+Pool/max/xmax/used/xused memory = 378128/49968/1160/45400/880 bytes (737 mallocs) (13%/12%)
+Dynamically allocated: 39244 bytes.
+malloc statistics: 163 blocks, 53280 bytes, 0 failures.
+realloc statistics: 4 blocks, 320 bytes, 0 failures.
+free statistics: 94 blocks, 14356 bytes.
+Dynamic pool block stats: &lt;=64K - max/used/msize/size: 1/0/0/216
+                           >64K - max/used           : 0/0
+Total heap memory: 379288 bytes.</screen>
+   <p>The display first shows some columns, followed by summary information.</p>
+  <p>The <cmdname>spoola</cmdname> command is similar, but gives two additional address columns, the
+   pool block address and the first free block address.</p>
+   <p>The first column shows either the origin (ex: RTPS:) or the name of the memory pool:</p>
+   <p>
+    <table frame="all" id="table_sp1_mtr_wf">
+     <title>Types of memory blocks</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="4.83*"/>
+      <thead>
+       <row>
+        <entry>Name</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>SLIST</entry>
+        <entry>Skiplist list.</entry>
+       </row>
+       <row>
+        <entry>SL0..7</entry>
+        <entry>Skiplist node containing i*2 forward pointers.  Ex.: SL3 contains 6 forward
+         pointers.</entry>
+       </row>
+       <row>
+        <entry>STRING</entry>
+        <entry>String descriptor.  Actual string data is stored in a separate string heap.</entry>
+       </row>
+       <row>
+        <entry>STR_REF</entry>
+        <entry>Reference to a string descriptor.</entry>
+       </row>
+       <row>
+        <entry>TIMER</entry>
+        <entry>Timer node.</entry>
+       </row>
+       <row>
+        <entry>DATA_BUF(0..7)</entry>
+        <entry>Data buffer pools having room for 64 up to 8K bytes as subsequent powers of 2, e.g.
+         64, 128, 256, etc.  Buffers have a reference count and can be referenced from multiple
+         readers and writers.</entry>
+       </row>
+       <row>
+        <entry>LOCREF</entry>
+        <entry>Reference to a locator node.</entry>
+       </row>
+       <row>
+        <entry>LOCATOR</entry>
+        <entry>A locator node contains locator storage and a reference count.</entry>
+       </row>
+       <row>
+        <entry>QOS_REF</entry>
+        <entry>Reference to a QoS node.</entry>
+       </row>
+       <row>
+        <entry>QOS_DATA</entry>
+        <entry>A QoS node contains Quality of Service parameters in a unified format, which is
+         suitable for DataWriters, DataReaders and Topics either locally or remote.</entry>
+       </row>
+       <row>
+        <entry>HIST_CACHE</entry>
+        <entry>History cache descriptor as used in both DataWriters and DataReaders. It describes
+         all data-related handling, and contains a list of samples, and possibly a list of
+         instances.</entry>
+       </row>
+       <row>
+        <entry>CHANGE</entry>
+        <entry>A Change descriptor typically contains a reference to actual change data (handle,
+         data stored in a  DATA_BUF or allocated directly).</entry>
+       </row>
+       <row>
+        <entry>INSTANCE</entry>
+        <entry>Each instance, e.g. key-dependent data is a descriptor that contains a list of
+         samples as well as various state information.</entry>
+       </row>
+       <row>
+        <entry>CCREF</entry>
+        <entry>The Change reference descriptor is used while queueing sample data.  Keyed samples
+         typically have two change references.  Non-keyed is typically a single change
+         reference.</entry>
+       </row>
+       <row>
+        <entry>CREF</entry>
+        <entry>The Reader Cache reference is used in order to chain matched local DataReaders for a
+         local DataWriter.</entry>
+       </row>
+       <row>
+        <entry>CWAIT</entry>
+        <entry>The Cache Wait context is used when an application needs to wait until some condition
+         needs to be fulfilled, such as room for writing a new sample, wait for acknowledgements,
+         etc.</entry>
+       </row>
+       <row>
+        <entry>CXFER</entry>
+        <entry>Samples that need to be sent to local DataReader caches from a local DataWriter
+         cache, but which can not be transferred yet, due to the destination cache having no room,
+         are queued using Cache Transfer descriptors.</entry>
+       </row>
+       <row>
+        <entry>XFLIST</entry>
+        <entry>A list of Cache Transfer descriptors to be received when the local DataReader cache
+         accepts new samples.</entry>
+       </row>
+       <row>
+        <entry>FILTER</entry>
+        <entry>The Time-Based filter descriptor is used for a local Reader cache to limit the
+         receive rate from a specific Writer. </entry>
+       </row>
+       <row>
+        <entry>FINST</entry>
+        <entry>This a per-instance descriptor that contains a delayed sample for reception.</entry>
+       </row>
+       <row>
+        <entry>DOMAIN</entry>
+        <entry>A complete DomainParticipant descriptor.</entry>
+       </row>
+       <row>
+        <entry>DPARTICIPANT</entry>
+        <entry>A Discovered, i.e. remote DomainParticipant.</entry>
+       </row>
+       <row>
+        <entry>TYPE</entry>
+        <entry>Type descriptor.</entry>
+       </row>
+       <row>
+        <entry>TOPIC</entry>
+        <entry>Topic descriptor.</entry>
+       </row>
+       <row>
+        <entry>FILTER_TOPIC</entry>
+        <entry>A Filtered topic is derived from a normal topic.</entry>
+       </row>
+       <row>
+        <entry>PUBLISHER</entry>
+        <entry>Publisher descriptor.</entry>
+       </row>
+       <row>
+        <entry>SUBSCRIBER</entry>
+        <entry>Subscriber descriptor.</entry>
+       </row>
+       <row>
+        <entry>WRITER</entry>
+        <entry>A DDS DataWriter, suitable for local and remote use, referring to a history cache,
+         optionally extended with an RTPS Writer context.</entry>
+       </row>
+       <row>
+        <entry>READER</entry>
+        <entry>A DDS DataReader, suitable for local and remote use, referring to a history cache,
+         optionally extended with an RTPS Reader context.</entry>
+       </row>
+       <row>
+        <entry>DWRITER</entry>
+        <entry>A Discovered DataWriter.</entry>
+       </row>
+       <row>
+        <entry>DREADER</entry>
+        <entry>A Discovered DataReader.</entry>
+       </row>
+       <row>
+        <entry>GUARD</entry>
+        <entry>Guard contexts are used to implement various QoS parameters, such as Liveliness,
+         Deadline, Lifespan and DataReader Lifetime QoS.</entry>
+       </row>
+      <row>
+       <entry>PREFIX</entry>
+       <entry>Prefix cache entry to associate IP addresses to GUID prefixes for locality
+        determination.</entry>
+      </row>
+      <row>
+       <entry>NOTIFICATION</entry>
+       <entry>Decoupled listener notification context.  Used when any listener needs to be
+        called.</entry>
+      </row>
+      <row>
+       <entry>WS_DEFERED</entry>
+       <entry>Defered Waitset notification context.  Used when a Waitset is blocked and needs to be
+        woken up.</entry>
+      </row>
+      <row>
+       <entry>CFG_UPDATE</entry>
+       <entry>When users update configuration parameters dynamically, this context is used to queue
+        the update to the core DDS thread.</entry>
+      </row>
+       <row>
+        <entry>SAMPLE_INFO</entry>
+        <entry>The SampleInfo structure is allocated when using any of the various
+         DDS_DataReader_read/take() functions, until a DDS_DataReader_return_loan() is
+         called.</entry>
+       </row>
+       <row>
+        <entry>WAITSET</entry>
+        <entry>A WaitSet context.</entry>
+       </row>
+       <row>
+        <entry>STATUS_COND</entry>
+        <entry>A StatusCondition descriptor.</entry>
+       </row>
+       <row>
+        <entry>READ_COND</entry>
+        <entry>A ReadCondition descriptor.</entry>
+       </row>
+       <row>
+        <entry>QUERY_COND</entry>
+        <entry>A QueryCondition descriptor.</entry>
+       </row>
+       <row>
+        <entry>GUARD_COND</entry>
+        <entry>A GuardCondition descriptor.</entry>
+       </row>
+       <row>
+        <entry>TOPIC_WAIT</entry>
+        <entry>Whenever the application needs to wait on a remotely defined topic via
+         DDS_DomainParticipant_find_topic(), this context is used.</entry>
+       </row>
+       <row>
+        <entry>RTPS::READER</entry>
+        <entry>When a local DataReader is matched for the first time with a remote DataWriter, the
+         RTPS Reader context is added to the DataReader in order to manage the RTPS Proxy
+         Writers.</entry>
+       </row>
+       <row>
+        <entry>RTPS::WRITER</entry>
+        <entry>When a local DataWriter is matched for the first time with a remote DataReader, the
+         RTPS Reader context is added to the DataWriter in order to manage the RTPS Proxy
+         Readers.</entry>
+       </row>
+       <row>
+        <entry>REM_READER</entry>
+        <entry>An RTPS Proxy Reader descriptor is used for each matched remote DataWriter.</entry>
+       </row>
+       <row>
+        <entry>REM_WRITER</entry>
+        <entry>An RTPS Proxy Writer descriptor is used for each matched remote DataReader.</entry>
+       </row>
+       <row>
+        <entry>RTPS::CCREF</entry>
+        <entry>When data samples are queued in RTPS, whether for a Proxy Reader or for a Proxy
+         Writer, they are queued using Cache Change Reference descriptors, that point to cloned
+         Change descriptors.</entry>
+       </row>
+       <row>
+        <entry>MSG_BUF</entry>
+        <entry>An RTPS Message descriptor is used, both when RTPS messages are received, and when
+         they are under construction, i.e. when RTPS Submessages are added to them.</entry>
+       </row>
+       <row>
+        <entry>MSG_ELEM_BUF</entry>
+        <entry>An RTPS Submessage descriptor is used both for Submessage headers, as well as for
+         extra data that needs to be concatenated to a submessage.</entry>
+       </row>
+       <row>
+        <entry>IP_CX</entry>
+        <entry>An IP Socket descriptor. These are used for both IPv4 and IPv6 UDP, TCP, DTLS/UDP and
+        TLS/TCP connections.</entry>
+       </row>
+      <row>
+       <entry>DYNTYPE</entry>
+       <entry>Dynamic type descriptor context.</entry>
+      </row>
+      <row>
+       <entry>DYNDREF</entry>
+       <entry>Reference to a Dynamic data sample.</entry>
+      </row>
+      <row>
+       <entry>DATA_HOLDER</entry>
+       <entry>A DataHolder context for security handshakes and crypto tokens.</entry>
+      </row>
+      <row>
+       <entry>PROPERTY</entry>
+       <entry>A string property as used in security handshakes.</entry>
+      </row>
+      <row>
+       <entry>BIN_PROPERTY</entry>
+       <entry>A binary string property as used in security handshakes.</entry>
+      </row>
+      <row>
+       <entry>HOLDER_SEQ</entry>
+       <entry>A sequence of DataHolders.</entry>
+      </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+   <p>This is then followed by a number of columns specifying either a number of bytes or a
+    counter:</p>
+   <p>
+    <table frame="all" id="table_dx5_hgr_wf">
+     <title><cmdname>spool</cmdname> and <cmdname>spoola</cmdname> counters</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="8.16*"/>
+      <thead>
+       <row>
+        <entry>Column</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>Addr</entry>
+        <entry>The memory address of the preallocated pool.</entry>
+       </row>
+       <row>
+        <entry>PSize</entry>
+        <entry>The size of the preallocated pool.</entry>
+       </row>
+       <row>
+        <entry>BSize</entry>
+        <entry>Block size of each element in the pool.</entry>
+       </row>
+       <row>
+        <entry>Rsrvd</entry>
+        <entry>Number of reserved elements.</entry>
+       </row>
+       <row>
+        <entry>Max</entry>
+        <entry>Maximum number of blocks that may be allocated of the pool (or * if
+         unlimited).</entry>
+       </row>
+       <row>
+        <entry>MPUse</entry>
+        <entry>Maximum number of blocks ever in use during the program lifetime.</entry>
+       </row>
+       <row>
+        <entry>CPUse</entry>
+        <entry>Current number of blocks in use by the program.</entry>
+       </row>
+       <row>
+        <entry>MXUse</entry>
+        <entry>Maximum number of blocks ever dynamically allocated.</entry>
+       </row>
+       <row>
+        <entry>CXUse</entry>
+        <entry>Current number of blocks that are dynamically allocated.</entry>
+       </row>
+       <row>
+        <entry>Alloc</entry>
+        <entry>Total number of dynamic allocations.</entry>
+       </row>
+       <row>
+        <entry>Nomem</entry>
+        <entry>Total number of unsuccessful allocations (i.e. out-of-memory conditions).</entry>
+       </row>
+       <row>
+        <entry>Block</entry>
+        <entry>First available pool block.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+    <note>If the DDS library was compiled with the FORCE_MALLOC define, which disables preallocated
+     pools, then a number of fields will not be significant, such as Addr, PSize, Rsrvd, MPUse, CPUse
+     and Block and these will then be set to 0 (or NULL).</note>
+  <note>The Addr and Block columns are only shown with the <cmdname>spoola</cmdname> command.</note>
+   <p>As can be seen from this example, not a lot of memory was ever used, but the preallocated
+   pools consume almost 400 KBytes, mainly due to the number of preallocated DDS IP contexts
+   (currently set to 1024).  The reason for this is that this pool can currently not be extended, so
+   when a huge number of devices are present in a domain, all having a large set of IP addresses,
+   this might overflow the IP connections table.  In practice, setting this maximum to something
+   more reasonable like 64 shouldn't give problems.</p>
+   <p>Optimizing memory usage can be done very easily by looking at both the MPUse and MXUse fields,
+    which, when added together, indicate the total number of blocks ever used in the program.
+    Setting the preallocated pool requirements then allows to allocate everything from that pool and
+    will no longer use malloc() for those pool elements.</p>
+   <p>Preallocated pools have a number of advantages compared to pure malloc() and free()
+    functions:</p>
+   <p>
+    <ol id="ol_lwp_hrr_wf">
+     <li>Allocation and release functions are at least twice as fast compared to dynamic memory
+      allocation functions.</li>
+     <li>There is no memory fragmentation overhead (saves ~20%).</li>
+     <li>Pool usage is deterministic and never leads to unexpected out-of-memory conditions while
+      using less elements than the pool sizes permit, since all memory blocks will be allocated at
+      startup.</li>
+     <li>Pool usage can be restricted in order to limit the number of memory resources that a DDS
+      program is allowed to use.</li>
+    </ol>
+   </p>
+   <p>Using the FORCE_MALLOC define is alternative way of handling memory, which results in ALL
+    memory being allocated via malloc(), effectively bypassing the preallocated pool mechanism.</p>
+ </conbody>
+</concept>

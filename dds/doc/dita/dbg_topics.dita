@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_mhd_snt_wf">
+ <title>Topics</title>
+ <shortdesc/>
+ <conbody>
+  <p>Topics can either be displayed as the list of Topics in the domain, or more specific Topic
+   information can be shown.</p>
+  <p>The <cmdname>stopic</cmdname> command expects a Domain Identifier, and then displays all Topics
+   in the Domain as follows:</p>
+  <screen scale="80">>stopic 1
+BuiltinParticipantMessageReader/ParticipantMessageData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		DW: {29}	92767f10:01096e8f:03e80000-000200-c2
+		DW: {22}	92767f10:01086e8c:03e80000-000200-c2
+	Readers:
+		R:  {17}	92767f10:010a6e9e:03e80000-000200-c7
+BuiltinParticipantMessageWriter/ParticipantMessageData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		W:  {19}	92767f10:010a6e9e:03e80000-000200-c2
+	Readers:
+		DR: {28}	92767f10:01096e8f:03e80000-000200-c7
+		DR: {21}	92767f10:01086e8c:03e80000-000200-c7
+SEDPbuiltinPublicationsReader/PublicationBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		DW: {31}	92767f10:01096e8f:03e80000-000003-c2
+		DW: {24}	92767f10:01086e8c:03e80000-000003-c2
+	Readers:
+		R:  {9}	92767f10:010a6e9e:03e80000-000003-c7
+SEDPbuiltinPublicationsWriter/PublicationBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		W:  {13}	92767f10:010a6e9e:03e80000-000003-c2
+	Readers:
+		DR: {30}	92767f10:01096e8f:03e80000-000003-c7
+		DR: {23}	92767f10:01086e8c:03e80000-000003-c7
+SEDPbuiltinSubscriptionsReader/SubscriptionBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		DW: {33}	92767f10:01096e8f:03e80000-000004-c2
+		DW: {26}	92767f10:01086e8c:03e80000-000004-c2
+	Readers:
+		R:  {11}	92767f10:010a6e9e:03e80000-000004-c7
+SEDPbuiltinSubscriptionsWriter/SubscriptionBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		W:  {15}	92767f10:010a6e9e:03e80000-000004-c2
+	Readers:
+		DR: {32}	92767f10:01096e8f:03e80000-000004-c7
+		DR: {25}	92767f10:01086e8c:03e80000-000004-c7
+SPDPbuiltinParticipantReader/ParticipantBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers: &lt;none>
+	Readers:
+		R:  {7}	92767f10:010a6e9e:03e80000-000100-c7
+SPDPbuiltinParticipantWriter/ParticipantBuiltinTopicData:
+	# of local create/find_topic() calls = 1, # of discoveries = 0
+	Writers:
+		W:  {5}	92767f10:010a6e9e:03e80000-000100-c2
+	Readers: &lt;none>
+Square/ShapeType:
+	# of local create/find_topic() calls = 1, # of discoveries = 3
+	Writers:
+		DW: {41}	92767f10:01096e8f:03e80000-000001-2
+		W:  {40}	92767f10:010a6e9e:03e80000-000003-2
+	Readers:
+		DR: {43}	92767f10:01086e8c:03e80000-000001-7
+		DR: {42}	92767f10:01096e8f:03e80000-000002-7
+		R:  {36}	92767f10:010a6e9e:03e80000-000001-7
+Triangle/ShapeType:
+	# of local create/find_topic() calls = 1, # of discoveries = 2
+	Writers:
+		DW: {45}	92767f10:01086e8c:03e80000-000003-2
+	Readers:
+		DR: {44}	92767f10:01086e8c:03e80000-000002-7
+		R:  {38}	92767f10:010a6e9e:03e80000-000002-7
+</screen>
+  <p>The following information is displayed for each Topic:<ul id="ul_nkh_jst_wf">
+    <li>Topic name / type.</li>
+    <li>Some Topic parameters needed to do correct Topic accounting.</li>
+    <li>The list of Writers (local and discovered) associated with the Topic.</li>
+    <li>The list of Readers (local and discovered) associated with the Topic.</li>
+   </ul></p>
+  <p>The following information is displayed for each Writer or Reader:</p>
+  <p>
+   <ul id="ul_pvf_wst_wf">
+    <li>The type of endpoint (W = local Writer, DW = discovered Writer, R = local Reader and DR =
+     discovered Reader).</li>
+    <li>The handle of the endpoint (between '{' and '}').</li>
+    <li>The unique GUID.</li>
+   </ul>
+  </p>
+  <p>When the Topic name is specified, a lot more information is given, as shown below:</p>
+  <screen scale="80">>stopic 0 Square
+Square/ShapeType:
+    Preferred: CDR, dynamic: 0, length: 140, keys: 1, mkeysize: 133
+    struct ShapeType {
+/*0*/   string&lt;128> /*ESize:1*/ color;  //@Key
+/*132*/ long x;
+/*136*/ long y;
+/*140*/ long shapesize;
+    };
+    # of local create/find_topic() calls = 1, # of discoveries = 3
+    Writers:
+        W:  {45}    c0a84080:000008cc:03e80000-000003-2
+        DW: {36}    c0a84080:0001091e:03e80000-000002-2
+    Readers:
+        R:  {42}    c0a84080:000008cc:03e80000-000001-7
+        DR: {37}    c0a84080:00020973:03e80000-000001-7
+        DR: {34}    c0a84080:0001091e:03e80000-000001-7</screen>
+  <p>As can be seen from this example, for individual topics, extra Topic type information is
+   given:</p>
+  
+  <p><ul id="ul_k4d_5tt_wf">
+    <li>The on-the-wire encoding/decoding type (CDR in this case).</li>
+    <li>Whether the type is dynamic or fixed-size.</li>
+    <li>The size of a sample in bytes.</li>
+    <li>Whether or not key information is present, and the total size of the key fields.</li>
+    <li>The type itself as originally registered as an IDL type definition, giving extra information
+                    in comments like the field offset and the element size for arrays.</li>
+   </ul></p>
+  <p>For filtered topics, if displayed with this command, even more data is displayed, e.g. the
+   expression string, expression parameters and the generated bytecode program that is used for
+   filtering data.</p>
+  <p>In the following example, a filtered topic is shown, as part of a topics list:</p>
+   <screen scale="80">Triangle/ShapeType:
+    Filter name: Filter_2
+    Class name: DDSSQL
+    Expression: x > %0 and x &lt; %1 and y > %2 and y &lt; %3
+    Parameters: 
+        %0 = "50"
+        %1 = "150"
+        %2 = "30"
+        %3 = "90"
+    Bytecode program size: 38 bytes.
+    # of local create/find_topic() calls = 1, # of discoveries = 0
+    Writers: &lt;none>
+    Readers:
+        R:  {56}	0a000044:000c38a9:03e80000-000002-7</screen>
+     <p>To show the filter topic in detail, the filter name needs to be specified as the topic name:</p>
+     <screen scale="80">>stopic 0 Filter_2
+Triangle/ShapeType:
+    Filter name: Filter_2
+    Class name: DDSSQL
+    Expression: x > %0 and x &lt; %1 and y > %2 and y &lt; %3
+    Parameters: 
+        %0 = "50"
+        %1 = "150"
+        %2 = "30"
+        %3 = "90"
+    Bytecode program:
+  0000        LDWS	1
+  0003        LPWS	0
+  0005        CMPWS
+  0006        BLE	37
+  0009        LDWS	1
+  0012        LPWS	1
+  0014        CMPWS
+  0015        BGE	37
+  0018        LDWS	2
+  0021        LPWS	2
+  0023        CMPWS
+  0024        BLE	37
+  0027        LDWS	2
+  0030        LPWS	3
+  0032        CMPWS
+  0033        BGE	37
+  0036        RETT
+  0037        RETF
+    Preferred: CDR, dynamic: 0, length: 140, keys: 1, mkeysize: 133
+    struct ShapeType {
+        string&lt;128> color;  //@key
+        long x;
+        long y;
+        long shapesize;
+    };
+    # of local create/find_topic() calls = 1, # of discoveries = 0
+    Writers: &lt;none>
+    Readers:
+        R:  {56}	0a000044:000c38a9:03e80000-000002-7</screen>
+  <note>For discovered filtered topics, where the filter is specified by a remote Reader, the same
+   information will also be present locally, and can also be displayed in this manner.</note>
+ </conbody>
+</concept>

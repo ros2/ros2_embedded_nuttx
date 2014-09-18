@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dds>
+ <security>
+  <domain id="7">
+   <access>secret</access>
+   <membership>exclusive</membership>
+   <controlled>yes</controlled>
+   <encryption>none</encryption>
+   <!--method>HMAC_SHA1</method-->
+   <transport protocol="UDP">
+    <local>DTLS</local>
+    <local>DDSSEC</local>
+    <remote>DTLS</remote>
+    <remote>DDSSEC</remote>
+   </transport>
+   <transport protocol="TCP">
+    <local>TLS</local>
+    <remote>TLS</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>restrict</mode>
+    <controlled>no</controlled>
+    <discovery>secure</discovery>
+    <encryption>payload</encryption>
+    <method>HMAC_SHA256</method>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <domain id="2">
+   <access>top secret</access>
+   <membership>exclusive</membership>
+   <controlled>yes</controlled>
+   <encryption>message</encryption>
+   <method>AES256_HMAC_SHA256</method>
+   <transport protocol="UDP">
+    <local>DTLS</local>
+    <local>DDSSEC</local>
+    <remote>DTLS</remote>
+    <remote>DDSSEC</remote>
+   </transport>
+   <transport protocol="TCP">
+    <local>TLS</local>
+    <remote>TLS</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>restrict</mode>
+    <controlled>no</controlled>
+    <discovery>secure</discovery>
+    <encryption>submessage</encryption>
+    <method>AES128_HMAC_SHA1</method>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <domain id="*">
+   <access>unclassified</access>
+   <membership>open</membership>
+   <transport>
+    <local>open</local>
+    <remote>open</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>open</mode>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <participant name="DCPS Test program">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>HelloWorld</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <controlled>yes</controlled>
+     <discovery>secure</discovery>
+     <encryption>payload</encryption>
+     <!--method>HMAC_SHA1</method-->
+     <method>AES128_HMAC_SHA1</method>
+    </topic>
+   </domain>
+  </participant>
+<participant name="7fef45661ffa779f 9283 21a6">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>HelloWorld</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <!-- controlled>yes</controlled-->
+     <!-- discovery>secure</discovery-->
+     <!-- encryption>submessage</encryption-->
+     <!---method>HMAC_SHA256</method-->
+    </topic>
+   </domain>
+  </participant>
+  <participant name="7fef45661ffa779f 9050 21a5">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>HelloWorld</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <!-- controlled>yes</controlled-->
+     <!-- discovery>secure</discovery-->
+     <!-- encryption>submessage</encryption-->
+     <!---method>HMAC_SHA256</method-->
+    </topic>
+   </domain>
+  </participant>
+ </security>
+</dds>

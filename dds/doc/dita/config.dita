@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_sjj_dtm_r4">
+ <title>Configuration mechanisms</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>A number of DDS parameters are present.  Either DDS global parameters or specific group-related
+   parameters can be configured.</p>
+  <p>A parameter name is typically formatted in configuration files and API function arguments
+   as:</p>
+  <p>
+   <b>[&lt;group>_]&lt;name></b></p>
+  <p>Where <b>&lt;group></b> is the name of the group and <b>&lt;name></b> is the parameter
+   name.</p>
+  <p>When refered to a parameter as an environment variable, it gets an additional <b>TDDS_</b>
+   prefix.</p>
+  <p>Example:  <b>export TDDS_IP_MCAST_TTL=20</b> sets an environment variable specifying the
+    <b>MCAST_TTL</b> parameter in the <b>IP</b> group.</p>
+  <p>DDS configuration files can be used to automatically configure Technicolor DDS on startup and
+   have the typical .ini file syntax with group names between brackets and parameters in a group
+   following the group name.</p>
+  <p>Example configuration file
+   contents:<codeblock>MAX_SAMPLE=100000     # Max. size of data samples
+
+[TCP]
+PORT=7400             # Set TCP server port.
+
+[IPV6]
+MODE=disabled         # No IPv6</codeblock></p>
+  <p>These files can be located in different places:<ul id="ul_x2t_3wm_r4">
+    <li>Either the location is specified by an application with a DDS API function as one of the
+     first actions on startup, before calling any other DDS
+     function:<codeblock>void DDS_configuration_set (const char *filename);</codeblock></li>
+    <li>or it is specified with the <b>TDDS_CONFIG=&lt;location></b> environment variable.</li>
+    <li>or one of the following standard filesystem locations are searched in the following order:<sl>
+      <sli>-> The current directory: <i>tdds.conf</i></sli>
+      <sli>-> The user's home directory: <i>~/.tdds.conf</i></sli>
+      <sli>-> The system configuration directory: <i>/etc/tdds.conf</i></sli>
+     </sl></li>
+  </ul></p>
+  <p>Configuration parameters can also be changed dynamically by applications with the following API
+   functions:<codeblock>DDS_ReturnCode_t DDS_parameter_set (
+    const char *name,
+    const char *value
+);
+
+DDS_ReturnCode_t DDS_parameter_unset (
+    const char *name
+);
+
+const char *DDS_parameter_get (
+    const char *name,
+    char buffer [],
+    size_t size
+);</codeblock></p>
+ </conbody>
+</concept>

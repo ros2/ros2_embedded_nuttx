@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_kf2_hvt_sf">
+ <title>Publish-subscribe methodology</title>
+ <shortdesc/>
+ <conbody>
+   <p>Various types of distributed middlewares exist, based on different approaches into how
+    end-to-end communication occurs:</p>
+   <p>
+    <ul id="ul_svt_lct_sf">
+     <li><b>Client-server</b>. This works well when all data is centralized, such as in databases,
+      transaction processing systems and in file servers. In this approach, a central server handles
+      client requests and sends responses when ready. Typically this doesn't scale well, since the
+      server is a central point of failure and quickly becomes a bottleneck in a system. Also, when
+      multiple nodes are able to generate data, they all have to sent this data to the server before
+      it can be redistributed. </li>
+     <li><b>Message-Passing</b>. The message-passing approach extends the client-server system to a
+      more distributed topology. It uses queues of messages to individual processes, which then
+      process a single message at the time and responding to them if appropriate. Message passing is
+      a lot more efficient than client-server, since it allows peer-to-peer communication. However,
+      there are also a number of problems associated with this:<ol id="ol_bzk_ypt_sf">
+       <li>The message passing approach is not data-centric, and requires the application to know
+        the details as to 'where' the data is available, and then asking the appropriate data
+        handling process for the data it is interested in.</li>
+       <li>If providing processes become unavailable, applications need to know this and must
+        recover properly, which is often quite complex to do.</li>
+      </ol></li>
+     <li><b>Publish-subscribe</b> The Publish-subscribe approach makes communication a lot easier,
+      since it adds a data-centric layer to the message passing approach. In this way, it is no
+      longer required for the application to know where the data is located. It just subscribes to a
+      specific data topic and will be notified when this data is available, is updated and is
+      removed. Data publishers also don't need to listen to requests for data. They simply publish
+      the data and the middleware will take care of proper distribution between the publishers and
+      the subscribers.</li>
+    </ul>
+   </p>
+   <p>The publish-subscribe approach is clearly the most powerful and most application-friendly
+    approach to sharing data. Since it is fully peer-to-peer, it is also very fast and scales very
+    well to a reasonable amount of distinct components (a hundred components seems feasible with
+    modest memory requirements). Its design also makes it a lot easier to recover on various error
+    situations, such as:</p>
+   <p><ul id="ul_xhd_gjt_sf">
+     <li>Components disappearing due to crashes, and restarting.</li>
+     <li>Components starting up in random order.</li>
+    </ul>A number of publish-subscribe middlewares exist currently. The most widely known are Java
+    Messaging Service (JMS) and Data Distribution System (DDS). The main differences between the two
+     are:<ul id="ul_ryn_bmt_sf">
+     <li>JMS is a lot slower than DDS, but allows both publish-subscribe and message-passing.</li>
+     <li>DDS was designed from the start for real-time systems, and is much better suited for
+      this.</li>
+     <li>DDS has no builtin message-passing mechanism, although it is not that difficult to do this
+      on top. In fact, the Remote Message Invocation (RMI) extension to DDS is a recent development,
+      which is doing exactly this.</li>
+    </ul></p>
+  </conbody>
+</concept>

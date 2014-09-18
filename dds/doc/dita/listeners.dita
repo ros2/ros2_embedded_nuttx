@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_hbx_5jm_5f">
+ <title>Listener functions</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The first and foremost mechanism is the Listener function. This mimics a bit the Unix
+    <i>signal</i> mechanism, in that it results in an asynchronous callback function in a thread
+   context that is not the thread of the user's application, so it is very important that some
+   precautions are taken to ensure proper use of this mechanism.</p>
+  <p>Listener callbacks can be specified on different entities as well as on encompassing entities
+   on top of the former. For a listener to be active, both the function callback must be set and the
+   Entity event mask indicating the specific listener must be set.  The primary entities and their
+   optional listeners are listed below:</p>
+  <p>
+   <table frame="all" id="table_qng_glm_5f">
+    <title>Listener functions</title>
+    <tgroup cols="2">
+     <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+     <colspec colname="c2" colnum="2" colwidth="2.64*" colsep="1" rowsep="1"/>
+     <thead>
+      <row>
+       <entry>Entity</entry>
+       <entry>Specific Listener functions</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>DataReader</entry>
+       <entry><i>requested_deadline_missed()</i>, <i>requested_incompatible_qos()</i>,
+         <i>sample_rejected()</i>, <i>liveliness_changed()</i>, <i>data_available()</i>,
+         <i>subscription_match()</i>, <i>sample_lost()</i></entry>
+      </row>
+      <row>
+       <entry>Subscriber</entry>
+       <entry><i>data_on_readers()</i></entry>
+      </row>
+      <row>
+       <entry>DataWriter</entry>
+       <entry><i>offered_deadline_missed()</i>, <i>offered_incompatible_qos()</i>,
+         <i>liveliness_lost()</i>, <i>publication_match()</i></entry>
+      </row>
+      <row>
+       <entry>Topic</entry>
+       <entry><i>inconsistent_topic()</i></entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
+  </p>
+  <p>The entities encompassing these primary entities inherit the listener functions of the
+   contained entities. For example, the Subscriber entity has both its own specific listener
+    (<i>data_on_readers()</i>), but also inherits every DataReader listener functions. The same can
+   be set of the Publisher entity, since it also contains the listener functions of the
+   DataWriter.</p>
+  <p>The DomainParticipant then inherits all listener functions, since it is a parent of all the
+   Topics, DataReaders, DataWriters as well as of all Publishers and Subscribers in the domain.</p>
+  <p>When multiple Listeners are available on all levels, the general rule is that the most specific
+   Listener will always be called.  The listeners on the higher levels are only called if there's no
+   listener on a more specific entity.  There is however a single exception of this rule for the
+   Subscriber.</p>
+  <p>The <i>data_on_readers()</i> listener is somewhat special, because even though there might be
+   more specific <i>data_available()</i> listeners on the contained DataReaders, if this specific
+   Subscriber listener is enabled, it will be called first.  The reason for this is that it is still
+   possible to call the specific <i>data_available()</i> listeners from within the
+    <i>data_on_readers()</i> callback function, using the <i>DDS_Subscriber_notify_datareaders()
+   </i>function.  Refer to the DCPS specification for more details on this.</p>
+  <p>As stated before, care must be taken as to which functions are used within a listener callback.
+   Since these callbacks occur from within a Technicolor DDS internal thread, it is very important
+   that a callback function tries to do its work as fast as possible and doesn't go to sleep for a
+   long time.  If there is a lot of work to do, or if the workload might block for a long time it is
+   necessary to dispatch this work to another thread, or just use the alternative WaitSet mechanism
+   which was really meant for these use-cases.</p>
+  <p>Technicolor DDS ensures that the state of DDS is valid for a number of function calls.
+   However, function calls that would block will return immediately with an error code, and function
+   calls that delete entities may not be called.</p>
+  <p>Within these restrictions, it is possible, and this is effectively one of the more commonly
+   used use-cases for listeners, to read data directly from a DataReader cache from within the
+   listener callback, and even to send data on another DataWriter.  For this, it is sufficient to
+   call any of the <i>DDS_DataReader_read/take() </i>function calls, followed by an optional
+    <i>DDS_DataReader_return_loan()</i> when finished with it.</p>
+ </conbody>
+</concept>

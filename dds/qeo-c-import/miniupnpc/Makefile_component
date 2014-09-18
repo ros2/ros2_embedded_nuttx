@@ -1,0 +1,32 @@
+ifneq ($($(miniupnpc_INCLUDED)),1)
+
+override COMPONENT          := miniupnpc
+
+miniupnpc_PARTS_INSTALL      := libminiupnpc.so@$$(libdir/)libminiupnpc.so:755
+miniupnpc_INCLUDES           := .
+miniupnpc_LIBS               := -lminiupnpc
+
+include $(projectdir/)build/Makefile_component_top
+
+
+miniupnpc.LIBRARIES               := libminiupnpc
+
+$(miniupnpc_COMP_DIR)/miniupnpcstrings.h:
+	cd $(miniupnpc_COMP_DIR) && /bin/sh updateminiupnpcstrings.sh
+
+$(miniupnpc_COMP_DIR)/miniwget.c: $(miniupnpc_COMP_DIR)/miniupnpcstrings.h
+
+miniupnpc.libminiupnpc_SRCS := miniwget.c minixml.c igd_desc_parse.c minisoap.c miniupnpc.c upnpreplyparse.c upnpcommands.c upnperrors.c connecthostport.c portlistingparse.c receivedata.c minissdpc.c
+miniupnpc.libminiupnpc_LOCALDEFINES := -Wall -W -Wstrict-prototypes -fno-common -DMINIUPNPC_SET_SOCKET_TIMEOUT -DMINIUPNPC_GET_SRC_ADDR -D_BSD_SOURCE -D_POSIX_C_SOURCE=1 -ansi
+ifdef ANDROID_ARCH
+miniupnpc.libminiupnpc_LOCALDEFINES += -Dsun
+endif
+ifeq ($(E),GOOG_ARMANDROID)
+#hacking around problem in android NDK. inline keyword is not supported by arm, this causes problems in this file: android-ndk-linux/platforms/android-9/arch-arm/usr/include/asm/byteorder.h
+miniupnpc.libminiupnpc_LOCALDEFINES += -Dinline=
+endif
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+

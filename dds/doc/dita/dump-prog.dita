@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_wrm_413_s4">
+ <title>Dump program</title>
+ <shortdesc/>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+   <p>The <cmdname>dump</cmdname> program is a simple example on how to monitor a DDS domain and
+    display any of its discovered topics.</p>
+   <p>It does this by listening to the builtin discovery readers and presenting a list of all the
+    discovered topics to the user.</p>
+   <p>When the user decides to monitor any of these topics, the X-types functions can be used to
+    create a new type support based on the discovered topic type.  A subsequent DDS DataReader
+    creation, referencing this type allows to read dynamic data samples that are published by the
+    remote DDS DataWriters.</p>
+   <p>Since Dynamic data samples can be introspected using the X-types functions, they can be
+    properly decoded and examined.</p>
+  </section>
+ <section><title>In-program commands</title>
+  <p>While the program is active, simple commands may be given to determine what should be
+    monitored.  These commands are an extension of the DDS Debug shell and provide for dump-specific
+    extensions.</p>
+   <p>Following commands are available:<table frame="all" id="table_wr1_nt3_v4">
+     <title>Dump program commands</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="2.39*"/>
+      <thead>
+       <row>
+        <entry>Command</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>list</cmdname></entry>
+        <entry>Lists all discovered domain topics.</entry>
+       </row>
+       <row>
+        <entry><cmdname>auto</cmdname>
+         <i>&lt;name_spec></i></entry>
+        <entry>Automatically monitor the topics matching the &lt;name_spec> argument, even if they
+         haven't been discovered yet.  Common wildcards like '*' and '?' are accepted.</entry>
+       </row>
+       <row>
+        <entry><cmdname>monitor</cmdname>
+         <i>&lt;name_spec></i></entry>
+        <entry>Monitor the discovered topics matching the given argument.</entry>
+       </row>
+       <row>
+        <entry><cmdname>ignore</cmdname>
+         <i>&lt;name_spec></i></entry>
+        <entry>Stop monitoring the discovered topics matching the argument.</entry>
+       </row>
+       <row>
+        <entry><cmdname>trace</cmdname></entry>
+        <entry>Toggle tracing of discovery traffic in real-time.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table></p></section>
+  <section><title>Starting the dump program</title><p>Following program arguments can be given:<table frame="all" id="table_vrl_jv3_v4">
+     <title>Dump program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="2.39*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-p</cmdname></entry>
+        <entry>Startup in paused state.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname></entry>
+        <entry>Trace discovered data.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-i</cmdname>
+         <i>&lt;num></i></entry>
+        <entry>Domain id to use.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-a</cmdname>
+         <i>&lt;name_spec></i></entry>
+        <entry>Topics to be monitored automatically.  This has the same effect as the in-program
+         auto command.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation. Logs overall functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose operation, logging detailed functionality.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Show the program options.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table></p></section>
+ </conbody>
+</concept>

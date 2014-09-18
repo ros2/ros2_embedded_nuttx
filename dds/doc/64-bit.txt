@@ -1,0 +1,47 @@
+char               = 1 byte
+unsigned short     = 2 bytes
+unsigned           = 4 bytes
+unsigned long      = 8 bytes
+unsigned long long = 8 bytes
+short              = 2 bytes
+int                = 4 bytes
+long               = 8 bytes
+long long          = 8 bytes
+float              = 4 bytes
+double             = 8 bytes
+long double        = 16 bytes
+char *             = 8 bytes
+int (*)(void)      = 8 bytes
+Test_t *           = 8 bytes
+Test_t             = 96 bytes
+
+For struct {
+	char		c;
+	unsigned short	us;
+	unsigned	u;
+	unsigned long	ul;
+	unsigned long long ull;
+	short		s;
+	int		i;
+	long		l;
+	long long	ll;
+	float		f;
+	double		d;
+	long double	ld;
+	char		*p;
+	int		(*fct)(void);
+}
+t.c offset          = 0 bytes
+t.us offset         = 2 bytes
+t.u offset          = 4 bytes
+t.ul offset         = 8 bytes
+t.ull offset        = 16 bytes
+t.s offset          = 24 bytes
+t.i offset          = 28 bytes
+t.l offset          = 32 bytes
+t.ll offset         = 40 bytes
+t.f offset          = 48 bytes
+t.d offset          = 56 bytes
+t.ld offset         = 64 bytes
+t.p offset          = 80 bytes
+t.fct offset        = 88 bytes

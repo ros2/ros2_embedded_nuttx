@@ -1,0 +1,2613 @@
+module DDS {
+    typedef long DomainId_t;
+    typedef long InstanceHandle_t;
+
+    struct BuiltinTopicKey_t {
+        long value[3];
+    };
+
+    typedef sequence<InstanceHandle_t> InstanceHandleSeq;
+
+    typedef long ReturnCode_t;
+    typedef long QosPolicyId_t;
+    typedef sequence<string> StringSeq;
+
+    struct Duration_t {
+        long sec;
+        unsigned long nanosec;
+    };
+
+    struct Time_t {
+        long sec;
+        unsigned long nanosec;
+    };
+
+
+
+
+    const InstanceHandle_t HANDLE_NIL = 0;
+
+    const long LENGTH_UNLIMITED = -1;
+
+    const long DURATION_INFINITE_SEC = 0x7fffffff;
+    const unsigned long DURATION_INFINITE_NSEC = 0x7fffffff;
+
+    const long DURATION_ZERO_SEC = 0;
+    const unsigned long DURATION_ZERO_NSEC = 0;
+
+    const long TIME_INVALID_SEC = -1;
+    const unsigned long TIME_INVALID_NSEC = 0xffffffff;
+
+
+
+
+    const ReturnCode_t RETCODE_OK = 0;
+    const ReturnCode_t RETCODE_ERROR = 1;
+    const ReturnCode_t RETCODE_UNSUPPORTED = 2;
+    const ReturnCode_t RETCODE_BAD_PARAMETER = 3;
+    const ReturnCode_t RETCODE_PRECONDITION_NOT_MET = 4;
+    const ReturnCode_t RETCODE_OUT_OF_RESOURCES = 5;
+    const ReturnCode_t RETCODE_NOT_ENABLED = 6;
+    const ReturnCode_t RETCODE_IMMUTABLE_POLICY = 7;
+    const ReturnCode_t RETCODE_INCONSISTENT_POLICY = 8;
+    const ReturnCode_t RETCODE_ALREADY_DELETED = 9;
+    const ReturnCode_t RETCODE_TIMEOUT = 10;
+    const ReturnCode_t RETCODE_NO_DATA = 11;
+    const ReturnCode_t RETCODE_ILLEGAL_OPERATION = 12;
+
+
+
+
+
+    typedef unsigned long StatusKind;
+    typedef unsigned long StatusMask;
+
+    const StatusKind INCONSISTENT_TOPIC_STATUS = 0x0001 << 0;
+    const StatusKind OFFERED_DEADLINE_MISSED_STATUS = 0x0001 << 1;
+    const StatusKind REQUESTED_DEADLINE_MISSED_STATUS = 0x0001 << 2;
+    const StatusKind OFFERED_INCOMPATIBLE_QOS_STATUS = 0x0001 << 5;
+    const StatusKind REQUESTED_INCOMPATIBLE_QOS_STATUS = 0x0001 << 6;
+    const StatusKind SAMPLE_LOST_STATUS = 0x0001 << 7;
+    const StatusKind SAMPLE_REJECTED_STATUS = 0x0001 << 8;
+    const StatusKind DATA_ON_READERS_STATUS = 0x0001 << 9;
+    const StatusKind DATA_AVAILABLE_STATUS = 0x0001 << 10;
+    const StatusKind LIVELINESS_LOST_STATUS = 0x0001 << 11;
+    const StatusKind LIVELINESS_CHANGED_STATUS = 0x0001 << 12;
+    const StatusKind PUBLICATION_MATCHED_STATUS = 0x0001 << 13;
+    const StatusKind SUBSCRIPTION_MATCHED_STATUS = 0x0001 << 14;
+
+    struct InconsistentTopicStatus {
+        long total_count;
+        long total_count_change;
+    };
+
+    struct SampleLostStatus {
+        long total_count;
+        long total_count_change;
+    };
+
+    enum SampleRejectedStatusKind {
+        NOT_REJECTED,
+        REJECTED_BY_INSTANCES_LIMIT,
+        REJECTED_BY_SAMPLES_LIMIT,
+        REJECTED_BY_SAMPLES_PER_INSTANCE_LIMIT
+    };
+
+    struct SampleRejectedStatus {
+        long total_count;
+        long total_count_change;
+        SampleRejectedStatusKind last_reason;
+        InstanceHandle_t last_instance_handle;
+    };
+
+    struct LivelinessLostStatus {
+        long total_count;
+        long total_count_change;
+    };
+
+    struct LivelinessChangedStatus {
+        long alive_count;
+        long not_alive_count;
+        long alive_count_change;
+        long not_alive_count_change;
+        InstanceHandle_t last_publication_handle;
+    };
+
+    struct OfferedDeadlineMissedStatus {
+        long total_count;
+        long total_count_change;
+        InstanceHandle_t last_instance_handle;
+    };
+
+    struct RequestedDeadlineMissedStatus {
+        long total_count;
+        long total_count_change;
+        InstanceHandle_t last_instance_handle;
+    };
+
+    struct QosPolicyCount {
+        QosPolicyId_t policy_id;
+        long count;
+    };
+
+    typedef sequence<QosPolicyCount> QosPolicyCountSeq;
+
+    struct OfferedIncompatibleQosStatus {
+        long total_count;
+        long total_count_change;
+        QosPolicyId_t last_policy_id;
+        QosPolicyCountSeq policies;
+    };
+
+    struct RequestedIncompatibleQosStatus {
+        long total_count;
+        long total_count_change;
+        QosPolicyId_t last_policy_id;
+        QosPolicyCountSeq policies;
+    };
+
+
+    struct PublicationMatchedStatus {
+        long total_count;
+        long total_count_change;
+        long current_count;
+        long current_count_change;
+        InstanceHandle_t last_subscription_handle;
+    };
+
+
+    struct SubscriptionMatchedStatus {
+        long total_count;
+        long total_count_change;
+        long current_count;
+        long current_count_change;
+        InstanceHandle_t last_publication_handle;
+    };
+
+
+
+
+
+    interface Listener;
+    interface Entity;
+    interface TopicDescription;
+    interface Topic;
+    interface ContentFilteredTopic;
+    interface MultiTopic;
+    interface DataWriter;
+    interface DataReader;
+    interface Subscriber;
+    interface Publisher;
+
+    typedef sequence<DataReader> DataReaderSeq;
+
+    interface Listener {};
+
+    interface TopicListener : Listener {
+    void on_inconsistent_topic(in Topic the_topic,
+        in InconsistentTopicStatus status);
+    };
+
+    interface DataWriterListener : Listener {
+        void on_offered_deadline_missed(
+            in DataWriter writer,
+            in OfferedDeadlineMissedStatus status);
+        void on_offered_incompatible_qos(
+            in DataWriter writer,
+            in OfferedIncompatibleQosStatus status);
+        void on_liveliness_lost(
+            in DataWriter writer,
+            in LivelinessLostStatus status);
+        void on_publication_matched(
+            in DataWriter writer,
+            in PublicationMatchedStatus status);
+    };
+
+    interface PublisherListener : DataWriterListener {
+    };
+
+    interface DataReaderListener : Listener {
+        void on_requested_deadline_missed(
+            in DataReader the_reader,
+            in RequestedDeadlineMissedStatus status);
+        void on_requested_incompatible_qos(
+            in DataReader the_reader,
+            in RequestedIncompatibleQosStatus status);
+        void on_sample_rejected(
+            in DataReader the_reader,
+            in SampleRejectedStatus status);
+        void on_liveliness_changed(
+            in DataReader the_reader,
+            in LivelinessChangedStatus status);
+        void on_data_available(
+            in DataReader the_reader);
+        void on_subscription_matched(
+            in DataReader the_reader,
+            in SubscriptionMatchedStatus status);
+        void on_sample_lost(
+            in DataReader the_reader,
+            in SampleLostStatus status);
+    };
+
+    interface SubscriberListener : DataReaderListener {
+        void on_data_on_readers(
+            in Subscriber the_subscriber);
+    };
+
+
+    interface DomainParticipantListener : TopicListener,
+                                      PublisherListener,
+                                      SubscriberListener {
+    };
+
+
+
+
+
+
+    interface Condition {
+        boolean get_trigger_value();
+    };
+
+    typedef sequence<Condition> ConditionSeq;
+
+    interface WaitSet {
+        ReturnCode_t wait(
+            inout ConditionSeq active_conditions,
+            in Duration_t timeout);
+        ReturnCode_t attach_condition(
+            in Condition cond);
+        ReturnCode_t detach_condition(
+            in Condition cond);
+        ReturnCode_t get_conditions(
+            inout ConditionSeq attached_conditions);
+    };
+
+    interface GuardCondition : Condition {
+        ReturnCode_t set_trigger_value(
+            in boolean value);
+    };
+
+    interface StatusCondition : Condition {
+        StatusMask get_enabled_statuses();
+        ReturnCode_t set_enabled_statuses(
+            in StatusMask mask);
+        Entity get_entity();
+    };
+
+
+    typedef unsigned long SampleStateKind;
+    const SampleStateKind READ_SAMPLE_STATE = 0x0001 << 0;
+    const SampleStateKind NOT_READ_SAMPLE_STATE = 0x0001 << 1;
+
+
+    typedef unsigned long SampleStateMask;
+    const SampleStateMask ANY_SAMPLE_STATE = 0xffff;
+
+
+    typedef unsigned long ViewStateKind;
+    const ViewStateKind NEW_VIEW_STATE = 0x0001 << 0;
+    const ViewStateKind NOT_NEW_VIEW_STATE = 0x0001 << 1;
+
+
+    typedef unsigned long ViewStateMask;
+    const ViewStateMask ANY_VIEW_STATE = 0xffff;
+
+
+    typedef unsigned long InstanceStateKind;
+    const InstanceStateKind ALIVE_INSTANCE_STATE = 0x0001 << 0;
+    const InstanceStateKind NOT_ALIVE_DISPOSED_INSTANCE_STATE = 0x0001 << 1;
+    const InstanceStateKind NOT_ALIVE_NO_WRITERS_INSTANCE_STATE = 0x0001 << 2;
+
+
+    typedef unsigned long InstanceStateMask;
+    const InstanceStateMask ANY_INSTANCE_STATE = 0xffff;
+    const InstanceStateMask NOT_ALIVE_INSTANCE_STATE = 0x006;
+
+
+    interface ReadCondition : Condition {
+        SampleStateMask get_sample_state_mask();
+        ViewStateMask get_view_state_mask();
+        InstanceStateMask get_instance_state_mask();
+        DataReader get_datareader();
+    };
+
+    interface QueryCondition : ReadCondition {
+        string get_query_expression();
+        ReturnCode_t get_query_parameters(
+            inout StringSeq query_parameters);
+        ReturnCode_t set_query_parameters(
+            in StringSeq query_parameters);
+    };
+
+
+
+
+    const string USERDATA_QOS_POLICY_NAME = "UserData";
+    const string DURABILITY_QOS_POLICY_NAME = "Durability";
+    const string PRESENTATION_QOS_POLICY_NAME = "Presentation";
+    const string DEADLINE_QOS_POLICY_NAME = "Deadline";
+    const string LATENCYBUDGET_QOS_POLICY_NAME = "LatencyBudget";
+    const string OWNERSHIP_QOS_POLICY_NAME = "Ownership";
+    const string OWNERSHIPSTRENGTH_QOS_POLICY_NAME = "OwnershipStrength";
+    const string LIVELINESS_QOS_POLICY_NAME = "Liveliness";
+    const string TIMEBASEDFILTER_QOS_POLICY_NAME = "TimeBasedFilter";
+    const string PARTITION_QOS_POLICY_NAME = "Partition";
+    const string RELIABILITY_QOS_POLICY_NAME = "Reliability";
+    const string DESTINATIONORDER_QOS_POLICY_NAME = "DestinationOrder";
+    const string HISTORY_QOS_POLICY_NAME = "History";
+    const string RESOURCELIMITS_QOS_POLICY_NAME = "ResourceLimits";
+    const string ENTITYFACTORY_QOS_POLICY_NAME = "EntityFactory";
+    const string WRITERDATALIFECYCLE_QOS_POLICY_NAME = "WriterDataLifecycle";
+    const string READERDATALIFECYCLE_QOS_POLICY_NAME = "ReaderDataLifecycle";
+    const string TOPICDATA_QOS_POLICY_NAME = "TopicData";
+    const string GROUPDATA_QOS_POLICY_NAME = "TransportPriority";
+    const string LIFESPAN_QOS_POLICY_NAME = "Lifespan";
+    const string DURABILITYSERVICE_POLICY_NAME = "DurabilityService";
+
+    const QosPolicyId_t INVALID_QOS_POLICY_ID = 0;
+    const QosPolicyId_t USERDATA_QOS_POLICY_ID = 1;
+    const QosPolicyId_t DURABILITY_QOS_POLICY_ID = 2;
+    const QosPolicyId_t PRESENTATION_QOS_POLICY_ID = 3;
+    const QosPolicyId_t DEADLINE_QOS_POLICY_ID = 4;
+    const QosPolicyId_t LATENCYBUDGET_QOS_POLICY_ID = 5;
+    const QosPolicyId_t OWNERSHIP_QOS_POLICY_ID = 6;
+    const QosPolicyId_t OWNERSHIPSTRENGTH_QOS_POLICY_ID = 7;
+    const QosPolicyId_t LIVELINESS_QOS_POLICY_ID = 8;
+    const QosPolicyId_t TIMEBASEDFILTER_QOS_POLICY_ID = 9;
+    const QosPolicyId_t PARTITION_QOS_POLICY_ID = 10;
+    const QosPolicyId_t RELIABILITY_QOS_POLICY_ID = 11;
+    const QosPolicyId_t DESTINATIONORDER_QOS_POLICY_ID = 12;
+    const QosPolicyId_t HISTORY_QOS_POLICY_ID = 13;
+    const QosPolicyId_t RESOURCELIMITS_QOS_POLICY_ID = 14;
+    const QosPolicyId_t ENTITYFACTORY_QOS_POLICY_ID = 15;
+    const QosPolicyId_t WRITERDATALIFECYCLE_QOS_POLICY_ID = 16;
+    const QosPolicyId_t READERDATALIFECYCLE_QOS_POLICY_ID = 17;
+    const QosPolicyId_t TOPICDATA_QOS_POLICY_ID = 18;
+    const QosPolicyId_t GROUPDATA_QOS_POLICY_ID = 19;
+    const QosPolicyId_t TRANSPORTPRIORITY_QOS_POLICY_ID = 20;
+    const QosPolicyId_t LIFESPAN_QOS_POLICY_ID = 21;
+    const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID = 22;
+
+    struct UserDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    struct TopicDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    struct GroupDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    struct TransportPriorityQosPolicy {
+        long value;
+    };
+
+    struct LifespanQosPolicy {
+        Duration_t duration;
+    };
+
+    enum DurabilityQosPolicyKind {
+        VOLATILE_DURABILITY_QOS,
+        TRANSIENT_LOCAL_DURABILITY_QOS,
+        TRANSIENT_DURABILITY_QOS,
+        PERSISTENT_DURABILITY_QOS
+    };
+    struct DurabilityQosPolicy {
+        DurabilityQosPolicyKind kind;
+    };
+
+    enum PresentationQosPolicyAccessScopeKind {
+        INSTANCE_PRESENTATION_QOS,
+        TOPIC_PRESENTATION_QOS,
+        GROUP_PRESENTATION_QOS
+    };
+    struct PresentationQosPolicy {
+        PresentationQosPolicyAccessScopeKind access_scope;
+        boolean coherent_access;
+        boolean ordered_access;
+    };
+
+    struct DeadlineQosPolicy {
+        Duration_t period;
+    };
+
+    struct LatencyBudgetQosPolicy {
+        Duration_t duration;
+    };
+
+    enum OwnershipQosPolicyKind {
+        SHARED_OWNERSHIP_QOS,
+        EXCLUSIVE_OWNERSHIP_QOS
+    };
+    struct OwnershipQosPolicy {
+        OwnershipQosPolicyKind kind;
+    };
+
+    struct OwnershipStrengthQosPolicy {
+        long value;
+    };
+
+    enum LivelinessQosPolicyKind {
+        AUTOMATIC_LIVELINESS_QOS,
+        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
+        MANUAL_BY_TOPIC_LIVELINESS_QOS
+    };
+
+    struct LivelinessQosPolicy {
+        LivelinessQosPolicyKind kind;
+        Duration_t lease_duration;
+    };
+
+    struct TimeBasedFilterQosPolicy {
+        Duration_t minimum_separation;
+    };
+
+    struct PartitionQosPolicy {
+        StringSeq name;
+    };
+
+    enum ReliabilityQosPolicyKind {
+        BEST_EFFORT_RELIABILITY_QOS,
+        RELIABLE_RELIABILITY_QOS
+    };
+
+    struct ReliabilityQosPolicy {
+        ReliabilityQosPolicyKind kind;
+        Duration_t max_blocking_time;
+    };
+
+   enum DestinationOrderQosPolicyKind {
+        BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
+    };
+    struct DestinationOrderQosPolicy {
+        DestinationOrderQosPolicyKind kind;
+    };
+
+    enum HistoryQosPolicyKind {
+        KEEP_LAST_HISTORY_QOS,
+        KEEP_ALL_HISTORY_QOS
+    };
+    struct HistoryQosPolicy {
+        HistoryQosPolicyKind kind;
+        long depth;
+    };
+
+    struct ResourceLimitsQosPolicy {
+        long max_samples;
+        long max_instances;
+        long max_samples_per_instance;
+    };
+
+    struct EntityFactoryQosPolicy {
+        boolean autoenable_created_entities;
+    };
+
+    struct WriterDataLifecycleQosPolicy {
+        boolean autodispose_unregistered_instances;
+    };
+
+    struct ReaderDataLifecycleQosPolicy {
+        Duration_t autopurge_nowriter_samples_delay;
+        Duration_t autopurge_disposed_samples_delay;
+    };
+
+    struct DurabilityServiceQosPolicy {
+        Duration_t service_cleanup_delay;
+        HistoryQosPolicyKind history_kind;
+        long history_depth;
+        long max_samples;
+        long max_instances;
+        long max_samples_per_instance;
+    };
+
+    struct DomainParticipantFactoryQos {
+        EntityFactoryQosPolicy entity_factory;
+    };
+
+    struct DomainParticipantQos {
+        UserDataQosPolicy user_data;
+        EntityFactoryQosPolicy entity_factory;
+    };
+
+    struct TopicQos {
+        TopicDataQosPolicy topic_data;
+        DurabilityQosPolicy durability;
+        DurabilityServiceQosPolicy durability_service;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        DestinationOrderQosPolicy destination_order;
+        HistoryQosPolicy history;
+        ResourceLimitsQosPolicy resource_limits;
+        TransportPriorityQosPolicy transport_priority;
+        LifespanQosPolicy lifespan;
+
+        OwnershipQosPolicy ownership;
+    };
+
+    struct DataWriterQos {
+        DurabilityQosPolicy durability;
+        DurabilityServiceQosPolicy durability_service;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        DestinationOrderQosPolicy destination_order;
+        HistoryQosPolicy history;
+        ResourceLimitsQosPolicy resource_limits;
+        TransportPriorityQosPolicy transport_priority;
+        LifespanQosPolicy lifespan;
+
+        UserDataQosPolicy user_data;
+        OwnershipQosPolicy ownership;
+        OwnershipStrengthQosPolicy ownership_strength;
+        WriterDataLifecycleQosPolicy writer_data_lifecycle;
+    };
+
+    struct PublisherQos {
+        PresentationQosPolicy presentation;
+        PartitionQosPolicy partition;
+        GroupDataQosPolicy group_data;
+        EntityFactoryQosPolicy entity_factory;
+    };
+
+    struct DataReaderQos {
+        DurabilityQosPolicy durability;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        DestinationOrderQosPolicy destination_order;
+        HistoryQosPolicy history;
+        ResourceLimitsQosPolicy resource_limits;
+
+        UserDataQosPolicy user_data;
+        OwnershipQosPolicy ownership;
+        TimeBasedFilterQosPolicy time_based_filter;
+        ReaderDataLifecycleQosPolicy reader_data_lifecycle;
+    };
+
+    struct SubscriberQos {
+        PresentationQosPolicy presentation;
+        PartitionQosPolicy partition;
+        GroupDataQosPolicy group_data;
+        EntityFactoryQosPolicy entity_factory;
+    };
+
+
+
+    struct ParticipantBuiltinTopicData {
+        BuiltinTopicKey_t key;
+        UserDataQosPolicy user_data;
+    };
+
+    struct TopicBuiltinTopicData {
+        BuiltinTopicKey_t key;
+        string name;
+        string type_name;
+        DurabilityQosPolicy durability;
+        DurabilityServiceQosPolicy durability_service;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        TransportPriorityQosPolicy transport_priority;
+        LifespanQosPolicy lifespan;
+        DestinationOrderQosPolicy destination_order;
+        HistoryQosPolicy history;
+        ResourceLimitsQosPolicy resource_limits;
+        OwnershipQosPolicy ownership;
+        TopicDataQosPolicy topic_data;
+    };
+
+    struct PublicationBuiltinTopicData {
+        BuiltinTopicKey_t key;
+        BuiltinTopicKey_t participant_key;
+        string topic_name;
+        string type_name;
+
+        DurabilityQosPolicy durability;
+        DurabilityServiceQosPolicy durability_service;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        LifespanQosPolicy lifespan;
+        UserDataQosPolicy user_data;
+        OwnershipQosPolicy ownership;
+        OwnershipStrengthQosPolicy ownership_strength;
+        DestinationOrderQosPolicy destination_order;
+
+        PresentationQosPolicy presentation;
+        PartitionQosPolicy partition;
+        TopicDataQosPolicy topic_data;
+        GroupDataQosPolicy group_data;
+    };
+
+    struct SubscriptionBuiltinTopicData {
+        BuiltinTopicKey_t key;
+        BuiltinTopicKey_t participant_key;
+        string topic_name;
+        string type_name;
+
+        DurabilityQosPolicy durability;
+        DeadlineQosPolicy deadline;
+        LatencyBudgetQosPolicy latency_budget;
+        LivelinessQosPolicy liveliness;
+        ReliabilityQosPolicy reliability;
+        OwnershipQosPolicy ownership;
+        DestinationOrderQosPolicy destination_order;
+        UserDataQosPolicy user_data;
+        TimeBasedFilterQosPolicy time_based_filter;
+
+        PresentationQosPolicy presentation;
+        PartitionQosPolicy partition;
+        TopicDataQosPolicy topic_data;
+        GroupDataQosPolicy group_data;
+    };
+
+
+    interface Entity {
+        ReturnCode_t enable();
+
+        StatusCondition get_statuscondition();
+
+        StatusMask get_status_changes();
+
+        InstanceHandle_t get_instance_handle();
+    };
+
+
+    interface DomainParticipant : Entity {
+
+        Publisher create_publisher(
+            in PublisherQos qos,
+            in PublisherListener a_listener,
+            in StatusMask mask);
+        ReturnCode_t delete_publisher(
+            in Publisher p);
+
+        Subscriber create_subscriber(
+            in SubscriberQos qos,
+            in SubscriberListener a_listener,
+            in StatusMask mask);
+        ReturnCode_t delete_subscriber(
+            in Subscriber s);
+        Subscriber get_builtin_subscriber();
+
+        Topic create_topic(
+            in string topic_name,
+            in string type_name,
+            in TopicQos qos,
+            in TopicListener a_listener,
+            in StatusMask mask);
+
+        ReturnCode_t delete_topic(
+            in Topic a_topic);
+
+        Topic find_topic(
+            in string topic_name,
+            in Duration_t timeout);
+        TopicDescription lookup_topicdescription(
+            in string name);
+
+        ContentFilteredTopic create_contentfilteredtopic(
+            in string name,
+            in Topic related_topic,
+            in string filter_expression,
+            in StringSeq expression_parameters);
+
+        ReturnCode_t delete_contentfilteredtopic(
+            in ContentFilteredTopic a_contentfilteredtopic);
+
+        MultiTopic create_multitopic(
+            in string name,
+            in string type_name,
+            in string subscription_expression,
+            in StringSeq expression_parameters);
+
+        ReturnCode_t delete_multitopic(
+            in MultiTopic a_multitopic);
+
+        ReturnCode_t delete_contained_entities();
+
+        ReturnCode_t set_qos(
+            in DomainParticipantQos qos);
+        ReturnCode_t get_qos(
+            inout DomainParticipantQos qos);
+
+        ReturnCode_t set_listener(
+            in DomainParticipantListener a_listener,
+            in StatusMask mask);
+        DomainParticipantListener get_listener();
+
+        ReturnCode_t ignore_participant(
+            in InstanceHandle_t handle);
+        ReturnCode_t ignore_topic(
+            in InstanceHandle_t handle);
+        ReturnCode_t ignore_publication(
+            in InstanceHandle_t handle);
+        ReturnCode_t ignore_subscription(
+            in InstanceHandle_t handle);
+
+        DomainId_t get_domain_id();
+        ReturnCode_t assert_liveliness();
+
+        ReturnCode_t set_default_publisher_qos(
+            in PublisherQos qos);
+        ReturnCode_t get_default_publisher_qos(
+            inout PublisherQos qos);
+
+        ReturnCode_t set_default_subscriber_qos(
+            in SubscriberQos qos);
+        ReturnCode_t get_default_subscriber_qos(
+            inout SubscriberQos qos);
+
+        ReturnCode_t set_default_topic_qos(
+            in TopicQos qos);
+        ReturnCode_t get_default_topic_qos(
+            inout TopicQos qos);
+
+        ReturnCode_t get_discovered_participants(
+            inout InstanceHandleSeq participant_handles);
+        ReturnCode_t get_discovered_participant_data(
+            inout ParticipantBuiltinTopicData participant_data,
+            in InstanceHandle_t participant_handle);
+
+        ReturnCode_t get_discovered_topics(
+            inout InstanceHandleSeq topic_handles);
+        ReturnCode_t get_discovered_topic_data(
+            inout TopicBuiltinTopicData topic_data,
+            in InstanceHandle_t topic_handle);
+
+        boolean contains_entity(
+            in InstanceHandle_t a_handle);
+
+        ReturnCode_t get_current_time(
+            inout Time_t current_time);
+    };
+
+    interface DomainParticipantFactory {
+        DomainParticipant create_participant(
+            in DomainId_t domain_id,
+            in DomainParticipantQos qos,
+            in DomainParticipantListener a_listener,
+            in StatusMask mask);
+        ReturnCode_t delete_participant(
+            in DomainParticipant a_participant);
+
+        DomainParticipant lookup_participant(
+            in DomainId_t domain_id);
+
+        ReturnCode_t set_default_participant_qos(
+            in DomainParticipantQos qos);
+        ReturnCode_t get_default_participant_qos(
+            inout DomainParticipantQos qos);
+
+        ReturnCode_t set_qos(
+            in DomainParticipantFactoryQos qos);
+        ReturnCode_t get_qos(
+            inout DomainParticipantFactoryQos qos);
+    };
+
+    interface TypeSupport {
+
+
+
+
+    };
+
+
+    interface TopicDescription {
+        string get_type_name();
+        string get_name();
+
+        DomainParticipant get_participant();
+    };
+
+    interface Topic : Entity, TopicDescription {
+        ReturnCode_t set_qos(
+            in TopicQos qos);
+        ReturnCode_t get_qos(
+            inout TopicQos qos);
+        ReturnCode_t set_listener(
+            in TopicListener a_listener,
+            in StatusMask mask);
+        TopicListener get_listener();
+
+        ReturnCode_t get_inconsistent_topic_status(
+            inout InconsistentTopicStatus a_status);
+    };
+
+    interface ContentFilteredTopic : TopicDescription {
+        string get_filter_expression();
+        ReturnCode_t get_expression_parameters(
+            inout StringSeq expression_parameters);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+        Topic get_related_topic();
+    };
+
+    interface MultiTopic : TopicDescription {
+        string get_subscription_expression();
+        ReturnCode_t get_expression_parameters(
+            inout StringSeq expression_parameters);
+        ReturnCode_t set_expression_parameters(
+            in StringSeq expression_parameters);
+    };
+
+
+    interface Publisher : Entity {
+        DataWriter create_datawriter(
+            in Topic a_topic,
+            in DataWriterQos qos,
+            in DataWriterListener a_listener,
+            in StatusMask mask);
+        ReturnCode_t delete_datawriter(
+            in DataWriter a_datawriter);
+        DataWriter lookup_datawriter(
+            in string topic_name);
+
+        ReturnCode_t delete_contained_entities();
+
+        ReturnCode_t set_qos(
+            in PublisherQos qos);
+        ReturnCode_t get_qos(
+            inout PublisherQos qos);
+
+        ReturnCode_t set_listener(
+            in PublisherListener a_listener,
+            in StatusMask mask);
+        PublisherListener get_listener();
+
+        ReturnCode_t suspend_publications();
+        ReturnCode_t resume_publications();
+
+        ReturnCode_t begin_coherent_changes();
+        ReturnCode_t end_coherent_changes();
+
+        ReturnCode_t wait_for_acknowledgments(
+            in Duration_t max_wait);
+
+        DomainParticipant get_participant();
+
+        ReturnCode_t set_default_datawriter_qos(
+            in DataWriterQos qos);
+        ReturnCode_t get_default_datawriter_qos(
+            inout DataWriterQos qos);
+
+        ReturnCode_t copy_from_topic_qos(
+            inout DataWriterQos a_datawriter_qos,
+            in TopicQos a_topic_qos);
+    };
+
+    interface DataWriter : Entity {
+        ReturnCode_t set_qos(
+            in DataWriterQos qos);
+        ReturnCode_t get_qos(
+            inout DataWriterQos qos);
+
+        ReturnCode_t set_listener(
+            in DataWriterListener a_listener,
+            in StatusMask mask);
+        DataWriterListener get_listener();
+
+        Topic get_topic();
+        Publisher get_publisher();
+
+        ReturnCode_t wait_for_acknowledgments(
+            in Duration_t max_wait);
+
+
+        ReturnCode_t get_liveliness_lost_status(
+            inout LivelinessLostStatus status);
+        ReturnCode_t get_offered_deadline_missed_status(
+            inout OfferedDeadlineMissedStatus status);
+        ReturnCode_t get_offered_incompatible_qos_status(
+            inout OfferedIncompatibleQosStatus status);
+        ReturnCode_t get_publication_matched_status(
+            inout PublicationMatchedStatus status);
+
+        ReturnCode_t assert_liveliness();
+
+        ReturnCode_t get_matched_subscriptions(
+            inout InstanceHandleSeq subscription_handles);
+        ReturnCode_t get_matched_subscription_data(
+            inout SubscriptionBuiltinTopicData subscription_data,
+            in InstanceHandle_t subscription_handle);
+    };
+
+
+    interface Subscriber : Entity {
+        DataReader create_datareader(
+            in TopicDescription a_topic,
+            in DataReaderQos qos,
+            in DataReaderListener a_listener,
+            in StatusMask mask);
+        ReturnCode_t delete_datareader(
+            in DataReader a_datareader);
+        ReturnCode_t delete_contained_entities();
+        DataReader lookup_datareader(
+            in string topic_name);
+        ReturnCode_t get_datareaders(
+            inout DataReaderSeq readers,
+            in SampleStateMask sample_states,
+            in ViewStateMask view_states,
+            in InstanceStateMask instance_states);
+        ReturnCode_t notify_datareaders();
+
+        ReturnCode_t set_qos(
+            in SubscriberQos qos);
+        ReturnCode_t get_qos(
+            inout SubscriberQos qos);
+
+        ReturnCode_t set_listener(
+            in SubscriberListener a_listener,
+            in StatusMask mask);
+        SubscriberListener get_listener();
+
+        ReturnCode_t begin_access();
+        ReturnCode_t end_access();
+
+        DomainParticipant get_participant();
+
+        ReturnCode_t set_default_datareader_qos(
+            in DataReaderQos qos);
+        ReturnCode_t get_default_datareader_qos(
+            inout DataReaderQos qos);
+
+        ReturnCode_t copy_from_topic_qos(
+            inout DataReaderQos a_datareader_qos,
+            in TopicQos a_topic_qos);
+    };
+
+    interface DataReader : Entity {
+        ReadCondition create_readcondition(
+            in SampleStateMask sample_states,
+            in ViewStateMask view_states,
+            in InstanceStateMask instance_states);
+
+        QueryCondition create_querycondition(
+            in SampleStateMask sample_states,
+            in ViewStateMask view_states,
+            in InstanceStateMask instance_states,
+            in string query_expression,
+            in StringSeq query_parameters);
+
+        ReturnCode_t delete_readcondition(
+            in ReadCondition a_condition);
+
+        ReturnCode_t delete_contained_entities();
+
+        ReturnCode_t set_qos(
+            in DataReaderQos qos);
+        ReturnCode_t get_qos(
+            inout DataReaderQos qos);
+
+        ReturnCode_t set_listener(
+            in DataReaderListener a_listener,
+            in StatusMask mask);
+        DataReaderListener get_listener();
+
+        TopicDescription get_topicdescription();
+        Subscriber get_subscriber();
+
+        ReturnCode_t get_sample_rejected_status(
+            inout SampleRejectedStatus status);
+        ReturnCode_t get_liveliness_changed_status(
+            inout LivelinessChangedStatus status);
+        ReturnCode_t get_requested_deadline_missed_status(
+            inout RequestedDeadlineMissedStatus status);
+        ReturnCode_t get_requested_incompatible_qos_status(
+            inout RequestedIncompatibleQosStatus status);
+        ReturnCode_t get_subscription_matched_status(
+            inout SubscriptionMatchedStatus status);
+        ReturnCode_t get_sample_lost_status(
+            inout SampleLostStatus status);
+
+        ReturnCode_t wait_for_historical_data(
+            in Duration_t max_wait);
+
+        ReturnCode_t get_matched_publications(
+            inout InstanceHandleSeq publication_handles);
+        ReturnCode_t get_matched_publication_data(
+            inout PublicationBuiltinTopicData publication_data,
+            in InstanceHandle_t publication_handle);
+    };
+
+
+    struct SampleInfo {
+        SampleStateKind sample_state;
+        ViewStateKind view_state;
+        InstanceStateKind instance_state;
+        Time_t source_timestamp;
+        InstanceHandle_t instance_handle;
+        InstanceHandle_t publication_handle;
+        long disposed_generation_count;
+        long no_writers_generation_count;
+        long sample_rank;
+        long generation_rank;
+        long absolute_generation_rank;
+        boolean valid_data;
+    };
+
+    typedef sequence<SampleInfo> SampleInfoSeq;
+};
+
+
+
+struct Foo {
+    long dummy;
+};
+
+typedef sequence<Foo> FooSeq;
+
+
+
+interface FooTypeSupport : DDS::TypeSupport {
+    DDS::ReturnCode_t register_type(
+        in DDS::DomainParticipant participant,
+        in string type_name);
+    string get_type_name();
+};
+
+interface FooDataWriter : DDS::DataWriter {
+
+    DDS::InstanceHandle_t register_instance(
+        in Foo instance_data);
+    DDS::InstanceHandle_t register_instance_w_timestamp(
+        in Foo instance_data,
+        in DDS::Time_t source_timestamp);
+
+
+    DDS::ReturnCode_t unregister_instance(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t handle);
+    DDS::ReturnCode_t unregister_instance_w_timestamp(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t handle,
+        in DDS::Time_t source_timestamp);
+
+    DDS::ReturnCode_t write(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t handle);
+
+    DDS::ReturnCode_t write_w_timestamp(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t handle,
+        in DDS::Time_t source_timestamp);
+
+    DDS::ReturnCode_t dispose(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t instance_handle);
+
+    DDS::ReturnCode_t dispose_w_timestamp(
+        in Foo instance_data,
+        in DDS::InstanceHandle_t instance_handle,
+        in DDS::Time_t source_timestamp);
+
+    DDS::ReturnCode_t get_key_value(
+        inout Foo key_holder,
+        in DDS::InstanceHandle_t handle);
+
+    DDS::InstanceHandle_t lookup_instance(
+        in Foo key_holder);
+};
+
+interface FooDataReader : DDS::DataReader {
+    DDS::ReturnCode_t read(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t take(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t read_w_condition(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::ReadCondition a_condition);
+
+    DDS::ReturnCode_t take_w_condition(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::ReadCondition a_condition);
+
+    DDS::ReturnCode_t read_next_sample(
+        inout Foo data_value,
+        inout DDS::SampleInfo sample_info);
+
+    DDS::ReturnCode_t take_next_sample(
+        inout Foo data_value,
+        inout DDS::SampleInfo sample_info);
+
+
+    DDS::ReturnCode_t read_instance(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t a_handle,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t take_instance(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t a_handle,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t read_next_instance(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t previous_handle,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t take_next_instance(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t previous_handle,
+        in DDS::SampleStateMask sample_states,
+        in DDS::ViewStateMask view_states,
+        in DDS::InstanceStateMask instance_states);
+
+    DDS::ReturnCode_t read_next_instance_w_condition(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t previous_handle,
+        in DDS::ReadCondition a_condition);
+
+    DDS::ReturnCode_t take_next_instance_w_condition(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos,
+        in long max_samples,
+        in DDS::InstanceHandle_t previous_handle,
+        in DDS::ReadCondition a_condition);
+
+
+    DDS::ReturnCode_t return_loan(
+        inout FooSeq data_values,
+        inout DDS::SampleInfoSeq sample_infos);
+
+    DDS::ReturnCode_t get_key_value(
+        inout Foo key_holder,
+        in DDS::InstanceHandle_t handle);
+
+    DDS::InstanceHandle_t lookup_instance(
+        in Foo key_holder);
+};
+
+
+
+
+
+
+module DDS {
+
+
+
+    typedef short TypeKind;
+
+    const TypeKind NO_TYPE = 0;
+
+    const TypeKind BOOLEAN_TYPE = 1;
+    const TypeKind BYTE_TYPE = 2;
+    const TypeKind INT_16_TYPE = 3;
+    const TypeKind UINT_16_TYPE = 4;
+    const TypeKind INT_32_TYPE = 5;
+    const TypeKind UINT_32_TYPE = 6;
+    const TypeKind INT_64_TYPE = 7;
+    const TypeKind UINT_64_TYPE = 8;
+    const TypeKind FLOAT_32_TYPE = 9;
+    const TypeKind FLOAT_64_TYPE = 10;
+    const TypeKind FLOAT_128_TYPE = 11;
+    const TypeKind CHAR_8_TYPE = 12;
+    const TypeKind CHAR_32_TYPE = 13;
+
+    const TypeKind ENUMERATION_TYPE = 14;
+    const TypeKind BITSET_TYPE = 15;
+    const TypeKind ALIAS_TYPE = 16;
+
+    const TypeKind ARRAY_TYPE = 17;
+    const TypeKind SEQUENCE_TYPE = 18;
+    const TypeKind STRING_TYPE = 19;
+    const TypeKind MAP_TYPE = 20;
+
+    const TypeKind UNION_TYPE = 21;
+    const TypeKind STRUCTURE_TYPE = 22;
+    const TypeKind ANNOTATION_TYPE = 23;
+
+
+    const long ELEMENT_NAME_MAX_LENGTH = 256;
+    typedef string<ELEMENT_NAME_MAX_LENGTH> ObjectName;
+
+
+    typedef long _TypeId;
+
+    const _TypeId NO_TYPE_ID = NO_TYPE;
+    const _TypeId BOOLEAN_TYPE_ID = BOOLEAN_TYPE;
+    const _TypeId BYTE_TYPE_ID = BYTE_TYPE;
+    const _TypeId INT_16_TYPE_ID = INT_16_TYPE;
+    const _TypeId UINT_16_TYPE_ID = UINT_16_TYPE;
+    const _TypeId INT_32_TYPE_ID = INT_32_TYPE;
+    const _TypeId UINT_32_TYPE_ID = UINT_32_TYPE;
+    const _TypeId INT_64_TYPE_ID = INT_64_TYPE;
+    const _TypeId UINT_64_TYPE_ID = UINT_64_TYPE;
+    const _TypeId FLOAT_32_TYPE_ID = FLOAT_32_TYPE;
+    const _TypeId FLOAT_64_TYPE_ID = FLOAT_64_TYPE;
+    const _TypeId FLOAT_128_TYPE_ID = FLOAT_128_TYPE;
+    const _TypeId CHAR_8_TYPE_ID = CHAR_8_TYPE;
+    const _TypeId CHAR_32_TYPE_ID = CHAR_32_TYPE;
+
+
+
+
+
+    typedef unsigned long MemberId;
+    const MemberId MEMBER_ID_INVALID = 0x0FFFFFFF;
+
+
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    union AnnotationMemberValue switch (TypeKind) {
+        case BOOLEAN_TYPE:
+            boolean boolean_value;
+        case BYTE_TYPE:
+            octet byte_value;
+        case INT_16_TYPE:
+            short int_16_value;
+        case UINT_16_TYPE:
+            unsigned short uint_16_value;
+        case INT_32_TYPE:
+            long int_32_value;
+        case UINT_32_TYPE:
+            unsigned long uint_32_value;
+        case INT_64_TYPE:
+            long long int_64_value;
+        case UINT_64_TYPE:
+            unsigned long long uint_64_value;
+        case FLOAT_32_TYPE:
+            float float_32_value;
+        case FLOAT_64_TYPE:
+            double float_64_value;
+        case FLOAT_128_TYPE:
+            long double float_128_value;
+        case CHAR_8_TYPE:
+            char character_value;
+        case CHAR_32_TYPE:
+            wchar wide_character_value;
+        case ENUMERATION_TYPE:
+            long enumeration_value;
+        case STRING_TYPE:
+            wstring string_value;
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct AnnotationUsageMember {
+        MemberId member_id;
+        AnnotationMemberValue value;
+    };
+
+    typedef sequence<AnnotationUsageMember> AnnotationUsageMemberSeq;
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct AnnotationUsage {
+        _TypeId type_id;
+        AnnotationUsageMemberSeq member;
+    };
+
+    typedef sequence<AnnotationUsage> AnnotationUsageSeq;
+
+
+
+
+
+    @BitSet @BitBound(16)
+    enum TypeFlag {
+        @Value(0) IS_FINAL,
+        @Value(1) IS_MUTABLE,
+        @Value(2) IS_NESTED
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TypeProperty {
+        TypeFlag flag;
+        _TypeId type_id;
+        ObjectName name;
+    };
+
+
+    enum TypeMemberId {
+        @Value(0) PROPERTY_TYPE_MEMBER_ID,
+        @Value(1) ANNOTATION_TYPE_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct Type {
+        @ID(PROPERTY_TYPE_MEMBER_ID) TypeProperty property;
+        @ID(ANNOTATION_TYPE_MEMBER_ID) AnnotationUsageSeq annotation;
+    };
+
+
+
+
+
+    @BitSet @BitBound(16)
+    enum MemberFlag {
+        @Value(0) IS_KEY,
+        @Value(1) IS_OPTIONAL,
+        @Value(2) IS_SHAREABLE,
+        @Value(3) IS_UNION_DEFAULT
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct MemberProperty {
+        MemberFlag flag;
+        MemberId member_id;
+        _TypeId type_id;
+        ObjectName name;
+    };
+
+
+    enum MemberMemberId {
+        @Value(0) PROPERTY_MEMBER_MEMBER_ID,
+        @Value(1) ANNOTATION_MEMBER_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct Member {
+        @ID(PROPERTY_MEMBER_MEMBER_ID) MemberProperty property;
+        @ID(ANNOTATION_MEMBER_MEMBER_ID) AnnotationUsageSeq annotation;
+    };
+
+    typedef sequence<Member> MemberSeq;
+
+
+    enum StructureTypeMemberId {
+        @Value(100) BASE_TYPE_STRUCTURETYPE_MEMBER_ID,
+        @Value(101) MEMBER_STRUCTURETYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct StructureType : Type {
+        @ID(BASE_TYPE_STRUCTURETYPE_MEMBER_ID) _TypeId base_type;
+        @ID(MEMBER_STRUCTURETYPE_MEMBER_ID) MemberSeq member;
+    };
+
+
+    typedef sequence<long> UnionCaseLabelSeq;
+
+
+    enum UnionMemberMemberId {
+        @Value(100) LABEL_UNIONMEMBER_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct UnionMember : Member {
+        @ID(LABEL_UNIONMEMBER_MEMBER_ID) UnionCaseLabelSeq label;
+    };
+
+    typedef sequence<UnionMember> UnionMemberSeq;
+
+
+    enum UnionTypeMemberId {
+        @Value(100) MEMBER_UNIONTYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct UnionType : Type {
+        @ID(MEMBER_UNIONTYPE_MEMBER_ID) UnionMemberSeq member;
+    };
+
+
+    enum AnnotationMemberMemberId {
+        @Value(100) DEFAULT_VALUE_ANNOTATIONMEMBER_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct AnnotationMember : Member {
+        @ID(DEFAULT_VALUE_ANNOTATIONMEMBER_MEMBER_ID)
+        AnnotationMemberValue default_value;
+    };
+
+    typedef sequence<AnnotationMember> AnnotationMemberSeq;
+
+
+    enum AnnotationTypeMemberId {
+        @Value(100) BASE_TYPE_ANNOTATIONTYPE_MEMBER_ID,
+        @Value(101) MEMBER_ANNOTATIONTYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct AnnotationType : Type {
+        @ID(BASE_TYPE_ANNOTATIONTYPE_MEMBER_ID) _TypeId base_type;
+        @ID(MEMBER_ANNOTATIONTYPE_MEMBER_ID) AnnotationMemberSeq member;
+    };
+
+
+
+
+
+    enum AliasTypeMemberId {
+        @Value(100) BASE_TYPE_ALIASTYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct AliasType : Type {
+        @ID(BASE_TYPE_ALIASTYPE_MEMBER_ID) _TypeId base_type;
+    };
+
+
+
+
+
+    typedef unsigned long Bound;
+    typedef sequence<Bound> BoundSeq;
+    const Bound UNBOUNDED_COLLECTION = 0;
+
+
+    enum CollectionTypeMemberId {
+        @Value(100) ELEMENT_TYPE_COLLECTIONTYPE_MEMBER_ID,
+        @Value(101) ELEMENT_SHARED_COLLECTIONTYPE_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct CollectionType : Type {
+        @ID(ELEMENT_TYPE_COLLECTIONTYPE_MEMBER_ID) _TypeId element_type;
+        @ID(ELEMENT_SHARED_COLLECTIONTYPE_MEMBER_ID) boolean element_shared;
+    };
+
+
+    enum ArrayTypeMemberId {
+        @Value(200) BOUND_ARRAYTYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct ArrayType : CollectionType {
+        @ID(BOUND_ARRAYTYPE_MEMBER_ID) BoundSeq bound;
+    };
+
+
+    enum MapTypeMemberId {
+        @Value(200) KEY_ELEMENT_TYPE_MAPTYPE_MEMBER_ID,
+        @Value(201) BOUND_MAPTYPE_MEMBER_ID
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct MapType : CollectionType {
+        @ID(KEY_ELEMENT_TYPE_MAPTYPE_MEMBER_ID) _TypeId key_element_type;
+        @ID(BOUND_MAPTYPE_MEMBER_ID) Bound bound;
+    };
+
+
+    enum SequenceTypeMemberId {
+        @Value(200) BOUND_SEQUENCETYPE_MEMBER_ID
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct SequenceType : CollectionType {
+        @ID(BOUND_SEQUENCETYPE_MEMBER_ID) Bound bound;
+    };
+
+
+    enum StringTypeMemberId {
+        @Value(200) BOUND_STRINGTYPE_MEMBER_ID
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct StringType : CollectionType {
+        @ID(BOUND_STRINGTYPE_MEMBER_ID) Bound bound;
+    };
+
+
+
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct Bit {
+        long index;
+        ObjectName name;
+    };
+
+    typedef sequence<Bit> BitSeq;
+
+
+    enum BitSetTypeMemberId {
+        @Value(100) BIT_BOUND_BITSETTYPE_MEMBER_ID,
+        @Value(101) BIT_BITSETTYPE_MEMBER_ID
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct BitSetType : Type {
+        @ID(BIT_BOUND_BITSETTYPE_MEMBER_ID) Bound bit_bound;
+        @ID(BIT_BITSETTYPE_MEMBER_ID) BitSeq bit;
+    };
+
+
+
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct EnumeratedConstant {
+        long value;
+        ObjectName name;
+    };
+
+    typedef sequence<EnumeratedConstant> EnumeratedConstantSeq;
+
+
+    enum EnumerationTypeMemberId {
+        @Value(100) BIT_BOUND_ENUMERATIONTYPE_MEMBER_ID,
+        @Value(101) CONSTANT_ENUMERATIONTYPE_MEMBER_ID
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    struct EnumerationType : Type {
+        @ID(BIT_BOUND_ENUMERATIONTYPE_MEMBER_ID)
+        Bound bit_bound;
+        @ID(CONSTANT_ENUMERATIONTYPE_MEMBER_ID)
+        EnumeratedConstantSeq constant;
+    };
+
+
+
+
+    struct TypeLibrary;
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct _Module {
+        ObjectName name;
+        @Shared TypeLibrary library;
+    };
+
+
+
+
+
+    @BitBound(16)
+    enum TypeLibraryElementKind {
+        @Value(ALIAS_TYPE) ALIAS_TYPE_ELEMENT,
+        @Value(ANNOTATION_TYPE) ANNOTATION_TYPE_ELEMENT,
+        @Value(ARRAY_TYPE) ARRAY_TYPE_ELEMENT,
+        @Value(BITSET_TYPE) BITSET_TYPE_ELEMENT,
+        @Value(ENUMERATION_TYPE) ENUMERATION_TYPE_ELEMENT,
+        @Value(MAP_TYPE) MAP_TYPE_ELEMENT,
+        @Value(SEQUENCE_TYPE) SEQUENCE_TYPE_ELEMENT,
+        @Value(STRING_TYPE) STRING_TYPE_ELEMENT,
+        @Value(STRUCTURE_TYPE) STRUCTURE_TYPE_ELEMENT,
+        @Value(UNION_TYPE) UNION_TYPE_ELEMENT,
+
+                                 MODULE_ELEMENT
+    };
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY) @Nested
+    union TypeLibraryElement switch (TypeLibraryElementKind) {
+        case ALIAS_TYPE_ELEMENT:
+            AliasType alias_type;
+        case ANNOTATION_TYPE_ELEMENT:
+            AnnotationType annotation_type;
+        case ARRAY_TYPE_ELEMENT:
+            ArrayType array_type;
+        case BITSET_TYPE_ELEMENT:
+            BitSetType bitset_type;
+        case ENUMERATION_TYPE_ELEMENT:
+            EnumerationType enumeration_type;
+        case MAP_TYPE_ELEMENT:
+            MapType map_type;
+        case SEQUENCE_TYPE_ELEMENT:
+            SequenceType sequence_type;
+        case STRING_TYPE_ELEMENT:
+            StringType string_type;
+        case STRUCTURE_TYPE_ELEMENT:
+            StructureType structure_type;
+        case UNION_TYPE_ELEMENT:
+            UnionType union_type;
+        case MODULE_ELEMENT:
+            _Module mod;
+    };
+
+    typedef sequence<TypeLibraryElement> TypeLibraryElementSeq;
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TypeLibrary {
+        TypeLibraryElementSeq element;
+    };
+
+
+
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct TypeObject {
+        @Shared TypeLibrary library;
+        @Optional _TypeId the_type;
+    };
+};
+
+
+
+
+
+
+module DDS {
+    local interface DynamicType;
+    valuetype TypeDescriptor;
+
+    typedef sequence<string> IncludePathSeq;
+
+    local interface DynamicTypeFactory {
+                   DynamicTypeFactory get_instance();
+                   DDS::ReturnCode_t delete_instance();
+
+        DynamicType get_primitive_type(in TypeKind kind);
+        DynamicType create_type(in TypeDescriptor descriptor);
+        DynamicType create_string_type(in unsigned long bound);
+        DynamicType create_wstring_type(in unsigned long bound);
+        DynamicType create_sequence_type(
+            in DynamicType element_type,
+            in unsigned long bound);
+        DynamicType create_array_type(
+            in DynamicType element_type,
+            in BoundSeq bound);
+        DynamicType create_map_type(
+            in DynamicType key_element_type,
+            in DynamicType element_type,
+            in unsigned long bound);
+        DynamicType create_bitset_type(in unsigned long bound);
+        DynamicType load_type_from_url(
+            in string document_url,
+            in string type_name,
+            in IncludePathSeq include_paths);
+        DynamicType load_type_from_document(
+            in string document,
+            in string type_name,
+            in IncludePathSeq include_paths);
+        DDS::ReturnCode_t delete_type(in DynamicType type);
+    };
+
+    local interface DynamicTypeSupport {
+                   DynamicTypeSupport create_type_support(
+            in DynamicType type);
+                   DDS::ReturnCode_t delete_type_support(
+            in DynamicTypeSupport type_support);
+
+        DDS::ReturnCode_t register_type(
+            in DDS::DomainParticipant participant,
+            in ObjectName type_signature);
+        ObjectName get_type_name();
+    };
+
+    typedef map<ObjectName, ObjectName> Parameters;
+
+    valuetype AnnotationDescriptor {
+        public DynamicType type;
+
+        DDS::ReturnCode_t get_value(
+            inout ObjectName value, in ObjectName key);
+        DDS::ReturnCode_t get_all_value(
+            inout Parameters value);
+        DDS::ReturnCode_t set_value(
+            in ObjectName key, in ObjectName value);
+
+        DDS::ReturnCode_t copy_from(in AnnotationDescriptor other);
+        boolean equals(in AnnotationDescriptor other);
+        boolean is_consistent();
+    };
+
+    valuetype TypeDescriptor {
+        public TypeKind kind;
+        public ObjectName name;
+        public DynamicType base_type;
+        public DynamicType discriminator_type;
+        public BoundSeq bound;
+        public @Optional DynamicType element_type;
+        public @Optional DynamicType key_element_type;
+
+        DDS::ReturnCode_t copy_from(in TypeDescriptor other);
+        boolean equals(in TypeDescriptor other);
+        boolean is_consistent();
+    };
+
+    valuetype MemberDescriptor {
+        public ObjectName name;
+        public MemberId id;
+        public DynamicType type;
+        public string default_value;
+        public unsigned long index;
+        public UnionCaseLabelSeq label;
+        public boolean default_label;
+
+        DDS::ReturnCode_t copy_from(in MemberDescriptor descriptor);
+        boolean equals(in MemberDescriptor descriptor);
+        boolean is_consistent();
+    };
+
+    local interface DynamicTypeMember {
+        readonly attribute MemberDescriptor descriptor;
+
+        unsigned long get_annotation_count();
+        DDS::ReturnCode_t get_annotation(
+            inout AnnotationDescriptor descriptor,
+            in unsigned long idx);
+
+        boolean equals(in DynamicTypeMember other);
+        DDS::ReturnCode_t apply_annotation(
+            in AnnotationDescriptor descriptor);
+
+        MemberId get_id();
+        ObjectName get_name();
+    };
+
+    typedef map<ObjectName, DynamicTypeMember> DynamicTypeMembersByName;
+    typedef map<MemberId, DynamicTypeMember> DynamicTypeMembersById;
+
+    local interface DynamicType {
+        readonly attribute TypeDescriptor descriptor;
+
+        ObjectName get_name();
+        TypeKind get_kind();
+
+        DDS::ReturnCode_t get_member_by_name(
+            inout DynamicTypeMember member,
+            in ObjectName name);
+        DDS::ReturnCode_t get_all_members_by_name(
+            inout DynamicTypeMembersByName member);
+
+        DDS::ReturnCode_t get_member(
+            inout DynamicTypeMember member,
+            in MemberId id);
+        DDS::ReturnCode_t get_all_members(
+            inout DynamicTypeMembersById member);
+
+        unsigned long get_annotation_count();
+        DDS::ReturnCode_t get_annotation(
+            inout AnnotationDescriptor descriptor,
+            in unsigned long idx);
+
+        boolean equals(in DynamicType other);
+        DDS::ReturnCode_t add_member(in MemberDescriptor descriptor);
+        DDS::ReturnCode_t apply_annotation(
+            in AnnotationDescriptor descriptor);
+        DynamicType clone();
+    };
+
+    local interface DynamicData;
+
+    local interface DynamicDataFactory {
+                   DynamicDataFactory get_instance();
+                   DDS::ReturnCode_t delete_instance();
+
+        DynamicData create_data();
+        DDS::ReturnCode_t delete_data(in DynamicData data);
+    };
+
+    typedef sequence<long> Int32Seq;
+    typedef sequence<unsigned long> UInt32Seq;
+    typedef sequence<short> Int16Seq;
+    typedef sequence<unsigned short> UInt16Seq;
+    typedef sequence<long long> Int64Seq;
+    typedef sequence<unsigned long long> UInt64Seq;
+    typedef sequence<float> Float32Seq;
+    typedef sequence<double> Float64Seq;
+    typedef sequence<long double> Float128Seq;
+    typedef sequence<char> CharSeq;
+    typedef sequence<wchar> WcharSeq;
+    typedef sequence<boolean> BooleanSeq;
+    typedef sequence<octet> ByteSeq;
+
+
+    typedef sequence<wstring> WstringSeq;
+
+    local interface DynamicData {
+        readonly attribute DynamicType type;
+
+        DDS::ReturnCode_t get_descriptor(
+            inout MemberDescriptor value,
+            in MemberId id);
+        DDS::ReturnCode_t set_descriptor(
+            in MemberId id,
+            in MemberDescriptor value);
+
+        boolean equals(in DynamicData other);
+
+        MemberId get_member_id_by_name(in ObjectName name);
+        MemberId get_member_id_at_index(in unsigned long index);
+
+        DDS::ReturnCode_t clear_all_values();
+        DDS::ReturnCode_t clear_nonkey_values();
+        DDS::ReturnCode_t clear_value(in MemberId id);
+
+        DynamicData loan_value(in MemberId id);
+        DDS::ReturnCode_t return_loaned_value(in DynamicData value);
+
+        DynamicData clone();
+
+        DDS::ReturnCode_t get_int32_value(
+            inout long value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int32_value(
+            in MemberId id,
+            in long value);
+        DDS::ReturnCode_t get_uint32_value(
+            inout unsigned long value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint32_value(
+            in MemberId id,
+            in unsigned long value);
+        DDS::ReturnCode_t get_int16_value(
+            inout short value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int16_value(
+            in MemberId id,
+            in short value);
+        DDS::ReturnCode_t get_uint16_value(
+            inout unsigned short value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint16_value(
+            in MemberId id,
+            in unsigned short value);
+        DDS::ReturnCode_t get_int64_value(
+            inout long long value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int64_value(
+            in MemberId id,
+            in long long value);
+        DDS::ReturnCode_t get_uint64_value(
+            inout unsigned long long value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint64_value(
+            in MemberId id,
+            in unsigned long long value);
+        DDS::ReturnCode_t get_float32_value(
+            inout float value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float32_value(
+            in MemberId id,
+            in float value);
+        DDS::ReturnCode_t get_float64_value(
+            inout double value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float64_value(
+            in MemberId id,
+            in double value);
+        DDS::ReturnCode_t get_float128_value(
+            inout long double value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float128_value(
+            in MemberId id,
+            in long double value);
+        DDS::ReturnCode_t get_char8_value(
+            inout char value,
+            in MemberId id);
+        DDS::ReturnCode_t set_char8_value(
+            in MemberId id,
+            in char value);
+        DDS::ReturnCode_t get_char32_value(
+            inout wchar value,
+            in MemberId id);
+        DDS::ReturnCode_t set_char32_value(
+            in MemberId id,
+            in wchar value);
+        DDS::ReturnCode_t get_byte_value(
+            inout octet value,
+            in MemberId id);
+        DDS::ReturnCode_t set_byte_value(
+            in MemberId id,
+            in octet value);
+        DDS::ReturnCode_t get_boolean_value(
+            inout boolean value,
+            in MemberId id);
+        DDS::ReturnCode_t set_boolean_value(
+            in MemberId id,
+            in boolean value);
+        DDS::ReturnCode_t get_string_value(
+            inout string value,
+            in MemberId id);
+        DDS::ReturnCode_t set_string_value(
+            in MemberId id,
+            in string value);
+        DDS::ReturnCode_t get_wstring_value(
+            inout wstring value,
+            in MemberId id);
+        DDS::ReturnCode_t set_wstring_value(
+            in MemberId id,
+            in wstring value);
+
+        DDS::ReturnCode_t get_complex_value(
+            inout DynamicData value,
+            in MemberId id);
+        DDS::ReturnCode_t set_complex_value(
+            in MemberId id,
+            in DynamicData value);
+
+        DDS::ReturnCode_t get_int32_values(
+            inout Int32Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int32_values(
+            in MemberId id,
+            in Int32Seq value);
+        DDS::ReturnCode_t get_uint32_values(
+            inout UInt32Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint32_values(
+            in MemberId id,
+            in UInt32Seq value);
+        DDS::ReturnCode_t get_int16_values(
+            inout Int16Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int16_values(
+            in MemberId id,
+            in Int16Seq value);
+        DDS::ReturnCode_t get_uint16_values(
+            inout UInt16Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint16_values(
+            in MemberId id,
+            in UInt16Seq value);
+        DDS::ReturnCode_t get_int64_values(
+            inout Int64Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_int64_values(
+            in MemberId id,
+            in Int64Seq value);
+        DDS::ReturnCode_t get_uint64_values(
+            inout UInt64Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_uint64_values(
+            in MemberId id,
+            in UInt64Seq value);
+        DDS::ReturnCode_t get_float32_values(
+            inout Float32Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float32_values(
+            in MemberId id,
+            in Float32Seq value);
+        DDS::ReturnCode_t get_float64_values(
+            inout Float64Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float64_values(
+            in MemberId id,
+            in Float64Seq value);
+        DDS::ReturnCode_t get_float128_values(
+            inout Float128Seq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_float128_values(
+            in MemberId id,
+            in Float128Seq value);
+        DDS::ReturnCode_t get_char8_values(
+            inout CharSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_char8_values(
+            in MemberId id,
+            in CharSeq value);
+        DDS::ReturnCode_t get_char32_values(
+            inout WcharSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_char32_values(
+            in MemberId id,
+            in WcharSeq value);
+        DDS::ReturnCode_t get_byte_values(
+            inout ByteSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_byte_values(
+            in MemberId id,
+            in ByteSeq value);
+        DDS::ReturnCode_t get_boolean_values(
+            inout BooleanSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_boolean_values(
+            in MemberId id,
+            in BooleanSeq value);
+        DDS::ReturnCode_t get_string_values(
+            inout StringSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_string_values(
+            in MemberId id,
+            in StringSeq value);
+        DDS::ReturnCode_t get_wstring_values(
+            inout WstringSeq value,
+            in MemberId id);
+        DDS::ReturnCode_t set_wstring_values(
+            in MemberId id,
+            in WstringSeq value);
+    };
+};
+
+
+
+
+
+
+module DDS {
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct BuiltinTopicKey_t {
+        long value[4];
+    };
+
+    @Extensibility(FINAL_EXTENSIBILITY) @Nested
+    struct Duration_t {
+        long sec;
+        unsigned long nanosec;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct DeadlineQosPolicy {
+        Duration_t period;
+    };
+
+    enum DestinationOrderQosPolicyKind {
+        BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+        BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct DestinationOrderQosPolicy {
+        DestinationOrderQosPolicyKind kind;
+    };
+
+    enum DurabilityQosPolicyKind {
+        VOLATILE_DURABILITY_QOS,
+        TRANSIENT_LOCAL_DURABILITY_QOS,
+        TRANSIENT_DURABILITY_QOS,
+        PERSISTENT_DURABILITY_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct DurabilityQosPolicy {
+        DurabilityQosPolicyKind kind;
+    };
+
+    enum HistoryQosPolicyKind {
+        KEEP_LAST_HISTORY_QOS,
+        KEEP_ALL_HISTORY_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct HistoryQosPolicy {
+        HistoryQosPolicyKind kind;
+        long depth;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct DurabilityServiceQosPolicy {
+        Duration_t service_cleanup_delay;
+        HistoryQosPolicyKind history_kind;
+        long history_depth;
+        long max_samples;
+        long max_instances;
+        long max_samples_per_instance;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct GroupDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct LatencyBudgetQosPolicy {
+        Duration_t duration;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct LifespanQosPolicy {
+        Duration_t duration;
+    };
+
+    enum LivelinessQosPolicyKind {
+        AUTOMATIC_LIVELINESS_QOS,
+        MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
+        MANUAL_BY_TOPIC_LIVELINESS_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct LivelinessQosPolicy {
+        LivelinessQosPolicyKind kind;
+        Duration_t lease_duration;
+    };
+
+    enum OwnershipQosPolicyKind {
+        SHARED_OWNERSHIP_QOS,
+        EXCLUSIVE_OWNERSHIP_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct OwnershipQosPolicy {
+        OwnershipQosPolicyKind kind;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct OwnershipStrengthQosPolicy {
+        long value;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct PartitionQosPolicy {
+        StringSeq name;
+    };
+
+    enum PresentationQosPolicyAccessScopeKind {
+        INSTANCE_PRESENTATION_QOS,
+        TOPIC_PRESENTATION_QOS,
+        GROUP_PRESENTATION_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct PresentationQosPolicy {
+        PresentationQosPolicyAccessScopeKind access_scope;
+        boolean coherent_access;
+        boolean ordered_access;
+    };
+
+    enum ReliabilityQosPolicyKind {
+        BEST_EFFORT_RELIABILITY_QOS,
+        RELIABLE_RELIABILITY_QOS
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct ReliabilityQosPolicy {
+        ReliabilityQosPolicyKind kind;
+        Duration_t max_blocking_time;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct ResourceLimitsQosPolicy {
+        long max_samples;
+        long max_instances;
+        long max_samples_per_instance;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TimeBasedFilterQosPolicy {
+        Duration_t minimum_separation;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TopicDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TransportPriorityQosPolicy {
+        long value;
+    };
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct UserDataQosPolicy {
+        sequence<octet> value;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct ParticipantBuiltinTopicData {
+        @ID(0x0050) @Key BuiltinTopicKey_t key;
+        @ID(0x002C) UserDataQosPolicy user_data;
+    };
+
+    typedef short DataRepresentationId_t;
+
+    const DataRepresentationId_t XCDR_DATA_REPRESENTATION = 0;
+    const DataRepresentationId_t XML_DATA_REPRESENTATION = 1;
+
+    typedef sequence<DataRepresentationId_t> DataRepresentationIdSeq;
+
+    const QosPolicyId_t DATA_REPRESENTATION_QOS_POLICY_ID = 23;
+    const string DATA_REPRESENTATION_QOS_POLICY_NAME = "DataRepresentation";
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct DataRepresentationQosPolicy {
+        DataRepresentationIdSeq value;
+    };
+
+    @BitBound(16)
+    enum TypeConsistencyKind {
+        EXACT_TYPE_TYPE_CONSISTENCY,
+        EXACT_NAME_TYPE_CONSISTENCY,
+        DECLARED_TYPE_CONSISTENCY,
+        ASSIGNABLE_TYPE_CONSISTENCY
+    };
+
+    const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
+    const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME =
+        "TypeConsistencyEnforcement";
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY) @Nested
+    struct TypeConsistencyEnforcementQosPolicy {
+        TypeConsistencyKind kind;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct TopicBuiltinTopicData {
+        @ID(0x005A) @Key BuiltinTopicKey_t key;
+        @ID(0x0005) string<256> name;
+        @ID(0x0007) string<256> type_name;
+        @ID(0x0075) @Optional DDS::StringSeq equivalent_type_name;
+        @ID(0x0076) @Optional DDS::StringSeq base_type_name;
+        @ID(0x0072) @Optional DDS::TypeObject type;
+        @ID(0x001D) DurabilityQosPolicy durability;
+        @ID(0x001E) DurabilityServiceQosPolicy durability_service;
+        @ID(0x0023) DeadlineQosPolicy deadline;
+        @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+        @ID(0x001B) LivelinessQosPolicy liveliness;
+        @ID(0x001A) ReliabilityQosPolicy reliability;
+        @ID(0x0049) TransportPriorityQosPolicy transport_priority;
+        @ID(0x002B) LifespanQosPolicy lifespan;
+        @ID(0x0025) DestinationOrderQosPolicy destination_order;
+        @ID(0x0040) HistoryQosPolicy history;
+        @ID(0x0041) ResourceLimitsQosPolicy resource_limits;
+        @ID(0x001F) OwnershipQosPolicy ownership;
+        @ID(0x002E) TopicDataQosPolicy topic_data;
+        @ID(0x0073) DataRepresentationQosPolicy representation;
+        @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct TopicQos {
+
+        DataRepresentationQosPolicy representation;
+        TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct PublicationBuiltinTopicData {
+        @ID(0x005A) @Key BuiltinTopicKey_t key;
+        @ID(0x0050) BuiltinTopicKey_t participant_key;
+        @ID(0x0005) string<256> topic_name;
+        @ID(0x0007) string<256> type_name;
+        @ID(0x0075) @Optional DDS::StringSeq equivalent_type_name;
+        @ID(0x0076) @Optional DDS::StringSeq base_type_name;
+        @ID(0x0072) @Optional DDS::TypeObject type;
+        @ID(0x001D) DurabilityQosPolicy durability;
+        @ID(0x001E) DurabilityServiceQosPolicy durability_service;
+        @ID(0x0023) DeadlineQosPolicy deadline;
+        @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+        @ID(0x001B) LivelinessQosPolicy liveliness;
+        @ID(0x001A) ReliabilityQosPolicy reliability;
+        @ID(0x002B) LifespanQosPolicy lifespan;
+        @ID(0x002C) UserDataQosPolicy user_data;
+        @ID(0x001F) OwnershipQosPolicy ownership;
+        @ID(0x0006) OwnershipStrengthQosPolicy ownership_strength;
+        @ID(0x0025) DestinationOrderQosPolicy destination_order;
+        @ID(0x0021) PresentationQosPolicy presentation;
+        @ID(0x0029) PartitionQosPolicy partition;
+        @ID(0x002E) TopicDataQosPolicy topic_data;
+        @ID(0x002D) GroupDataQosPolicy group_data;
+        @ID(0x0073) DataRepresentationQosPolicy representation;
+        @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct DataWriterQos {
+
+        DataRepresentationQosPolicy representation;
+        TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct SubscriptionBuiltinTopicData {
+        @ID(0x005A) @Key BuiltinTopicKey_t key;
+        @ID(0x0050) BuiltinTopicKey_t participant_key;
+        @ID(0x0005) string<256> topic_name;
+        @ID(0x0007) string<256> type_name;
+        @ID(0x0075) @Optional DDS::StringSeq equivalent_type_name;
+        @ID(0x0076) @Optional DDS::StringSeq base_type_name;
+        @ID(0x0072) @Optional DDS::TypeObject type;
+        @ID(0x001D) DurabilityQosPolicy durability;
+        @ID(0x0023) DeadlineQosPolicy deadline;
+        @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+        @ID(0x001B) LivelinessQosPolicy liveliness;
+        @ID(0x001A) ReliabilityQosPolicy reliability;
+        @ID(0x001F) OwnershipQosPolicy ownership;
+        @ID(0x0025) DestinationOrderQosPolicy destination_order;
+        @ID(0x002C) UserDataQosPolicy user_data;
+        @ID(0x0004) TimeBasedFilterQosPolicy time_based_filter;
+        @ID(0x0021) PresentationQosPolicy presentation;
+        @ID(0x0029) PartitionQosPolicy partition;
+        @ID(0x002E) TopicDataQosPolicy topic_data;
+        @ID(0x002D) GroupDataQosPolicy group_data;
+        @ID(0x0073) DataRepresentationQosPolicy representation;
+        @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+
+    @Extensibility(MUTABLE_EXTENSIBILITY)
+    struct DataReaderQos {
+
+        DataRepresentationQosPolicy representation;
+        TypeConsistencyEnforcementQosPolicy type_consistency;
+    };
+};
+
+
+
+
+
+
+module DDS {
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY)
+    struct _String {
+        string value;
+    };
+
+    interface StringDataWriter : DataWriter {
+
+
+
+    };
+
+    interface StringDataReader : DataReader {
+
+
+
+    };
+
+    interface StringTypeSupport : TypeSupport {
+
+
+
+
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY)
+    struct KeyedString {
+        @Key string key;
+        string value;
+    };
+    typedef sequence<KeyedString> KeyedStringSeq;
+
+    interface KeyedStringDataWriter : DataWriter {
+
+
+
+
+        InstanceHandle_t register_instance_w_key(
+            in string key);
+        InstanceHandle_t register_instance_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t unregister_instance_w_key(
+            in string key);
+        ReturnCode_t unregister_instance_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t write_string_w_key(
+            in string key,
+            in string str,
+            in InstanceHandle_t handle);
+        ReturnCode_t write_string_w_key_w_timestamp(
+            in string key,
+            in string str,
+            in InstanceHandle_t handle,
+            in Time_t source_timestamp);
+
+        ReturnCode_t dispose_w_key(
+            in string key);
+        ReturnCode_t dispose_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t get_key_value_w_key(
+            inout string key,
+            in InstanceHandle_t handle);
+
+        InstanceHandle_t lookup_instance_w_key(
+            in string key);
+    };
+
+    interface KeyedStringDataReader : DataReader {
+
+
+
+    };
+
+    interface KeyedStringTypeSupport : TypeSupport {
+
+
+
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY)
+    struct Bytes {
+        sequence<octet> value;
+    };
+    typedef sequence<Bytes> BytesSeq;
+
+    interface BytesDataWriter : DataWriter {
+
+
+
+
+        ReturnCode_t write_w_bytes(
+              in ByteArray bytes,
+              in long offset,
+              in long length,
+              in InstanceHandle_t handle);
+        ReturnCode_t write_w_bytes_w_timestamp(
+              in ByteArray bytes,
+              in long offset,
+              in long length,
+              in InstanceHandle_t handle,
+              in Time_t source_timestamp);
+    };
+
+    interface BytesDataReader : DataReader {
+
+
+
+    };
+
+    interface BytesTypeSupport : TypeSupport {
+
+
+
+    };
+
+
+    @Extensibility(EXTENSIBLE_EXTENSIBILITY)
+    struct KeyedBytes {
+        @Key string key;
+        sequence<octet> value;
+    };
+    typedef sequence<KeyedBytes> KeyedBytesSeq;
+
+    interface KeyedBytesDataWriter : DataWriter {
+
+
+
+
+        InstanceHandle_t register_instance_w_key(
+            in string key);
+        InstanceHandle_t register_instance_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t unregister_instance_w_key(
+            in string key);
+        ReturnCode_t unregister_instance_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t write_bytes_w_key(
+              in string key,
+              in ByteArray bytes,
+              in long offset,
+              in long length,
+              in InstanceHandle_t handle);
+        ReturnCode_t write_bytes_w_key_w_timestamp(
+              in string key,
+              in ByteArray bytes,
+              in long offset,
+              in long length,
+              in InstanceHandle_t handle,
+              in Time_t source_timestamp);
+
+        ReturnCode_t dispose_w_key(
+            in string key);
+        ReturnCode_t dispose_w_key_w_timestamp(
+            in string key,
+            in Time_t source_timestamp);
+
+        ReturnCode_t get_key_value_w_key(
+            inout string key,
+            in InstanceHandle_t handle);
+
+        InstanceHandle_t lookup_instance_w_key(
+            in string key);
+    };
+
+    interface KeyedBytesDataReader : DataReader {
+
+
+
+    };
+
+    interface KeyedBytesTypeSupport : TypeSupport {
+
+
+
+    };
+};
+
+
+
+
+
+
+module DDS {
+    @Annotation
+    local interface ID {
+        attribute unsigned long value;
+    };
+
+    @Annotation
+    local interface Optional {
+        attribute boolean value default true;
+    };
+
+    @Annotation
+    local interface Key {
+        attribute boolean value default true;
+    };
+
+    @Annotation
+    local interface BitBound {
+        attribute unsigned short value default 32;
+    };
+
+    @Annotation
+    local interface Value {
+        attribute unsigned long value;
+    };
+
+    @Annotation
+    local interface BitSet {
+    };
+
+    @Annotation
+    local interface Nested {
+        attribute boolean value default true;
+    };
+
+    enum ExtensibilityKind {
+        FINAL_EXTENSIBILITY,
+        EXTENSIBLE_EXTENSIBILITY,
+        MUTABLE_EXTENSIBILITY
+    };
+
+    @Annotation
+    local interface Extensibility {
+        attribute ExtensibilityKind value;
+    };
+
+    @Annotation
+    local interface MustUnderstand {
+        attribute boolean value default true;
+    };
+
+    @Annotation
+    local interface Verbatim {
+        attribute string<32> language default "*";
+        attribute string<128> placement default "before-declaration";
+        attribute string text;
+    };
+
+    @Annotation
+    local interface Shared {
+     attribute boolean value default true;
+    };
+};

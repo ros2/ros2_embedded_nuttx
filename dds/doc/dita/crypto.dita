@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_ndc_dh2_v4">
+ <title>Security data</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Introduction</title>
+      <p>In secure domains, DDS operation becomes a lot more complex. Not only are there additional
+    security-related discovery topics, but there is an extra 3-way handshake needed in order to
+    authenticate remote participants in which user certificates and security policies are
+    verified.</p>
+      <p>Once successfully authenticated, a shared secret is created which is known only by the two
+        participants that did the handshake.</p>
+      <p>Using this shared secret, and for each secure topic endpoint, crypto tokens are then
+        transferred between the participants in order to setup encryption (AES128 or AES256) and/or
+        signing (SHA1 or SHA256) parameters for each individual topic Reader/Writer.</p>
+      <p>Note that there are 3 ways in which security can be used in DDS:</p>
+      <p>
+        <ul id="ul_or4_t22_v4">
+          <li>Full RTPS message encryption/signing.</li>
+          <li>Encryption/signing of individual Reader/Writer submessages.</li>
+          <li>Payload encryption.</li>
+        </ul>
+      </p>
+      <p>Technicolor DDS only supports payload encryption currently, but all the hooks are present
+        to support the other types in the future should the need arise.</p>
+      <p>The authentication and access control parameters are handled using an external security
+        plugin module (as recommended by the DDS standard).</p>
+      <p>The various security parameters can be displayed with the <cmdname>scrypto</cmdname>,
+          <cmdname>spdb</cmdname> and <cmdname>spv</cmdname> commands.</p>
+     </section>
+  <section>
+   <title>Crypto contexts</title>
+   <p>In secure domains, crypto contexts are created on various levels and the
+     <cmdname>scrypto</cmdname> command can be used on any of these levels to display the parameters
+    that apply there.</p>
+   <p>Following different levels can be distinguished:<ol id="ol_onx_tk2_v4">
+     <li>Local DomainParticipant.</li>
+     <li>Discovered Participant.</li>
+     <li>Local Writer.</li>
+     <li>Local Reader.</li>
+     <li>Discovered Writer.</li>
+     <li>Discovered Reader.</li>
+   </ol></p>
+   <p>For each individual level, an example will be shown.</p>
+  </section>
+  <section><title>Local DomainParticipant crypto data.</title><p>Using the <cmdname>sdisc</cmdname> command, we find out what the handle is of the local
+    DomainParticipant. Using the scrypto command on that handle, we get the following
+    information:</p><p>
+    <screen scale="80">>scrypto 1
+Txdata: Crypto not enabled.
+Total crypto data: 6052 bytes.</screen></p>
+   <p>This may seem surprising, but it's not, actually.  On this level, the crypto data for RTPS
+    message encryption would be stored, and since we don't keep do RTPS message encryption for
+    native DDS security yet, there are no parameters filled in (we do allow transport level
+    encryption which has a similar effect).</p>
+   <p>The second line gives the total amount of memory that is currently used for all crypto
+    contexts within this domain.</p>
+  </section>
+  <section>
+   <title>Discovered Participant crypto data.</title>
+   <p>Here things become a lot more interesting, as can be seen with the output of the scrypto
+    command (note that the handle of the discovered participant is shown in the output of the sdisc
+    command):</p>
+   <p>
+    <screen scale="80">>scrypto 49
+RxData: Crypto not enabled.
+TxSign: Hash not enabled.
+RxSign: Hash not enabled.
+KxKeys: M.Key:  4c505a48d92134ec2f689c885b39a8b88f975d3863d2e9e13e479df7b979e5af
+        M.Mac:  a6b6e33266bce3f31e3ab0ecb5dad4d796d8abd06aeb761255a16afec5288615
+TToken: AES256/HMAC-SHA256 encrypted/signed data.
+        S.Id:   189802
+        S.Key:  bb1e12f7467e5ed38d7aff8d4b95192d6347921b8c7273c249f30f6ab0f6b72f
+        S.Salt: d7e5662b04848642764e9d4bef94ab80
+        S.HMAC: c7b471e475aaf15ef05e7371d68618446531e11c66a66f3d05d880d143fa28a4
+        S.Count:94
+RToken: AES256/HMAC-SHA256 encrypted/signed data.
+        S.Id:   118363
+        S.Key:  abe9a1d764d02322930c93f6de5ebb3f6b87cace0581539990230180a5dd2814
+        S.Salt: 4c9ff83fd3e86caa139d0d4fea4a2bbe
+        S.HMAC: cfa6e02d637e5d38a4478d5d0d252d0d611e46de36b71e44e703f8036bbbfe1c
+RxKeys:
+ [000001-2]:
+  Data: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   97383,
+        M.Key:  d1d27c3d5e87c6d9d9f3423817ab60b7
+        M.IV:   dcef9b829d5608d24af83d87411652e5
+        M.HMAC: e27c4cc2ff02b6cafd89466e7c1c329b
+        S.Id:   97384
+        S.Key:  9b909f210a5155f4ea744394679f72d4
+        S.Salt: 41866d7dc02898da570c40535d6af843
+        S.HMAC: be9aa60600ffb449cb6dcb04705666d6
+  Sign: HMAC-SHA1 signed data.
+        M.Id:   118382,
+        M.Key:  e037b50a4296cbfa30b9a37092638d85
+        M.HMAC: f13a0137d6c95c547c028e4cf90fc8d5
+        S.Id:   0
+        S.HMAC: 00000000000000000000000000000000
+ [000002-7]:
+  Data: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   118361,
+        M.Key:  e6d43dcc09247eacc47751dfd6310d3b
+        M.IV:   f3cb6b286ea36c4bf366d32926b72c7b
+        M.HMAC: ea1513a4220c52bf6dd01e1c16dab587
+        S.Id:   0
+        S.Key:  00000000000000000000000000000000
+        S.Salt: 00000000000000000000000000000000
+        S.HMAC: 00000000000000000000000000000000
+  Sign: HMAC-SHA1 signed data.
+        M.Id:   118380,
+        M.Key:  d3664ad2d9cf1975029fe4e619add789
+        M.HMAC: cedacd0d28277e1ce7a7af0a1d8ff7c5
+        S.Id:   0
+        S.HMAC: 00000000000000000000000000000000
+ [ff0003-c2]:
+  Data: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   51868,
+        M.Key:  e76da98037d912251c496ed66adf80eb
+        M.IV:   f6a4d5194a543095544aa1a674019b45
+        M.HMAC: dc258b5d781506bb7b27f5631e21709b
+        S.Id:   51869
+        S.Key:  378bdfd7f5645e6e15c4eb78effff77b
+        S.Salt: fc7c7ecd3e6b463f4d4a5ac81488e464
+        S.HMAC: deb251e46404984296d3edce0ea7ecc5
+  Sign: HMAC-SHA1 signed data.
+        M.Id:   118372,
+        M.Key:  d9eeb8ea1e8f8f2336748fc2cb984349
+        M.HMAC: fa6857ca0df43e1e0b3d8465562ed9b9
+        S.Id:   0
+        S.HMAC: 00000000000000000000000000000000
+ [ff0003-c7]:
+  Data: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   10802,
+        M.Key:  c589caa7ae555e687fadb274f75759f7
+        M.IV:   e5236a2fc3bd593ff2d401e641703cdb
+        M.HMAC: e488a0a1b22b4a396e63be54c0397eab
+        S.Id:   0
+        S.Key:  00000000000000000000000000000000
+        S.Salt: 00000000000000000000000000000000
+        S.HMAC: 00000000000000000000000000000000
+  Sign: HMAC-SHA1 signed data.
+        M.Id:   118374,
+        M.Key:  d34e34c96d70e2b9069c665ef2838fc9
+        M.HMAC: d2c5b421b73760c2ba4756d357f4cf39
+        S.Id:   0
+        S.HMAC: 00000000000000000000000000000000
+
+            .
+            .
+
+ [ff0401-c7]:
+  Data: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   68097,
+        M.Key:  fb3a2efba938d4d9d0313e1197d51d21
+        M.IV:   f3619f99a52014ade4a94fa03d6841b3
+        M.HMAC: c5062345ab0fea7bea17a2ba0e7fd6a1
+        S.Id:   0
+        S.Key:  00000000000000000000000000000000
+        S.Salt: 00000000000000000000000000000000
+        S.HMAC: 00000000000000000000000000000000
+  Sign: HMAC-SHA1 signed data.
+        M.Id:   118366,
+        M.Key:  ef0c241b03df678fd21e3254db7134f9
+        M.HMAC: f7abd1d25328df498e95c7828979e303
+        S.Id:   0
+        S.HMAC: 00000000000000000000000000000000
+Keysize: 2000 bytes.</screen>
+   </p><p>The first part of the output gives the crypto parameters that are used on Participant level, the
+    next part (after RxKeys:) lists all the received crypto tokens from the remote participant each
+    one for a specific Entity Id (as shown: <b>[</b><i>&lt;entity_id></i><b>]</b> followed by the
+    key data.).  The last information shown it the amount of crypto data bytes that are needed for
+    this Participant.</p>
+   <p>The following data is used on Participant level:<table frame="all" rowsep="1" colsep="1"
+     id="table_nny_dp2_v4">
+     <title>Discovered Participant crypto data</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.17*"/>
+      <thead>
+       <row>
+        <entry>Item</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>RxData</entry>
+        <entry>If RTPS message encryption is used: the crypto keys (master/session) for AES
+         decryption of messages arriving from the discovered participant.</entry>
+       </row>
+       <row>
+        <entry>TxSign</entry>
+        <entry>If RTPS message signing is used: the crypto keys (master/session) for SHA1 or SHA256
+         signing of messages sent to the discovered participant.</entry>
+       </row>
+       <row>
+        <entry>RxSign</entry>
+        <entry>If RTPS message signing is used: the crypto keys (master/session) for SHA1 or SHA256
+         sign verification of messages received from the discovered participant.</entry>
+       </row>
+       <row>
+        <entry>KxKeys</entry>
+        <entry>The Kx keys are derived from the shared secret that was created during the
+         authentication handshake and are the master keys for encryption and decryption of crypto
+         tokens transferred between the participants.  From these parameters, the TToken and RToken
+         crypto session data is derived.</entry>
+       </row>
+       <row>
+        <entry>TToken</entry>
+        <entry>The session data needed for encryption (AES256) and signing (SHA256) of transmitted
+         crypto tokens to the discovered participant.</entry>
+       </row>
+       <row>
+        <entry>RToken</entry>
+        <entry>The session data needed for decryption (AES256) and sign verification (SHA256) of
+         received crypto tokens from the discovered participant.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table></p>
+  </section>
+  <section><title>Local Writer crypto data.</title><p>The scrypto command can be used to display the
+    crypto information of a local DataWriter:</p><p>
+    <screen scale="80">>scrypto 46
+TxData: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   168143,
+        M.Key:  cbae65f2680f76173fe64c951497597f
+        M.IV:   e043d43779c20a577dfa5ec96b07a825
+        M.HMAC: fdcfda6de6300d0ff6cf996a710fa53d
+        S.Id:   168144
+        S.Key:  668e456d3ba728948b74aaa332fee5ec
+        S.Salt: 86ba9b7fa178c402135d36545409413c
+        S.HMAC: ee717f11686e6d845ffd98fb2aa13875
+        S.Count:23</screen>
+   </p><p>This displays the encryption and/or signing crypto data for either payload or submessage
+    encryption of data sent to any discovered DataReader.  Both master and session information is
+    displayed.</p>Note that the information is stored on DataWriter level, since data can be
+   multicasted in DDS.  It therefor needs to be encrypted/signed similarly for all allowed
+   DataReaders.</section>
+  <section><title>Discovered Reader crypto data.</title><p>The <cmdname>scrypto</cmdname> command on Discovered Reader level shows a lot more
+    information:</p>
+   <p><screen scale="80">>scrypto 66
+RxData: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   118361,
+        M.Key:  e6d43dcc09247eacc47751dfd6310d3b
+        M.IV:   f3cb6b286ea36c4bf366d32926b72c7b
+        M.HMAC: ea1513a4220c52bf6dd01e1c16dab587
+        S.Id:   0
+        S.Key:  00000000000000000000000000000000
+        S.Salt: 00000000000000000000000000000000
+        S.HMAC: 00000000000000000000000000000000
+TxSign: HMAC-SHA1 signed data.
+        M.Id:   189819,
+        M.Key:  e0810e7625af8f0fb9b0b0eac433a483
+        M.HMAC: e6cf0f8039546efb1b2a0685087550a3
+        S.Id:   189820
+        S.HMAC: f77be0e8f8a0241dd9763d2f9fda65d1
+RxSign: Hash not enabled.</screen></p><p>Except for TxSign, most of the information is there for Submessage encryption/signing.</p>
+   <p>Following information can be distinguished:</p>
+   <p>
+    <table frame="all" rowsep="1" colsep="1" id="table_h12_ds2_v4">
+     <title>Discovered Reader crypto data</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="3.05*"/>
+      <thead>
+       <row>
+        <entry>Item</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>RxData</entry>
+        <entry>If Submessage encryption is used: the crypto keys (master/session) for AES decryption
+         of encrypted submessages coming from the discovered DataReader.</entry>
+       </row>
+       <row>
+        <entry>TxSign</entry>
+        <entry>If per destination Submessage or Payload signing is used: the crypto keys
+         (master/session) for signing of encrypted data for this specific discovered
+         DataReader.</entry>
+       </row>
+       <row>
+        <entry>RxSign</entry>
+        <entry>If per destination Submessage or Payload signing is used: the crypto keys
+         (master/session) for verification of signed data from this specific discovered DataReader.
+        </entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p></section>
+  <section>
+   <title>Local Reader crypto data.</title>
+   <p>The <cmdname>scrypto</cmdname> command on a local DataReader gives the following
+    information:</p>
+   <p>
+    <screen scale="80">>scrypto 48
+TxData: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   189800,
+        M.Key:  e54445e4bb153e8b34a68f981587e5e5
+        M.IV:   f6dead294778887a00fa6314480f3c9d
+        M.HMAC: d2772a735195c5aa56a00ffc5848249d
+        S.Id:   189801
+        S.Key:  40269e61d35173fa796bc7565d49d63a
+        S.Salt: 0fdd3ec62593b684b84f1c5229f0a573
+        S.HMAC: d33f8ed8070876649e89024b17d016cb
+        S.Count:0</screen>
+   </p>
+   <p>The TxData crypto is used for encrypting/signing Submessages from the DataReader to all the
+    reliable DataWriters.</p>
+  </section>
+  <section><title>Discovered Writer crypto data.</title><p>The <cmdname>scrypto</cmdname> command on a discovered DataWriter gives the following info:</p>
+   <p><screen scale="80">>scrypto 67
+RxData: AES128/HMAC-SHA1 encrypted/signed data.
+        M.Id:   97383,
+        M.Key:  d1d27c3d5e87c6d9d9f3423817ab60b7
+        M.IV:   dcef9b829d5608d24af83d87411652e5
+        M.HMAC: e27c4cc2ff02b6cafd89466e7c1c329b
+        S.Id:   97384
+        S.Key:  9b909f210a5155f4ea744394679f72d4
+        S.Salt: 41866d7dc02898da570c40535d6af843
+        S.HMAC: be9aa60600ffb449cb6dcb04705666d6
+TxSign: HMAC-SHA1 signed data.
+        M.Id:   189821,
+        M.Key:  cb7e8b682955783817d85069dc2f0eeb
+        M.HMAC: d75953c43b7b1bf0e864a45139e27b5b
+        S.Id:   189822
+        S.HMAC: 341f9edc4a503a9b72d3519af516391d
+RxSign: Hash not enabled.</screen></p><p>Again a lot of information:</p>
+   <p>
+    <table frame="all" rowsep="1" colsep="1" id="table_jyf_j52_v4">
+     <title>Discovered Writer crypto data</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="2.7*"/>
+      <thead>
+       <row>
+        <entry>Item</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry>RxData</entry>
+        <entry>If submessage or payload encryption is used: the crypto keys (master/session) for AES
+         decryption of encrypted payload data coming from the discovered DataWriter.</entry>
+       </row>
+       <row>
+        <entry>TxSign</entry>
+        <entry>If Submessages need to be signed, the crypto keys (master/session) for signing of
+         encrypted data for this specific discovered DataWriter.</entry>
+       </row>
+       <row>
+        <entry>RxSign</entry>
+        <entry>If Payload or submessages are signed individually for each DataReader, the crypto
+         keys for sign verification.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p></section>
+  <section><title>DTLS contexts dump command.</title><p>The DTLS context dump command can be used when DTLS/UDP based transport security is used with
+    peer-to-peer DTLS/UDP connections.</p>
+   <p>Since this quickly leads to scaling issues if more than 5 or so peers are used, this is no
+    longer used, especially since native DDS security performs a lot better in this case.</p><p><screen scale="80">>dtls
+DTLS connection attempts:
+        &lt;No connections>
+DTLS v4 Servers:
+    DTLS.S(14) UDP:10.0.0.29:4635-DTLS(S)(14) [18] p:0x8e31b0
+        &lt;No connections>
+DTLS v6 Servers:
+    DTLS.S(16) UDPv6:2a02:a03f:669:3100:92e6:baff:fe10:7817:4635-DTLS(S)(16) [20] p:0x8eb880
+        &lt;No connections>
+    DTLS.S(15) UDPv6:2a02:a03f:669:3100:1c3c:6a97:d469:750:4635-DTLS(S)(15) [19] p:0x8eb780
+        &lt;No connections></screen></p></section>
+  <section><title>Security Policy database.</title><p>The current security policy database can be queried with the <cmdname>spdb</cmdname> command
+    (which stands for "show policy database") can be used:</p>
+   <p><screen scale="60">>spdb
+Security policy database rules: 
+5) Participant [2]: '7fef45661ffa779f 9050 21a5' | access: Unclassified | blacklist: 0 | clone from 3
+4) Participant [1]: 'DCPS Test program' | access: Unclassified | blacklist: 0 | clone from 1
+1) Participant: 'DCPS Test program' | access: Secret | blacklist: 0
+|---> Topic: HelloWorld | mode: * | controlled: 1 | secure_disc: 1 | encrypt: payload(AES128_HMAC_SHA1) | domId: 7 | blacklist: 0
+|---> Partition: * | mode: * | domId: * | blacklist: 0
+2) Participant: '7fef45661ffa779f 9283 21a6' | access: Secret | blacklist: 0
+|---> Topic: HelloWorld | mode: * | controlled: 0 | secure_disc: 0 | encrypt: none | domId: 7 | blacklist: 0
+|---> Partition: * | mode: * | domId: * | blacklist: 0
+3) Participant: '7fef45661ffa779f 9050 21a5' | access: Secret | blacklist: 0
+|---> Topic: HelloWorld | mode: * | controlled: 0 | secure_disc: 0 | encrypt: none | domId: 7 | blacklist: 0
+|---> Partition: * | mode: * | domId: * | blacklist: 0
+1) Domain 7: access: Secret | exclusive: 1 | controlled: 1 | encrypt: none | secure transport: Local=any/Remote=any | blacklist: 0
+|---> Topic: * | mode: none | controlled: 0 | secure_disc: 1 | encrypt: payload(HMAC_SHA256) | domId: 7 | blacklist: 0
+|---> Partition: * | mode: * | domId: 7 | blacklist: 0
+2) Domain 2: access: Top-Secret | exclusive: 1 | controlled: 1 | encrypt: message(AES256_HMAC_SHA256) | secure transport: Local=any/Remote=any | blacklist: 0
+|---> Topic: * | mode: none | controlled: 0 | secure_disc: 1 | encrypt: submessage(AES128_HMAC_SHA1) | domId: 2 | blacklist: 0
+|---> Partition: * | mode: * | domId: 2 | blacklist: 0
+3) Domain *: access: Unclassified | exclusive: 0 | controlled: 0 | encrypt: none | secure transport: Local=no/Remote=no | blacklist: 0
+|---> Topic: * | mode: * | controlled: 0 | secure_disc: 0 | encrypt: none | domId: * | blacklist: 0
+|---> Partition: * | mode: * | domId: * | blacklist: 0</screen></p><p>The information shown here is actually identical to the content of the security.xml file shown before.</p></section>
+ </conbody>
+</concept>

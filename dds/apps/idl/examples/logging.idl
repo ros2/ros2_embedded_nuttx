@@ -1,0 +1,22 @@
+module DDS {
+
+    enum LogLevel {
+	LOG_TRACE,
+	LOG_DEBUG,
+	LOG_INFO,
+	LOG_NOTICE,
+	LOG_WARNING,
+	LOG_ERROR,
+	LOG_SEVERE,
+	LOG_FATAL
+    };
+
+    struct LogInfo {
+	octet	 source_guid [16];
+	LogLevel log_level;
+	string	 message;
+	string	 category;
+    };
+    
+}; // end module DDS
+

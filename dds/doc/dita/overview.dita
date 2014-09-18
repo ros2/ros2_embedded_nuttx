@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_2f5_zps_sf">
+ <title>Overview</title>
+ <shortdesc/>
+ <conbody>
+  <p>The purpose of this document is to make the user familiar with working with the Technicolor DDS
+   Middleware implementation.</p>
+  <p>Technicolor DDS provides a Middleware approach that minimizes the memory footprint of
+   DDS-applications, without sacrificing their speeds, in order to make the DDS Publish/Subscribe
+   methodology usable on low-memory, low-performance embedded devices, all this both over LAN and
+   WAN and fully secure.</p>
+  <p>The next chapters will give a small introduction in the Middleware concept and how the
+   Technicolor DDS can make it easier for application writers to use DDS.</p>
+  <p>The Technicolor DDS Data Type system will be described in detail, since this is one of the most
+   important changes in Technicolor DDS compared to other DDS implementations.</p>
+  <p>The document will also give some guidelines to application writers which kind of DDS data
+   eventing approaches are available, and which is more appropriate in what situation, e.g. using
+   either Listener functions, or using a WaitSet-based approach.</p>
+  <p>A number of environment variables are available in Technicolor DDS that can be used to
+   influence the usage of Multicast and of Interface IP addresses.  These environment variables will
+   also be discussed.</p>
+  <p>A drastic per-node DDS memory reduction is possible using the Technicolor Central Discovery
+   Daemon.</p>
+  <p>For a good look into how applications are actually using their DDS resources, the Technicolor
+   DDS implementation can provide lots of ways to examine this in detail.  Some of those ways are by
+   default compiled out in order to minimize the code size, but it is quite easy to enable more
+   exhaustive debugging features.  The available compilation options will be explained in
+   detail.</p>
+  <p>We  will also explain how to optimise memory usage even more using the Technicolor DDS memory
+   pool system.</p>
+  <p>A number of DDS example programs are provided which are quite useful on their own, such as the
+   Shapes demo program, and the Bandwidth and Latency test programs.  These will also be
+   explained.</p>
+ </conbody>
+</concept>

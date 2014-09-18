@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_c3f_hzs_wf">
+ <title>History Cache</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The history cache contents can be shown with the <cmdname>scache</cmdname> or
+    <cmdname>sdcache</cmdname> commands as shown below:</p>
+  <screen scale="80">>sdc 36
+Topic/Type: Square/ShapeType 
+GUID: 92767f10:010a6e9e:03e80000-000001-7
+Max. depth = 1, Flags = Transient-Local/Auto-dispose/Inst-ordered/Keep-last
+Limits: * samples, * instances, 1 samples/instance
+Hashed: 0, monitor: 0, inform: 1, unacked: 0, ownership: shared
+Changes: {2}
+        3295.625815887s - [0x2278090*2:ALIVE:0:h=2,R,NN]->0x227469c*1,148 bytes
+        3295.723990600s - [0x2278110*2:ALIVE:0:h=1,R,NN]->0x2274440*3,148 bytes
+Last handle = 2, Maximum key size = 133
+   1: 30727bee:ff213066:4d6cfc73:0a6c72c8, ALIVE, NOT_NEW, D/NW=0/1, W:40 {1}
+      Statistics:
+        # of cache bytes added:   3876416
+        # of cache samples added: 26192
+        # of cache registers:     0
+        # of cache disposes:      0
+        # of cache unregisters:   0
+        # of cache notifications: 26192
+        # of cache gets:          26192
+      Key:
+        {color='RED'}
+      ->: (1) {
+        3295.723990600s - [0x2278110*2:ALIVE:0:h=1,R,NN]->0x2274440*3,148 bytes
+      }
+   2: 262cfcbc:42b9f5a5:a1186f2c:5cde78d5, ALIVE, NOT_NEW, D/NW=0/1, I, W:41 {1}
+      Statistics:
+        # of cache bytes added:   3860432
+        # of cache samples added: 26084
+        # of cache registers:     0
+        # of cache disposes:      0
+        # of cache unregisters:   0
+        # of cache notifications: 26084
+        # of cache gets:          26084
+      Key:
+        {color='GREEN'}
+      ->: (1) {
+        3295.625815887s - [0x2278090*2:ALIVE:0:h=2,R,NN]->0x227469c*1,148 bytes
+      }</screen>
+  <p>In this particular example, where we display the contents of the Square DataReader, samples
+   remain in the history cache, since we always read() from the cache while processing the data
+   instead of doing a take().</p>
+  <p>The following information is effectively displayed:</p>
+  <p>
+   <ul id="ul_tm1_11t_wf">
+    <li>The Topic/Type names.</li>
+    <li>The GUID of the DataReader.</li>
+    <li>The maximum depth for <i>KEEP_LAST</i> caches or the <i>max_samples_per_instance</i> limit
+     for <i>KEEP_ALL</i> caches.</li>
+    <li>Cache flags that are derived from QoS parameters and which control cache behaviour.</li>
+    <li>The resource limits for this cache.</li>
+    <li>Whether the cache is hashed, actively being monitored.</li>
+    <li>The number of as yet unacknowledged samples.</li>
+    <li>The type of ownership.</li>
+    <li>The global list of changes in the cache, sorted in arrival order (2 samples in this
+     cache).</li>
+    <li>If the cache has multiple instances, i.e. is keyed, the last handle and the key size are
+     displayed, as well as the instance list.</li>
+    <li>Each active instance is listed as:<ol id="ol_21d_x1t_wf">
+      <li>The instance handle.</li>
+      <li>The hash value of the key as an MD5 checksum if the key is larger than 16 bytes, or the
+       key itself<fn>Secure topics always use an MD5 checksum.</fn>.</li>
+      <li>The last instance and view states.</li>
+      <li>The number of disposed/no_writer state changes.</li>
+      <li>The handle of the writers actively writing data to this cache.</li>
+      <li>Instance statistics if enabled (-DEXTRA_STATS).</li>
+      <li>The key value if the key is hashed.</li>
+      <li>The arrival time of the last sample or</li>
+      <li>The list of samples queued in that instance.</li>
+     </ol></li>
+   </ul>
+  </p>
+  <note>The instance list for a multi-instance cache is either a linear list, if small enough,
+   or a dual skiplist, where the first skiplist has as key the keyhash value, and the second
+  skiplist has as key the instance handle.</note>
+  <note>Multi-instance caches are automatically converted from one format to the other, when items
+  are added or removed from.</note>
+  <p>For each sample, the following information is displayed:</p>
+  <p>
+   <ul id="ul_h1w_f2t_wf">
+    <li>The timestamp for when the sample was generated, relative since the time the program was
+     started, followed by " - ["</li>
+    <li>The address of the Change descriptor and the number of references to it.</li>
+    <li>If the change is <b>ALIVE</b> or <b>DISPOSED</b> or <b>UNREGISTERED</b> or <b>ZOMBIE</b>
+     (both disposed and unregistered).</li>
+    <li>The number of outstanding acknowledgements.</li>
+    <li>The writer handle.</li>
+    <li>If a writer cache, the sequence number as a <i>high.low</i> tuple.</li>
+    <li>If the sample was due to a directed write, the list of destinations (after a '=>'
+     symbol).</li>
+    <li>If a reader cache (in this case), the sample state (NR=Not Read, R=Read) and the view state
+     (NN=Not New, N=New), followed by ']'</li>
+    <li>If the sample contains data (ALIVE sample), this is indicated with a
+      "-><i>&lt;addr></i>*<i>&lt;nrefs></i>,<i>&lt;len></i> bytes" string where:<ol
+      id="ol_jyf_qft_wf">
+      <li><i>&lt;addr></i> is the memory address of the sample data.</li>
+      <li><i>&lt;nrefs></i> is the number of references to this sample data.</li>
+      <li><i>&lt;len></i> is the total length of the sample data in bytes.</li>
+     </ol></li>
+   </ul>
+  </p>
+  <p>The cache contents can be queried with the <cmdname>qcache</cmdname> command, as follows:</p>
+  <screen scale="80">>qcache 42 x &lt; 150 and y > 10
+1: {color="GREEN", x=104, y=83, shapesize=30}</screen>
+ </conbody>
+</concept>

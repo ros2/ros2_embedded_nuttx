@@ -1,0 +1,3 @@
+#WORKSPACE=/middleware/core/servicefw/dds/project ../tools/ccm-check
+#WORKSPACE=~/qeo/git/c-dds/dds/project ../tools/ccm-check
+WORKSPACE=/work/git/qeo/dds ../tools/ccm-check

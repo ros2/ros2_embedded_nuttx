@@ -1,0 +1,7 @@
+for m in /proc/* ; do
+	if [ -f $m/smaps ] ; then
+		echo $m
+		echo -n
+		cat $m/smaps
+	fi
+done

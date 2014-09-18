@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_gmg_k2v_sf">
+ <title>DDS Debug features</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The Technicolor DDS implementation has the following features that are useful for debugging
+   user- as well as DDS-specific code and data:</p>
+  <p>
+   <ol id="ol_2mw_my5_sf">
+    <li>A debug command handler (shell) can easily be attached to application code.</li>
+    <li>An application debugger (gdb, ddd, etc.) can 'call' Technicolor DDS debug commands.</li>
+    <li>Any Technicolor DDS application can optionally be verified/monitored remotely using the
+     telnet protocol to a built-in debug server giving access to the Debug shell.  This debug server
+     is either started automatically, or spawned on request of applications.</li>
+    <li>The Debug shell can give detailed information on memory usage, created as well as discovered
+     DDS entities, and it allows detailed inspection of History Cache data.</li>
+    <li>RTPS message tracing can be enabled for any topic, even the builtin Discovery topics.</li>
+   </ol>
+  </p>
+ </conbody>
+</concept>

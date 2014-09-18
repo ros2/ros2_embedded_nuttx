@@ -1,0 +1,1 @@
+LD_LIBRARY_PATH=../../output/dds/HOSTLINUX/Coverage/coverage/usr/local/lib ./dds -k qeoCerts/first-key.pem -c qeoCerts/first.pem $*

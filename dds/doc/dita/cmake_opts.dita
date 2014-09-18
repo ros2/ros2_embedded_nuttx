@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_zgx_25t_5f">
+ <title>Library build options</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The application and test programs described before each have a Makefile in their own directory
+   and can be build as standalone programs.</p>
+  <p>The DDS library (i.e. <i>libdds.so.1</i>) should be build using the Makefile_component makefile
+   in the dds root directory:</p>
+  <p>A large number of build options are available directly from the build system. These take the
+   form of <b>dds_</b><i>&lt;option></i><b>=1</b>:<table frame="all" rowsep="1" colsep="1"
+    id="table_pb2_svb_v4">
+    <title>DDS Library build options</title>
+    <tgroup cols="2">
+     <colspec colname="c1" colnum="1" colwidth="1*"/>
+     <colspec colname="c2" colnum="2" colwidth="3.65*"/>
+     <thead>
+      <row>
+       <entry>DDS build option</entry>
+       <entry>Description</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry><cmdname>dds_DEBUG=1</cmdname></entry>
+       <entry>This option automatically enables the debug shell using a builtin debug server that
+        listens to port 3400 + <i>&lt;participant_id></i> for incoming Telnet connections.  This is
+        the default for debug builds but is normally disabled for release builds.</entry>
+      </row>
+      <row>
+       <entry><cmdname>dds_WERROR=1</cmdname></entry>
+       <entry>Compile everything with<cmdname> -werror</cmdname>.</entry>
+      </row>
+      <row>
+       <entry><cmdname>dds_SECURITY=1</cmdname></entry>
+       <entry>Enable DDS security software to be compiled in.</entry>
+      </row>
+      <row>
+       <entry><cmdname>dds_FORCE_MALLOC=1</cmdname></entry>
+       <entry>If not specified, the DDS library will use a builtin pool system (as described
+        before), but it can be forced to automatically call malloc/free functions on pool
+        allocations/releases for valgrind verification purposes.  Using this option forces the use
+        of malloc/free.</entry>
+      </row>
+      <row>
+       <entry><cmdname>dds_LOG_FILE=1</cmdname></entry>
+       <entry>The DDS log file will by default not be used in non-debug mode.  Set this to keep
+        using the DDS log file system.</entry>
+      </row>
+      <row>
+       <entry><cmdname>dds_QEO_SECURITY=1</cmdname></entry>
+       <entry>Enable the Qeo security plugin instead of the standard DDS security plugin.</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table></p>
+  <note>On Android and iOS devices, the &lt;participant_id> number will always be 0, so port 3400
+   can always be used.  On native systems (Linux, OSX, etc.) the &lt;participant_id> will differ
+   when multiple processes are using DDS.  A command like <cmdname>ss -tnap</cmdname> might indicate
+   the correct debug port.</note>
+ </conbody>
+</concept>

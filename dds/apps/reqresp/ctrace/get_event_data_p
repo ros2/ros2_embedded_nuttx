@@ -1,0 +1,37 @@
+CTGET=$HOME/DDS/git/dds/tools/ctget
+
+$CTGET $1 RTPS:receive 33 > /tmp/receive.dat
+$CTGET $1 RTPS:sfr_rx_info_ts 32 > /tmp/sfrrxits.dat
+$CTGET $1 RTPS:sfr_rx_data 31 > /tmp/sfrrxd.dat
+$CTGET $1 RTPS:sfr_rel_data 30 > /tmp/sfrreld.dat
+$CTGET $1 DCPS:notify_data_avail 29 > /tmp/notifyd.dat
+$CTGET $1 DCPS:DataReader_take 28 > /tmp/drtake.dat
+$CTGET $1 DCPS:DataReader_get_key_value 27 > /tmp/gkeyval.dat
+$CTGET $1 DCPS:DataWriter_unregister_instance 26 > /tmp/dwunreg.dat
+$CTGET $1 RTPS:writer_delete_change 25 > /tmp/wdelch.dat
+$CTGET $1 RTPS:sfw_rel_remove_change 24 > /tmp/wrremch.dat
+$CTGET $1 USER:RxRequest 23 > /tmp/rxreq.dat
+$CTGET $1 USER:TxResponse 22 > /tmp/txresp.dat
+$CTGET $1 DCPS:DataWriter_write 21 > /tmp/dww.dat
+$CTGET $1 RTPS:writer_new_change 20 > /tmp/wnch.dat
+$CTGET $1 RTPS:sfw_rel_new_change 19 > /tmp/relnch.dat
+$CTGET $1 DCPS:DataReader_return_loan 18 > /tmp/drrloan.dat
+$CTGET $1 DDS:NOTIFY 17 > /tmp/notify.dat
+$CTGET $1 DDS:W_CONT 16 > /tmp/wcont.dat
+$CTGET $1 DDS:W_EV 15 > /tmp/wev.dat
+$CTGET $1 DDS:W_RX 14 > /tmp/wrx.dat
+$CTGET $1 DDS:WAKEUP 13 > /tmp/wakeup.dat
+$CTGET $1 DDS:W_PROXY 12 > /tmp/wproxy.dat
+$CTGET $1 DDS:W_POLL 11 > /tmp/wpoll.dat
+$CTGET $1 DDS:W_IO 10 > /tmp/wio.dat
+$CTGET $1 RTPS:sch_w_prepare 9 > /tmp/wprep.dat
+$CTGET $1 RTPS:sfw_rel_send 8 > /tmp/rsend.dat
+$CTGET $1 RTPS:tx_data 7 > /tmp/txdata.dat
+$CTGET $1 RTPS:sch_loc_send 6 > /tmp/lsend.dat
+$CTGET $1 RTPS:sch_send_done 5 > /tmp/sendd.dat
+$CTGET $1 RTPS:rx_heartbeat 4 > /tmp/rhbeat.dat
+$CTGET $1 RTPS:tx_acknack 3 > /tmp/tack.dat
+$CTGET $1 RTPS:tx_heartbeat 2 > /tmp/thbeat.dat
+$CTGET $1 RTPS:rx_acknack 1 > /tmp/rack.dat
+
+

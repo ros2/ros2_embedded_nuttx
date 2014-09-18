@@ -1,0 +1,8 @@
+struct Request {
+	__dds_key unsigned long id; //@key
+	unsigned long command;
+};
+
+struct Response {
+	__dds_key unsigned long id; //@key
+};

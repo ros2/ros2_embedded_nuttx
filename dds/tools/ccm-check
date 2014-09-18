@@ -1,0 +1,1 @@
+awk '{ if (substr ($1, 1, 1) != "#" && length ($2)) { sysstr = sprintf ("$HOME/bin/check.sh %s $WORKSPACE/%s", $1, $2); system (sysstr); }}' $1.ccfiles
