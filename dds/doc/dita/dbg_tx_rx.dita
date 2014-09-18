@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_mhd_snt_wf">
+ <title>RTPS Send/Receive contexts</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The RTPS Send and Receive contexts can be displayed with the <cmdname>stx</cmdname> and
+    <cmdname>srx</cmdname> commands respectively.</p>
+  <p>Following examples should demonstrate this:</p>
+  <screen scale="80">>stx
+# of locator transmits: 30761
+# of missing locator events: 0
+# of out-of-memory conditions: 0
+
+>srx
+Protocol version: {2, 1}
+Src. Vendor Id: {0x1, 0xe}
+Src. GUID Prefix: c0a84080:00062810:03e80000
+Dst. GUID Prefix: c0a84080:000d3c04:03e80000
+Domain: 0x9644b00
+# of invalid submessages: 0
+# of too short submessages: 0
+# of invalid QoS errors: 0
+# of out-of-memory errors: 0
+# of unknown destination errors: 15108
+# of invalid marshalling data: 0
+Last error: Unknown destination
+Last MEP:
+      00 00 00 00 d8 0e 64 09 - d0 0e 64 09 bc 00 04 00   ......d...d.....
+      15 07 bc 00 00 00 02 07 - 00 00 03 02 00 00 00 00   ................
+      9e 1d 00 00 00 00 00 00 - 9e 1d 00 00 6e 1e 00 00   ............n...
+      42 b9 f5 a5 a1 18 6f 2c - 5c de 78 d5 01 00 00 00   B.....o,\.x.....
+      00 00 00 00 e8 10 64 09 - 00 00 00 00 90 00 0a 00   ......d.........
+      00 00 00 00 00 00 00 00 - c8 37 64 09 00 00 00 00   .........7d.....
+      00 00 00 00                                         ....
+Last domain: 0
+Last msg:
+      00 00 10 00 00 00 00 00 - 00 00 03 02 00 00 00 00   ................
+      9e 1d 00 00                                         ....</screen>
+ </conbody>
+</concept>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_wc1_jq5_5f">
+ <title>Central Discovery Daemon</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>DDS Discovery mechanism</title>
+   <p>DDS uses the Simple Discovery protocol (<i>SPDP/SEDP</i>) to propagate Participant, Topic and
+    Endpoint (i.e. Reader/Writer) information to all other discovered DDS peers. This is needed,
+    since a DDS-component can only 'match' with peer endpoints if this information is locally
+    available, i.e. discovered.</p><p>Although this is perfectly ok if there are only a limited
+    amount of DDS components in a device or if there is plenty of memory in a device when there are
+    a lot of DDS components, this can become a real problem on low-memory footprint devices when a
+    lot of topics need to be discovered.</p><p>The amount of memory that is used on each device for
+    discovery data (e.g. meta-data) would in practice be: the number of components times the total
+    number of topics and endpoints in the DDS domain times the memory needed to store each of the
+    endpoints.</p><p>In Technicolor DDS, this memory usage is not very high, i.e. less than 80 bytes
+    per discovered endpoint, which is a lot less than what other DDS'es require. However, even this
+    small amount can quickly add up! Assuming 30 components and 2000 endpoints in a domain on a
+    single device, for example, this would end up occupying: 30 x 2000 x 80 = 4.8MB for discovery
+    data alone. </p><p>In practice, a component has typically no interest in the majority of the
+    discovered data. Only the data that matches its own endpoints is really needed for correct DDS
+    operation. For small components that have only a few matching endpoints, having to store all the
+    unused discovery data can be a real burden.</p><p>A naive approach to filter discovered
+    information might be to just discard everything that is of no interest yet, but this simply
+    doesn't work. The discovered endpoint/topic info might be needed afterwards. This can happen if
+    the order of endpoint creation is different between the component and its peers and the
+    component is a bit slower (intentionally or not) than its peers. A match would then not happen
+    and communication would not be possible.</p><p>In fact, most embedded DDS's just disable the
+    Simple Discovery protocol and use static (manually configured) discovery data. Although this can
+    work with a limited amount of Topics/Endpoints, overall it is very cumbersome and also very
+    error-prone, and it doesn't scale at all.</p><p>As shall be seen further, the idea of the
+    Central Discovery handler solves the memory usage problems, while still allowing a fully dynamic
+    Discovery mechanism.</p></section>
+  <section>
+   <title>Centralizing Discovery data</title>
+   <p>By centralizing the DDS Discovery meta-data on a device, a lot of memory can be saved.  Using
+    the numbers presented in the previous chapter and assuming that all Discovery data is needed only
+    twice (not an unrealistic assumption), once in the Central Discovery handler and once distributed
+    over the components of a device, the following numbers come up: 2 x 2000 x 80 = 320 Kbytes, i.e.
+    we can save almost 4.5 Mbytes of memory!</p>
+   <p>See below for an overview of the Central Discovery Daemon in action:</p>
+   <image href="cdd_operation.jpg" id="image_dlq_bjz_5f" scalefit="yes" scale="80"/>
+   <p>Of course, it is not all positive news since there are also a few disadvantages associated
+    with a 'central' Discovery data store:<ul id="ul_h4r_kjz_5f">
+     <li>It introduces a central point of failure in the device, which goes against the DDS
+      'philosophy'. If something happens with the central discovery daemon (<cmdname>CDD</cmdname>),
+      crashes or otherwise, no more new matches will happen, although existing matches will continue
+      to work.</li>
+     <li>It slows down the time before discovery happens in the components, since there is more
+      communication overhead and the matching decisions for late joining components are taken by the
+       <cmdname>CDD</cmdname> instead of by the component itself.</li>
+     <li>Some security issues might pop up if remote participants filter on participant USER_DATA to
+      determine whether communication is allowed. The <cmdname>CDD</cmdname> is visible remotely as
+      a separate participant and might be filtered out. Also, it might send matching information to
+      local components, even though this was not allowed. Although the design of the daemon
+      partially alleviates some of these issues, some problems might still occur. Some further study
+      might be necessary to look at the various security issues.</li>
+    </ul></p>
+     </section>
+  <section>
+   <title>CDD design principles</title>
+   <p>The following design principles are used:</p>
+   <p>
+    <ul id="ul_3qy_2kz_5f">
+     <li>All communication between device components and the <cmdname>CDD</cmdname> will be over
+      extra DDS builtin Central Discovery Endpoints, similar to the SPDP and SEDP endpoints.</li>
+     <li>The Central Discovery endpoints will be invisible to external devices/components, since
+      like builtin Discovery Endpoints they are not published.</li>
+     <li>If a component starts up without a <cmdname>CDD</cmdname> being present (the
+       <cmdname>CDD</cmdname> registers itself in the Technicolor DDS shared memory), or if
+      specifically instructed not to use an existing <cmdname>CDD</cmdname> (via either an
+      environment variable, or via a command-line flag), it will not use Centralized Discovery and
+      just behave as a normal DDS component, storing all Discovery data.</li>
+     <li>The <cmdname>CDD</cmdname> itself <i>will</i> be visible to external devices/components,
+      but it will never announce Subscriptions or Publications over the normal SPDP/SEDP builtin
+      endpoints.</li>
+     <li>Since it is visible to the external world as an extra participant, the
+       <cmdname>CDD</cmdname> captures all discovered information coming from components on the same
+      device as well as from components on other devices, which it stores into its Discovery Data
+      store.</li>
+     <li>If the <cmdname>CDD</cmdname> detects that other participants on the <i>same </i>device
+      publish new, i.e. not yet received Publications/Subscriptions, an additional action will
+      happen; i.e. the Data store will be checked for new matches with existing endpoints in other
+      components (local or remote). If a match is then found, this will be notified on one of the
+      builtin Central Discovery endpoints.</li>
+     <li>If the <cmdname>CDD</cmdname> detects that other participants on a <i>different</i> device
+      publish new information, the <cmdname>CDD</cmdname> will not send anything to local
+      components, since these still have their normal Discovery builtin endpoints and will react
+      autonomously on the received information.</li>
+    </ul>
+   </p>
+  </section>
+  <section><title>Starting <cmdname>cdd</cmdname></title>
+   <p>The program, when used on Unix/Linux operating systems, daemonizes itself by default, and
+    detaches itself from the standard I/O channels. It also then logs its operation to the Syslog
+    service, and can be stopped by sending a Hangup (HUP) signal to it.  This daemonizing behavior
+    can be prevented with the <cmdname>-D</cmdname> option. </p>
+   <p>The program accepts a number of options that can be shown by typing <cmdname>cdd
+    -h</cmdname>.</p>
+   <p>The following options can be given:</p>
+   <p>
+    <table frame="all" id="table_mq2_ccz_5f">
+     <title><cmdname>cdd</cmdname> program options</title>
+     <tgroup cols="2">
+      <colspec colname="c1" colnum="1" colwidth="1*"/>
+      <colspec colname="c2" colnum="2" colwidth="4.39*"/>
+      <thead>
+       <row>
+        <entry>Option</entry>
+        <entry>Description</entry>
+       </row>
+      </thead>
+      <tbody>
+       <row>
+        <entry><cmdname>-i</cmdname>
+         <i>&lt;domain></i></entry>
+        <entry>Specifies the DDS Domain Identifier for which the Central Discovery function must be
+         enabled.  If not specified, Domain Identifier 0 is used.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-f</cmdname></entry>
+        <entry>Continue if the Daemon is already running. This option is present to recover in cases
+         where a previous instance of <cmdname>cdd</cmdname> stopped unexpectedly without proper
+         cleanup. In case this happens, the shared memory region would wrongly indicate an active
+         <cmdname>cdd</cmdname>, preventing the daemon from starting again.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-r</cmdname></entry>
+        <entry>Reset the shared memory region before starting up.  This can be used when DDS
+         application components didn't complete properly, thereby messing up the count of active
+         in-node DDS participants.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-d</cmdname></entry>
+        <entry>Display/dump all Discovery data whenever changes are detected.  Since this can lead to
+         a lot of data being dumped, it is not advised to do this when daemonized (see
+         <cmdname>-D</cmdname> option).</entry>
+       </row>
+       <row>
+        <entry><cmdname>-D</cmdname></entry>
+        <entry>Don't daemonize on startup, but behave as a normal user program.  This option could be
+         used while debugging, since cdd then displays all output on the normal terminal output
+         channel, and its debug shell (when enabled) can be used directly from the command
+         line.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-p</cmdname>
+         <i>&lt;name></i></entry>
+        <entry>Specifies the name of a pipe on which <cmdname>cdd</cmdname> will send its
+         <b><i>pid</i></b> when fully activated.  This can be used by an init process to know the
+         <b><i>pid</i></b> in order to be able to close <cmdname>cdd</cmdname>, but also to block
+         until <cmdname>cdd</cmdname> is completely initialized before starting other DDS-based
+         application processes.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-v</cmdname></entry>
+        <entry>Verbose operation flag.  This causes the program to log the main actions while it's
+         active.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-vv</cmdname></entry>
+        <entry>Very verbose operation flag.  If enabled, cdd wil give a lot of information while
+         running, probably a lot more than desired.  Don't use this while daemonized.</entry>
+       </row>
+       <row>
+        <entry><cmdname>-h</cmdname></entry>
+        <entry>Displays some information on program usage.</entry>
+       </row>
+      </tbody>
+     </tgroup>
+    </table>
+   </p>
+  </section>
+ </conbody>
+</concept>

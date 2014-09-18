@@ -1,0 +1,15 @@
+ifneq ($($(uthash_INCLUDED)),1)
+
+override COMPONENT          := tools.external.acme.uthash
+
+uthash_PARTS_INSTALL      := 
+uthash_INCLUDES           := src
+uthash_LIBS               :=
+
+include $(projectdir/)build/Makefile_component_top
+
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+

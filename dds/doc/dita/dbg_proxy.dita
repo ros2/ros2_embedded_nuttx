@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_dnq_mmt_wf">
+ <title>Proxy Endpoints</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>The <cmdname>sproxy</cmdname> command can be used to display RTPS proxy endpoint contexts:</p>
+  <screen scale="80">>spro 40
+1/000003-02 W{40} - Square/ShapeType:
+    GUID: 92767f10:01096e8f:03e80000-000002-7 {42} - 
+        InlineQoS=0, Reliable=1, Active=0, Marshall=0, MCast=1, Tunnel=0
+        States (Control/Tx/Ack): READY/ANNOUNCING/WAITING
+        Changes: : (1)
+                {UNDERWAY:1        [0x2278190*2:ALIVE:h=1,0.37223]}
+        LastAck=37126
+        Unicast locators: 
+                UDP:10.0.0.29:7679
+        Multicast locators: 
+                UDP:239.255.0.1:7651(2)
+        Direct reply locator:
+                UDP:10.0.0.29:7679
+        Last: 0.37222, local=7, remote=0
+        # of DATA messages sent:     34576
+        # of GAPs sent:              0
+        # of HEARTBEATs sent:        282
+        # of ACKNACKs received:      37084
+        # of DATAFRAG messages sent: 0
+        # of HEARTBEATFRAGs sent:    0
+        # of NACKFRAGs received:     0
+        Next GUID: (nil)
+    GUID: 92767f10:01086e8c:03e80000-000001-7 {43} - 
+        InlineQoS=0, Reliable=1, Active=0, Marshall=0, MCast=1, Tunnel=0
+        States (Control/Tx/Ack): READY/ANNOUNCING/WAITING
+        Changes: : (1)
+                {UNDERWAY:1        [0x2278190*2:ALIVE:h=1,0.37223]}
+        LastAck=74034
+        Unicast locators: 
+                UDP:10.0.0.29:7677
+        Multicast locators: 
+                UDP:239.255.0.1:7651(2)
+        Direct reply locator:
+                UDP:10.0.0.29:7677
+        Last: 0.37222, local=8, remote=0
+        # of DATA messages sent:     2509
+        # of GAPs sent:              0
+        # of HEARTBEATs sent:        37000
+        # of ACKNACKs received:      37000
+        # of DATAFRAG messages sent: 0
+        # of HEARTBEATFRAGs sent:    0
+        # of NACKFRAGs received:     0
+        Next GUID: (nil)</screen>
+  <p>As shown above, for the local DataWriter with handle 40, there are two proxy Reader
+            contexts.</p>
+  <p>For each proxy context, the following information is displayed:</p>
+  <p>
+   <ul id="ul_qwz_bnt_wf">
+    <li>The GUID</li>
+    <li>The type of endpoint, e.g. reliable or best-effort.</li>
+    <li>The proxy state machine states (see RTPS specification for details).</li>
+    <li>The queued changes.</li>
+    <li>The last acknowledgement number.</li>
+    <li>The unicast locators to use.</li>
+    <li>The multicast locators to use.</li>
+    <li>The determined locator to use for replies.</li>
+    <li>The last sent sequence number.</li>
+    <li>The proxy instance ids.</li>
+    <li>Optional statistics counters (if enabled with -DEXTRA_STATS).</li>
+    <li>The next proxy in the proxy list of a discovered endpoint.</li>
+   </ul>
+  </p>
+  <p>In the example
+   above, there is one sample that has not been acknowledged yet, as indicated
+   with UNDERWAY.  Refer to the RTPS specification as to which states can be
+   used for samples in stateful reliable Readers/Writers.</p>
+ </conbody>
+</concept>

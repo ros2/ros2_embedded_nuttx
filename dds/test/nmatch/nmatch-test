@@ -1,0 +1,16 @@
+PATH=$PATH:.
+nmatch -s a%bb  aaaaaab
+nmatch -s a%bb  aaaaaabb
+nmatch -s a a
+nmatch -s a%bb  aaaaaabb
+nmatch a%bb  aaaaaabb
+nmatch a a
+nmatch a*bb  aaaaaabb
+nmatch a*b?b  aaaaaabdb
+nmatch a\\*b??c aabcdc
+nmatch -e a\\*b??c a*bcdc
+nmatch a\\*b??c a*bcdc
+nmatch -e a\\*b??c a\\bbcdc
+nmatch a\\*b??c a\\bbcdc
+nmatch -c a*CC aaaacc
+nmatch a*CC aaaacc

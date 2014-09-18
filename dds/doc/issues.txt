@@ -1,0 +1,32 @@
+TODO:
+
+- Don't free instance immediately in Volatile/Best-effort mode, but use
+  hc_acknowledge() after marshalling => needs key data from instance.
+
+- Add proper ownership code to handle NOT_ALIVE_NO_WRITERS correctly as well
+  as enabling Exclusive/Shared ownership.
+
+- Add liveness mechanism.
+
+- Add Central Discovery mechanism.
+
+- Add support for IPv6.
+
+- Proper notifications needed for various listeners.
+
+- Add Dynamic Type/Data APIs.
+
+- Rewrite Typesupport module for X-types.
+
+- Write IDL-compiler for C.
+
+- Add C++ support.
+
+- Add Java support.
+
+- Fix races/bugs:
+
+	* random_level() uses a global var and can deadlock.
+	* competing calls for remove proxy from both Discovery and Application.
+	* Sometimes with large amounts of data, RTPS handshake doesn't work.
+

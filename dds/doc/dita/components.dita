@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_ksf_s15_5f">
+ <title>Overview</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <section>
+   <title>Shared library</title>
+   <p>The <cmdname>libdds.so.0</cmdname> library is a dynamically loadable shared library that can
+    be built on Unix/Linux platforms to provide the core Technicolor DDS functionality. Applications
+    link to the library via a <i>-ldds</i> linker options.</p>
+  </section>
+  <section>
+   <title>Central Discovery Daemon</title>
+   <p>The Central Discovery Daemon (<cmdname>cdd</cmdname>) is responsible for keeping per-node
+    Discovery data central.</p>
+   <p>This prevents local components to all keep their own copy of Discovery data which would
+    multiply the amount of memory needed for storing Discovery data with the number of components.
+    The amount of memory used can be very high in cases where a large number of distinct topics are
+    used.</p>
+  </section>
+  <section>
+   <title>Shapes demo</title>
+   <p>The shapes program (<cmdname>shapes</cmdname>) demonstrates DDS interoperability between
+    different DDS vendors.</p>
+   <p>It is a technology demo, showing in real-time various shapes (Circle, Square and Triangle)
+    that are moving around.  In the program, the user can create new shapes, as well as subscribe to
+    shapes.</p>
+  </section>
+  <section>
+   <title>A bandwidth test program</title>
+   <p>The bandwidth test program (<cmdname>bw</cmdname>) can be used to test DDS performance.</p>
+   <p>The program can be started either as a data producer or as a data consumer, or even both, so
+    it can test performance between multiple DDS nodes and processes.  It attempts to stress the
+    system by sending bursts of data at controlled speeds, while verifying that data is successfully
+    received at the remote end.</p>
+  </section>
+  <section>
+   <title>Latency test program</title>
+   <p>This latency test program (<cmdname>latency</cmdname>) is able to accurately measure the
+    latency between two DDS components.</p>
+   <p>It sends a number of data samples that are looped by a remote entity and registers the time it
+    took for arrival of the response.  When the test is completed, a report is generated on the
+    measured latency.</p>
+  </section>
+  <section>
+   <title>Chat program</title>
+   <p>The chat program (<cmdname>chat</cmdname>) is able to chat to any number of other chat
+     clients directly over DDS.</p>
+  </section>
+  <section>
+   <title>Dump program</title>
+   <p>The dump program (<cmdname>dump</cmdname>) can display all topics it detects in a DDS
+        domain and can even connect to any topic and display received topic data in text format.</p>
+      <p>It can be used to monitor the data that is being published in the domain.</p>
+  </section>
+  <section>
+   <title>IDL to TSM conversion utility</title>
+   <p>An IDL parser (<cmdname>idl</cmdname>) is available that is very useful for generation of
+     TSM data. Manual conversion of IDL specifications are typically very error-prone. A tool
+     that does this automatically is therefore extremely useful.</p>
+   </section>
+   <section>
+     <title>The DCPS functionality test program</title>
+     <p>This program, called <cmdname>dcps</cmdname>, is used internally to test out various
+        functionalities of DDS between different application components. At compile time, lots of
+        options are available for creating Readers and Writers with various kinds op QoS settings.
+        As many instances of the program as necessary can be run simultaneously.  It can be
+        interacted with in a dynamic manner in order to start and stop data transfers from
+        individual DataWriters and to monitor received data from individual DataReaders.</p>
+   </section>
+   <section>
+      <title>DCPS API test suite program</title>
+      <p>The API test program (<cmdname>api</cmdname>) tests out the full DDS DCPS API in order to
+        verify that the Technicolor DDS implementation works correctly. It is a limited conformance
+        test suite, but still manages to test all public DCPS API functions at least once. It is
+        limited since it doesn't have full coverage of all DDS code, but runs very quickly and is
+        used as one of the tests in the battery of tests that are performed when a new DDS build is
+        done.</p>
+    </section>
+ </conbody>
+</concept>

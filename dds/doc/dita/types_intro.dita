@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_mmf_4z4_tf">
+ <title>Introduction</title>
+ <shortdesc/>
+ <conbody>
+  <p>As explained before, data is transferred between Data Writers and Data Readers using properly
+   typed writer and reader functions, based on an intimate knowledge of the exact data types that
+   are used.</p>
+  <p>This is done using the concept of topics and types, where a DDS topic corresponds to a single
+   data type. However, several topics may refer to the same data type.</p>
+  <p>Topics may range from a single instance to a whole collection of instances of the given type.
+   Different instances must be distinguishable.  This is achieved by means of the value of some data
+   fields of the objects that form the key to that data set.</p>
+  <p>The exact type of a topic and the fields it contains can either be constructed dynamically
+   (using the Dynamic Type system), or can be specified statically using external tools . In the
+   latter case, a descriptive language such as IDL or XML is used to define the data contents. From
+   this, the code/data that is needed to handle the Topic data and the on-the-wire encoding/decoding
+   logic is generated.</p>
+  <p>See the figure below for the relationship between Writers, Readers, Topics and types:</p>
+  <p><image href="topic.jpg" id="image_jlr_5cp_tf" scale="50"/></p>
+  <p>Types that can be specified are:</p>
+  <ul id="ul_pdt_22p_tf">
+   <li>Integer types (16-bit, 32-bit, 64-bit).</li>
+   <li>Unsigned types (16-bit, 32-bit, 64-bit).</li>
+   <li>Floating point types (32-bit, 64-bit, 128-bit)<fn>Technicolor DDS only supports 128-bit
+     floating point numbers when compiled with a special preprocessor definition.</fn></li>
+   <li>Fixed point types (up to 31 digits).<fn>Not currently supported in Technicolor DDS.</fn></li>
+   <li>Bytes</li>
+   <li>Booleans</li>
+   <li>Chars (8-bit and 32-bit) - Allows UTF-8, UTF-16 and UTF-32.</li>
+   <li>Bitsets</li>
+   <li>Enumerations</li>
+   <li>Alias</li>
+   <li>Collections (Map, Sequence, Array and String).</li>
+   <li>Aggregations (Union and Struct)</li>
+  </ul>
+  <p>Some metadata is supported as well:</p>
+   <ul id="ul_qc4_r2p_tf">
+    <li>Annotations</li>
+    <li>Verbatim text</li>
+   </ul>
+  <note>The definition of which types can be expressed has been extended recently with an additional
+   DDS specification, called X-types, or the Extended Types specification, which has added support
+   for the Map type, Annotations and Verbatim text. Originally these features were not available.
+   The X-types specification has also added support for sparse data structures and evolution of data
+   types, as well as providing additional marshalling methods, and an additional API for dynamically
+   adding types and for dynamically accessing data.  Introspection of types, locally generated or
+   received from peers is also possible.</note>
+  <note>Technicolor DDS properly supports the extensions that are described in the X-types
+   specification, as will be demonstrated further.</note>
+ </conbody>
+</concept>

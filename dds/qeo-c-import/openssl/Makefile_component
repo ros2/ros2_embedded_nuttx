@@ -1,0 +1,246 @@
+ifneq ($($(openssl_INCLUDED)),1)
+
+override COMPONENT := tools.external.acme.openssl
+
+openssl_VERSION            := 1.0.1h
+openssl_INCLUDES           := $$(openssl_PREFIX/)src/openssl-$(openssl_VERSION)/include
+openssl_CFLAGS             :=
+openssl_LIBS               := -lssl -lcrypto -ldl
+
+openssl.soname             := 1.0.0
+ifneq ($(filter $(TARG_OS),MACOS IOS),)
+openssl.lib.crypto         := libcrypto.$(openssl.soname).dylib
+openssl.lib.ssl            := libssl.$(openssl.soname).dylib
+else
+openssl.lib.crypto         := libcrypto.so.$(openssl.soname)
+openssl.lib.ssl            := libssl.so.$(openssl.soname)
+endif
+openssl.a.crypto           := libcrypto.a
+openssl.a.ssl              := libssl.a
+
+ifeq ($(E), HOSTDARWIN)
+openssl_PARTS_INSTALL      := \
+  $(openssl.lib.crypto)@$$(libdir/)$(openssl.lib.crypto):755 \
+  s:$(openssl.lib.crypto)@$$(libdir/)libcrypto.dylib \
+  $(openssl.lib.ssl)@$$(libdir/)$(openssl.lib.ssl):755 \
+  s:$(openssl.lib.ssl)@$$(libdir/)libssl.dylib
+else
+openssl_PARTS_INSTALL      := \
+  $(openssl.lib.crypto)@$$(libdir/)$(openssl.lib.crypto):755 \
+  s:$(openssl.lib.crypto)@$$(libdir/)libcrypto.so \
+  $(openssl.lib.ssl)@$$(libdir/)$(openssl.lib.ssl):755 \
+  s:$(openssl.lib.ssl)@$$(libdir/)libssl.so
+endif
+
+openssl_PARTS              += $(openssl.a.crypto) $(openssl.a.ssl)
+
+# using upstream .pc files
+openssl_DONT_GENERATE_PKGCONFIG := 1
+openssl_DEVEL_INSTALL           := \
+  mkdir -p $$(pkgconfigdir) && \
+  for i in openssl libcrypto libssl; do \
+    cp $$(openssl_PREFIX/)src/openssl-$(openssl_VERSION)/$$i.pc $$(pkgconfigdir); \
+  done && \
+  mkdir -p $$(incdir/)openssl && \
+  cp $$(openssl_PREFIX/)src/openssl-$(openssl_VERSION)/include/openssl/*.h $$(incdir/)openssl
+
+openssl_BUILT_HEADERS      := configured.stamp
+
+include $(projectdir/)build/Makefile_component_top
+
+openssl.tarname    := openssl-$(openssl_VERSION)
+openssl.tarcmd     := tar -zf $(openssl_COMP_DIR)/$(openssl.tarname).tar.gz
+
+openssl.untarred   := $(openssl_PREFIX/)untarred.stamp
+openssl.patched    := $(openssl_PREFIX/)patched.stamp
+openssl.configured := $(openssl_PREFIX/)configured.stamp
+openssl.built      := $(openssl_PREFIX/)built.stamp
+
+##< Source preparations
+openssl.pseries  := $(openssl_COMP_DIR)/patches/series
+
+# Untarring the sources
+openssl_sources: $(openssl.untarred)
+$(openssl.untarred):
+	mkdir -p $(@D)/src
+	$(openssl.tarcmd) -x -m -C $(@D)/src
+	touch -r $(openssl.pseries) $@
+
+# Applying patches if any
+openssl_sources_patched: $(openssl.patched)
+$(openssl.patched): $(openssl.pseries) $(openssl.untarred)
+	cd $(@D)/src/$(openssl.tarname) &&                  \
+	while read p; do                                    \
+	  commentchar='#' &&                                \
+	  case $$p in                                       \
+	    $${commentchar}*)                               \
+	       echo "# Skipping patch \"$$p\".";            \
+	       ;;                                           \
+	    *)                                              \
+	       echo "# Applying patch \"$$p\"...";          \
+	       patch -p1 < $(openssl_COMP_DIR)/patches/$$p; \
+	       ;;                                           \
+	  esac;                                             \
+	done < $(openssl.pseries)
+	touch $@
+
+# Source availability is dependant upon untar+patches
+$(foreach e,$(openssl.tarsrc),$(openssl_COMP_DIR)/$(e)): $(openssl.patched)
+
+.PHONY: openssl_sources openssl_sources_patched
+##>
+
+
+##< Configuration options
+openssl.cfgargs  := --prefix=/$(prefix)
+openssl.cfgargs  += --openssldir=/$(libdir)/ssl
+openssl.cfgargs  += shared
+
+ifeq ($($(E)_ENDIAN),BIG)
+openssl.cfgargs  += -DB_ENDIAN
+else
+openssl.cfgargs  += -DL_ENDIAN
+endif
+ifeq ($($(COMPONENT)_DEBUG),1)
+openssl.debug_target_prefix="debug-"
+endif
+
+CC:=$($(COMPONENT)_$(E)_CC)
+export EXTRA_CMD="true"
+export EXTRA_CC=
+
+ifeq ($(E), GOOG_X86ANDROID)
+openssl.cfgargs  += android-x86
+export ANDROID_DEV := $(ANDROID_NDK)/platforms/android-$(ANDROID_API)/arch-$(ANDROID_ARCH)/usr
+else
+ifeq ($(E), GOOG_ARMANDROID)
+openssl.cfgargs  += android
+export ANDROID_DEV := $(ANDROID_NDK)/platforms/android-$(ANDROID_API)/arch-$(ANDROID_ARCH)/usr
+else
+ifeq ($(E), HOSTDARWIN)
+ifeq ($($(E)_SIZEOF_LONG), 8)
+#Debug stuff not available for 64-bit...
+openssl.cfgargs  += darwin64-x86_64-cc
+ifeq ($($(COMPONENT)_DEBUG),1)
+EXTRA_CC+=-g
+export EXTRA_CMD=sed -ie "s!-O3!-O0!" "Makefile"
+openssl.cfgargs  += -DPURIFY
+endif
+else
+openssl.cfgargs  += $(openssl.debug_target_prefix)darwin-i386-cc
+endif
+else
+
+ifeq ($(TARG_OS), IOS)
+export CROSS_TOP=$(E_SYSROOT_TOP)
+export CROSS_SDK=$(E_SYSROOT_SDK_FULL)
+ifeq ($(TARG_ARCH), HOST)
+ifeq ($($(E)_SIZEOF_LONG), 8)
+openssl.cfgargs  += darwin64-x86_64-cc
+ifeq ($($(COMPONENT)_DEBUG),1)
+EXTRA_CC+=-g
+endif
+else
+openssl.cfgargs  += $(openssl.debug_target_prefix)darwin-i386-cc
+endif
+else 
+openssl.cfgargs  += iphoneos-cross
+ifeq ($($(COMPONENT)_DEBUG),1)
+EXTRA_CC+=-g
+endif
+endif
+EXTRA_CC+=-arch $(ARCHITECTURE_NAME)
+export EXTRA_CMD=sed -ie "s!^CFLAG=!CFLAG=-isysroot $(CROSS_TOP)/SDKs/$(CROSS_SDK) -miphoneos-version-min=7.0 !" "Makefile"
+ifeq ($($(COMPONENT)_DEBUG),1)
+EXTRA_CMD+=&&
+EXTRA_CMD+=sed -ie "s!-O3!-O0!" "Makefile"
+openssl.cfgargs  += -DPURIFY
+endif
+else
+
+# Host x86 32/64-bit platform
+ifeq ($($(E)_SIZEOF_LONG), 8)
+openssl.cfgargs  += $(openssl.debug_target_prefix)linux-x86_64
+else
+openssl.cfgargs  += $(openssl.debug_target_prefix)linux-generic32
+endif
+ifeq ($($(COMPONENT)_DEBUG),1)
+openssl.cfgargs  += -DPURIFY
+endif
+endif
+endif
+endif
+endif
+##>
+
+$(openssl.configured): openssl.cfgargs  := $(openssl.cfgargs)
+$(openssl.configured): openssl.AR       := $($(COMPONENT)_$(E)_LIBRARIAN)
+$(openssl.configured): openssl.CC       := $($(COMPONENT)_$(E)_CC) $(EXTRA_CC)
+$(openssl.configured): openssl.LD       := $($(CUR_COMPONENT)_$(CUR_E)_LD)
+$(openssl.configured): openssl.RANLIB   := $($(COMPONENT)_$(E)_RANLIB)
+$(openssl.configured): openssl.CFLAGS   := $($(COMPONENT)_$(E)_CFLAGS) $($(COMPONENT)_$(E)_TMP_CFLAGS)
+$(openssl.configured): $(openssl.patched)
+	cd $(@D)/src/$(openssl.tarname); \
+	  AR='$(openssl.AR)' \
+	  CC='$(openssl.CC)' \
+	  LD='$(openssl.LD)' \
+	  RANLIB='$(openssl.RANLIB)' \
+	  CROSS_TOP='$(CROSS_TOP)' \
+	  CROSS_SDK='$(CROSS_SDK)' \
+	  ANDROID_DEV='$(ANDROID_DEV)' \
+	    perl Configure $(openssl.cfgargs) && $(EXTRA_CMD)
+	  touch $@
+
+$(openssl.built): $(openssl.configured)
+	cd $(@D)/src/$(openssl.tarname); \
+	  $(GNU_MAKE) build_libs; \
+	  $(GNU_MAKE) openssl.pc libssl.pc libcrypto.pc ; \
+	$(mkdir) -p $(@D)/installed/lib/pkgconfig
+	cp $(@D)/src/$(openssl.tarname)/*.pc $(@D)/installed/lib/pkgconfig
+	perl -i -p -e "s:^prefix=.*$$:prefix=$(@D)/src/$(openssl.tarname):g"                 $(@D)/installed/lib/pkgconfig/*.pc
+	perl -i -p -e "s:^libdir=.*$$:libdir=$(@D)/src/$(openssl.tarname):g"                 $(@D)/installed/lib/pkgconfig/*.pc
+	perl -i -p -e "s:^includedir=.*$$:includedir=$(@D)/src/$(openssl.tarname)/include:g" $(@D)/installed/lib/pkgconfig/*.pc
+	touch $@
+
+
+
+$(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.lib.crypto): $(openssl.built)
+$(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.lib.ssl): $(openssl.built)
+
+$(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.crypto): $(openssl.built)
+$(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.ssl): $(openssl.built)
+
+$(openssl_PREFIX/)libssl.so: $(openssl_PREFIX/)$(openssl.lib.ssl)
+$(openssl_PREFIX/)libcrypto.so: $(openssl_PREFIX/)$(openssl.lib.crypto)
+
+$(openssl_PREFIX/)$(openssl.lib.crypto): $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.lib.crypto)
+	rm -f $@ && cp $< $@
+	cd $(@D) && ln -sf $(notdir $@) libcrypto.so
+$(openssl_PREFIX/)$(openssl.lib.ssl): $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.lib.ssl)
+	rm -f $@ && cp $< $@
+	cd $(@D) && ln -sf $(notdir $@) libssl.so
+
+$(openssl_PREFIX/)libcrypto_pic.a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.crypto)
+	rm -f $@ && cp $< $@
+$(openssl_PREFIX/)libssl_pic.a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.ssl)
+	rm -f $@ && cp $< $@
+
+$(openssl_PREFIX/)libcrypto.a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.crypto)
+	find $(openssl_PREFIX) -name  "*.o" > $(openssl_PREFIX)/libcrypto_pic.lst
+	rm -f $@ && cp $< $@
+$(openssl_PREFIX/)libssl.a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.ssl)
+	#everything is in libcrypto_pic.lst (just creating an empty file here)
+	touch $(openssl_PREFIX)/libssl_pic.lst 
+	rm -f $@ && cp $< $@
+
+#workaround for static linking on mac (build env cannot properly handly this yet)
+$(openssl_PREFIX/)libcrypto.$(openssl.soname).a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.crypto)
+	rm -f $@ && cp $< $@
+$(openssl_PREFIX/)libssl.$(openssl.soname).a: $(openssl_PREFIX/)src/$(openssl.tarname)/$(openssl.a.ssl)
+	rm -f $@ && cp $< $@
+
+include $(projectdir/)build/Makefile_component_bot
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: et sw=4 ts=4 sts=4 foldmethod=marker foldmarker=##<,##> :

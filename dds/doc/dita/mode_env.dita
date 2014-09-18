@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="aabwdxa515d2" xml:lang="en-US">
+ <title>IPv4 and IPv6 mode of operation parameters.</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <table frame="all" id="table_ip_mode">
+   <title>IPv4 and IPv6 mode parameters</title>
+   <tgroup cols="2">
+    <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+    <colspec colname="c2" colnum="2" colwidth="4.2*" colsep="1" rowsep="1"/>
+    <thead>
+     <row>
+      <entry>Parameter name</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>IP_MODE</entry>
+      <entry>Specifies the default mode of operation of IPv4. By default, IPv4 operation is enabled
+       and preferred over IPv6. The argument should be set to one of the valid IP modes as explained
+       below.</entry>
+     </row>
+     <row>
+      <entry>IPV6_MODE</entry>
+      <entry>Specifies the default mode of operation of IPv6. By default, if IPv6 is enabled at
+       compile time, it is enabled, but not preferred. The argument should be set to one of the
+       valid IP modes.</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <p>Valid arguments for IP_MODE and IPV6_MODE are:</p>
+  <table frame="all" id="table_ip_mode_type">
+   <title>IPv4 and IPv6 mode arguments</title>
+   <tgroup cols="2">
+    <colspec colname="c1" colnum="1" colwidth="1*" colsep="1" rowsep="1"/>
+    <colspec colname="c2" colnum="2" colwidth="5.36*" colsep="1" rowsep="1"/>
+    <thead>
+     <row>
+      <entry>Mode</entry>
+      <entry>Description</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>DISABLE[D]</entry>
+      <entry>The specific IP transport is disabled and remains passive. IP addresses of the
+       transport type will not be used and discovery of this transport will be inactive.</entry>
+     </row>
+     <row>
+      <entry>ENABLE[D]</entry>
+      <entry>The specific IP transport is enabled, but is not prioritized.  This means that
+       the transport will function and will announce its source addresses, but it will only be
+       used if the other transport has no means of reaching a certain destination.</entry>
+     </row>
+     <row>
+      <entry>PREFER[RED]</entry>
+      <entry>The specific IP transport is enabled and preferred.</entry>
+     </row>
+    </tbody>
+   </tgroup>
+  </table>
+  <note>If both IPv4 and IPv6 have priority, then IPv4 will still be used.</note>
+  <note>Although described in uppercase in the mode table, alternatively all lower-case modes can be
+   used as well.</note>
+  <p>The combination of mode settings will, in the current implementation, enable only one
+   discovery protocol.  If IPv6 is enabled in cooperation with IPv4, discovery will be done over
+   IPv4, even though IPv6 might be preferred.  Only if IPv4 is disabled will Discovery be performed
+   over IPv6.  The rationale here is that Discovery over IPv4 is clearly defined in the DDS
+   specification as the default Discovery protocol.</p>
+ </conbody>
+</concept>

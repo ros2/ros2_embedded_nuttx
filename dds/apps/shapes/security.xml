@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dds>
+ <security>
+  <domain id="7">
+   <access>secret</access>
+   <membership>exclusive</membership>
+   <controlled>yes</controlled>
+   <encryption>none</encryption>
+   <!--method>HMAC_SHA1</method-->
+   <transport protocol="UDP">
+    <local>DTLS</local>
+    <local>DDSSEC</local>
+    <remote>DTLS</remote>
+    <remote>DDSSEC</remote>
+   </transport>
+   <transport protocol="TCP">
+    <local>TLS</local>
+    <remote>TLS</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>restrict</mode>
+    <controlled>no</controlled>
+    <discovery>secure</discovery>
+    <encryption>payload</encryption>
+    <method>HMAC_SHA256</method>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <domain id="*">
+   <access>unclassified</access>
+   <membership>open</membership>
+   <transport>
+    <local>open</local>
+    <remote>open</remote>
+   </transport>
+   <topic>
+    <name>*</name>
+    <mode>open</mode>
+   </topic>
+   <partition>
+    <name>*</name>
+    <mode>open</mode>
+   </partition>
+  </domain>
+  <participant name="Technicolor Shapes">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>Square</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <controlled>yes</controlled>
+     <discovery>secure</discovery>
+     <encryption>payload</encryption>
+     <method>AES128_HMAC_SHA1</method>
+    </topic>
+    <topic>
+     <name>Circle</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <controlled>yes</controlled>
+     <discovery>secure</discovery>
+     <encryption>payload</encryption>
+     <method>AES128_HMAC_SHA1</method>
+    </topic>
+    <topic>
+     <name>Triangle</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <controlled>yes</controlled>
+     <discovery>secure</discovery>
+     <encryption>payload</encryption>
+     <method>AES128_HMAC_SHA1</method>
+    </topic>
+   </domain>
+  </participant>
+  <participant name="7fef45661ffa779f 9283 21a6">
+   <access>secret</access>
+   <domain id="7">
+    <topic>
+     <name>Square</name>
+     <create>yes</create>
+     <read>read_write</read>
+    </topic>
+    <topic>
+     <name>Circle</name>
+     <create>yes</create>
+     <read>read_write</read>
+    </topic>
+    <topic>
+     <name>Triangle</name>
+     <create>yes</create>
+     <read>read_write</read>
+     <!-- controlled>yes</controlled-->
+     <!-- discovery>secure</discovery-->
+     <!-- encryption>submessage</encryption-->
+     <!---method>HMAC_SHA256</method-->
+    </topic>
+   </domain>
+  </participant>
+ </security>
+</dds>

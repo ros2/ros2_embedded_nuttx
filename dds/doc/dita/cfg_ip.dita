@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dita PUBLIC "-//OASIS//DTD DITA Composite//EN" "ditabase.dtd">
+<dita>
+  <topic id="topic_s2j_wd5_r4">
+    <title>IPv4 and IPv6 configuration parameters</title>
+    <body>
+      <p>A lot of parameters can be configured for the Internet transport mechanisms.</p>
+      <p>The following tables summarizes them:</p>
+      <p>
+        <table frame="all" rowsep="1" colsep="1" id="table_unr_325_r4">
+          <title>IPv4 and IPv6 configuration parameters</title>
+          <tgroup cols="4">
+            <colspec colname="c1" colnum="1" colwidth="1.32*" colsep="1"/>
+            <colspec colname="c2" colnum="2" colwidth="2.41*" colsep="1"/>
+            <colspec colname="newCol3" colnum="3" colwidth="1.39*" colsep="1"/>
+            <colspec colname="c3" colnum="4" colwidth="1*" colsep="1"/>
+            <thead>
+              <row>
+                <entry>Parameter name</entry>
+                <entry>Description</entry>
+                <entry>Type</entry>
+                <entry>Default value</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>IP_SOCKETS</entry>
+                <entry>Defines the maximum number of IP and IPv6 sockets to be used simultaneously
+                  by DDS. Once this maximum number is used, no more sockets will be opened.</entry>
+                <entry>Number</entry>
+                <entry>1024</entry>
+              </row>
+              <row>
+                <entry>IP_MODE</entry>
+                <entry>Mode of operation of IPv4</entry>
+                <entry>Mode</entry>
+                <entry>Preferred</entry>
+              </row>
+              <row>
+                <entry>IP_SCOPE</entry>
+                <entry>Scope of own IPv4 addresses that may be used.</entry>
+                <entry>Range</entry>
+                <entry>Link .. Global</entry>
+              </row>
+              <row>
+                <entry>IP_INTF</entry>
+                <entry>The IP interface names that may be used for IPv4.</entry>
+                <entry>String (name{':' name})</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_ADDRESS</entry>
+                <entry>The IPv4 addresses that may be used.</entry>
+                <entry>String (IPv4 address filter)</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_NETWORK</entry>
+                <entry>The IPv4 networks that may be used.</entry>
+                <entry>String (IPv4 network filter)</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_NO_MCAST</entry>
+                <entry>The IPv4 interfaces with the given addresses may not be used for multicast
+                  transmits. May be set to 'any' to disable IPv4 multicast alltogether.</entry>
+                <entry>String (IPv4 address filter|'any')</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_MCAST_TTL</entry>
+                <entry>IPv4 multicast TTL value</entry>
+                <entry>Number</entry>
+                <entry>1</entry>
+              </row>
+              <row>
+                <entry>IP_MCAST_DEST</entry>
+                <entry>IPv4 multicast destination interface addresses</entry>
+                <entry>String (IPv4 address)</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_MCAST_SRC</entry>
+                <entry>IPv4 multicast source interface addresses</entry>
+                <entry>String (IPv4 address filter)</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IP_GROUP</entry>
+                <entry>IPv4 multicast destination address for DDS</entry>
+                <entry>String (IPv4 multicast address)</entry>
+                <entry>239.255.0.1</entry>
+              </row>
+              <row>
+                <entry>IPV6_MODE</entry>
+                <entry>Mode of operation of IPv6</entry>
+                <entry>Mode</entry>
+                <entry>Enabled</entry>
+              </row>
+              <row>
+                <entry>IPV6_SCOPE</entry>
+                <entry>Scope of own IPv6 addresses that may be used.</entry>
+                <entry>Range</entry>
+                <entry>Site-local</entry>
+              </row>
+              <row>
+                <entry>IPV6_INTF</entry>
+                <entry>The IP interface names that may be used for IPv6</entry>
+                <entry>String (name{':' name})</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IPV6_MCAST_HOPS</entry>
+                <entry>Maximum number of IPv6 multicast hops.</entry>
+                <entry>Number</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IPV6_MCAST_INTF</entry>
+                <entry>Default IPv6 interface for outgoing multicast traffic.</entry>
+                <entry>String (interface name)</entry>
+                <entry/>
+              </row>
+              <row>
+                <entry>IPV6_GROUP</entry>
+                <entry>IPv6 multicast destination address for DDS.</entry>
+                <entry>String (IPv6 multicast address)</entry>
+                <entry>ff03::80</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+      </p>
+      <p>As can be seen in the table, both IP and IPV6 groups can be configured.</p>
+    </body>
+  </topic>
+</dita>

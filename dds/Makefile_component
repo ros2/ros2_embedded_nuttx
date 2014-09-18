@@ -1,0 +1,328 @@
+ifneq ($($(dds_INCLUDED)),1)
+
+override COMPONENT          := technicolor.middleware.core.servicefw.dds
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../*/%/Makefile_component
+
+# Force to use dds_SECURITY in this branch
+dds_SECURITY := 1
+dds_NATIVE_SECURITY := 1
+dds_QEO_SECURITY := 1
+#dds_DTLS_SECURITY := 1
+
+# The license of this component
+
+# The exported header files for this component
+dds_INCLUDES                := api/headers
+
+dds_CFLAGS                  := -DDDS_FLAVOUR=0 
+
+dds_FLAVOUR                 := technicolor
+
+# The linker flags that have to be added to use the libraries of this component
+dds_LIBS                    := -ldds $$(rt_LIBS)
+
+# The parts (libraries and programs) that make up this component
+dds_MAJOR_VERSION           := 0
+ifeq ($(TARG_OS), IOS)
+dds_PARTS_INSTALL           := libdds.so@$$(libdir/)libdds.so:644
+else
+dds_PARTS_INSTALL           := libdds.so@$$(libdir/)libdds.so:644 ddsfreeshm@$$(bindir/)ddsfreeshm
+endif
+
+# Test parts of this component
+ifneq ($(dds_OLD_SECURITY), 1)
+dds_TEST_PARTS_INSTALL       = libsystests.so@$$(libdir/)unittests/libsystests.so:644 \
+                               dcps_test@$$(bindir/)dcps_test:755 \
+                               skiplist_test@$$(bindir/)skiplist_test:755 \
+                               latency_test@$$(bindir/)latency_test:755 \
+                               api_test@$$(bindir/)api_test:755 \
+                               reqresp_test@$$(bindir/)reqresp_test:755 \
+                               chat@$$(bindir/)chat:755 \
+                               aac_test@$$(bindir/)aac_test:755
+                               #filter_test@$$(bindir/)filter_test:755 
+                               #type_test@$$(bindir/)type_test:755 
+                               #disc_test@$$(bindir/)disc_test:755
+else
+dds_TEST_PARTS_INSTALL       = libsystests.so@$$(libdir/)unittests/libsystests.so:644 \
+                               dcps_test@$$(bindir/)dcps_test:755 \
+                               skiplist_test@$$(bindir/)skiplist_test:755 \
+                               latency_test@$$(bindir/)latency_test:755 \
+                               api_test@$$(bindir/)api_test:755 \
+                               reqresp_test@$$(bindir/)reqresp_test:755 \
+                               chat@$$(bindir/)chat:755
+endif
+dds_TEST_PARTS_INSTALL       += fwd@$$(bindir/)fwd:755
+
+ifneq ($(dds_OLD_SECURITY), 1)
+dds_TEST_RUN                 = $$(bindir/)dcps_test -wl -n 100 -d 10 && $$(bindir/)dcps_test -v -wl -n 2 -d 10000 && $$(bindir/)skiplist_test && $$(bindir/)testScript.sh aac_test 1 security.xml $(bindir)/
+else
+dds_TEST_RUN                 = $$(bindir/)dcps_test -wl -n 100 -d 10 && $$(bindir/)dcps_test -v -wl -n 2 -d 10000 && $$(bindir/)skiplist_test
+endif
+
+#TODO JaSm: Enable test again -- && $$(bindir/)api_test -vv -r
+#$$(bindir/)test_run && $$(bindir/)filter_test && $$(bindir/)type_test
+dds_DOCS_INSTALL            := user.pdf@UserManual.pdf
+ifeq ($(dds_SECURITY), 1)
+#dds_TEST_ELEM_INSTALL       += apps/dcps/certs/ca-cert.pem@certs/ca-cert.pem:644
+#dds_TEST_ELEM_INSTALL       += apps/dcps/certs/server-key.pem@certs/server-key.pem:644
+#dds_TEST_ELEM_INSTALL       += apps/dcps/certs/server-cert.pem@certs/server-cert.pem:644
+#dds_TEST_ELEM_INSTALL       += apps/dcps/certs/client-key.pem@certs/client-key.pem:644
+#dds_TEST_ELEM_INSTALL       += apps/dcps/certs/client-cert.pem@certs/client-cert.pem:644
+dds_DEPS                    += openssl
+endif
+
+
+include $(projectdir/)build/Makefile_component_top
+
+DDS_TYPE_SYSTEM:=XTYPES
+
+# Workaround for raw multicast to different endian hosts
+
+dds_EXTRA_DEFINES           += -DRTPS_MARSHALL_ALWAYS -DDDS_HIST_PURGE_NA
+
+dds.LIBRARIES               := libdds
+
+dds.libdds_SRCS             := \
+                               $(addprefix src/cache/,       cache.c) \
+                               $(addprefix src/co/,          cmdline.c config.c ctrace.c db.c error.c handle.c hash.c heap.c \
+                                                             ipc.c ipfilter.c libx.c log.c md5.c nmatch.c pool.c prof.c random.c \
+                                                             skiplist.c sock.c str.c strseq.c sys.c thread.c timer.c) \
+                               $(addprefix src/dcps/,        dcps_builtin.c dcps_dbg.c dcps_dpfact.c dcps_entity.c dcps_event.c dcps_main.c \
+			                                     dcps_part.c dcps_pub.c dcps_qos.c dcps_reader.c dcps_sub.c dcps_topic.c \
+							     dcps_waitset.c dcps_writer.c) \
+                               $(addprefix src/dds/,         dds.c dds_seq.c domain.c guard.c guid.c locator.c uqos.c) \
+                               $(addprefix src/disc/,        disc_tc.c disc_ep.c disc_match.c disc_sub.c disc_pub.c disc_msg.c \
+							     disc_sedp.c disc_spdp.c disc_main.c disc_ctt.c disc_psmp.c disc_cdd.c \
+							     disc_policy_updater.c) \
+                               $(addprefix src/rtps/,        rtps_check.c rtps_clist.c rtps_dbg.c rtps_frag.c rtps_main.c rtps_msg.c \
+			                                     rtps_mux.c rtps_sfbr.c rtps_sfbw.c rtps_sfrr.c rtps_sfrw.c rtps_slbr.c \
+							     rtps_slbw.c rtps_slrw.c rtps_trace.c) \
+                               $(addprefix src/trans/ip/,    ri_dtls.c ri_tcp.c ri_tcp_sock.c ri_tls.c ri_udp.c rtps_ip.c) \
+                               $(addprefix src/sql/,         bytecode.c parse.c scan.c)
+                               
+ifneq ($(filter $(TARG_OS),MACOS IOS),)		       
+dds.libdds_SRCS             += $(addprefix src/dynip/,       di_darwin.c di_main.c)
+else
+dds.libdds_SRCS             += $(addprefix src/dynip/,       di_linux.c di_main.c)
+endif
+                               
+ifeq ($(DDS_TYPE_SYSTEM),XTYPES)			       
+dds.libdds_SRCS             += $(addprefix src/xtypes/,      builtin.c pid.c pl_cdr.c tsm.c vtc.c xcdr.c xdata.c xtopic.c xtypecode.c xtypes.c)
+else
+dds.libdds_SRCS             += $(addprefix src/typecode/,    cdr.c pid.c pl_cdr.c typecode.c)
+endif
+                               
+ifeq ($(dds_DEBUG), 1)
+dds.libdds_SRCS             += $(addprefix src/dbg/,         debug.c) \
+	                       $(addprefix src/co/,          tty.c)
+endif
+
+ifneq ($(dds_FORCE_MALLOC),)
+dds_EXTRA_DEFINES           += -DFORCE_MALLOC 
+endif
+ifeq ($(DDS_TYPE_SYSTEM),XTYPES)			       
+dds_EXTRA_DEFINES           += -DXTYPES_USED
+endif
+ifneq ($(dds_LOG_FILE),)
+dds_EXTRA_DEFINES           += -DLOG_FILE
+endif
+ifeq ($(dds_SECURITY), 1)
+dds_EXTRA_DEFINES           += -DDDS_SECURITY
+ifneq ($(dds_OLD_SECURITY), 1)
+dds_EXTRA_DEFINES           += -DDDS_NATIVE_SECURITY
+dds_EXTRA_DEFINES           += -DCOMMON_NAME_ALTERATION
+dds_EXTRA_DEFINES	    += -DDDS_QEO_TYPES
+dds.libdds_SRCS             += $(addprefix src/nsec/,		sec_access.c sec_auth.c sec_a_std.c sec_compat.c sec_id.c sec_logging.c \
+								sec_main.c sec_perm.c sec_p_std.c sec_util.c sec_cdata.c sec_c_std.c \
+								sec_crypto.c)
+ifeq ($(dds_QEO_SECURITY), 1)
+dds_EXTRA_DEFINES           += -DQEO_SECURITY
+dds.libdds_SRCS             += $(addprefix src/nsec/,		sec_a_qeo.c sec_p_qeo.c sec_qeo_policy.c)
+endif
+ifeq ($(dds_DTLS_SECURITY), 1)
+dds_EXTRA_DEFINES           += -DDTLS_SECURITY
+dds.libdds_SRCS             += $(addprefix src/nsec/,		sec_a_dtls.c sec_p_dtls.c)
+endif
+dds.libdds_SRCS             += $(addprefix plugins/nsecplug/,	sp_access.c sp_access_db.c sp_access_populate.c sp_auth.c sp_cert.c \
+								sp_sys_cert_none.c sp_cred.c sp_crypto.c sp_main.c sp_sys.c \
+								sp_sys_cert.c sp_sys_crypto.c)
+else
+dds.libdds_SRCS             += $(addprefix src/security/,	security.c)
+dds.libdds_SRCS             += $(addprefix plugins/secplug/,	msecplug.c)
+dds.libdds_SRCS             += $(addprefix plugins/security/,	engine_fs.c)
+endif
+dds_INCLUDES                += $(openssl_INCLUDES)
+dds_EXTRA_LIBS              += $(openssl_LIBS)
+ifdef ANDROID_ARCH
+dds_EXTRA_LIBS              += -llog
+endif
+dds_LIBS                    += $(dds_EXTRA_LIBS)
+endif
+dds_EXTRA_DEFINES           += -DDDS_FORWARD
+dds.libdds_SRCS             += $(addprefix src/rtps/,		rtps_ft.c rtps_fwd.c)
+
+dds.PEDANTIC                :=
+ifneq ($(E), GOOG_X86ANDROID)
+ifneq ($(E), GOOG_ARMANDROID)
+dds.PEDANTIC                := -pedantic
+endif
+endif
+dds.libdds_LOCALINCLUDES    := $(dds_INCLUDES) src/include
+dds.libdds_LOCALDEFINES     := -Wextra -Wall -Wno-long-long $(dds.PEDANTIC) $(dds_EXTRA_DEFINES) -DNO_ATOMIC -DDCPS_ZERO_BUFFER -DPTHREADS_USED -D_XOPEN_SOURCE=600 -D_SVID_SOURCE -DRTPS_USED -DDDS_AUTO_LIVELINESS -DDDS_DYN_IP -DDDS_TYPECODE -DDDS_TCP -DBIGDATA -DNO_CERTIFICATE_TIME_VALIDITY_CHECK # -DDDS_IPV6 -DLOG_FILE  -DCTRACE_USED -DCTRACE_ATEXIT 
+ifeq ($(dds_WERROR), 1)
+dds.libdds_LOCALDEFINES     += -Werror
+endif
+
+ifeq ($(dds_DEBUG), 1)
+dds.libdds_LOCALDEFINES     += -DDDS_DEBUG -DDDS_SERVER -DEXTRA_STATS -DDDS_TRACE -DRTPS_TRACE -DMSG_TRACE -DFORWARD_TRC -DFORWARD_TRC_FWD -DUSE_ABORT
+endif
+dds.libdds_LDADD            += $(dds_EXTRA_LIBS) $(rt_LIBS)
+
+
+dds.PROGRAMS                += ddsfreeshm
+
+dds.ddsfreeshm_SRCS         := tools/shm/freeshm.c
+dds.ddsfreeshm_LOCALDEFINES := -Wextra -Wall -Wno-long-long $(dds.PEDANTIC)
+
+##< Test Parts
+dds.LIBRARIES               += libend2end libsystests
+       
+ifneq ($(dds_OLD_SECURITY), 1)
+dds.PROGRAMS                += unittest \
+                               dcps_test \
+                               rtps_test \
+                               skiplist_test \
+                               latency_test \
+                               filter_test \
+                               reqresp_test \
+                               type_test \
+                               chat \
+                               api_test \
+                               aac_test
+else
+dds.PROGRAMS                += unittest \
+                               dcps_test \
+                               rtps_test \
+                               skiplist_test \
+                               latency_test \
+                               filter_test \
+                               reqresp_test \
+                               type_test \
+                               chat \
+                               api_test
+endif
+
+# TODO JaSm
+#                               disc_test \
+
+dds.PROGRAMS                    += shapes
+dds_$(E)_TEST_PARTS             += $(dds_PREFIX/)shapes
+dds_$(E)_TEST_INSTALL           += && cp $(dds_PREFIX/)shapes $(bindir/)shapes
+
+dds.dcps_test_SRCS              := apps/dcps/main.c src/dbg/debug.c
+dds.dcps_test_LOCALINCLUDES     := $(dds_INCLUDES) src/include  
+dds.dcps_test_LDADD             := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.dcps_test_LDDEPS            := libdds.a
+dds.dcps_test_LOCALDEFINES      := $(dds.libdds_LOCALDEFINES)
+
+ifeq ($(dds_DEBUG), 1)
+dds.dcps_test_LOCALDEFINES      += -DDDS_DEBUG
+endif
+
+dds.PROGRAMS              += fwd
+dds.fwd_SRCS              := apps/fwd/main.c src/dbg/debug.c
+dds.fwd_LOCALINCLUDES     := $(dds_INCLUDES) src/include  
+dds.fwd_LDADD             := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.fwd_LDDEPS            := libdds.a
+dds.fwd_LOCALDEFINES      := $(dds.libdds_LOCALDEFINES)
+ifeq ($(dds_DEBUG), 1)
+dds.fwd_LOCALDEFINES      += -DDDS_DEBUG
+endif
+
+dds.skiplist_test_SRCS          := test/skiplist/main.c libdds:src/co/skiplist.c libdds:src/co/pool.c libdds:src/co/error.c
+dds.skiplist_test_LOCALINCLUDES := $(dds_INCLUDES) src/include  
+dds.skiplist_test_LDADD         := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(openssl_LIBS)
+dds.skiplist_test_LDDEPS        := libdds.a
+dds.skiplist_test_LOCALDEFINES  := -Wall $(dds.PEDANTIC) -DPTHREADS_USED -D_XOPEN_SOURCE=600 -D_SVID_SOURCE -DRTPS_USED -DUSE_MALLOC
+
+dds.shapes_SRCS                 := apps/shapes/main.c src/co/tty.c
+dds.shapes_LOCALINCLUDES        := $(dds_INCLUDES) src/include  
+dds.shapes_LOCALDEFINES         := -DPTHREADS_USED -D_XOPEN_SOURCE=600 -D_SVID_SOURCE -DRTPS_USED $(dds_EXTRA_DEFINES)
+ifeq ($(dds_DEBUG), 1)
+dds.shapes_LOCALDEFINES         += -DDDS_DEBUG
+endif
+dds.shapes_LDADD                := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.shapes_LDDEPS               := libdds.a
+
+dds.filter_test_SRCS            := test/filter/filter.c
+dds.filter_test_LOCALINCLUDES   := $(dds_INCLUDES) src/include
+dds.filter_test_LDADD           := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.filter_test_LDDEPS          := libdds.a
+dds.filter_test_LOCALDEFINES    := $(dds.libdds_LOCALDEFINES)
+
+dds.reqresp_test_SRCS           := apps/reqresp/reqresp.c
+dds.reqresp_test_LOCALINCLUDES  := $(dds_INCLUDES) src/include
+dds.reqresp_test_LDDEPS         := libdds.so
+dds.reqresp_test_LDADD          := $(dds_LIBS)
+dds.reqresp_test_LOCALDEFINES   := $(dds.libdds_LOCALDEFINES)
+
+dds.type_test_SRCS              := test/type/type.c
+dds.type_test_LOCALINCLUDES     := $(dds_INCLUDES) src/include
+dds.type_test_LDADD             := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.type_test_LDDEPS            := libdds.a
+dds.type_test_LOCALDEFINES      := $(dds.libdds_LOCALDEFINES)
+
+dds.disc_test_SRCS              := test/disc/disc.c
+dds.disc_test_LOCALINCLUDES     := $(dds_INCLUDES) src/include
+dds.disc_test_LDDEPS            := libdds.so
+dds.disc_test_LDADD             := $(dds_LIBS)
+dds.disc_test_LOCALDEFINES      := $(dds.libdds_LOCALDEFINES)
+
+dds.chat_SRCS              := apps/chat/main.c
+ifeq ($(DDS_TYPE_SYSTEM),XTYPES)			       
+dds.chat_SRCS              += apps/chat/chat_msg.c src/co/tty.c #TODO JaSm apps/chat/crc32.c
+endif
+dds.chat_LOCALINCLUDES     := $(dds_INCLUDES) src/include
+dds.chat_LDDEPS            := libdds.a
+dds.chat_LDADD             := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.chat_LOCALDEFINES      := $(dds.libdds_LOCALDEFINES)
+
+
+dds.api_test_SRCS               := $(addprefix test/api/, main.c ta_aux.c ta_seq.c ta_type.c ta_pfact.c ta_part.c ta_topic.c\
+	                                              ta_pub.c ta_sub.c ta_writer.c ta_reader.c ta_disc.c ta_data.c)
+dds.api_test_LOCALINCLUDES      := $(dds_INCLUDES) src/include
+dds.api_test_LDDEPS             := libdds.so
+dds.api_test_LDADD              := $(dds_LIBS)
+dds.api_test_LDDEPS             := libdds.so
+dds.api_test_LOCALDEFINES       := $(dds.libdds_LOCALDEFINES)
+
+dds.latency_test_SRCS           := apps/latency/main.c
+dds.latency_test_LOCALINCLUDES  := $(dds_INCLUDES) src/include  
+dds.latency_test_LOCALDEFINES   := $(dds.libdds_LOCALDEFINES)
+dds.latency_test_LDADD          := -Wl,-Bstatic -L$(dds_PREFIX) -ldds -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS)
+dds.latency_test_LDDEPS         := libdds.a
+
+ifneq ($(dds_OLD_SECURITY), 1)
+dds.aac_test_SRCS               := apps/dcps/main.c src/dbg/debug.c $(dds.libdds_SRCS) src/dds/dds.c plugins/nsecplug/sp_xml.c src/co/tty.c
+dds.aac_test_LOCALINCLUDES      := $(dds_INCLUDES) src/include /usr/include/libxml2/
+dds.aac_test_LOCALDEFINES       := -Wextra -Wall -Wno-long-long $(dds.PEDANTIC) -DDDS_NO_MCAST -DXTYPES_USED -DNO_ATOMIC -DDCPS_ZERO_BUFFER -DPTHREADS_USED -D_XOPEN_SOURCE=600 -D_SVID_SOURCE -DRTPS_USED -DDDS_AUTO_LIVELINESS -DDDS_DYN_IP -DDDS_TYPECODE -DDDS_TCP -DBIGDATA -DMSECPLUG_WITH_SECXML -DDDS_DEBUG -DLOG_FILE -DDDS_NATIVE_SECURITY -DDDS_SECURITY -DDDS_FORWARD -DDDS_QEO_TYPES
+dds.aac_test_LDADD              := -Wl,-Bstatic -L$(dds_PREFIX) -Wl,-Bdynamic $(rt_LIBS) $(dds_EXTRA_LIBS) -lm -lxml2
+dds.aac_test_LDDEPS             := 
+dds_$(E)_TEST_INSTALL           += && cp $(projectdir/)apps/dcps/testScript.sh $(bindir/)testScript.sh \
+                                   && cp $(projectdir/)apps/dcps/securityQeo.xml $(bindir/)security.xml \
+                                   && cp -r $(projectdir)/apps/dcps/qeoCerts/ $(bindir/)qeoCerts/
+endif
+##>
+
+
+dds.DOCUMENTS     := user
+dds.user_TITLE     = Technicolor DDS User Manual
+dds.user_TITLE_ALT =
+dds.user_DOC_ID    = 20120411-0000
+dds.user_CHAPTERS  = user_manual.ditamap
+
+include $(projectdir/)build/Makefile_component_bot
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

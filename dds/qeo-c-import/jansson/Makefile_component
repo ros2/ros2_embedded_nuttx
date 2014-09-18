@@ -1,0 +1,117 @@
+ifneq ($($(jansson_INCLUDED)),1)
+
+override COMPONENT := tools.external.acme.jansson
+
+jansson_INCLUDES              := $$(jansson_PREFIX/)/installed/include
+jansson_LIBS                  := -L$$(jansson_PREFIX/)installed/lib -ljansson
+
+ifeq ($(E), HOSTDARWIN)
+jansson_PARTS_INSTALL       := installed/lib/libjansson.4.dylib@$$(libdir/)libjansson.4.dylib:644 \
+                               s:libjansson.4.dylib@$$(libdir/)libjansson.0.dylib \
+                               s:libjansson.4.dylib@$$(libdir/)libjansson.dylib
+else
+ifeq ($(TARG_OS), IOS)
+jansson_PARTS_INSTALL       := installed/lib/libjansson.a@$$(libdir/)libjansson.a:644 
+else
+jansson_PARTS_INSTALL       := installed/lib/libjansson.so.4.4.0@$$(libdir/)libjansson.so.4.4.0:644 \
+                               s:libjansson.so.4.4.0@$$(libdir/)libjansson.so.4 \
+                               s:libjansson.so.4.4.0@$$(libdir/)libjansson.so.0 \
+                               s:libjansson.so.4.4.0@$$(libdir/)libjansson.so
+endif
+endif
+
+jansson_TEST_PARTS_INSTALL := \
+    github_commits@$$(bindir/)$$(COMPONENT)/github_commits:755
+
+jansson_BUILT_HEADERS_INSTALL := \
+  installed/include/jansson.h@$$(incdir/)jansson.h:644 \
+  installed/include/jansson_config.h@$$(incdir/)jansson_config.h:644
+
+jansson_BUILT_HEADERS     := $(jansson_PREFIX/)cmw.install.stamp
+
+# Android isnan and isinf reside under -lm for android and mips
+jansson_$(E)_LDFLAGS := -lm
+
+include $(projectdir/)build/Makefile_component_top
+
+jansson.PROGRAMS  := github_commits
+
+##< helper variables
+jansson.libdir   := $(jansson_PREFIX/)installed/lib
+jansson.incdir   := $(jansson_PREFIX/)installed/include
+jansson.builddir :=  $(jansson_PREFIX/)build
+##>
+
+##< tarball extraction & compilation
+jansson.tarname        := jansson-2.4
+jansson.srcdir         := $(jansson_PREFIX/)$(jansson.tarname)
+jansson.untar          := $(jansson_PREFIX/)cmw.untar.stamp
+jansson.configure_opts :=
+#jansson.configure_opts := --host=$(shell echo $(TARG_ARCH_RESOLVED) | $(tr) A-Z a-z)-linux
+ifeq ($(E_SIZEOF_LONG),8)
+jansson.configure_opts += --with-pic
+endif
+jansson.install        := $(jansson_PREFIX/)cmw.install.stamp
+
+$(jansson.untar): $(jansson_COMP_DIR)/$(jansson.tarname).tar.gz
+	mkdir -p $(jansson_PREFIX/)
+	tar -xzf $(jansson_COMP_DIR)/$(jansson.tarname).tar.gz -C $(jansson_PREFIX/)
+	touch $@
+
+$(jansson.install): $(jansson.untar)
+#hack because armv7 is not yet supported in jansson tarball
+ifeq ($(TARG_OS), IOS)
+	cd $(jansson_PREFIX/)$(jansson.tarname)/ && autoreconf -fi
+endif
+	export CONFIGURE_DIR=$(jansson_PREFIX/)$(jansson.tarname)/ && $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CONFIGURE) $(jansson.configure_opts)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_MAKE)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_AUTOTOOLS_INSTALL)
+	touch $@
+##>
+
+MULTI_TARGET_FILES:= \
+	$(jansson.incdir)/jansson.h \
+	$(jansson.incdir)/jansson_config.h
+ifeq ($(E), HOSTDARWIN)
+
+MULTI_TARGET_DEPUTY:= $(jansson_PREFIX/)installed/lib/libjansson.4.dylib
+else
+ifeq ($(TARG_OS), IOS)
+MULTI_TARGET_DEPUTY:= $(jansson_PREFIX/)installed/lib/libjansson.a
+else
+MULTI_TARGET_DEPUTY:= $(jansson_PREFIX/)installed/lib/libjansson.so.4.4.0
+endif
+endif
+
+$(MULTI_TARGET_SETUP)
+$(MULTI_TARGET): $(jansson.install)
+
+$(jansson_$(E)_PREFIX)/libjansson_pic.a: $(jansson_$(E)_PREFIX)/installed/lib/libjansson.a
+	find $(jansson_$(E)_PREFIX) -name  "*.o" > $(jansson_$(E)_PREFIX)/libjansson_pic.lst
+	rm -f $@
+	cp $< $@
+
+$(jansson_$(E)_PREFIX)/libjansson.a: $(jansson_$(E)_PREFIX)/installed/lib/libjansson.a
+	find $(jansson_$(E)_PREFIX) -name  "*.o" > $(jansson_$(E)_PREFIX)/libjansson_pic.lst
+	rm -f $@
+	cp $< $@
+
+ifeq ($(E), HOSTDARWIN)
+$(jansson_$(E)_PREFIX)/libjansson.dylib: $(jansson_$(E)_PREFIX)/installed/lib/libjansson.dylib
+	rm -f $@
+	cp $< $@
+
+else
+ifneq ($(TARG_OS), IOS)
+$(jansson_$(E)_PREFIX)/libjansson.so: $(jansson_$(E)_PREFIX)/installed/lib/libjansson.so
+	rm -f $@
+	cp $< $@
+endif
+endif
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

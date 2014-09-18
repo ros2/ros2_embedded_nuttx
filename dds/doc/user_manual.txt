@@ -1,0 +1,17 @@
+Overview
+Middleware concepts
+Publish-Subscribe paradigm
+Data Types and Topics
+  TSM-based type definitions
+  Using Sequences
+Waitsets and Listeners
+Environment variables
+Centralized Discovery Daemon
+Compilation options
+Debugging features
+Optimizing memory usage
+Utility programs
+ - shapes
+ - latency
+ - bw
+

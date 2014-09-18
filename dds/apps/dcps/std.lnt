@@ -1,0 +1,7 @@
+--i/usr/local/include
+--i/usr/lib/gcc/i686-redhat-linux/4.4.5/include
+--i/usr/include
+--i/usr/include/linux
+--i../../include
+--i../../export
+co-gcc.lnt

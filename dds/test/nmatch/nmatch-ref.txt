@@ -1,0 +1,15 @@
+NoEscape:0, CaseFold:0, SQL:1, Pattern:'a%bb', Name:'aaaaaab'  ->  No match
+NoEscape:0, CaseFold:0, SQL:1, Pattern:'a%bb', Name:'aaaaaabb'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:1, Pattern:'a', Name:'a'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:1, Pattern:'a%bb', Name:'aaaaaabb'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a%bb', Name:'aaaaaabb'  ->  No match
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a', Name:'a'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a*bb', Name:'aaaaaabb'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a*b?b', Name:'aaaaaabdb'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a\*b??c', Name:'aabcdc'  ->  No match
+NoEscape:1, CaseFold:0, SQL:0, Pattern:'a\*b??c', Name:'a*bcdc'  ->  No match
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a\*b??c', Name:'a*bcdc'  ->  Match!
+NoEscape:1, CaseFold:0, SQL:0, Pattern:'a\*b??c', Name:'a\bbcdc'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a\*b??c', Name:'a\bbcdc'  ->  No match
+NoEscape:0, CaseFold:1, SQL:0, Pattern:'a*CC', Name:'aaaacc'  ->  Match!
+NoEscape:0, CaseFold:0, SQL:0, Pattern:'a*CC', Name:'aaaacc'  ->  No match

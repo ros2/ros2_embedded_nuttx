@@ -1,0 +1,15 @@
+struct sx {
+	long x;
+	struct huh 
+	{
+		char a;
+		float b;
+		struct bla {
+			long z;
+		} w;
+	} y;
+	struct hoebla { 
+		long a1; //@Key //Set to key
+		long a2;
+	} v;
+};

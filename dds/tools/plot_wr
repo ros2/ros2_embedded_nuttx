@@ -1,0 +1,3 @@
+$HOME/DDS/git/dds/tools/get_event_data_wr $1
+gnuplot "$HOME/DDS/git/dds/tools/plot_data_wr.gp"
+

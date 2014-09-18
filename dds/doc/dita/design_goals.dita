@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE concept PUBLIC "-//OASIS//DTD DITA Concept//EN" "concept.dtd">
+<concept id="concept_wyy_nt5_sf">
+ <title>Design goals</title>
+ <shortdesc></shortdesc>
+ <conbody>
+  <p>Due to Technicolor DDS being used on platforms having severe memory footprint restrictions, and
+   also because it is an intrinsic part of the Technicolor core middleware, which comprises more
+   than DDS alone, and instead provides a full component development framework, the design of
+   Technicolor DDS is slightly different from other commercial DDS implementations.</p>
+  <p>Following design goals were envisaged:</p>
+  <p>
+   <ul id="ul_gzk_h55_sf">
+    <li>Memory usage needs to be kept as low as possible, both for core data structures where DDS
+     metadata must be stored in the most optimal manner, as well as for real data buffers, storing
+     topic data.</li>
+    <li>Never create an entity until it is really needed to have it.<ol id="ol_yx3_fw5_sf">
+      <li>RTPS Reader/Writers are only created when a remote entity is detected that has an interest
+       in the topic data.</li>
+      <li>Data caches can autonomously transfer data between a local Writer and a local Reader
+       without the need for RTPS.</li>
+      <li>Discovery data readers are only created when the user expresses an interest in it.</li>
+     </ol></li>
+    <li>When possible, reuse the same data (sometimes determined by hashes), using reference counts.
+     This is done, for example, for:<ol id="ol_p5g_3w5_sf">
+      <li>Stored user data, which is shared between DDS history caches.</li>
+      <li>Locator structures.</li>
+      <li>Discovery data.</li>
+      <li>QoS parameter sets.</li>
+      <li>Character strings are stored only once.</li>
+     </ol></li>
+    <li>Using memory pools instead of 'pure' malloc()/free() has several advantages, such as:<ol
+      id="ol_dxf_vv5_sf">
+      <li>Severely limiting allocation overhead and memory fragmentation.</li>
+      <li>Allocation/free of data chunks is much faster.</li>
+      <li>Allows to specify upfront what the pool limits may be.</li>
+      <li>The application's memory usage can be monitored due to the pool's bookkeeping.</li>
+     </ol></li>
+    <li>Contrary to other DDS implementations, data type marshalling and unmarshalling is
+     data-driven instead of function-driven (see TSM type specification).</li>
+    <li>Data types are generated primarily from Qeo layer XML-based data. Qeo is an additional,
+     simplified API on top of Technicolor DDS. This does not preclude an IDL data definition
+     compiler, in fact, a small IDL compiler is included, which allows to create TSM definitions
+     from IDL.</li>
+    <li>Since the Qeo layer is a C-component, and there are already Qeo bindings for various
+     execution environments (Java/JNI and Python), there would be no need for other execution
+     environments on top of DDS.  There are, however, DDS bindings available for other execution
+     environments (Java/JNI and Python).</li>
+    <li>Focus on easy debugging of application as well as Technicolor DDS operations.</li>
+    <li>Use a node-centralized Discovery data manager, the Central Discovery Daemon (CDD), in order
+     to prevent components of learning topics via the DDS Discovery mechanisms in which they are not
+     interested.</li>
+   </ul>
+  </p>
+ </conbody>
+</concept>
