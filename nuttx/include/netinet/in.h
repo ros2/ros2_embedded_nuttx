@@ -105,6 +105,28 @@
 #define s6_addr16             in6_u.u6_addr16
 #define s6_addr32             in6_u.u6_addr32
 
+#if defined (NUTTX_RTOS)
+#define IP_MULTICAST_IF                 32
+#define IP_MULTICAST_TTL                33
+#define IP_MULTICAST_LOOP               34
+#define IP_ADD_MEMBERSHIP               35
+#define IP_DROP_MEMBERSHIP              36
+#define IP_UNBLOCK_SOURCE               37
+#define IP_BLOCK_SOURCE                 38
+#define IP_ADD_SOURCE_MEMBERSHIP        39
+#define IP_DROP_SOURCE_MEMBERSHIP       40
+#define IP_MSFILTER                     41
+#define MCAST_JOIN_GROUP                42
+#define MCAST_BLOCK_SOURCE              43
+#define MCAST_UNBLOCK_SOURCE            44
+#define MCAST_LEAVE_GROUP               45
+#define MCAST_JOIN_SOURCE_GROUP         46
+#define MCAST_LEAVE_SOURCE_GROUP        47
+#define MCAST_MSFILTER                  48
+#define IP_MULTICAST_ALL                49
+#define IP_UNICAST_IF                   50
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -122,12 +144,18 @@ struct in_addr
   in_addr_t       s_addr;      /* Address (network byte order) */
 };
 
+#define __SOCK_SIZE__   16              /* sizeof(struct sockaddr)      */
 struct sockaddr_in
 {
   sa_family_t     sin_family;  /* Address family: AF_INET */
   uint16_t        sin_port;    /* Port in network byte order */
   struct in_addr  sin_addr;    /* Internet address */
+
+/* Pad to size of `struct sockaddr'. */
+  unsigned char   __pad[__SOCK_SIZE__ - sizeof(short int) -
+                       sizeof(unsigned short int) - sizeof(struct in_addr)];
 };
+#define sin_zero        __pad           /* for BSD UNIX compatibility      */
 
 /* IPv6 Internet address */
 
@@ -148,6 +176,10 @@ struct sockaddr_in6
   struct in6_addr sin6_addr;   /* IPv6 internet address */
 };
 
+struct ip_mreq  {
+  struct in_addr imr_multiaddr;   /* IP multicast address of group */
+  struct in_addr imr_interface;   /* local IP address of interface */
+};
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
