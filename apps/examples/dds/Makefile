@@ -90,7 +90,7 @@ dds_CSRCS  = ${DDS}/dds.c ${DDS}/domain.c ${DDS}/locator.c ${DDS}/guid.c \
              ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c  
 type_CSRCS = ${TYPE}/xtypecode.c ${TYPE}/xtypes.c ${TYPE}/xdata.c \
              ${TYPE}/xcdr.c ${TYPE}/tsm.c ${TYPE}/pl_cdr.c ${TYPE}/pid.c \
-             ${TYPE}/xtopic.c ${TYPE}/builtin.c ${TYPE}/vtc.c
+             ${TYPE}/xtopic.c ${TYPE}/xtypes_builtin.c ${TYPE}/vtc.c
 dcps_CSRCS = ${DCPS}/dcps_main.c ${DCPS}/dcps_dpfact.c ${DCPS}/dcps_part.c \
 	     ${DCPS}/dcps_pub.c ${DCPS}/dcps_sub.c ${DCPS}/dcps_topic.c \
 	     ${DCPS}/dcps_reader.c ${DCPS}/dcps_writer.c ${DCPS}/dcps_event.c \
@@ -144,6 +144,8 @@ prog_CSRCS = main.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_C
 #comment the following && don't define RTPS_USED to drop RTPS/Discovery
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
+
+
 #prog_COBJS = ${prog_CSRCS:.c=.o}
 prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
 
@@ -153,17 +155,24 @@ prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
 # Build system
 
 ASRCS =
-CSRCS = 
-CSRCS = ${prog_CSRCS}
+#CSRCS = main.c chat_msg.c 
+CSRCS =
+TINQ_SCRCS =  ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
+             ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${co_CSRCS} ${rtps_CSRCS} ${trans_CSRCS}
 MAINSRC = hello_main.c 
 #MAINSRC = main.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
+TINQ_COBJS = $(TINQ_SCRCS:.c=$(OBJEXT))
+TINQ_COBJS_PRE=$(addpreffix dds_, $(TINQ_COBJS))
 MAINOBJ = $(MAINSRC:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(MAINSRC)
-OBJS = $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS) $(MAINSRC) $(TINQ_SCRCS)
+#SRCS = $(ASRCS) $(CSRCS) $(MAINSRC) 
+OBJS = $(AOBJS) $(COBJS) $(TINQ_COBJS)
+#OBJS = $(AOBJS) $(COBJS) $(TINQ_COBJS_PRE)
+#OBJS = $(AOBJS) $(COBJS)
 
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   OBJS += $(MAINOBJ)

@@ -54,7 +54,7 @@ export/dds/dds_tsm.h			api/headers/dds/dds_tsm.h
 export/dds/dds_types.h			api/headers/dds/dds_types.h
 export/dds/dds_xtypes.h			api/headers/dds/dds_xtypes.h
 include/atomic.h			src/include/atomic.h
-include/builtin.h			src/include/builtin.h
+include/xtypes_builtin.h			src/include/xtypes_builtin.h
 include/bytecode.h			src/include/bytecode.h
 include/cache.h				src/include/cache.h
 include/cdr.h     			src/include/cdr.h
@@ -208,7 +208,7 @@ typecode/cdr.c				src/typecode/cdr.c
 typecode/pid.c				src/typecode/pid.c
 typecode/pl_cdr.c			src/typecode/pl_cdr.c
 typecode/typecode.c			src/typecode/typecode.c
-xtypes/builtin.c			src/xtypes/builtin.c
+xtypes/xtypes_builtin.c			src/xtypes/xtypes_builtin.c
 xtypes/tsm.c				src/xtypes/tsm.c
 xtypes/vtc.c				src/xtypes/vtc.c
 xtypes/xcdr.c				src/xtypes/xcdr.c
