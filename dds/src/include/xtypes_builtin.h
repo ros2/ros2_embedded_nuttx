@@ -12,7 +12,7 @@
  * See LICENSE file for more details.
  */
 
-/* builtin.h -- Builtin types as defined in the X-Types specification for
+/* xtypes_builtin.h -- Builtin types as defined in the X-Types specification for
 		String, KeyedString, Bytes and KeyedBytes. */
 
 #ifndef __builtin_h_

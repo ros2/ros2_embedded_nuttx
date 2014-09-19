@@ -12,7 +12,7 @@
  * See LICENSE file for more details.
  */
 
-/* builtin.c -- Extra builtin types: String, KeyedString, Octets and KeyedOctets
+/* xtypes_builtin.c -- Extra xtypes_builtin types: String, KeyedString, Octets and KeyedOctets
 		that allow easy communication without having to create your own
 		types. */
 

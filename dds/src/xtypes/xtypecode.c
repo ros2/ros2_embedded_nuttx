@@ -26,7 +26,7 @@
 #include "pl_cdr.h"
 #include "xtypes.h"
 #include "xtopic.h"
-#include "builtin.h"
+#include "xtypes_builtin.h"
 #include "tsm.h"
 #include "md5.h"
 #include "vtc.h"
