@@ -107,7 +107,7 @@ dds.libdds_SRCS             += $(addprefix src/dynip/,       di_linux.c di_main.
 endif
                                
 ifeq ($(DDS_TYPE_SYSTEM),XTYPES)			       
-dds.libdds_SRCS             += $(addprefix src/xtypes/,      builtin.c pid.c pl_cdr.c tsm.c vtc.c xcdr.c xdata.c xtopic.c xtypecode.c xtypes.c)
+dds.libdds_SRCS             += $(addprefix src/xtypes/,      xtypes_builtin.c pid.c pl_cdr.c tsm.c vtc.c xcdr.c xdata.c xtopic.c xtypecode.c xtypes.c)
 else
 dds.libdds_SRCS             += $(addprefix src/typecode/,    cdr.c pid.c pl_cdr.c typecode.c)
 endif
