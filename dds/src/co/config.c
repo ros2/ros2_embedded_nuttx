@@ -447,7 +447,11 @@ static void syntax_error (const char *filename, unsigned line, const char *buf)
 }
 
 #define	getch()		c = buf [i++]
+#if defined (NUTTX_RTOS)
+#define	skipblanks()	while (isspace (c)) getch()
+#else
 #define	skipblanks()	while (isblank (c)) getch()
+#endif
 
 /* config_load_file -- Try to load a config file. cfg_lock is assumed to be taken. */
 
@@ -519,7 +523,11 @@ static int config_load_file (const char *filename)
 				while (c != '#' && c != '\n')
 					getch ();
 				i--;
+#if defined (NUTTX_RTOS)				
+				while (i > value + 1 && isspace (buf [i - 1]))
+#else
 				while (i > value + 1 && isblank (buf [i - 1]))
+#endif
 					i--;
 				buf [i] = '\0';
 				if (group [0])
