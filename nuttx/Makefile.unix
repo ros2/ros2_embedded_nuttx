@@ -570,3 +570,7 @@ apps_distclean:
 ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C "$(TOPDIR)/$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
 endif
+
+dds_clean:
+	$(Q) $(MAKE) -C "$(TOPDIR)/../dds/apps/chat" TOPDIR="$(TOPDIR)" clean
+
