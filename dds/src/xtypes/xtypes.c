@@ -3564,7 +3564,9 @@ static DDS_ReturnCode_t ad_set_value (TypeDomain            *dp,
 	}
 	else if (tp->kind == DDS_CHAR_32_TYPE) {
 #ifndef ANDROID
+#if !defined (NUTTX_RTOS)
 		if (mbtowc (&vp->u.wide_char_val, buf, strlen (buf)) < 0)
+#endif
 #endif
 			return (DDS_RETCODE_BAD_PARAMETER);
 	}
