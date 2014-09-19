@@ -23,7 +23,8 @@
 #define srandom	srand
 #elif defined (NUTTX_RTOS)
 #include <unistd.h>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
+#include "stdlib.h" 
 #else
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -104,9 +105,13 @@ static unsigned random_hid (void)
 
 	/* Generate a unique Id. */
 	sys_getftime (&t);
+#if defined (NUTTX_RTOS)
+	srand (2000);
+	hid = rand();
+#else	
 	srandom (FTIME_FRACT (t));
 	hid = random ();
-
+#endif
 	/* Add some extra variability using PID/Time. */
 	sys_gettime ((Time_t *) &t);
 	hid ^= (sys_pid () | FTIME_FRACT (t) << 15);
