@@ -12,6 +12,7 @@
  * See LICENSE file for more details.
  */
 
+#include <nuttx/config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -478,7 +479,18 @@ static void cleanup_security (void)
 
 #endif
 
+
+#if defined (NUTTX_RTOS)
+#ifdef CONFIG_BUILD_KERNEL
+int main(int argc, FAR char *argv[])
+#else
+int dds_chat_main(int argc, char *argv[])
+#endif
+/* CONFIG_BUILD_KERNEL */
+#else
 int main (int argc, const char **argv)
+#endif 
+/* defined  (NUTTX_RTOS) */
 {
 	DDS_DataWriterQos 	wr_qos;
 	DDS_DataReaderQos	rd_qos;
