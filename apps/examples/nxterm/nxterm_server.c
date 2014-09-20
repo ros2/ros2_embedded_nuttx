@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_bkgd.c
+ * examples/nxterm/nxterm_server.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,17 +39,23 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sched.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
 
-#include "nxcon_internal.h"
+#ifdef CONFIG_NX_LCDDRIVER
+#  include <nuttx/lcd/lcd.h>
+#else
+#  include <nuttx/video/fb.h>
+#endif
+
+#include "nxterm_internal.h"
 
 /****************************************************************************
  * Definitions
@@ -60,15 +66,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -80,74 +78,112 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxcon_redraw
- *
- * Description:
- *   Re-draw a portion of the NX console.  This function should be called
- *   from the appropriate window callback logic.
- *
- * Input Parameters:
- *   handle - A handle previously returned by nx_register, nxtk_register, or
- *     nxtool_register.
- *   rect - The rectangle that needs to be re-drawn (in window relative
- *          coordinates)
- *   more - true:  More re-draw requests will follow
- *
- * Returned Value:
- *   None
- *
+ * Name: nxterm_server
  ****************************************************************************/
 
-void nxcon_redraw(NXCONSOLE handle, FAR const struct nxgl_rect_s *rect, bool more)
+int nxterm_server(int argc, char *argv[])
 {
-  FAR struct nxcon_state_s *priv;
+  FAR NX_DRIVERTYPE *dev;
   int ret;
-  int i;
 
-  DEBUGASSERT(handle && rect);
-  gvdbg("rect={(%d,%d),(%d,%d)} more=%s\n",
-        rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y,
-        more ? "true" : "false");
+#if defined(CONFIG_EXAMPLES_NXCON_EXTERNINIT)
+  /* Use external graphics driver initialization */
 
-  /* Recover our private state structure */
-
-  priv = (FAR struct nxcon_state_s *)handle;
-
-  /* Get exclusive access to the state structure */
-
-  do
+  message("nxterm_server: Initializing external graphics device\n");
+  dev = up_nxdrvinit(CONFIG_EXAMPLES_NXCON_DEVNO);
+  if (!dev)
     {
-      ret = nxcon_semwait(priv);
-
-      /* Check for errors */
-
-      if (ret < 0)
-        {
-          /* The only expected error is if the wait failed because of it
-           * was interrupted by a signal.
-           */
-
-          DEBUGASSERT(errno == EINTR);
-        }
+      message("nxterm_server: up_nxdrvinit failed, devno=%d\n", CONFIG_EXAMPLES_NXCON_DEVNO);
+      return ERROR;
     }
-  while (ret < 0);
 
-  /* Fill the rectangular region with the window background color */
+#elif defined(CONFIG_NX_LCDDRIVER)
+  /* Initialize the LCD device */
 
-  ret = priv->ops->fill(priv, rect, priv->wndo.wcolor);
+  message("nxterm_server: Initializing LCD\n");
+  ret = up_lcdinitialize();
   if (ret < 0)
     {
-      gdbg("fill failed: %d\n", errno);
+      message("nxterm_server: up_lcdinitialize failed: %d\n", -ret);
+      return 1;
     }
 
-  /* Then redraw each character on the display (Only the characters within
-   * the rectangle will actually be redrawn).
-   */
+  /* Get the device instance */
 
-  for (i = 0; i < priv->nchars; i++)
+  dev = up_lcdgetdev(CONFIG_EXAMPLES_NXCON_DEVNO);
+  if (!dev)
     {
-      nxcon_fillchar(priv, rect, &priv->bm[i]);
+      message("nxterm_server: up_lcdgetdev failed, devno=%d\n", CONFIG_EXAMPLES_NXCON_DEVNO);
+      return 2;
     }
 
-  (void)nxcon_sempost(priv);
+  /* Turn the LCD on at 75% power */
+
+  (void)dev->setpower(dev, ((3*CONFIG_LCD_MAXPOWER + 3)/4));
+#else
+  /* Initialize the frame buffer device */
+
+  message("nxterm_server: Initializing framebuffer\n");
+  ret = up_fbinitialize();
+  if (ret < 0)
+    {
+      message("nxterm_server: up_fbinitialize failed: %d\n", -ret);
+      return 1;
+    }
+
+  dev = up_fbgetvplane(CONFIG_EXAMPLES_NXCON_VPLANE);
+  if (!dev)
+    {
+      message("nxterm_server: up_fbgetvplane failed, vplane=%d\n", CONFIG_EXAMPLES_NXCON_VPLANE);
+      return 2;
+    }
+#endif
+
+  /* Then start the server */
+
+  ret = nx_run(dev);
+  gvdbg("nx_run returned: %d\n", errno);
+  return 3;
+}
+
+/****************************************************************************
+ * Name: nxterm_listener
+ ****************************************************************************/
+
+FAR void *nxterm_listener(FAR void *arg)
+{
+  int ret;
+
+  /* Process events forever */
+
+  for (;;)
+    {
+      /* Handle the next event.  If we were configured blocking, then
+       * we will stay right here until the next event is received.  Since
+       * we have dedicated a while thread to servicing events, it would
+       * be most natural to also select CONFIG_NX_BLOCKING -- if not, the
+       * following would be a tight infinite loop (unless we added addition
+       * logic with nx_eventnotify and sigwait to pace it).
+       */
+
+      ret = nx_eventhandler(g_nxterm_vars.hnx);
+      if (ret < 0)
+        {
+          /* An error occurred... assume that we have lost connection with
+           * the server.
+           */
+
+          message("nxterm_listener: Lost server connection: %d\n", errno);
+          exit(EXIT_FAILURE);
+        }
+
+      /* If we received a message, we must be connected */
+
+      if (!g_nxterm_vars.connected)
+        {
+          g_nxterm_vars.connected = true;
+          sem_post(&g_nxterm_vars.eventsem);
+          message("nxterm_listener: Connected\n");
+        }
+    }
 }

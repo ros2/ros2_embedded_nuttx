@@ -1,5 +1,5 @@
 /****************************************************************************
- * nuttx/graphics/nxconsole/nxcon_putc.c
+ * nuttx/graphics/nxterm/nxcon_putc.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
