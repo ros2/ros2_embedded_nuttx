@@ -154,18 +154,27 @@ prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
 
 # Build system
 
-ASRCS =
-#CSRCS = main.c chat_msg.c 
-CSRCS =
+# Assembly files
+ASRCS = $(NUTTX_BASE)/arch/arm/src/arm/setjmp.S
+
+# Application .c files
+#CSRCS =
+CSRCS = main.c chat_msg.c 
+
+# The Tinq DDS sources
 TINQ_SCRCS =  ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
              ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${co_CSRCS} ${rtps_CSRCS} ${trans_CSRCS}
+
+# Application entry point
 MAINSRC = hello_main.c 
 #MAINSRC = main.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
+
 TINQ_COBJS = $(TINQ_SCRCS:.c=$(OBJEXT))
 TINQ_COBJS_PRE=$(addpreffix dds_, $(TINQ_COBJS))
+
 MAINOBJ = $(MAINSRC:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS) $(MAINSRC) $(TINQ_SCRCS)
