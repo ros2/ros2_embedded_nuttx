@@ -59,7 +59,12 @@ int nmatch (const char *pattern, const char *name, int flags)
 		}
 		/*printf ("  new pattern => %s\n", fnpattern);*/
 	}
+#if defined (NUTTX_RTOS)
+#include "nuttx/regex.h"
+	r = match(pattern, name);
+#else
 	r = fnmatch (((flags & NM_SQL) != 0) ? fnpattern : pattern, name, fflags);
+#endif
 	if (!r)
 		return (NM_MATCH);
 	else
