@@ -20,6 +20,8 @@
 #include <ctype.h>
 
 #if defined (NUTTX_RTOS)
+#define PRId64	"lld"
+#define PRIu64	"llu"
 #else
 #include <wctype.h>
 #endif
