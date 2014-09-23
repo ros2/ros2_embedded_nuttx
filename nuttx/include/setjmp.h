@@ -56,8 +56,8 @@ struct __jmp_buf {
 typedef struct __jmp_buf jmp_buf[1];
 
 
-__extern int setjmp(jmp_buf);
-__extern __noreturn longjmp(jmp_buf, int);
+extern int setjmp(jmp_buf);
+extern void longjmp(jmp_buf, int);
 
 
 #endif                          /* _SETJMP_H */
