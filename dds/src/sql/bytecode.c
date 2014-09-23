@@ -358,6 +358,13 @@ PROF_PID (bc_prog_pid)
 #define strtold strtod
 #endif
 
+#if defined (NUTTX_RTOS)
+				/* In our architecture and with arm-none-eabi compiler double and long 
+				double have the same size thereby srtold and strtod can be used interchangeably */
+#define strtold strtod
+#endif
+
+
 /* bc_interpret -- Interpret a bytecode program (progcode, proglen), with the
 		   given parameter list (pars, npars) over a data sample (data,
 		   prefixed) of the specified type (ts). 
