@@ -8,3 +8,20 @@ config EXAMPLES_DDS_CHAT
 	default n
 	---help---
 		Enable the EXAMPLE_DDS_CHAT
+
+if EXAMPLES_DDS_CHAT
+
+config EXAMPLES_UDP_IPADDR
+	hex "Target IP address"
+	default 0xc0a80003
+
+config EXAMPLES_UDP_DRIPADDR
+	hex "Target default router address (Gateway)"
+	default 0xc0a80002
+
+config EXAMPLES_UDP_NETMASK
+	hex "Network mask"
+	default 0xffffff00
+
+
+endif # EXAMPLES_UDP
