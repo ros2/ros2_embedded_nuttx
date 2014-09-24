@@ -577,6 +577,9 @@ int config_load (void)
 		return (DDS_RETCODE_OK);
 	}
 
+/* We make use of no file system in NuttX for the moment thereby
+the parameters should be hardcoded */
+#if !defined (NUTTX_RTOS)
 	cfg_ready = 1;
 	config_init ();
 
@@ -611,6 +614,7 @@ int config_load (void)
 			lock_take (cfg_lock);
 		}
 	}
+#endif
 	lock_release (cfg_lock);
 	return (DDS_RETCODE_OK);
 }
