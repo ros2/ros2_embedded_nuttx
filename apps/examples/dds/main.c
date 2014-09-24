@@ -481,20 +481,37 @@ static void cleanup_security (void)
 
 
 #if defined (NUTTX_RTOS)
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <apps/netutils/netlib.h>
+#endif
+
 #ifdef CONFIG_BUILD_KERNEL
 int main(int argc, FAR char *argv[])
 #else
 int dds_chat_main(int argc, char *argv[])
 #endif
-/* CONFIG_BUILD_KERNEL */
-#else
-int main (int argc, const char **argv)
-#endif 
-/* defined  (NUTTX_RTOS) */
 {
 	DDS_DataWriterQos 	wr_qos;
 	DDS_DataReaderQos	rd_qos;
-	DDS_ReturnCode_t	error;
+	DDS_ReturnCode_t	error;	
+	struct in_addr addr;
+
+	/* Configure the network */
+	/* Set up our host address */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR);
+	netlib_sethostaddr("eth0", &addr);
+
+	/* Set up the default router address */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR);
+	netlib_setdraddr("eth0", &addr);
+
+	/* Setup the subnet mask */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK);
+	netlib_setnetmask("eth0", &addr);
+
+  	/* Start the application */
+  	printf("Network configured, starting DDS chat:\n");
 
 	sprintf (user_name, ".pid.%u", getpid ());
 	do_switches (argc, argv);
