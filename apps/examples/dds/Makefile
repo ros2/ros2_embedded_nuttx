@@ -159,15 +159,15 @@ ASRCS = $(NUTTX_BASE)/arch/arm/src/arm/setjmp.S
 
 # Application .c files
 #CSRCS =
-CSRCS = main.c chat_msg.c 
+CSRCS = chat_msg.c 
 
 # The Tinq DDS sources
 TINQ_SCRCS =  ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
              ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${co_CSRCS} ${rtps_CSRCS} ${trans_CSRCS}
 
 # Application entry point
-MAINSRC = hello_main.c 
-#MAINSRC = main.c
+#MAINSRC = hello_main.c 
+MAINSRC = main.c
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))

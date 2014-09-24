@@ -39,6 +39,9 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <apps/netutils/netlib.h>
 
 /****************************************************************************
  * Definitions
@@ -62,6 +65,23 @@ int main(int argc, FAR char *argv[])
 int dds_chat_main(int argc, char *argv[])
 #endif
 {
-  printf("Hello, DDS!!\n");
-  return 0;
+	
+	/* Configure the network */
+	struct in_addr addr;
+
+	/* Set up our host address */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR);
+	netlib_sethostaddr("eth0", &addr);
+
+	/* Set up the default router address */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR);
+	netlib_setdraddr("eth0", &addr);
+
+	/* Setup the subnet mask */
+	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK);
+	netlib_setnetmask("eth0", &addr);
+
+  	/* Application */
+  	printf("Hello, DDS!!\n");
+  	return 0;
 }
