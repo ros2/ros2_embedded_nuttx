@@ -24,9 +24,13 @@
 #include "ipfilter.h"
 #include "rtps_mux.h"
 
+#if defined (NUTTX_RTOS)
+#define MAX_TX_SIZE	0x2000	/* 8K - 16 bytes. */
+#define MAX_RX_SIZE	0x2000	/* 8K - 16 bytes. */
+#else
 #define MAX_TX_SIZE	0xfff0	/* 64K - 16 bytes. */
 #define MAX_RX_SIZE	0xfff0	/* 64K - 16 bytes. */
-
+#endif
 #define DDS_TCP_NODELAY /* Use TCP_NODELAY flag as recommanded in the spec. */
 
 #define	CLASSD(ipa) ((unsigned char) ipa >= 224 && (unsigned char) ipa <= 239)
