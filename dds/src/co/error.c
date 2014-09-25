@@ -528,6 +528,11 @@ static void buffer_output (ErrLevel_t level,
 
 void dbg_printf (const char *fmt, ...)
 {
+#if defined (NUTTX_RTOS)
+	/* Simple print it out in the serial console */
+	printf("%s", fmt);
+#else
+	/* NUTTX_RTOS */
 	va_list		arg;
 	char		sbuf [256];
 #ifndef CDR_ONLY
@@ -561,6 +566,8 @@ void dbg_printf (const char *fmt, ...)
 	}
 	lock_releasef (dbg_lock);
 #endif
+#endif
+	/* NUTTX_RTOS */
 }
 
 #define	RC_BUFSIZE	128
@@ -684,6 +691,10 @@ void dbg_flush (void)
 
 void log_printf (unsigned id, unsigned level, const char *fmt, ...)
 {
+#if defined (NUTTX_RTOS)
+	printf("%s", fmt);
+#else
+	/*not NUTTX_RTOS*/	
 	va_list		arg;
 	unsigned	acts;
 	char		sbuf [256];
@@ -724,6 +735,8 @@ void log_printf (unsigned id, unsigned level, const char *fmt, ...)
 	
 	lock_releasef (log_lock);
 #endif
+#endif
+	/*NUTTX_RTOS*/
 }
 
 void log_print_region (unsigned   id,
