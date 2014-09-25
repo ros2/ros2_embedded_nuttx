@@ -68,6 +68,20 @@ typedef struct par_val_st {
 	}		value;
 } ParVal_t;
 
+#if defined (NUTTX_RTOS)
+static ParVal_t common_pars [] = {
+	{ G_Common, DC_Name,        "NAME",        V_String, 1, NULL, {"Tinq ROS 2.0"}},
+	{ G_Common, DC_Environment, "ENVIRONMENT", V_Number, 1, NULL, {DDS_EE_C}},
+	{ G_Common, DC_PurgeDelay,  "PURGE_DELAY", V_Number, 1, NULL, {50}},
+	{ G_Common, DC_SampleSize,  "MAX_SAMPLE",  V_Number, 1, NULL, {4*1024}},
+#ifdef DDS_DEBUG
+	/* TODO: Remove this and all related code once dtls/tls are fully working */
+	{ G_Common, DC_NoSecurity,  "NOSECURITY",  V_Number, 1, NULL, {0}},
+#endif
+	{ G_Common, DC_Forward,     "FORWARD",     V_Number, 1, NULL, {0}},
+	{ G_Common, DC_LogDir,      "LOG_DIR",     V_String, 1, NULL, {0}}
+};
+#else
 static ParVal_t common_pars [] = {
 	{ G_Common, DC_Name,        "NAME",        V_String, 0, NULL, {0}},
 	{ G_Common, DC_Environment, "ENVIRONMENT", V_Number, 0, NULL, {0}},
@@ -80,9 +94,55 @@ static ParVal_t common_pars [] = {
 	{ G_Common, DC_Forward,     "FORWARD",     V_Number, 0, NULL, {0}},
 	{ G_Common, DC_LogDir,      "LOG_DIR",     V_String, 0, NULL, {0}}
 };
+#endif
 
 #define N_COMMON_PARS	(sizeof (common_pars) / sizeof (ParVal_t))
 
+#if defined (NUTTX_RTOS)
+static ParVal_t pool_pars [] = {
+	{ G_Pool, DC_Pool_Domains,          "DOMAINS",       V_Number, 1, NULL, {0}},
+	{ G_Pool, DC_Pool_Subscribers,      "SUBSCRIBERS",   V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Publishers,       "PUBLISHERS",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Readers,          "READERS",       V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Writers,          "WRITERS",       V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Topics,           "TOPICS",        V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_FilteredTopics,   "FILTERED",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_TopicTypes,       "TYPES",         V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_ReaderProxies,    "RPROXIES",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_WriterProxies,    "WPROXIES",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_DiscParticipants, "RPARTICIPANTS", V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_DiscReaders,      "RREADERS",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_DiscWriters,      "RWRITERS",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_PoolData,         "POOL_DATA",     V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_RxBuffers,        "RX_BUFFERS",    V_Number, 1, NULL, {0}},
+	{ G_Pool, DC_Pool_Changes,          "CHANGES",       V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Instances,        "INSTANCES",     V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Samples,          "SAMPLES",       V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_LocalMatch,       "LOCAL_MATCH",   V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_CacheWait,        "CACHE_WAIT",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_CacheXfer,        "CACHE_XFER",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_TimeFilters,      "TIME_FILTERS",  V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_TimeInsts,        "TIME_INSTS",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Strings,          "STRINGS",       V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_StringData,       "STRING_DATA",   V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Locators,         "LOCATORS",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_QoS,              "QOS",           V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Lists,            "LISTS",         V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_ListNodes,        "LIST_NODES",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Timers,           "TIMERS",        V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_WaitSets,         "WAITSETS",      V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_StatusConds,      "STATUSCONDS",   V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_ReadConds,        "READCONDS",     V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_QueryConds,       "QUERYCONDS",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_GuardConds,       "GUARDCONDS",    V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Notifications,    "NOTIFICATIONS", V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_TopicWaits,       "TOPIC_WAITING", V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Guards,           "GUARDS",        V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_DynTypes,         "DYN_TYPES",     V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_DynSamples,       "DYN_SAMPLES",   V_Range,  1, NULL, {0}},
+	{ G_Pool, DC_Pool_Growth,           "GROWTH",        V_Number, 1, NULL, {100}}
+};
+#else
 static ParVal_t pool_pars [] = {
 	{ G_Pool, DC_Pool_Domains,          "DOMAINS",       V_Number, 0, NULL, {0}},
 	{ G_Pool, DC_Pool_Subscribers,      "SUBSCRIBERS",   V_Range,  0, NULL, {0}},
@@ -126,9 +186,28 @@ static ParVal_t pool_pars [] = {
 	{ G_Pool, DC_Pool_DynSamples,       "DYN_SAMPLES",   V_Range,  0, NULL, {0}},
 	{ G_Pool, DC_Pool_Growth,           "GROWTH",        V_Number, 0, NULL, {0}}
 };
+#endif
 
 #define N_POOL_PARS	(sizeof (pool_pars) / sizeof (ParVal_t))
 
+#if defined (NUTTX_RTOS)
+static ParVal_t rtps_pars [] = {
+	{ G_RTPS, DC_RTPS_Mode,             "MODE",          V_Mode,   1, NULL, {MODE_ENABLED}},
+	{ G_RTPS, DC_RTPS_StatelessRetries, "SL_RETRIES",    V_Number, 1, NULL, {2}},
+	{ G_RTPS, DC_RTPS_ResendPer,        "RESEND_TIME",   V_Number, 1, NULL, {10}},
+	{ G_RTPS, DC_RTPS_HeartbeatPer,     "HB_TIME",       V_Number, 1, NULL, {100}},
+	{ G_RTPS, DC_RTPS_NackRespTime,     "NACK_RESP_TIME",V_Number, 1, NULL, {0}},
+	{ G_RTPS, DC_RTPS_NackSuppTime,     "NACK_SUPP_TIME",V_Number, 1, NULL, {0}},
+	{ G_RTPS, DC_RTPS_LeaseTime,        "LEASE_TIME",    V_Number, 1, NULL, {30}},
+	{ G_RTPS, DC_RTPS_HeartbeatResp,    "HB_RESP_TIME",  V_Number, 1, NULL, {0}},
+	{ G_RTPS, DC_RTPS_HeartbeatSupp,    "HB_SUPP_TIME",  V_Number, 1, NULL, {0}},
+	{ G_RTPS, DC_RTPS_MsgSize,          "MSG_SIZE",      V_Number, 1, NULL, {1452}},
+	{ G_RTPS, DC_RTPS_FragSize,         "FRAG_SIZE",     V_Number, 1, NULL, {4096}},
+	{ G_RTPS, DC_RTPS_FragBurst,        "FRAG_BURST",    V_Number, 1, NULL, {512}}, 
+	{ G_RTPS, DC_RTPS_FragDelay,        "FRAG_DELAY",    V_Number, 1, NULL, {0}}, 
+	{ G_RTPS, DC_RTPS_DefTrace,         "DTRACE",        V_Number, 1, NULL, {0}}
+};
+#else
 static ParVal_t rtps_pars [] = {
 	{ G_RTPS, DC_RTPS_Mode,             "MODE",          V_Mode,   0, NULL, {0}},
 	{ G_RTPS, DC_RTPS_StatelessRetries, "SL_RETRIES",    V_Number, 0, NULL, {0}},
@@ -145,9 +224,25 @@ static ParVal_t rtps_pars [] = {
 	{ G_RTPS, DC_RTPS_FragDelay,        "FRAG_DELAY",    V_Number, 0, NULL, {0}}, 
 	{ G_RTPS, DC_RTPS_DefTrace,         "DTRACE",        V_Number, 0, NULL, {0}}
 };
+#endif
 
 #define N_RTPS_PARS	(sizeof (rtps_pars) / sizeof (ParVal_t))
 
+#if defined (NUTTX_RTOS)
+static ParVal_t ip_pars [] = {
+	{ G_IP, DC_IP_Sockets,   "SOCKETS",         V_Number, 1, NULL, {50}},
+	{ G_IP, DC_IP_Mode,      "MODE",            V_Mode,   1, NULL, {MODE_PREFERRED}},
+	{ G_IP, DC_IP_Scope,     "SCOPE",           V_Range,  1, NULL, {0}},
+	{ G_IP, DC_IP_Intf,      "INTF",            V_String, 1, NULL, {"eth0"}},
+	{ G_IP, DC_IP_Address,   "ADDRESS",         V_String, 1, NULL, {"192.168.0.3"}},
+	{ G_IP, DC_IP_Network,   "NETWORK",         V_String, 1, NULL, {"192.168.0.1"}},
+	{ G_IP, DC_IP_NoMCast,   "NO_MCAST",        V_String, 1, NULL, {0}},
+	{ G_IP, DC_IP_MCastTTL,  "MCAST_TTL",       V_Number, 1, NULL, {1}},
+	{ G_IP, DC_IP_MCastDest, "MCAST_DEST",      V_String, 1, NULL, {"192.168.0.255"}},
+	{ G_IP, DC_IP_MCastSrc,  "MCAST_SRC",       V_String, 1, NULL, {"192.168.0.3"}},
+	{ G_IP, DC_IP_MCastAddr, "GROUP",           V_String, 1, NULL, {"192.168.0.1"}}
+};
+#else
 static ParVal_t ip_pars [] = {
 	{ G_IP, DC_IP_Sockets,   "SOCKETS",         V_Number, 0, NULL, {0}},
 	{ G_IP, DC_IP_Mode,      "MODE",            V_Mode,   0, NULL, {0}},
@@ -161,9 +256,22 @@ static ParVal_t ip_pars [] = {
 	{ G_IP, DC_IP_MCastSrc,  "MCAST_SRC",       V_String, 0, NULL, {0}},
 	{ G_IP, DC_IP_MCastAddr, "GROUP",           V_String, 0, NULL, {0}}
 };
+#endif
 
 #define N_IP_PARS	(sizeof (ip_pars) / sizeof (ParVal_t))
 
+#if defined (NUTTX_RTOS)
+static ParVal_t udp_pars [] = {
+	{ G_UDP, DC_UDP_Mode, "MODE",          V_Mode,   1, NULL, {MODE_ENABLED}},
+	{ G_UDP, DC_UDP_PB,   "PB",            V_Number, 1, NULL, {7400}},
+	{ G_UDP, DC_UDP_DG,   "DG",            V_Number, 1, NULL, {250}},
+	{ G_UDP, DC_UDP_PG,   "PG",            V_Number, 1, NULL, {2}},
+	{ G_UDP, DC_UDP_D1,   "D0",            V_Number, 1, NULL, {0}},
+	{ G_UDP, DC_UDP_D1,   "D1",            V_Number, 1, NULL, {10}},
+	{ G_UDP, DC_UDP_D2,   "D2",            V_Number, 1, NULL, {1}},
+	{ G_UDP, DC_UDP_D3,   "D3",            V_Number, 1, NULL, {11}}
+};
+#else
 static ParVal_t udp_pars [] = {
 	{ G_UDP, DC_UDP_Mode, "MODE",          V_Mode,   0, NULL, {0}},
 	{ G_UDP, DC_UDP_PB,   "PB",            V_Number, 0, NULL, {0}},
@@ -174,6 +282,7 @@ static ParVal_t udp_pars [] = {
 	{ G_UDP, DC_UDP_D2,   "D2",            V_Number, 0, NULL, {0}},
 	{ G_UDP, DC_UDP_D3,   "D3",            V_Number, 0, NULL, {0}}
 };
+#endif
 
 #define N_UDP_PARS	(sizeof (udp_pars) / sizeof (ParVal_t))
 
