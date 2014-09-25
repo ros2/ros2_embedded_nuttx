@@ -1636,7 +1636,7 @@ int DDS_Transport_parameters (LocatorKind_t kind, void *pars)
 #endif
 
 /* DDS_get_purge_delay -- Get the *_delete_contained_entities() delay in
-			  microseconds. Default setting is 50ms. */
+			  microseconds. Default setting is 50us. */
 
 unsigned DDS_get_purge_delay (void)
 {
