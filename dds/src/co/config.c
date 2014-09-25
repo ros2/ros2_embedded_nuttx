@@ -31,6 +31,7 @@
 #include "thread.h"
 #include "dds.h"
 #include "config.h"
+#include "dds/dds_aux.h"			
 
 typedef enum {
 	V_String,
