@@ -232,14 +232,19 @@ void do_chat (DDS_DataWriter dw)
 			   tty_input,
 			   NULL);
 
-	printf ("Welcome to the Technicolor chatroom.\r\n");
+	printf ("Welcome to the ROS 2.0 DDS chatroom.\r\n");
 	printf ("Anything you type will be sent to all chatroom attendees.\r\n");
+	printf ("      (Please write messages of less than 255 characters).\r\n");	
 	printf ("Type '!help' for chatroom options.\r\n");
 	m.chatroom = chatroom;
 	m.from = user_name;
 	h = 0;
 	while (!aborting) {
+#if defined (NUTTX_RTOS)
+		fgets(buf, 256, stdin);
+#else
 		tty_gets (sizeof (buf), buf, 0, 1);
+#endif
 		if (buf [0] == '!') {
 			if (!strcmp (buf + 1, "quit") ||
 			    (buf [1] == 'q' && buf [2] == '\0')) {
