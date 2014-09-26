@@ -414,7 +414,8 @@ unsigned sys_own_ipv4_addr (unsigned char *addr,
 	return (naddr);
 #elif defined(NUTTX_RTOS)
 	/* TODO */
-	exit (1);
+	return;	
+	
 #else /* Linux */
 	struct ifconf		ifc;
 	struct ifreq		*ifr, *r;

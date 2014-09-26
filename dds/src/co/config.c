@@ -689,7 +689,9 @@ int config_load (void)
 
 /* We make use of no file system in NuttX for the moment thereby
 the parameters should be hardcoded */
-#if !defined (NUTTX_RTOS)
+#if defined (NUTTX_RTOS)
+	config_init ();
+#else	
 	cfg_ready = 1;
 	config_init ();
 
