@@ -52,6 +52,7 @@ endif
 OPENOCD=../tools/openocd/bin/openocd
 QEMU_STM32 ?= ../../RTOS/qemu_stm32/arm-softmmu/qemu-system-arm
 CROSS_COMPILE=arm-none-eabi-
+STLINK=../stlink/
 
 qemu: nuttx.bin $(QEMU_STM32)
 	$(QEMU_STM32) -M stm32-p103 -kernel nuttx.bin
@@ -73,31 +74,16 @@ emu: nuttx.bin
 	bash emulate.sh nuttx.bin
 
 program: nuttx.bin
-	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; flash write_image erase nuttx.bin 0x8000000; verify_image nuttx.bin 0x8000000; sleep 100; reset run; sleep 100; shutdown"
-
-program2: nuttx.bin
 	-$(OPENOCD) -f board/stm32f4discovery.cfg -c "init" -c "reset halt" -c "flash write_image erase nuttx.bin 0x08000000 bin" -c "verify_image nuttx.bin 0x8000000; reset run; exit"
 
 dump_flash:
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; dump_image nuttx.bin.dump 0x8000000 0x1000; reset run; shutdown"
 
-gdb_server: nuttx.bin
-	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt"
-
-gdb_server2: nuttx.bin
-	$(OPENOCD) -f board/stm32f4discovery.cfg -c "init; halt" 
-	#-select USB=0 -device STM32F405RG
-
-gdb_server3:
-	st-util -V
+gdb_server:
+	${STLINK}st-util -V
+#	st-util -V
 		
 gdb: nuttx.bin
-	$(CROSS_COMPILE)gdb nuttx -x ../tools/gdb_init_commands
-
-gdb2: nuttx.bin
-	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:3333'
-
-gdb3: nuttx.bin
 	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:4242'
 
 reset:
