@@ -226,7 +226,9 @@ void do_chat (DDS_DataWriter dw)
 	DDS_InstanceHandle_t	h;
 	char			buf [256];
 
+#if !defined (NUTTX_RTOS)
 	tty_init ();
+#endif
 	DDS_Handle_attach (tty_stdin,
 			   POLLIN | POLLPRI | POLLERR | POLLHUP | POLLNVAL,
 			   tty_input,
@@ -241,19 +243,34 @@ void do_chat (DDS_DataWriter dw)
 	h = 0;
 	while (!aborting) {
 #if defined (NUTTX_RTOS)
+		/* Take into account that fgets reads the "\n" character at the end
+		of each line. Code should consider this aspect in every case */
 		fgets(buf, 256, stdin);
 #else
 		tty_gets (sizeof (buf), buf, 0, 1);
 #endif
 		if (buf [0] == '!') {
+#if defined (NUTTX_RTOS)						
+			if (!strcmp (buf + 1, "quit\n") ||
+			    (buf [1] == 'q' && buf [2] == '\n')) {
+#else
 			if (!strcmp (buf + 1, "quit") ||
-			    (buf [1] == 'q' && buf [2] == '\0')) {
+			    (buf [1] == 'q' && buf [2] == '\0')) {				
+#endif
 				aborting = 1;
 				break;
 			}
+#if defined (NUTTX_RTOS)						
+			else if (!strcmp (buf + 1, "list\n"))
+#else
 			else if (!strcmp (buf + 1, "list"))
+#endif			
 				printf ("Attendees:\r\n\t%s\r\n", user_name);
+#if defined (NUTTX_RTOS)						
+			else if (!memcmp (buf + 1, "user\n", 4)) {
+#else
 			else if (!memcmp (buf + 1, "user", 4)) {
+#endif			
 				if (h) {
 					ChatMsg_signal (dw, h, 1);
 					h = 0;
@@ -261,7 +278,11 @@ void do_chat (DDS_DataWriter dw)
 				strcpy (user_name, buf + 6);
 				printf ("You are now: %s\r\n", user_name);
 			}
+#if defined (NUTTX_RTOS)						
+			else if (!memcmp (buf + 1, "room\n", 4)) {
+#else
 			else if (!memcmp (buf + 1, "room", 4)) {
+#endif						
 				if (h) {
 					ChatMsg_signal (dw, h, 1);
 					h = 0;
@@ -269,20 +290,39 @@ void do_chat (DDS_DataWriter dw)
 				strcpy (chatroom, buf + 6);
 				printf ("Switched to chatroom: %s\r\n", chatroom);
 			}
+#if defined (NUTTX_RTOS)						
+			else if (!strcmp (buf + 1, "info\n"))
+#else
 			else if (!strcmp (buf + 1, "info"))
+#endif			
 				printf ("Chatroom: %s, Username: %s\r\n", 
 							chatroom, user_name);
+#if defined (NUTTX_RTOS)						
+			else if (!strcmp (buf + 1, "busy\n"))
+#else
 			else if (!strcmp (buf + 1, "busy"))
+#endif			
 				ChatMsg_signal (dw, h, 0);
+#if defined (NUTTX_RTOS)						
+			else if (!strcmp (buf + 1, "away\n")) {
+#else
 			else if (!strcmp (buf + 1, "away")) {
+#endif			
 				if (h) {
 					ChatMsg_signal (dw, h, 1);
 					h = 0;
 				}
 			}
+#if defined (NUTTX_RTOS)			
+			else if (!strcmp (buf + 1, "help\n") ||
+				 (buf [1] == 'h' && buf [2] == '\n\0') ||
+				 (buf [1] == '?' && buf [2] == '\n\0')) {
+
+#else
 			else if (!strcmp (buf + 1, "help") ||
 				 (buf [1] == 'h' && buf [2] == '\0') ||
 				 (buf [1] == '?' && buf [2] == '\0')) {
+#endif
 				printf ("Commands:\r\n");
 				printf ("    !room <room_name>   -> set the chatroom name.\r\n");
 				printf ("    !user <user_name>   -> set the user name.\r\n");
@@ -294,7 +334,7 @@ void do_chat (DDS_DataWriter dw)
 				printf ("    !quit or !q         -> Quit the chatroom.\r\n");
 				printf ("    !!<command>         -> DDS debug command.\r\n");
 				/* printf ("    !$<command>         -> Shell command.\r\n"); */
-			}
+			}			
 			else if (buf [1] == '!')
 				DDS_Debug_command (buf + 2);
 			/* else if (buf [1] == '$')
