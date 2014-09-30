@@ -18,7 +18,9 @@
 #ifndef __sec_data_h_
 #define	__sec_data_h_
 
+#if !defined (NUTTX_RTOS)
 #include "openssl/ssl.h"
+#endif
 #include "str.h"
 #include "strseq.h"
 #include "dds/dds_dcps.h"
