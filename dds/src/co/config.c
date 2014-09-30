@@ -691,6 +691,15 @@ int config_load (void)
 the parameters should be hardcoded */
 #if defined (NUTTX_RTOS)
 	config_init ();
+	/* Configuration is now ready */
+	cfg_ready = 1;
+
+	/* Set them as valid parameters one the config has been loaded 	
+	for (i = 0; i < N_CONFIG_PARS; i++) {
+		parameters[i]->valid = 1;
+	}
+	*/
+
 #else	
 	cfg_ready = 1;
 	config_init ();
