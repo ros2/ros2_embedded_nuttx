@@ -441,13 +441,13 @@ void thread_init (void)
 void rcl_access (void *p)
 {
 	ARG_NOT_USED (p);
-	lock_take (rclock);
+	//lock_take (rclock);
 }
 
 void rcl_done (void *p)
 {
 	ARG_NOT_USED (p);
-	lock_release (rclock);
+	//lock_release (rclock);
 }
 
 #else
