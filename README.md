@@ -65,18 +65,18 @@ cd nuttx/tools
 ####Programming
 
 ```bash
-make program2
+make program
 ```
 
 ####Debugging
 
 ```bash
 cd nuttx/
-make gdb_server3
+make gdb_server
 ```
 In another terminal (same directory):
 ```bash
-make gdb3
+make gdb
 ```
 
 ###UDP testing
