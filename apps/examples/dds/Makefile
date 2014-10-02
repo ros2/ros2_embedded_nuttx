@@ -41,7 +41,8 @@ include $(APPDIR)/Make.defs
 
 APPNAME = dds_chat
 PRIORITY = SCHED_PRIORITY_DEFAULT
-STACKSIZE = 2048
+#STACKSIZE = 2048
+STACKSIZE = 8192
 
 #######################################################
 ALT_NUM = 0

@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_THREADING
+	bool "\"Threading!\" example"
+	default n
+	---help---
+		Enable the \"Hello, World!\" example
+

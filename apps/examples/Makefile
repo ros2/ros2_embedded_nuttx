@@ -43,7 +43,7 @@ SUBDIRS += keypadtest lcdrw mm modbus mount mtdpart mtdrwb netpkt nettest
 SUBDIRS += nrf24l01_term nsh null nx nxterm nxffs nxflat nxhello nximage
 SUBDIRS += nxlines nxtext ostest pashello pipe poll posix_spawn pwm qencoder
 SUBDIRS += random relays rgmp romfs sendmail serialblaster serloop serialrx
-SUBDIRS += slcd smart smart_test tcpecho telnetd thttpd tiff touchscreen udp
+SUBDIRS += slcd smart smart_test tcpecho telnetd thttpd threading tiff touchscreen udp
 SUBDIRS += usbserial usbterm watchdog webserver wget wgetjson xmlrpc
 
 # Sub-directories that might need context setup.  Directories may need
@@ -57,7 +57,7 @@ CNTXTDIRS += adc can cc3000 cpuhog cxxtest dds dhcpd discover flash_test ftpd
 CNTXTDIRS += hello helloxx i2schar json keypadtestmodbus lcdrw mtdpart
 CNTXTDIRS += netpkt nettest nx nxhello nximage nxlines nxtext nrf24l01_term
 CNTXTDIRS += ostest random relays qencoder serialblasterslcd serialrx
-CNTXTDIRS += smart_test tcpecho telnetd tiff touchscreen usbterm watchdog
+CNTXTDIRS += smart_test tcpecho telnetd tiff threading touchscreen usbterm watchdog
 CNTXTDIRS += wgetjson
 endif
 
