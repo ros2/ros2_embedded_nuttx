@@ -290,6 +290,10 @@ ifeq ($(CONFIG_EXAMPLES_TOUCHSCREEN),y)
 CONFIGURED_APPS += examples/touchscreen
 endif
 
+ifeq ($(CONFIG_EXAMPLES_THREADING),y)
+CONFIGURED_APPS += examples/threading
+endif
+
 ifeq ($(CONFIG_EXAMPLES_UDP),y)
 CONFIGURED_APPS += examples/udp
 endif
