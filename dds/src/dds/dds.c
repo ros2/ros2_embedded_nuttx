@@ -1417,6 +1417,13 @@ int dds_init (void)
 
 	log_printf (DDS_ID, 0, "QoS pools initialized.\r\n");
 
+#if defined (NUTTX_RTOS)
+	/* Initialize threading support. */
+#ifdef THREADS_USED
+	dds_init_threads ();
+#endif
+#endif
+
 	error = disc_init ();
 	if (error)
 		fatal_printf ("disc_init() failed: error = %d", error);
@@ -1475,9 +1482,11 @@ int dds_init (void)
 	PROF_INIT ("W:Waitset", dds_w_waitset);
 	PROF_INIT ("W:Listen", dds_w_listen);
 
+#if !defined (NUTTX_RTOS)
 	/* Initialize threading support. */
 #ifdef THREADS_USED
 	dds_init_threads ();
+#endif
 #endif
 
 	tmr_init (&shm_timer, "SharedMemory");
