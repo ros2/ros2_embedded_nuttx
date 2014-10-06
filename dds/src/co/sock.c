@@ -492,6 +492,9 @@ int sock_fd_init (void)
 
 	if (!initialized) {
 		lock_init_nr (sock_lock, "lock");
+#if defined (NUTTX_RTOS)
+		lock_init_nr (poll_lock, "poll");		
+#endif	
 		fd_max_size = config_get_number (DC_IP_Sockets, FD_MAX_SIZE);
 		initialized = 1;
 	}
