@@ -413,8 +413,35 @@ unsigned sys_own_ipv4_addr (unsigned char *addr,
 	freeifaddrs (ifa);
 	return (naddr);
 #elif defined(NUTTX_RTOS)
-	/* TODO */
-	return;	
+
+#include <nuttx/net/net.h>
+#include <nuttx/net/netdev.h>
+#include "netdev/netdev.h"
+
+ 	struct net_driver_s *dev;
+ 	struct in_addr ina;
+
+    for (dev = g_netdevices; dev; dev = dev->flink) {
+    	ina.s_addr = dev->d_ipaddr;
+    	/* Scope */ 
+		scope = sys_ipv4_scope ((const unsigned char *) &ina);
+		if (scope < min_scope || scope > max_scope)
+			continue;
+		
+    	/* Copy address to addr */
+		if (!naddr)
+			log_printf (LOG_DEF_ID, 0, "IP interfaces:\r\n");
+		log_printf (LOG_DEF_ID, 0, "    %-8s : %s\r\n",
+					dev->d_ifname,
+					inet_ntoa(ina));
+		memcpy (addr, &ina, 4);
+		memcpy (addr + OWN_IPV4_SCOPE_OFS, &scope, 4);
+		addr += OWN_IPV4_SIZE;
+		max -= OWN_IPV4_SIZE;
+		++naddr;
+    	/* printf("\tIPaddr:%s\n ", inet_ntoa(ina)); */
+    }
+	return (naddr);
 	
 #else /* Linux */
 	struct ifconf		ifc;
