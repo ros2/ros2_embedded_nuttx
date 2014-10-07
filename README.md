@@ -99,4 +99,25 @@ make
 ./nuttx # you should see the NuttX shell ;)
 ```
 
+---
+
+*IGMPv2*
+
+NuttX supports only IGMPv2 thereby in order to put force your Linux machine in this mode the following should
+be done:
+```bash
+
+sudo bash
+echo "2" > /proc/sys/net/ipv4/conf/eth0/force_igmp_version
+```
+If you wish to set if to the default value:
+```bash
+sudo bash
+echo "0" > /proc/sys/net/ipv4/conf/eth0/force_igmp_version
+```
+
+---
+
+
+
 ![](http://www.osrfoundation.org/wordpress/wp-content/uploads/2014/07/osrf_masthead.png)
