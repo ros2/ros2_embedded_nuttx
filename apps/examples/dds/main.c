@@ -563,7 +563,8 @@ int dds_chat_main(int argc, char *argv[])
 	if (verbose > 1)
 		DDS_Log_stdio (1);
 
-	DDS_entity_name ("ROS 2.0 embedded");
+	//DDS_entity_name ("ROS 2.0 embedded");
+	DDS_entity_name ("Technicolor Chatroom");
 
 #ifdef DDS_SECURITY
 	if (cert_path || key_path || engine_id)

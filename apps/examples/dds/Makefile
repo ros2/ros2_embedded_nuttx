@@ -79,7 +79,7 @@ NUTTX_HEADERS = ${NUTTX_BASE}/include
 INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
 			-I../../../dds/plugins/security/ -I${NSECP}/ \
 			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
-			-I${NUTTX_HEADERS}
+			-I${NUTTX_HEADERS} -I${NUTTX_BASE}/net
 #-I/usr/include/libxml2 
 
 LIB_PATH =
