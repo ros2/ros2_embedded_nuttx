@@ -79,11 +79,24 @@ In another terminal (same directory):
 make gdb
 ```
 
-###UDP testing
+####UDP testing
 If NSH is launched with the right debug options, it can be used to test UDP traffic. On the remote machine do:
 ```bash
  sudo mz eth0 -c 10 -A 192.168.0.2 -B 192.168.0.3 -t udp -p 100
 ```
 You should see incoming packages in the NSH.
+
+
+###Running in Linux
+NuttX includes a simulator that allows to run the applications (with some resctrictions, refer to [nuttx/configs/sim/README.txt](nuttx/configs/sim/README.txt)) directly in Linux. A simple setup can be achieved through:
+```
+cd nuttx
+make distclean # this is an important step to clean previous builds
+cd tools
+./configure.sh sim/nsh # make sure you have all the requirements in your Linux machine before compiling (e.g. zlib installed, ...)
+cd -
+make
+./nuttx # you should see the NuttX shell ;)
+```
 
 ![](http://www.osrfoundation.org/wordpress/wp-content/uploads/2014/07/osrf_masthead.png)
