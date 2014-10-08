@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config DDS_CHAT
+	bool "A simple chat example using DDS over NSH"
+	default n
+	---help---
+		Enable the DDS_CHAT
+
+if DDS_CHAT
+
+config UDP_IPADDR
+	hex "Target IP address"
+	default 0xc0a80003
+
+config UDP_DRIPADDR
+	hex "Target default router address (Gateway)"
+	default 0xc0a80002
+
+config UDP_NETMASK
+	hex "Network mask"
+	default 0xffffff00
+
+
+endif # DDS_CHAT
