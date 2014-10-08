@@ -7,6 +7,10 @@ menu "Built-In Applications"
 source "$APPSDIR/builtin/Kconfig"
 endmenu
 
+menu "DDS"
+source "$APPSDIR/dds/Kconfig"
+endmenu
+
 menu "Examples"
 source "$APPSDIR/examples/Kconfig"
 endmenu
