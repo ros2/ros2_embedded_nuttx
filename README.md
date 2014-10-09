@@ -119,5 +119,7 @@ echo "0" > /proc/sys/net/ipv4/conf/eth0/force_igmp_version
 ---
 
 
+### Communication
+- [development discussion](https://github.com/brunodebus/tinq-core/issues/7)
 
 ![](http://www.osrfoundation.org/wordpress/wp-content/uploads/2014/07/osrf_masthead.png)
