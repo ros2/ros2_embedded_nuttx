@@ -228,11 +228,11 @@ void do_chat (DDS_DataWriter dw)
 
 #if !defined (NUTTX_RTOS)
 	tty_init ();
-#endif
 	DDS_Handle_attach (tty_stdin,
 			   POLLIN | POLLPRI | POLLERR | POLLHUP | POLLNVAL,
 			   tty_input,
 			   NULL);
+#endif
 
 	printf ("Welcome to the ROS 2.0 DDS chatroom.\r\n");
 	printf ("Anything you type will be sent to all chatroom attendees.\r\n");

@@ -710,9 +710,9 @@ void sock_fd_poll (unsigned poll_time)
 	lock_take (poll_lock);
 	n = atomic_get_w (num_fds);
 	/*printf ("*"); fflush (stdout);*/
-#if defined (NUTTX_RTOS)
-	/* Do something about the polling with UDP */
-	n_ready = 1;
+#if defined (NUTTX_RTOS)	
+	// Pseudo-UDP polling
+	n_ready = nuttx_udp_poll(*fds, n);
 #else
 	n_ready = poll (*fds, n, poll_time);
 #endif

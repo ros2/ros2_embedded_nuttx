@@ -79,7 +79,8 @@ NUTTX_HEADERS = ${NUTTX_BASE}/include
 INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
 			-I../../../dds/plugins/security/ -I${NSECP}/ \
 			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
-			-I${NUTTX_HEADERS} -I${NUTTX_BASE}/net
+			-I${NUTTX_HEADERS} -I${NUTTX_HEADERS}/nuttx/net -I${NUTTX_BASE}/net -I${TRANS}/ringbuffer \
+			-I${NUTTX_HEADERS}/netinet
 #-I/usr/include/libxml2 
 
 LIB_PATH =
@@ -111,7 +112,8 @@ rtps_CSRCS = ${RTPS}/rtps_main.c ${RTPS}/rtps_mux.c ${RTPS}/rtps_msg.c \
 	     ${RTPS}/rtps_fwd.c
 
 trans_CSRCS= ${TRANS}/ip/rtps_ip.c ${TRANS}/ip/ri_udp.c ${TRANS}/ip/ri_dtls.c \
-	     ${TRANS}/ip/ri_tcp.c ${TRANS}/ip/ri_tcp_sock.c ${TRANS}/ip/ri_tls.c
+	     ${TRANS}/ip/ri_tcp.c ${TRANS}/ip/ri_tcp_sock.c ${TRANS}/ip/ri_tls.c \
+	     ${TRANS}/ringbuffer/ghpringbuf.c
 
 co_CSRCS   = ${CO}/pool.c ${CO}/sys.c ${CO}/error.c ${CO}/ipc.c ${CO}/timer.c \
              ${CO}/sock.c ${CO}/skiplist.c ${CO}/str.c ${CO}/heap.c ${CO}/md5.c \
