@@ -10,3 +10,4 @@ Make.dep
 core
 .gdbinit
 cscope.out
+ros2_embedded.sublime-workspace
