@@ -900,6 +900,7 @@ static thread_result_t dds_core (void *arg)
 	thread_return (NULL);
 }
 
+
 static void dds_wakeup_event (HANDLE h, short revents, void *arg)
 {
 #ifndef _WIN32
