@@ -23,6 +23,8 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX in the STM32
 - [ ] Real Time assessment
 - [ ] Hardware frontier
 
+
+
 ###Hardware
 The hardware used for this prototype is the `STM32F4Discovery board` together with the `STM32F4-BB`.
 
@@ -51,6 +53,11 @@ There're are several configurations for the different applications. The followin
 ```bash
 cd nuttx/tools
 ./configure stm32f4discovery/hello
+```
+For DDS the one you need to use is:
+```bash
+cd nuttx/tools
+./configure stm32f4discovery/dds
 ```
 
 ####Building
@@ -86,6 +93,14 @@ If NSH is launched with the right debug options, it can be used to test UDP traf
 ```
 You should see incoming packages in the NSH.
 
+####Updating NuttX
+This prototype relies heavily on NuttX. It's recommended to rebase the code frequently with the master branch of NuttX git://git.code.sf.net/p/nuttx/git. The following steps show picture how to do it:
+```bash
+git remote add nuttx git://git.code.sf.net/p/nuttx/git
+git fetch nuttx
+git checkout master
+git rebase nuttx/master
+```
 
 ###Running in Linux
 NuttX includes a simulator that allows to run the applications (with some resctrictions, refer to [nuttx/configs/sim/README.txt](nuttx/configs/sim/README.txt)) directly in Linux. A simple setup can be achieved through:
