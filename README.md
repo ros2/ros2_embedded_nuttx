@@ -91,7 +91,10 @@ If NSH is launched with the right debug options, it can be used to test UDP traf
 ```bash
  sudo mz eth0 -c 10 -A 192.168.0.2 -B 192.168.0.3 -t udp -p 100
 ```
-You should see incoming packages in the NSH.
+You can also use mz to send packages from a specific port and to a particular destiny port:
+```bash
+sudo mz eth0 -c 1 -A 192.168.0.2 -B 192.168.0.3 -t udp "sp=12,dp=5471" -P "Hola que tal"
+```
 
 ####Updating NuttX
 This prototype relies heavily on NuttX. It's recommended to rebase the code frequently with the master branch of NuttX git://git.code.sf.net/p/nuttx/git. The following steps show picture how to do it:
