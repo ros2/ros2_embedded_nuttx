@@ -1753,8 +1753,9 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 #else /* !USE_RECVMSG */
 #if defined NUTTX_RTOS
 	nread = ringBuffer_recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
-#endif
+#else	
 	nread = recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
+#endif
 #ifdef _WIN32
 	if (nread == SOCKET_ERROR) {
 #else /* !_WIN32 */
