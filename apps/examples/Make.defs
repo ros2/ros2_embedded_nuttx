@@ -294,6 +294,10 @@ ifeq ($(CONFIG_EXAMPLES_UDP),y)
 CONFIGURED_APPS += examples/udp
 endif
 
+ifeq ($(CONFIG_EXAMPLES_UDPSIMPLE),y)
+CONFIGURED_APPS += examples/udpsimple
+endif
+
 ifeq ($(CONFIG_EXAMPLES_USBSERIAL),y)
 CONFIGURED_APPS += examples/usbserial
 endif
