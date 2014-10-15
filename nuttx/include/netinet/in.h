@@ -105,6 +105,7 @@
 #define s6_addr16             in6_u.u6_addr16
 #define s6_addr32             in6_u.u6_addr32
 
+/* This is part of my additions however it's still not supported in NuttX natively */
 #if defined (NUTTX_RTOS)
 #define IP_MULTICAST_IF                 32
 #define IP_MULTICAST_TTL                33
