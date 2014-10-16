@@ -553,7 +553,7 @@ void ringBuffer_populate(ghpringbuf *ringBuffer, char* content, int nbytes, int 
 	int i;
 	for (i=0; i < nbytes; i++){
 		retval = ghpringbuf_put(ringBuffer, content++);
-		if (retval){
+		if (!retval){
 			printf("Ring buffer is full in thread %d (fd=%d)\n", 
 				thread_number, localizadores[thread_number]);			
 			break;
@@ -598,7 +598,7 @@ int get_threadnumber_fromfd(int fd)
 		Returns:
 			Number of bytes received when successful and -1 when a problem arised.
 */
-int ringBuffer_recvfrom(int fd, void *buf, size_t len, 
+int ringBuffer_recvfrom(int fd, char *buf, size_t len, 
 		int flags, struct sockaddr *from, socklen_t *fromlen)
 {
 	// fetch ring buffer and thread number from the fd
@@ -615,16 +615,22 @@ int ringBuffer_recvfrom(int fd, void *buf, size_t len,
 	// buffer buf and the ringbuffers sizes are the same thereby no 
 	//   check with len is needed. If the implementation wants to be improved
 	// 	 it might be worthy considering this kind of aspects.
-	int i;
+	int i,ritems = 0;	
+	/*  copy and pop performed in two different steps due to the ring buffer implementation
+			if put together in the same loop it gets only 1 out of 2 chars
+	*/
 	for (i=0; i<nitems; i++){
-		ghpringbuf_at(ringBuffer, ringBuffer->iget, &(buf[i]));
+		ghpringbuf_at(ringBuffer, ringBuffer->iget + i, &(buf[i]));
+		ritems++;
+	}
+	for (i=0; i<nitems; i++){
 		ghpringbuf_pop(ringBuffer);
 	}
 	lock_release(udp_poll_buffer_lock[thread_number]);
 	from = &(client[thread_number]);
 	// TODO Review this call
 	fromlen = sizeof(struct sockaddr_in);
-	return nitems;
+	return ritems;
 }
 
 /*

@@ -32,45 +32,43 @@
 #include "ghpringbuf.h"
 
 
-ghpringbuf* ghpringbuf_create(size_t capacity, size_t item_size, int is_overwriting, void (*item_cleaner)(void*))
-{
-  ghpringbuf* b = calloc(1, sizeof(ghpringbuf));
-  if(!b)
-    return NULL;
-  b->capacity = capacity;
-  b->item_sz = item_size;
-  b->is_overwriting = is_overwriting;
-  b->clean_item = item_cleaner;
-  b->items = calloc(capacity, item_size);
-  if(!b->items)
+   ghpringbuf* ghpringbuf_create(size_t capacity, size_t item_size, int is_overwriting, void (*item_cleaner)(void*))
+   {
+    ghpringbuf* b = calloc(1, sizeof(ghpringbuf));
+    if(!b)
+      return NULL;
+    b->capacity = capacity;
+    b->item_sz = item_size;
+    b->is_overwriting = is_overwriting;
+    b->clean_item = item_cleaner;
+    b->items = calloc(capacity, item_size);
+    if(!b->items)
     {
       free(b);
       return NULL;
     }
-  return b;
-}
+    return b;
+  }
 
 
-void ghpringbuf_destroy(ghpringbuf* b)
-{
-  if(!b)
-    return;
+  void ghpringbuf_destroy(ghpringbuf* b)
+  {
+    if(!b)
+      return;
 
-  if(b->clean_item)
-    {
-      size_t i, count = ghpringbuf_count(b); /* pop decrements count */
+    if(b->clean_item){
+    size_t i, count = ghpringbuf_count(b); /* pop decrements count */
       for(i=0; i < count; ++i)
-	ghpringbuf_pop(b);
+        ghpringbuf_pop(b);
     }
-  free(b->items);
-  free(b);
-}
+    free(b->items);
+    free(b);
+  }
 
-
-int ghpringbuf_put(ghpringbuf* b, void* item)
-{
-  b->lock = 1;
-  if (b->count < b->capacity)
+  int ghpringbuf_put(ghpringbuf* b, void* item)
+  {
+    b->lock = 1;
+    if (b->count < b->capacity)
     {
       char* it = b->items;
       it += b->item_sz * b->iput;
@@ -78,47 +76,47 @@ int ghpringbuf_put(ghpringbuf* b, void* item)
       b->iput = (b->iput+1) == b->capacity ? 0 : b->iput+1; /* advance or wrap around */
       b->count++;
     }
-  else
+    else
     {
       if(b->is_overwriting)
-	{
-	  char* it = b->items;
-	  it += b->item_sz * b->iput;
+      {
+       char* it = b->items;
+       it += b->item_sz * b->iput;
 
 	  if(b->clean_item) /* clean out item that we will overwrite */
-	    b->clean_item(it);
+       b->clean_item(it);
 
-	  memcpy(it, item, b->item_sz);
+       memcpy(it, item, b->item_sz);
 	  b->iget = b->iput = (b->iput+1) == b->capacity ? 0 : b->iput+1; /* advance or wrap around */
-	}
-      else
-	{
-	  b->lock = 0;
+     }
+     else
+     {
+       b->lock = 0;
 	  return 0; /* buffer full */
-	}
-    }
-  b->lock = 0;
-  return 1;
-}
+     }
+   }
+   b->lock = 0;
+   return 1;
+ }
 
 
-int ghpringbuf_insert(ghpringbuf* b, size_t index, void* src)
-{
+ int ghpringbuf_insert(ghpringbuf* b, size_t index, void* src)
+ {
   b->lock = 1;
   if (b->count > 0 && index < b->count) 
-    {
-      size_t pos = b->iget + index;
-      if(pos >= b->capacity)
-	pos -= b->capacity;
+  {
+    size_t pos = b->iget + index;
+    if(pos >= b->capacity)
+     pos -= b->capacity;
 
-      char* it = b->items;
-      it += b->item_sz * pos;
-      memcpy(it, src, b->item_sz);
-      b->lock = 0;
-      return 1;
-    }
-  b->lock = 0;
-  return 0;
+   char* it = b->items;
+   it += b->item_sz * pos;
+   memcpy(it, src, b->item_sz);
+   b->lock = 0;
+   return 1;
+ }
+ b->lock = 0;
+ return 0;
 }
 
 
@@ -126,19 +124,19 @@ int ghpringbuf_at(ghpringbuf* b, size_t index, void* dst)
 {
   b->lock = 1;
   if (b->count > 0 && index < b->count) 
-    {
-      size_t pos = b->iget + index;
-      if(pos >= b->capacity)
-	pos -= b->capacity;
+  {
+    size_t pos = b->iget + index;
+    if(pos >= b->capacity)
+     pos -= b->capacity;
 
-      char* it = b->items;
-      it += b->item_sz * pos;
-      memcpy(dst, it, b->item_sz);
-      b->lock = 0;
-      return 1;
-    }
-  b->lock = 0;
-  return 0;
+   char* it = b->items;
+   it += b->item_sz * pos;
+   memcpy(dst, it, b->item_sz);
+   b->lock = 0;
+   return 1;
+ }
+ b->lock = 0;
+ return 0;
 }
 
 
@@ -146,22 +144,22 @@ int ghpringbuf_pop(ghpringbuf* b)
 {
   b->lock = 1;
   if (b->count > 0) 
+  {
+    if(b->clean_item)
     {
-      if(b->clean_item)
-	{
-	  char* it = b->items;
-	  it += b->item_sz * b->iget; /* go to iget index */
-	  if(b->clean_item) /* clean out item that we will abandon */
-	    b->clean_item(it);
-	}
-
-      b->iget = (b->iget+1) == b->capacity ? 0 : b->iget+1; /* advance or wrap around */
-      b->count--;
-      b->lock = 0;
-      return 1;
+      char* it = b->items;
+  	  it += b->item_sz * b->iget; /* go to iget index */
+  	  if(b->clean_item) /* clean out item that we will abandon */
+       b->clean_item(it);
     }
-  b->lock = 0;
-  return 0;
+
+   b->iget = (b->iget+1) == b->capacity ? 0 : b->iget+1; /* advance or wrap around */
+   b->count--;
+   b->lock = 0;
+   return 1;
+ }
+ b->lock = 0;
+ return 0;
 }
 
 
