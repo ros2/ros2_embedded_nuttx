@@ -129,7 +129,8 @@ void recv_server(void)
       return;
     }
 
-  /* Join a multicast group */
+  /* Join a multicast group using setsockopt calls */
+  /*
   mc_req.imr_multiaddr = inaddr;
   struct in_addr inaddr_local;
   ret = inet_pton(AF_INET, "192.168.7.3", &inaddr_local);
@@ -143,6 +144,12 @@ void recv_server(void)
                 (char *) &mc_req, sizeof (mc_req)) < 0){
       printf("setsockopt (IP_ADD_MEMBERSHIP) failed\n");
   }  
+  */
+
+  /* Join a multicast group using ioctl calls */
+  printf("Join group...\n");
+  ipmsfilter("eth0", &inaddr, MCAST_INCLUDE);
+
 
   /* Then receive up to 256 packets of data */
 
