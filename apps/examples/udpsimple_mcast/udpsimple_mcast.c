@@ -51,7 +51,7 @@
  * Definitions
  ****************************************************************************/
 
-#define PORTNO     5471
+#define PORTNO     7400
 
 #define ASCIISIZE  (0x7f - 0x20)
 #define SENDSIZE   (ASCIISIZE+1)
@@ -184,6 +184,8 @@ void recv_server(void)
           return;
         }
 
+    /*    
+
       if (offset < inbuf[0])
         {
           printf("server: %d. %d packets lost, resetting offset\n", offset, inbuf[0] - offset);
@@ -196,7 +198,6 @@ void recv_server(void)
           return;
         }
 
-    /*    
       if (!check_buffer(inbuf))
         {
           printf("server: %d. Bad buffer contents\n", offset);
