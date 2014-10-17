@@ -537,6 +537,8 @@ static lock_t udp_poll_buffer_lock[NLOCATORS_NUTTX];
 int localizadores[NLOCATORS_NUTTX];
 ghpringbuf* rbuf[NLOCATORS_NUTTX];
 sockaddr_in client[NLOCATORS_NUTTX];
+unsigned char* threads_buf[NLOCATORS_NUTTX];
+int threads_buf_count[NLOCATORS_NUTTX];
 
 /*
 	Populates the ring buffer rbuf with content copying "number" of bytes.
@@ -633,6 +635,29 @@ int ringBuffer_recvfrom(int fd, char *buf, size_t len,
 	return ritems;
 }
 
+
+int thread_recvfrom(int fd, char *buf, size_t len, 
+		int flags, struct sockaddr *from, socklen_t *fromlen)
+{
+	int ritems;
+	// fetch ring buffer and thread number from the fd
+	int thread_number = get_threadnumber_fromfd(fd);
+	if (thread_number < 0){
+		printf("ERROR in ringBuffer recvfrom. fd=%d not found in localizadores\n", fd);
+		return -1;
+	}
+
+	lock_take(udp_poll_buffer_lock[thread_number]);
+	memcpy(buf, threads_buf[thread_number], threads_buf_count[thread_number]);
+	// Clean the count
+	ritems = threads_buf_count[thread_number]; 
+	threads_buf_count[thread_number] = 0;
+	lock_release(udp_poll_buffer_lock[thread_number]);
+	from = &(client[thread_number]);
+	fromlen = sizeof(struct sockaddr_in);
+	return ritems;
+}
+
 /*
 		This thread is part of a pseudo-polling UDP functionality implemented 
 		for NuttX using ring buffers (nuttx_upd_thread + nuttx_udp_poll ).
@@ -651,6 +676,7 @@ static thread_result_t nuttx_udp_thread (void *arg)
 	socklen_t addrlen;
 	// current thread number (will be used to match with the right locator)	
 	int thread_number = *(int *)arg;
+	threads_buf[thread_number] = malloc(sizeof(char[RINGBUFFER_SIZE]));
 
 	addrlen = sizeof(struct sockaddr_in);
 	// Init the ring buffers
@@ -664,7 +690,9 @@ static thread_result_t nuttx_udp_thread (void *arg)
                         (struct sockaddr*)&(client[thread_number]), 
                         &addrlen);
 	    lock_take(udp_poll_buffer_lock[thread_number]);
-	    ringBuffer_populate(rbuf[thread_number], inbuf, nbytes, thread_number);
+	    memcpy(threads_buf[thread_number], inbuf, nbytes);
+	    threads_buf_count[thread_number] = nbytes;
+	    //ringBuffer_populate(rbuf[thread_number], inbuf, nbytes, thread_number);
 	    lock_release(udp_poll_buffer_lock[thread_number]);
     }
 }
