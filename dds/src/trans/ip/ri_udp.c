@@ -821,6 +821,18 @@ static void rtps_udpv4_mc_join (IP_CX *mc_cxp, void *data)
 	    (mc_cxp->locator->locator.flags & jp->flags) != jp->flags)
 		return;
 
+#if defined (NUTTX_RTOS)
+  	struct in_addr inaddr;
+  	int ret;
+  	ret = inet_pton(AF_INET, "239.255.0.1", &inaddr);
+  	if (ret != 1)
+  	{
+    	printf("Error while setting up inaddr\n");
+  	}
+	ipmsfilter("eth0", &inaddr, MCAST_INCLUDE);
+	log_printf (RTPS_ID, 0, "UDP: ipmsfilter join group 239.255.0.1\n");
+#else
+
 	mc_addr = (mc_cxp->locator->locator.address [12] << 24) |
 	          (mc_cxp->locator->locator.address [13] << 16) |
 	          (mc_cxp->locator->locator.address [14] << 8) |
@@ -841,6 +853,7 @@ static void rtps_udpv4_mc_join (IP_CX *mc_cxp, void *data)
 				locator_str (&mc_cxp->locator->locator),
 				ERRNO);
 	}
+#endif
 }
 
 /* rtps_add_unicast_ipv4 -- Set multicast attributes in IP source address. */
@@ -935,6 +948,21 @@ static void rtps_udp_join_intf (IP_CX *cxp, void *data)
 	    !cxp->src_mcast)
 		return;
 
+/*
+	NuttX doesn't have implemented the multicast IP_ADD_MEMBERSHIP and
+	IP_DROP_MEMBERSHIP thereby ioctl calls through ipmsfilter should be used
+*/
+#if defined (NUTTX_RTOS)
+  	struct in_addr inaddr;
+  	int ret;
+  	ret = inet_pton(AF_INET, "239.255.0.1", &inaddr);
+  	if (ret != 1)
+  	{
+    	printf("Error while setting up inaddr\n");
+  	}
+	ipmsfilter("eth0", &inaddr, MCAST_INCLUDE);
+	log_printf (RTPS_ID, 0, "UDP: ipmsfilter join group 239.255.0.1\n");
+#else
 	addr = (cxp->locator->locator.address [12] << 24) |
 	       (cxp->locator->locator.address [13] << 16) |
 	       (cxp->locator->locator.address [14] << 8) |
@@ -961,6 +989,7 @@ static void rtps_udp_join_intf (IP_CX *cxp, void *data)
 				cxp->locator->locator.address [15],
 				ERRNO);
 	}*/
+#endif
 }
 
 #define	BCAST_ADDR(a) (a [12] == 255 && a [13] == 255 && a [14] == 255 && a [15] == 255)
@@ -1087,6 +1116,19 @@ static int rtps_udpv4_add_locator (DomainId_t    domain_id,
 		memcpy (&mc_req.imr_multiaddr.s_addr, lp->address + 12, 4);
 		if (ipv4_proto.mcast_if) {
 			mc_req.imr_interface.s_addr = htonl (ipv4_proto.mcast_if);
+
+#if defined (NUTTX_RTOS)
+  	struct in_addr inaddr;
+  	int ret;
+  	ret = inet_pton(AF_INET, "239.255.0.1", &inaddr);
+  	if (ret != 1)
+  	{
+    	printf("Error while setting up inaddr\n");
+  	}
+	ipmsfilter("eth0", &inaddr, MCAST_INCLUDE);
+	log_printf (RTPS_ID, 0, "UDP: ipmsfilter join group 239.255.0.1\n");
+#else
+
 			log_printf (RTPS_ID, 0, "UDP: setsockopt (IP_ADD_MEMBERSHIP) %u.%u.%u.%u:%u\r\n",
 				lp->address [12], lp->address [13],
 				lp->address [14], lp->address [15],
@@ -1115,6 +1157,7 @@ static int rtps_udpv4_add_locator (DomainId_t    domain_id,
 				}
 #endif
 			}
+#endif /* NUTTX_RTOS */		
 		}
 		else {
 			jd.fd = fd;
