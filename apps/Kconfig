@@ -19,6 +19,10 @@ menu "Graphics Support"
 source "$APPSDIR/graphics/Kconfig"
 endmenu
 
+menu "Hello"
+source "$APPSDIR/hello/Kconfig"
+endmenu
+
 menu "Interpreters"
 source "$APPSDIR/interpreters/Kconfig"
 endmenu
