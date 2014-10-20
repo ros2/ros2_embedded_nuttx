@@ -16,5 +16,5 @@
 /*.hex
 /pcode
 /tags
-*.built
+.built
 
