@@ -33,7 +33,7 @@ The board is connected to the computer using USB. This connection is used to pow
 
 ###Setting it up
 
-#### Installing `menuconfig`
+##### Installing `menuconfig`
 ```bash
 git clone http://ymorin.is-a-geek.org/git/kconfig-frontends
 cd kconfig-frontends/
@@ -48,7 +48,7 @@ sudo make install
 sudo /sbin/ldconfig -v
 ```
 
-#### Selecting a configuration
+##### Selecting a configuration
 There're are several configurations for the different applications. The following example shows how to use the hello world one:
 ```bash
 cd nuttx/tools
@@ -60,7 +60,7 @@ cd nuttx/tools
 ./configure stm32f4discovery/dds
 ```
 
-####Building
+#####Building
 
 ```bash
     cd nuttx/
@@ -69,13 +69,13 @@ cd nuttx/tools
 ```
 
 
-####Programming
+#####Programming
 
 ```bash
 make program
 ```
 
-####Debugging
+#####Debugging
 
 ```bash
 cd nuttx/
@@ -86,7 +86,7 @@ In another terminal (same directory):
 make gdb
 ```
 
-####UDP testing
+##### UDP testing
 If NSH is launched with the right debug options, it can be used to test UDP traffic. On the remote machine do:
 ```bash
  sudo mz eth0 -c 10 -A 192.168.0.2 -B 192.168.0.3 -t udp -p 100
@@ -96,13 +96,20 @@ You can also use mz to send packages from a specific port and to a particular de
 sudo mz eth0 -c 1 -A 192.168.0.2 -B 192.168.0.3 -t udp "sp=12,dp=5471" -P "Hola que tal"
 ```
 
-####Updating NuttX
+##### Updating NuttX
 This prototype relies heavily on NuttX. It's recommended to rebase the code frequently with the master branch of NuttX git://git.code.sf.net/p/nuttx/git. The following steps show picture how to do it:
 ```bash
 git remote add nuttx git://git.code.sf.net/p/nuttx/git
 git fetch nuttx
 git checkout master
 git rebase nuttx/master
+```
+
+##### Memory inspection
+We can review the memory consumed by the compiled image by:
+```bash
+cd nuttx
+source tools/showsize.sh nuttx
 ```
 
 ###Running in Linux
