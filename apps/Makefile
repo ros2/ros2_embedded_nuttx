@@ -64,10 +64,8 @@ SUBDIRS += netutils platform dds hello system
 # builtin/Make.defs must be included first
 
 include builtin/Make.defs
-include dds/Make.defs
 include examples/Make.defs
 include graphics/Make.defs
-include hello/Make.defs
 include interpreters/Make.defs
 include modbus/Make.defs
 include netutils/Make.defs
