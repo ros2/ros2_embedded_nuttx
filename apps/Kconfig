@@ -7,20 +7,12 @@ menu "Built-In Applications"
 source "$APPSDIR/builtin/Kconfig"
 endmenu
 
-menu "DDS"
-source "$APPSDIR/dds/Kconfig"
-endmenu
-
 menu "Examples"
 source "$APPSDIR/examples/Kconfig"
 endmenu
 
 menu "Graphics Support"
 source "$APPSDIR/graphics/Kconfig"
-endmenu
-
-menu "Hello"
-source "$APPSDIR/hello/Kconfig"
 endmenu
 
 menu "Interpreters"
