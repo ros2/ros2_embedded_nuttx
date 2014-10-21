@@ -230,10 +230,14 @@ static void go_os_start(void *pv, unsigned int nbytes)
  *
  ****************************************************************************/
 
+#include <stm32_ccm.h>
+
 void __start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
+
+  ccm_initialize();
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
