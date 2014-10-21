@@ -185,7 +185,7 @@
  */
 # define __need_uClibc_config_h
 #if !defined (NUTTX_RTOS)
-# include <bits/uClibc_config.h>
+//# include <bits/uClibc_config.h>
 #endif
 # undef __need_uClibc_config_h
 

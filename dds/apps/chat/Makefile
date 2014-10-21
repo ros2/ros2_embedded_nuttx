@@ -36,7 +36,7 @@ dds_CSRCS  = ${DDS}/dds.c ${DDS}/domain.c ${DDS}/locator.c ${DDS}/guid.c \
              ${DDS}/dds_seq.c ${DDS}/uqos.c ${DDS}/guard.c
 type_CSRCS = ${TYPE}/xtypecode.c ${TYPE}/xtypes.c ${TYPE}/xdata.c \
              ${TYPE}/xcdr.c ${TYPE}/tsm.c ${TYPE}/pl_cdr.c ${TYPE}/pid.c \
-             ${TYPE}/xtopic.c ${TYPE}/builtin.c ${TYPE}/vtc.c
+             ${TYPE}/xtopic.c ${TYPE}/xtypes_builtin.c ${TYPE}/vtc.c
 dcps_CSRCS = ${DCPS}/dcps_main.c ${DCPS}/dcps_dpfact.c ${DCPS}/dcps_part.c \
 	     ${DCPS}/dcps_pub.c ${DCPS}/dcps_sub.c ${DCPS}/dcps_topic.c \
 	     ${DCPS}/dcps_reader.c ${DCPS}/dcps_writer.c ${DCPS}/dcps_event.c \
