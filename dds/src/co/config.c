@@ -230,7 +230,7 @@ static ParVal_t rtps_pars [] = {
 #define N_RTPS_PARS	(sizeof (rtps_pars) / sizeof (ParVal_t))
 
 #if defined (NUTTX_RTOS)
-static ParVal_t ip_pars [] = __attribute__ ((section (".sram2"))) {
+static ParVal_t ip_pars [] __attribute__ ((section (".sram2"))) =  {
 	{ G_IP, DC_IP_Sockets,   "SOCKETS",         V_Number, 1, NULL, {50}},
 	{ G_IP, DC_IP_Mode,      "MODE",            V_Mode,   1, NULL, {MODE_PREFERRED}},
 	{ G_IP, DC_IP_Scope,     "SCOPE",           V_Range,  1, NULL, {0}},
@@ -289,7 +289,7 @@ static ParVal_t udp_pars [] = {
 
 #ifdef DDS_TCP
 
-static ParVal_t tcp_pars [] = __attribute__ ((section (".sram2"))) {
+static ParVal_t tcp_pars [] __attribute__ ((section (".sram2"))) =  {
 	{ G_TCP, DC_TCP_Mode,     "MODE",          V_Mode,   0, NULL, {0}},
 	{ G_TCP, DC_TCP_Port,     "PORT",          V_Number, 0, NULL, {0}},
 	{ G_TCP, DC_TCP_Server,   "SERVER",        V_String, 0, NULL, {0}},
