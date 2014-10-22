@@ -70,7 +70,7 @@ typedef struct par_val_st {
 } ParVal_t;
 
 #if defined (NUTTX_RTOS)
-static ParVal_t common_pars [] = {
+static ParVal_t common_pars [] __attribute__ ((section (".sram2"))) = {
 	{ G_Common, DC_Name,        "NAME",        V_String, 1, NULL, {"Tinq ROS 2.0"}},
 	{ G_Common, DC_Environment, "ENVIRONMENT", V_Number, 1, NULL, {DDS_EE_C}},
 	{ G_Common, DC_PurgeDelay,  "PURGE_DELAY", V_Number, 1, NULL, {50}},
@@ -100,7 +100,7 @@ static ParVal_t common_pars [] = {
 #define N_COMMON_PARS	(sizeof (common_pars) / sizeof (ParVal_t))
 
 #if defined (NUTTX_RTOS)
-static ParVal_t pool_pars [] = {
+static ParVal_t pool_pars [] __attribute__ ((section (".sram2"))) = {
 	{ G_Pool, DC_Pool_Domains,          "DOMAINS",       V_Number, 1, NULL, {0}},
 	{ G_Pool, DC_Pool_Subscribers,      "SUBSCRIBERS",   V_Range,  1, NULL, {0}},
 	{ G_Pool, DC_Pool_Publishers,       "PUBLISHERS",    V_Range,  1, NULL, {0}},
@@ -192,7 +192,7 @@ static ParVal_t pool_pars [] = {
 #define N_POOL_PARS	(sizeof (pool_pars) / sizeof (ParVal_t))
 
 #if defined (NUTTX_RTOS)
-static ParVal_t rtps_pars [] = {
+static ParVal_t rtps_pars [] __attribute__ ((section (".sram2"))) = {
 	{ G_RTPS, DC_RTPS_Mode,             "MODE",          V_Mode,   1, NULL, {MODE_ENABLED}},
 	{ G_RTPS, DC_RTPS_StatelessRetries, "SL_RETRIES",    V_Number, 1, NULL, {2}},
 	{ G_RTPS, DC_RTPS_ResendPer,        "RESEND_TIME",   V_Number, 1, NULL, {10}},
@@ -230,7 +230,7 @@ static ParVal_t rtps_pars [] = {
 #define N_RTPS_PARS	(sizeof (rtps_pars) / sizeof (ParVal_t))
 
 #if defined (NUTTX_RTOS)
-static ParVal_t ip_pars [] = {
+static ParVal_t ip_pars [] = __attribute__ ((section (".sram2"))) {
 	{ G_IP, DC_IP_Sockets,   "SOCKETS",         V_Number, 1, NULL, {50}},
 	{ G_IP, DC_IP_Mode,      "MODE",            V_Mode,   1, NULL, {MODE_PREFERRED}},
 	{ G_IP, DC_IP_Scope,     "SCOPE",           V_Range,  1, NULL, {0}},
@@ -262,7 +262,7 @@ static ParVal_t ip_pars [] = {
 #define N_IP_PARS	(sizeof (ip_pars) / sizeof (ParVal_t))
 
 #if defined (NUTTX_RTOS)
-static ParVal_t udp_pars [] = {
+static ParVal_t udp_pars [] __attribute__ ((section (".sram2"))) = {
 	{ G_UDP, DC_UDP_Mode, "MODE",          V_Mode,   1, NULL, {MODE_ENABLED}},
 	{ G_UDP, DC_UDP_PB,   "PB",            V_Number, 1, NULL, {7400}},
 	{ G_UDP, DC_UDP_DG,   "DG",            V_Number, 1, NULL, {250}},
@@ -289,7 +289,7 @@ static ParVal_t udp_pars [] = {
 
 #ifdef DDS_TCP
 
-static ParVal_t tcp_pars [] = {
+static ParVal_t tcp_pars [] = __attribute__ ((section (".sram2"))) {
 	{ G_TCP, DC_TCP_Mode,     "MODE",          V_Mode,   0, NULL, {0}},
 	{ G_TCP, DC_TCP_Port,     "PORT",          V_Number, 0, NULL, {0}},
 	{ G_TCP, DC_TCP_Server,   "SERVER",        V_String, 0, NULL, {0}},
