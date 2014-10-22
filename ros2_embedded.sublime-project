@@ -13,7 +13,6 @@
 				".depend",
 				".config",
 				".version",
-				"Make.dep",
 				".configured",
 				"*.sublime-project",
 				"*.sublime-workspace",
