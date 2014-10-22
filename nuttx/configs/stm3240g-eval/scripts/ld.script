@@ -129,4 +129,12 @@ SECTIONS
 	  . = ALIGN(4);      
 	  _eccm = .;
 	}> ccmram	
+
+	.sram2 : {
+	  . = ALIGN(4);
+	  _ssram2 = .;
+	  *(.ccm)
+	  . = ALIGN(4);      
+	  _esram2 = .;
+	}> sram2	
 }
