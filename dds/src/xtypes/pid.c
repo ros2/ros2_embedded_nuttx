@@ -1222,8 +1222,14 @@ static int pid_locator_parse (ParameterId_t       id,
 static ssize_t pid_locator_write (unsigned char *dst, const void *src)
 {
 	const Locator_t	*lp = (const Locator_t *) src;
-
+	
+#if defined (NUTTX_RTOS)
+	uint32_t aux;
+	aux = lp->kind & 0x000000FF;
+	memcpy (dst, &aux, sizeof (uint32_t));
+#else
 	memcpy (dst, &lp->kind, sizeof (uint32_t));
+#endif
 	dst += sizeof (uint32_t);
 	memcpy (dst, &lp->port, sizeof (uint32_t));
 	dst += sizeof (uint32_t);

@@ -84,7 +84,7 @@ gdb_server:
 #	st-util -V
 		
 gdb: nuttx.bin
-	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:4242'
+	$(CROSS_COMPILE)gdb -tui nuttx -ex 'target remote localhost:4242; mem 0x64000000 0x6FFFFFF0 rw 16'
 
 reset:
 	$(OPENOCD) -f ../tools/olimex-arm-usb-tiny-h.cfg -f ../tools/stm32.cfg -c "init; halt; reset run; shutdown"
