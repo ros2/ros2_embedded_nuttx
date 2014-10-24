@@ -43,7 +43,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-
+#include <errno.h>
 #include "aio/aio.h"
 
 #ifdef CONFIG_FS_AIO
