@@ -1752,7 +1752,17 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 #endif /* !_WIN32 */
 #else /* !USE_RECVMSG */
 #if defined NUTTX_RTOS
+	//nread = thread_recvfrom(fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
 	nread = ringBuffer_recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
+	printf("Received %d bytes bytes\n", nread);	
+	printf("---------- \n");
+	int i;
+	for (i= 0; i < nread; i++)
+	{
+	    printf("%02X", rtps_rx_buf[i]);
+	}
+	printf("\n");
+
 #else	
 	nread = recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
 #endif
