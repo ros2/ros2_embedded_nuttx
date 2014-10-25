@@ -526,17 +526,30 @@ static void rtps_update_kinds (Domain_t *dp)
 #include "net.h"
 #include "in.h"
 #include "poll.h"
+#include <fcntl.h>
+#include <aio.h>
+
 
 typedef struct sockaddr_in sockaddr_in;
 typedef struct pollfd pollfd;
 
 #define NLOCATORS_NUTTX 4
-#define RINGBUFFER_SIZE 1024
+#define BUFFER_SIZE 1024*4
+
+sockaddr_in 		client[NLOCATORS_NUTTX];
+struct aiocb  				a_read[AIO_LISTIO_MAX];
+struct aiocb  				*wait_list[AIO_LISTIO_MAX];
+typedef char   		*buf_p;
+buf_p           	buf[BUFFER_SIZE];
+int   				localizadores[NLOCATORS_NUTTX];
+/* notify signal
+struct sigevent 	lio_sigevent = {0,0};
+*/
+
+#if 0
 thread_t nuttx_udp_poll_thread[NLOCATORS_NUTTX];
 static lock_t udp_poll_buffer_lock[NLOCATORS_NUTTX];
-int localizadores[NLOCATORS_NUTTX];
 ghpringbuf* rbuf[NLOCATORS_NUTTX];
-sockaddr_in client[NLOCATORS_NUTTX];
 
 /*
 	Populates the ring buffer rbuf with content copying "number" of bytes.
@@ -694,6 +707,151 @@ int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
 	}
 	return total;
 }
+#endif
+
+/*
+	UDP polling simulated using asynchronous I/O primitives   
+*/
+int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
+{
+	int total = 0;
+	int i;
+	/* 
+	The DDS implementatin places in postion 0 of fds the DDS_WakeUp file descriptor
+	thereby the indexing of the ring buffers should take this into account
+	*/
+	for (i=1; i< nfds; i++){
+		int res = aio_error(&a_read[i-1]);
+		if (res == 0) {
+			if (fds[i].fd == localizadores[i - 1]) {
+				fds[i].revents = 1;
+			}
+			else{
+				printf("Problem detected: fds variable and localizadores don't match\n");
+			}
+			total++;
+		} else if (res == EINPROGRESS){
+			continue;
+		}
+		else{
+			printf("Problem with asynchronous call: aio_error returned %d\n", res);
+		} 
+	}
+	return total;
+}
+
+/*
+	iterates through the different fds located in localizadores
+	and return the appropiate index or -1 if not found
+*/
+int get_pos_fromfd(int fd)
+{
+	int i;
+	for (i=0; i<NLOCATORS_NUTTX; i++){
+		if (localizadores[i] == fd)
+			return i;
+	}
+	return -1;
+}
+
+/*
+	recvfrom primitive simulated using asynchronous I/O primitives
+*/
+int lio_recvfrom(int fd, char *buffer, size_t len, 
+		int flags, struct sockaddr *from, socklen_t *fromlen)
+{
+	int pos = get_pos_fromfd(fd);	
+	int numBytes = aio_return(&a_read[pos]);
+	if (numBytes < 0){
+		printf("Problem: aio_return returned %d\n", numBytes);
+	}
+
+#if 1
+	/* DEBUG */
+	int i;
+	printf("*************************\n");
+	for (i = 0; i < numBytes; i++){
+	    printf("%02X", buf[pos]);
+	}
+	printf("*************************\n");
+#endif	
+	
+	/* Process the Ethernet frame manually */
+	from = NULL;
+	fromlen = NULL;
+	
+	/* Copy the payload */
+	memcpy (buffer, buf, numBytes);
+	return numBytes;
+}
+
+#if 0
+void lio_reset_polling(void){
+
+	/*Assuming that lio_start_polling has been called before, initializacion
+	is not necessary */
+	/* Launch lio_listio reads */
+	int nlocators = rtps_ip_get_nlocators();
+	int i;
+	for (i = 0; i < (unsigned) nlocators; i++){
+			/* specify a read operation */
+ 			a_read[i].aio_lio_opcode = LIO_READ;
+ 			/* no need to raise a signal when completed (polling mechanism) */
+ 			/* a_read[i].aio_sigevent.sigev_signo = 0 */
+            a_read[i].aio_sigevent.sigev_notify = SIGEV_NONE;
+            /* read up to BUFFER_SIZE */		
+			a_read[i].aio_nbytes = BUFFER_SIZE;
+			a_read[i].aio_buf = buf[i];
+			/* always read and store starting at the byte 0 of the buffer */
+			a_read[i].aio_offset = 0;
+			/* pass the corresponding file descriptor */
+			a_read[i].aio_fildes = localizadores[i];
+			
+			/* add the aiocb_t struct to the wait list */			 
+			wait_list[i] = &a_read[i]; 
+    }
+
+    /* notify signal
+	ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, &lio_sigevent);
+	*/
+	ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, NULL);
+	if (!ret) /* report failure status, but don't exit yet */
+		printf("lio_listio error\n");
+	}
+}
+#endif
+
+void lio_start_polling(void){
+
+	/* Launch lio_listio reads */
+	int nlocators = rtps_ip_get_nlocators();
+	int i;
+	for (i = 0; i < (unsigned) nlocators; i++){
+			/* specify a read operation */
+ 			a_read[i].aio_lio_opcode = LIO_READ;
+ 			/* no need to raise a signal when completed (polling mechanism) */
+ 			/* a_read[i].aio_sigevent.sigev_signo = 0 */
+            a_read[i].aio_sigevent.sigev_notify = SIGEV_NONE;
+            /* read up to BUFFER_SIZE */		
+			a_read[i].aio_nbytes = BUFFER_SIZE;
+			a_read[i].aio_buf = buf[i];
+			/* always read and store starting at the byte 0 of the buffer */
+			a_read[i].aio_offset = 0;
+			/* pass the corresponding file descriptor */
+			a_read[i].aio_fildes = localizadores[i];
+			
+			/* add the aiocb_t struct to the wait list */			 
+			wait_list[i] = &a_read[i]; 
+    }
+
+    /* notify signal
+	ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, &lio_sigevent);
+	*/
+	int ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, NULL);
+	if (!ret) { 
+		printf("lio_listio error\n");
+	}
+}
 
 #endif /* defined NUTTX_RTOS */
 
@@ -779,13 +937,16 @@ int rtps_participant_create (Domain_t *dp)
 	disc_start (dp);
 
 #if defined NUTTX_RTOS
+	/* Simulate udp polling using asynchronous pritimives */
+	rtps_ip_get_fds(localizadores, NLOCATORS_NUTTX);	
+	lio_start_polling();
+#if 0
 	/* Simulate udp polling using threads and buffering */
-	int nlocators = rtps_ip_get_nlocators();
-	rtps_ip_get_fds(localizadores, NLOCATORS_NUTTX);
 	int i;
 	for (i = 0; i < (unsigned) nlocators; i++){
 		thread_create(nuttx_udp_poll_thread[i], nuttx_udp_thread, (void *)&i);
 	}
+#endif
 #endif
 	return (DDS_RETCODE_OK);
 }

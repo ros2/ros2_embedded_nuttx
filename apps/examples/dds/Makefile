@@ -211,7 +211,7 @@ PROGNAME = $(CONFIG_EXAMPLES_DDS_CHAT)
 
 
 DEFINES  = -DNUTTX_RTOS -DPTHREADS_USED -DFORCE_MALLOC -DTTY_NORMAL -DRTPS_USED   \
-	    -DXTYPES_USED -DDDS_TYPECODE -DBIGDATA   \
+	    -DXTYPES_USED -DDDS_TYPECODE -DBIGDATA \
 	      -DNOIPC -DNO_SYSLOG -DDDS_DEBUG -DDDS_FORWARD -DMSECPLUG_WITH_SECXML
 
 #-DMSECPLUG_WITH_SECXML
@@ -252,7 +252,7 @@ OPTTYPE  = -O0
 # -fprofile-arcs -ftest-coverage
 
 # Important to not overwrite the flags but actually add them to the NuttX existing ones
-CFLAGS   += -Wall -Wextra -pedantic -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFINES} ${ALT_STR} -g
+CFLAGS   += -Wall -Wextra -pedantic -fshort-enums -Wno-long-long ${OPTTYPE} ${INC_PATH} ${DEFINES} ${ALT_STR} -g
 #LDFLAGS  = ${LIB_PATH} ${LIBS} -lnsl -lrt -lpthread -lssl -lcrypto -lxml2 -g
 #LDFLAGS += -nodefaultlibs ${LIB_PATH} ${LIBS} -g -L../../../nuttx/lib -lsched -lgcc -larch -lc -lcxx -lmm 
 #LDFLAGS  +=
