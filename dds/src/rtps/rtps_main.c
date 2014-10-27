@@ -537,178 +537,15 @@ typedef struct pollfd pollfd;
 #define BUFFER_SIZE 1024*4
 
 sockaddr_in 		client[NLOCATORS_NUTTX];
-struct aiocb  				a_read[NLOCATORS_NUTTX];
-struct aiocb  				*wait_list[NLOCATORS_NUTTX];
+struct aiocb  		a_read[NLOCATORS_NUTTX];
+struct aiocb  		*wait_list[NLOCATORS_NUTTX];
 typedef char   		*buf_p;
-buf_p           	buf[BUFFER_SIZE];
+buf_p           	buf[NLOCATORS_NUTTX];
 int   				localizadores[NLOCATORS_NUTTX];
 int 				flag_localizadores = 0;
 /* notify signal
 struct sigevent 	lio_sigevent = {0,0};
 */
-
-#if 0
-thread_t nuttx_udp_poll_thread[NLOCATORS_NUTTX];
-static lock_t udp_poll_buffer_lock[NLOCATORS_NUTTX];
-ghpringbuf* rbuf[NLOCATORS_NUTTX];
-
-/*
-	Populates the ring buffer rbuf with content copying "number" of bytes.
-		The function assumes that external locks are being used.
-*/
-void ringBuffer_populate(ghpringbuf *ringBuffer, char* content, int nbytes, int thread_number)
-{
-	int retval;
-	if (ghpringbuf_count(ringBuffer) == RINGBUFFER_SIZE){
-		printf("Ring buffer is full in thread %d (fd=%d)\n", 
-			thread_number, localizadores[thread_number]);
-		return;
-	}
-	int i;
-	for (i=0; i < nbytes; i++){
-		retval = ghpringbuf_put(ringBuffer, content++);
-		if (!retval){
-			printf("Ring buffer is full in thread %d (fd=%d)\n", 
-				thread_number, localizadores[thread_number]);			
-			break;
-		}
-	}
-}
-
-/*
-	Returns the number of available bytes in the ring buffer
-*/
-int ringBuffer_space(ghpringbuf *ringBuffer)
-{
-	return RINGBUFFER_SIZE - ghpringbuf_count(ringBuffer);
-}
-
-/*
-	iterates through the different fds located in localizadores
-	and return the appropiate index or -1 if not found
-*/
-int get_threadnumber_fromfd(int fd)
-{
-	int i;
-	for (i=0; i<NLOCATORS_NUTTX; i++){
-		if (localizadores[i] == fd)
-			return i;
-	}
-	return -1;
-}
-
-/* 	
-	A pseudo-recvfrom() function implemented using ring buffers
-		Input:
-			- ringBuffer: the ring buffer that contains the information
-			- len: the size of the output buffer (for now matches the size of the ring buffer)
-			- flags: not used
-			- thread_number: an identifier of the thread. Used to index the array of thread variables
-		Output:
-			- buf: the application buffer to be populated. Within the 
-				DDS impl, the size of this buffer is MAX_RX_SIZE 
-			- from: sender of the packet
-			- fromlen: size of the sockaddr_in struct 
-		Returns:
-			Number of bytes received when successful and -1 when a problem arised.
-*/
-int ringBuffer_recvfrom(int fd, char *buf, size_t len, 
-		int flags, struct sockaddr *from, socklen_t *fromlen)
-{
-	// fetch ring buffer and thread number from the fd
-	int thread_number = get_threadnumber_fromfd(fd);
-	if (thread_number < 0){
-		printf("ERROR in ringBuffer recvfrom. fd=%d not found in localizadores\n", fd);
-		return -1;
-	}
-
-	ghpringbuf* ringBuffer = rbuf[thread_number];
-	// items available in the ring buffer
-	int nitems = ghpringbuf_count(ringBuffer);
-	lock_take(udp_poll_buffer_lock[thread_number]);
-	// buffer buf and the ringbuffers sizes are the same thereby no 
-	//   check with len is needed. If the implementation wants to be improved
-	// 	 it might be worthy considering this kind of aspects.
-	int i,ritems = 0;	
-	/*  copy and pop performed in two different steps due to the ring buffer implementation
-			if put together in the same loop it gets only 1 out of 2 chars
-	*/
-	for (i=0; i<nitems; i++){
-		ghpringbuf_at(ringBuffer, ringBuffer->iget + i, &(buf[i]));
-		ritems++;
-	}
-	for (i=0; i<nitems; i++){
-		ghpringbuf_pop(ringBuffer);
-	}
-	lock_release(udp_poll_buffer_lock[thread_number]);
-	from = &(client[thread_number]);
-	// TODO Review this call
-	fromlen = sizeof(struct sockaddr_in);
-	return ritems;
-}
-
-/*
-		This thread is part of a pseudo-polling UDP functionality implemented 
-		for NuttX using ring buffers (nuttx_upd_thread + nuttx_udp_poll ).
-		In a nutshell: this function is launched by a new thread that calls
-		in an infinite loop recvfrom (blocking call) and populates a ringbuffer.
-		The DDS implementation, when used with NuttX, uses ringBuffer_recvfrom
-		which reads the ringbuffer populated by this thread.
-
-		Both ringBuffer_recvfrom and this thread's code use locks to make sure
-		that the ring buffer is not accessed simultaneously. 
-*/
-static thread_result_t nuttx_udp_thread (void *arg)
-{	
-	unsigned char inbuf[RINGBUFFER_SIZE];
-	int nbytes;
-	socklen_t addrlen;
-	// current thread number (will be used to match with the right locator)	
-	int thread_number = *(int *)arg;
-
-	addrlen = sizeof(struct sockaddr_in);
-	// Init the ring buffers
-	rbuf[thread_number] = ghpringbuf_create(RINGBUFFER_SIZE, sizeof(char), 0, NULL);
-	// Init the locks for the ring buffers
-	lock_init_nr (udp_poll_buffer_lock[thread_number], "ringBuffer_lock");
-
-    for(;;){
-    	// blocking call
-	    nbytes = recvfrom(localizadores[thread_number], inbuf, RINGBUFFER_SIZE, 0,
-                        (struct sockaddr*)&(client[thread_number]), 
-                        &addrlen);
-	    lock_take(udp_poll_buffer_lock[thread_number]);
-	    ringBuffer_populate(rbuf[thread_number], inbuf, nbytes, thread_number);
-	    lock_release(udp_poll_buffer_lock[thread_number]);
-    }
-}
-
-/*
-	Check which of the udp polling threads have information in their ring buffers
-	and return a constructed   
-*/
-int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
-{
-	int total = 0;
-	int i;
-	/* 
-	The DDS implementatin places in postion 0 of fds the DDS_WakeUp file descriptor
-	thereby the indexing of the ring buffers should take this into account
-	*/
-	for (i=1; i< nfds; i++){
-		if (ghpringbuf_count(rbuf[i - 1])>0 && rbuf[i-1]) {
-			if (fds[i].fd == localizadores[i - 1]) {
-				fds[i].revents = 1;
-			}
-			else{
-				printf("Problem detected: fds variable and localizadores don't match\n");
-			}
-			total++;
-		}
-	}
-	return total;
-}
-#endif
 
 /*
 	UDP polling simulated using asynchronous I/O primitives   
@@ -725,7 +562,7 @@ int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
 	if (nlocators == NLOCATORS_NUTTX && flag_localizadores){
 	/* Launch lio_listio reads */
 		for (i=1; i< nfds; i++){
-			int res = aio_error(&a_read[i-1]);
+			int res = aio_error(wait_list[i-1]);
 			if (res == EINPROGRESS) {
 				continue;
 			} else {
@@ -764,9 +601,10 @@ int lio_recvfrom(int fd, char *buffer, size_t len,
 		int flags, struct sockaddr *from, socklen_t *fromlen)
 {
 	int pos = get_pos_fromfd(fd);	
-	int numBytes = aio_return(&a_read[pos]);
+	int numBytes = aio_return(wait_list[pos]);
 	if (numBytes < 0){
 		printf("Problem: aio_return returned %d\n", numBytes);
+		return -1;
 	}
 
 #if 1
@@ -948,10 +786,18 @@ int rtps_participant_create (Domain_t *dp)
 #endif
 	disc_start (dp);
 
-#if defined NUTTX_RTOS
 	/* Simulate udp polling using asynchronous pritimives */
+#if defined NUTTX_RTOS
+	/* Init localizadores */	
 	rtps_ip_get_fds(localizadores, NLOCATORS_NUTTX);
+	int nlocators = rtps_ip_get_nlocators();
+	int i;
+	/* Populate the buffers for the aio calls */
+	for	(i = 0; i<nlocators; i++){
+		buf[i] = (buf_p) malloc(BUFFER_SIZE);  
+	}
 	flag_localizadores = 1;	
+	/* start the aio operations */
 	lio_start_polling();
 #if 0
 	/* Simulate udp polling using threads and buffering */

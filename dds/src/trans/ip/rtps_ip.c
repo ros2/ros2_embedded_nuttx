@@ -1753,14 +1753,6 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 #else /* !USE_RECVMSG */
 #if defined NUTTX_RTOS
 	nread = lio_recvfrom(fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
-	printf("Received %d bytes bytes\n", nread);	
-	printf("---------- \n");
-	int i;
-	for (i= 0; i < nread; i++)
-	{
-	    printf("%02X", rtps_rx_buf[i]);
-	}
-	printf("\n");
 
 #else	
 	nread = recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
@@ -1780,6 +1772,18 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 		mds_pool_free (mhdr_pool, mp);
 		return;
 	}
+/* DEBUGGING purposes */
+#if 1
+	printf("Received %d bytes bytes\n", nread);	
+	printf("---------- \n");
+	int i;
+	for (i= 0; i < nread; i++)
+	{
+	    printf("%02X", rtps_rx_buf[i]);
+	}
+	printf("\n");
+#endif
+
 	if (!nread) {
 		cxp->stats.empty_read++;
 		mds_pool_free (mhdr_pool, mp);
