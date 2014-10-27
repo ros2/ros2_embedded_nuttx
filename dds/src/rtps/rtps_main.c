@@ -537,11 +537,12 @@ typedef struct pollfd pollfd;
 #define BUFFER_SIZE 1024*4
 
 sockaddr_in 		client[NLOCATORS_NUTTX];
-struct aiocb  				a_read[AIO_LISTIO_MAX];
-struct aiocb  				*wait_list[AIO_LISTIO_MAX];
+struct aiocb  				a_read[NLOCATORS_NUTTX];
+struct aiocb  				*wait_list[NLOCATORS_NUTTX];
 typedef char   		*buf_p;
 buf_p           	buf[BUFFER_SIZE];
 int   				localizadores[NLOCATORS_NUTTX];
+int 				flag_localizadores = 0;
 /* notify signal
 struct sigevent 	lio_sigevent = {0,0};
 */
@@ -720,19 +721,24 @@ int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
 	The DDS implementatin places in postion 0 of fds the DDS_WakeUp file descriptor
 	thereby the indexing of the ring buffers should take this into account
 	*/
-	for (i=1; i< nfds; i++){
-		int res = aio_error(&a_read[i-1]);
-		if (res == EINPROGRESS) {
-			if (fds[i].fd == localizadores[i - 1]) {
-				fds[i].revents = 1;
+	int nlocators = rtps_ip_get_nlocators();
+	if (nlocators == NLOCATORS_NUTTX && flag_localizadores){
+	/* Launch lio_listio reads */
+		for (i=1; i< nfds; i++){
+			int res = aio_error(&a_read[i-1]);
+			if (res == EINPROGRESS) {
+				continue;
+			} else {
+				if (fds[i].fd == localizadores[i - 1]) {
+					fds[i].revents = 1;
+				}
+				else{
+					printf("Problem detected: fds variable and localizadores don't match\n");
+				}
+				total++;
 			}
-			else{
-				printf("Problem detected: fds variable and localizadores don't match\n");
-			}
-			total++;
-		} else {
-			continue;
 		}
+	lio_start_polling();
 	}
 	return total;
 }
@@ -818,35 +824,44 @@ void lio_reset_polling(void){
 }
 #endif
 
+/*
+	This function initializes the structs needed by the asynchronous API
+	for I/O and sets up the calls. The function will periodically be called
+	every time the DDS code polls.
+
+	flag_localizadores makes sure that the locators within the DDS code have been initialized.
+*/
 void lio_start_polling(void){
 
 	/* Launch lio_listio reads */
 	int nlocators = rtps_ip_get_nlocators();
-	int i;
-	for (i = 0; i < (unsigned) nlocators; i++){
-			/* specify a read operation */
- 			a_read[i].aio_lio_opcode = LIO_READ;
- 			/* no need to raise a signal when completed (polling mechanism) */
- 			/* a_read[i].aio_sigevent.sigev_signo = 0 */
-            a_read[i].aio_sigevent.sigev_notify = SIGEV_NONE;
-            /* read up to BUFFER_SIZE */		
-			a_read[i].aio_nbytes = BUFFER_SIZE;
-			a_read[i].aio_buf = buf[i];
-			/* always read and store starting at the byte 0 of the buffer */
-			a_read[i].aio_offset = 0;
-			/* pass the corresponding file descriptor */
-			a_read[i].aio_fildes = localizadores[i];
-			
-			/* add the aiocb_t struct to the wait list */			 
-			wait_list[i] = &a_read[i]; 
-    }
+	if (nlocators == NLOCATORS_NUTTX && flag_localizadores){
+		int i;
+		for (i = 0; i < (unsigned) nlocators; i++){
+				/* specify a read operation */
+	 			a_read[i].aio_lio_opcode = LIO_READ;
+	 			/* no need to raise a signal when completed (polling mechanism) */
+	 			/* a_read[i].aio_sigevent.sigev_signo = 0 */
+	            a_read[i].aio_sigevent.sigev_notify = SIGEV_NONE;
+	            /* read up to BUFFER_SIZE */		
+				a_read[i].aio_nbytes = BUFFER_SIZE;
+				a_read[i].aio_buf = buf[i];
+				/* always read and store starting at the byte 0 of the buffer */
+				a_read[i].aio_offset = 0;
+				/* pass the corresponding file descriptor */
+				a_read[i].aio_fildes = localizadores[i];
+				
+				/* add the aiocb_t struct to the wait list */			 
+				wait_list[i] = &a_read[i]; 
+	    }
 
-    /* notify signal
-	ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, &lio_sigevent);
-	*/
-	int ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, NULL);
-	if (!ret) { 
-		printf("lio_listio error\n");
+	    /* notify signal
+		ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, &lio_sigevent);
+		*/
+		int ret = lio_listio(LIO_NOWAIT, wait_list, nlocators, NULL);
+		if (ret != 0) { 
+			printf("lio_listio error\n");
+		}
 	}
 }
 
@@ -935,7 +950,8 @@ int rtps_participant_create (Domain_t *dp)
 
 #if defined NUTTX_RTOS
 	/* Simulate udp polling using asynchronous pritimives */
-	rtps_ip_get_fds(localizadores, NLOCATORS_NUTTX);	
+	rtps_ip_get_fds(localizadores, NLOCATORS_NUTTX);
+	flag_localizadores = 1;	
 	lio_start_polling();
 #if 0
 	/* Simulate udp polling using threads and buffering */

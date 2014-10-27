@@ -1419,7 +1419,7 @@ int dds_init (void)
 	log_printf (DDS_ID, 0, "QoS pools initialized.\r\n");
 
 #if defined (NUTTX_RTOS)
-	/* Initialize threading support. */
+	/* Initialize threading support. */	
 #ifdef THREADS_USED
 	dds_init_threads ();
 #endif
