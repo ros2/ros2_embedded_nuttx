@@ -722,7 +722,7 @@ int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
 	*/
 	for (i=1; i< nfds; i++){
 		int res = aio_error(&a_read[i-1]);
-		if (res == 0) {
+		if (res == EINPROGRESS) {
 			if (fds[i].fd == localizadores[i - 1]) {
 				fds[i].revents = 1;
 			}
@@ -730,12 +730,9 @@ int nuttx_udp_poll(pollfd *fds, nfds_t nfds)
 				printf("Problem detected: fds variable and localizadores don't match\n");
 			}
 			total++;
-		} else if (res == EINPROGRESS){
+		} else {
 			continue;
 		}
-		else{
-			printf("Problem with asynchronous call: aio_error returned %d\n", res);
-		} 
 	}
 	return total;
 }
