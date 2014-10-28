@@ -70,7 +70,7 @@ typedef struct par_val_st {
 } ParVal_t;
 
 #if defined (NUTTX_RTOS)
-static ParVal_t common_pars [] __attribute__ ((section (".sram2"))) = {
+static ParVal_t common_pars [] = {
 	{ G_Common, DC_Name,        "NAME",        V_String, 1, NULL, {"Tinq ROS 2.0"}},
 	{ G_Common, DC_Environment, "ENVIRONMENT", V_Number, 1, NULL, {DDS_EE_C}},
 	{ G_Common, DC_PurgeDelay,  "PURGE_DELAY", V_Number, 1, NULL, {50}},
