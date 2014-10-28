@@ -544,14 +544,17 @@ sockaddr_in client[NLOCATORS_NUTTX];
 */
 void ringBuffer_populate(ghpringbuf *ringBuffer, char* content, int nbytes, int thread_number)
 {
-	int retval;
 	if (ghpringbuf_count(ringBuffer) == RINGBUFFER_SIZE){
 		printf("Ring buffer is full in thread %d (fd=%d)\n", 
 			thread_number, localizadores[thread_number]);
 		return;
 	}
+
+	int retval;
 	int i;
+	int buf_count = 0;
 	for (i=0; i < nbytes; i++){
+		buf_count = ghpringbuf_count(ringBuffer);
 		retval = ghpringbuf_put(ringBuffer, content++);
 		if (!retval){
 			printf("Ring buffer is full in thread %d (fd=%d)\n", 
@@ -620,7 +623,7 @@ int ringBuffer_recvfrom(int fd, char *buf, size_t len,
 			if put together in the same loop it gets only 1 out of 2 chars
 	*/
 	for (i=0; i<nitems; i++){
-		ghpringbuf_at(ringBuffer, ringBuffer->iget + i, &(buf[i]));
+		ghpringbuf_at(ringBuffer, i, &(buf[i]));
 		ritems++;
 	}
 	for (i=0; i<nitems; i++){
