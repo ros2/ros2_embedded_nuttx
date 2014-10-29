@@ -531,7 +531,7 @@ typedef struct sockaddr_in sockaddr_in;
 typedef struct pollfd pollfd;
 
 #define NLOCATORS_NUTTX 4
-#define RINGBUFFER_SIZE 1024
+#define RINGBUFFER_SIZE 1024*2
 thread_t nuttx_udp_poll_thread[NLOCATORS_NUTTX];
 static lock_t udp_poll_buffer_lock[NLOCATORS_NUTTX];
 int localizadores[NLOCATORS_NUTTX];
