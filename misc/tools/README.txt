@@ -198,7 +198,7 @@ http://uvc.de/posts/linux-kernel-configuration-tool-mconf-under-windows.html
 
 [The remainder of the text in this section is for historical interest only]
 
-From http://tech.groups.yahoo.com/group/nuttx/message/2900:
+From https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/2900:
 
 "The build was quite simple:
 
