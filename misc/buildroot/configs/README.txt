@@ -262,7 +262,7 @@ Q: Some of my libraries like GMP and MPFR are in non-standard locations the
      checking for correct version of mpfr.h... no
      configure: error: Building GCC requires GMP 4.1+ and MPFR 2.3.0+.
 
-A: http://tech.groups.yahoo.com/group/nuttx/message/1160
+A: https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/1160
 
    "I think that you can specify the path to GMP and MPFR. I think that GCC
     has some special configuration command line options to support this. I
@@ -361,7 +361,7 @@ Building GDB Under Cygwin
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
    This can be tricking, but it has been done.  See this message sequence for
-   http://tech.groups.yahoo.com/group/nuttx/message/726 .  Apparently there
+   https://groups.yahoo.com/neo/groups/nuttx/conversations/messages/726 .  Apparently there
    are some incompatibilities with Cygwin 1.7 that require an additional
    patch.  See http://old.nabble.com/-RFA--windows-nat.c%3A-Cygwin%3A-Port-to-Cygwin-1.7-td27735619.html
 
