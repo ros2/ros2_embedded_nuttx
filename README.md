@@ -20,6 +20,22 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
 - [File structure](#file-structure)
 - [Communication](#communication)
 
+ The prototype has been built in a modular way using the following blocks:
+
+```
+----------------------------------
+|               rcl               |
+----------------------------------
+|            DDS (Tinq)           |
+----------------------------------
+|          RTOS (NuttX)           |
+__________________________________
+
+|        Hardware (STM32F4)       |
+----------------------------------
+
+```
+
 ### Milestones
 
 - [x] Quick overview/understand fo the OMG DDS standart 
