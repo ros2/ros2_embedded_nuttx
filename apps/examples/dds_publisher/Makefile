@@ -39,7 +39,7 @@ include $(APPDIR)/Make.defs
 
 # DDS chat built-in application info
 
-APPNAME = dds_chat
+APPNAME = dds_publisher
 PRIORITY = SCHED_PRIORITY_DEFAULT
 #STACKSIZE = 2048
 STACKSIZE = 8192
@@ -52,7 +52,6 @@ ALT_STR =
 #ALT_NUM = 2
 #ALT_STR = -DALT2
 
-EXECUTABLE = chat${ALT_NUM}
 
 BASE       = ../../../dds/src
 
