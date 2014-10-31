@@ -60,6 +60,13 @@ The `TX`, `RX` and `GND` signals should be connected to `CN4` pins `36`, `35` an
 
 ![](misc/images/IMG_20141030_171934.jpg)
 
+To get a serial console type:
+```bash
+ sudo screen /dev/ttyUSB0 115200
+```
+
+(assuming that `/dev/ttyUSB0` is the new device that appears when connecting the USB to serial cable)
+
 ###Setting it up
 
 ##### Installing `menuconfig`
