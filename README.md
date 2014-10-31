@@ -17,6 +17,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [Rebasing NuttX](#Rebasing-nuttx)
     + [Memory inspection](#memory-inspection)
 - [Running in Linux](#running-in-linux)
+- [File structure](#file-structure)
 - [Communication](#communication)
 
 ### Milestones
@@ -92,6 +93,8 @@ cd nuttx/tools
 ```
 (alternatively if you work with the STM32F4Discovery board do a `./configure stm32f4discovery/dds
 `)
+
+This configurations selects `apps/examples/dds` DDS application.
 
 #####Building
 
@@ -206,6 +209,37 @@ echo "0" > /proc/sys/net/ipv4/conf/eth0/force_igmp_version
 
 ---
 
+
+### File structure
+
+```bash
+tree -L 1
+.
+├── apps
+├── dds
+├── misc
+├── nuttx
+├── NxWidgets
+├── rcl
+├── README.md
+├── ros2_embedded.sublime-project
+├── ros2_embedded.sublime-workspace
+├── ros2_embedded.tmLanguage
+├── stlink
+└── tools
+
+```
+
+- **apps**: NuttX applications. The subdirectory `examples` contains some of the DDS apps.
+- **dds**: Tinq's DDS implementation hacked to work with NuttX.
+- **misc**: Variety of things.
+- **nuttx**: The NuttX RTOS.
+- **NxWidgets**: a special graphical user interface.
+- **rcl**: ROS 2 Client Library (Ros Client Library) for embedded.
+- **README.md**: this file.
+- **ros2_embedded.\***: Sublime text configuration files.
+- **stlink**: a modified version of stlink compatible with the implementations.
+- **tools**: a set of useful tools for development.
 
 ### Communication
 - [development discussion](https://github.com/brunodebus/tinq-core/issues/7)
