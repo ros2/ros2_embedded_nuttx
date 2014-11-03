@@ -1,0 +1,7 @@
+ifeq ($(CONFIG_ROS_PUBLISHER),y)
+CONFIGURED_APPS += ros/publisher
+endif
+
+ifeq ($(CONFIG_ROS_SUBSCRIBER),y)
+CONFIGURED_APPS += ros/subscriber
+endif
