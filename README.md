@@ -19,12 +19,15 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
 - [Running in Linux](#running-in-linux)
 - [File structure](#file-structure)
 - [ROS Client Library](#ros-client-library)
+- [Applications](#applications)
 - [Communication](#communication)
 
 
  The prototype has been built in a modular way using the following blocks:
 
 ```
+----------------------------------
+|           application           |
 ----------------------------------
 |               rcl               |
 ----------------------------------
@@ -260,7 +263,7 @@ tree -L 1
 - **tools**: a set of useful tools for development.
 
 ### ROS Client Library
-The [ROS Client Library](rcl/README.md) (RCL) for embedded (implemented under the `rcl` directory) allows to code ROS applications using the ROS 2 API. Refer to [rcl.h](rcl/rcl.h) for a list of functions.
+The [ROS Client Library](rcl/README.md) (rcl) for embedded (implemented under the `rcl` directory) allows to code ROS applications using the ROS 2 API. Refer to [rcl.h](rcl/rcl.h) for a list of functions.
 
 A simple ROS publisher can be coded with:
 ```c
@@ -292,6 +295,9 @@ int ros_main(int argc, char *argv[])
 ```
 
 Refer to the [rcl/README.md](rcl/README.md) for further instructions on how to use the ROS 2 API to code applications.
+
+### Applications
+Applications are coded at `apps/ros`. Refer to `apps/ros/publisher` for an example.
 
 ### Communication
 - [development discussion](https://github.com/brunodebus/tinq-core/issues/7)
