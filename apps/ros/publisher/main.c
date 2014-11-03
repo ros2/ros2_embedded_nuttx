@@ -12,6 +12,11 @@ int ros_main(int argc, char *argv[])
 	/* Create a ROS node */
 	create_node();
 
+	/* Init the dynamic types 
+		TODO: abstract this code
+	*/
+	init_types();
+
 	/* Create a publisher
 		TODO: specify message types, topics, etc.
 	*/
@@ -20,6 +25,7 @@ int ros_main(int argc, char *argv[])
 	int i;
 	for (i=0; i<10; i++){
 		publish("Hola ROS 2, ¿como estás?");
+		printf("Hola ROS 2, ¿como estás %d?\n",i);
 	}
 
 }

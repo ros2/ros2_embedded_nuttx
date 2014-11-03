@@ -274,6 +274,11 @@ int ros_main(int argc, char *argv[])
     /* Create a ROS node */
     create_node();
 
+    /* Init the dynamic types 
+        TODO: abstract this code
+    */
+    init_types();
+
     /* Create a publisher
         TODO: specify message types, topics, etc.
     */
