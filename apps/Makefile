@@ -72,6 +72,7 @@ include netutils/Make.defs
 include nshlib/Make.defs
 include platform/Make.defs
 include system/Make.defs
+include ros/Make.defs
 -include external/Make.defs
 
 # INSTALLED_APPS is the list of currently available application directories.  It

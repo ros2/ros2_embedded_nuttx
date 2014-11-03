@@ -7,6 +7,10 @@ menu "Built-In Applications"
 source "$APPSDIR/builtin/Kconfig"
 endmenu
 
+menu "ROS applications"
+source "$APPSDIR/ros/Kconfig"
+endmenu
+
 menu "Examples"
 source "$APPSDIR/examples/Kconfig"
 endmenu
