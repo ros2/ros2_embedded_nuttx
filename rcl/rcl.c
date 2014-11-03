@@ -13,7 +13,14 @@
 #include "dds/dds_aux.h"
 #include "dds/dds_debug.h"
 
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <apps/netutils/netlib.h>
+
 #include "rcl.h"
+#include "aux/chat_msg.h"
+
+#define HISTORY		1	/* # of samples buffered. */
 
 DDS_DomainParticipant		part;
 DDS_DynamicTypeSupport		ts;
@@ -173,7 +180,7 @@ void delete_node(void)
 	if (verbose)
 		printf ("delete_node() DDS Entities deleted (error = %u).\r\n", error);
 
-	delete_types()
+	delete_types();	
 	if (verbose)
 		printf ("delete_node() types deleted.\r\n");	
 
