@@ -624,9 +624,10 @@ int ringBuffer_recvfrom(int fd, char *buf, size_t len,
 		ghpringbuf_pop(ringBuffer);
 	}
 	lock_release(udp_poll_buffer_lock[thread_number]);
-	from = &(client[thread_number]);
+	//*from = (struct sockaddr) (client[thread_number]);
+	memcpy(from, &client[thread_number], sizeof(client[thread_number]));
 	// TODO Review this call
-	fromlen = sizeof(struct sockaddr_in);
+	*fromlen = sizeof(struct sockaddr);
 	return ritems;
 }
 
@@ -658,7 +659,7 @@ static thread_result_t nuttx_udp_thread (void *arg)
     for(;;){
     	// blocking call
 	    nbytes = recvfrom(localizadores[thread_number], inbuf, RINGBUFFER_SIZE, 0,
-                        (struct sockaddr*)&(client[thread_number]), 
+                        (struct sockaddr_in*) &client[thread_number], 
                         &addrlen);
 	    lock_take(udp_poll_buffer_lock[thread_number]);
 	    ringBuffer_populate(rbuf[thread_number], inbuf, nbytes, thread_number);
