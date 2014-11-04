@@ -712,7 +712,8 @@ void sock_fd_poll (unsigned poll_time)
 	/*printf ("*"); fflush (stdout);*/
 #if defined (NUTTX_RTOS)	
 	// Pseudo-UDP polling
-	n_ready = nuttx_udp_poll(*fds, n);
+	//n_ready = nuttx_udp_poll(*fds, n);
+	n_ready = nuttx_udp_poll_noringbuffer(*fds, n);
 #else
 	n_ready = poll (*fds, n, poll_time);
 #endif
