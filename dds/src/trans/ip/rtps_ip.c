@@ -1752,7 +1752,8 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 #endif /* !_WIN32 */
 #else /* !USE_RECVMSG */
 #if defined NUTTX_RTOS
-	nread = ringBuffer_recvfrom(fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
+	//nread = ringBuffer_recvfrom(fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
+	nread = thread_recvfrom(fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
 #else	
 	nread = recvfrom (fd, (char *) rtps_rx_buf, MAX_RX_SIZE, 0, sa, &ssize);
 #endif
@@ -1772,7 +1773,7 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 		return;
 	}
 /* DEBUGGING purposes */
-#if 0
+#if 1
 	printf("Received %d bytes bytes\n", nread);	
 	printf("---------- \n");
 	int i;
