@@ -531,7 +531,7 @@ typedef struct sockaddr_in sockaddr_in;
 typedef struct pollfd pollfd;
 
 #define NLOCATORS_NUTTX 4
-#define RINGBUFFER_SIZE 1024*2
+#define BUFFER_SIZE 1024*2
 thread_t nuttx_udp_poll_thread[NLOCATORS_NUTTX];
 static lock_t udp_poll_buffer_lock[NLOCATORS_NUTTX];
 int localizadores[NLOCATORS_NUTTX];
@@ -564,7 +564,7 @@ void ringBuffer_populate(ghpringbuf *ringBuffer, char* content, int nbytes, int 
 */
 int ringBuffer_space(ghpringbuf *ringBuffer)
 {
-	return RINGBUFFER_SIZE - ghpringbuf_count(ringBuffer);
+	return BUFFER_SIZE - ghpringbuf_count(ringBuffer);
 }
 
 /*
@@ -682,23 +682,23 @@ int thread_recvfrom(int fd, char *buf, size_t len,
 */
 static thread_result_t nuttx_udp_thread (void *arg)
 {	
-	unsigned char inbuf[RINGBUFFER_SIZE];
+	unsigned char inbuf[BUFFER_SIZE];
 	int nbytes;
 	socklen_t addrlen;
 	// current thread number (will be used to match with the right locator)	
 	int thread_number = *(int *)arg;
 
-	threads_buf[thread_number] = malloc(sizeof(char[RINGBUFFER_SIZE]));
+	threads_buf[thread_number] = malloc(sizeof(char[BUFFER_SIZE]));
 
 	addrlen = sizeof(struct sockaddr_in);
 	// Init the ring buffers
-	rbuf[thread_number] = ghpringbuf_create(RINGBUFFER_SIZE, sizeof(char), 0, NULL);
+	rbuf[thread_number] = ghpringbuf_create(BUFFER_SIZE, sizeof(char), 0, NULL);
 	// Init the locks for the ring buffers
 	lock_init_nr (udp_poll_buffer_lock[thread_number], "ringBuffer_lock");
 
     for(;;){
     	// blocking call
-	    nbytes = recvfrom(localizadores[thread_number], inbuf, RINGBUFFER_SIZE, 0,
+	    nbytes = recvfrom(localizadores[thread_number], inbuf, BUFFER_SIZE, 0,
                         (struct sockaddr_in*) &client[thread_number], 
                         &addrlen);
 	    lock_take(udp_poll_buffer_lock[thread_number]);
