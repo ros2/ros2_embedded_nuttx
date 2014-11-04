@@ -158,6 +158,22 @@ void publish(char* text_to_publish)
 	ChatMsg_write (dw, &m, h);
 }
 
+void create_subscriber(char* topic_name)
+{
+
+}
+
+void take(void)
+{
+
+}
+
+void wait(bool non_blocking)
+{
+
+}
+
+
 /*
 	Deletes the DataWritter
 */
