@@ -113,7 +113,7 @@ static void* recv_server(void *arg)
   /* Then receive up to 256 packets of data */
   for (;;)
     {
-      printf("server: %d. Receiving up 1024 bytes in port: %d\n", offset, PORTNO + thread_number);
+      //printf("server: %d. Receiving up 1024 bytes in port: %d\n", offset, PORTNO + thread_number);
       addrlen = sizeof(struct sockaddr_in);
       nbytes = recvfrom(sockfd, inbuf, 1024, 0,
                         (struct sockaddr*)&client, &addrlen);
@@ -127,21 +127,22 @@ static void* recv_server(void *arg)
 
       tmpaddr = ntohl(client.sin_addr.s_addr);
       printf("server: %d. Received %d bytes from %d.%d.%d.%d:%d\n",
-             offset, nbytes,
+             thread_number, nbytes,
              tmpaddr >> 24, (tmpaddr >> 16) & 0xff,
              (tmpaddr >> 8) & 0xff, tmpaddr & 0xff,
              ntohs(client.sin_port));
       
-      /* Print the content received  */
+      /* Print the content received  
       printf("Content (hex):\n");
       int i;
       for (i = 0; i<nbytes; i++){
         printf(" %2x", inbuf[i]);
       }
       printf("\n");
+     */
       printf("Content:\n");
       printf("%s\n", inbuf);
-
+     
     }
   close(sockfd);
   printf("Finishing thread %d\n", thread_number);
