@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_UDPSIMPLE_MULTITHREAD
+	bool "UDP Simple Multihread"
+	default n
+	---help---
+		Enable the \"UDP simple Multithread\" example
+
+if EXAMPLES_UDPSIMPLE_MULTITHREAD
+
+config UDP_IPADDR
+        hex "Target IP address"
+        default 0xc0a80003
+
+config UDP_DRIPADDR
+        hex "Target default router address (Gateway)"
+        default 0xc0a80002
+
+config UDP_NETMASK
+        hex "Network mask"
+        default 0xffffff00
+
+
+endif # EXAMPLES_UDPSIMPLE
+
