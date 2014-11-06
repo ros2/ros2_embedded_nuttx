@@ -12,6 +12,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [Selecting a configuration](#selecting-a-configuration)
     + [Building](#building)
     + [Programming](#programming)
+    + [Serial console](#serial-console)
     + [Modifying NuttX](#modifying-nuttx)
     + [Debugging](#debugging)
     + [Rebasing NuttX](#Rebasing-nuttx)
@@ -179,6 +180,17 @@ xPSR: 0x61000000 pc: 0x2000002e msp: 0x2000ce18
 verified 646286 bytes in 5.552209s (113.673 KiB/s)
 make: [program] Error 1 (ignored)
 ```
+
+##### Serial console
+Using picocom:
+```bash
+picocom /dev/ttyUSB0 -b 115200
+```
+Using screen:
+```bash
+screen /dev/ttyUSB0 115200
+```
+The advantage of using picocom is that you can scroll while screen does not offer that option by default.
 
 ##### Modifying NuttX
 To program the board:
