@@ -692,7 +692,7 @@ static thread_result_t nuttx_udp_thread (void *arg)
 
 	addrlen = sizeof(struct sockaddr_in);
 	// Init the ring buffers
-	rbuf[thread_number] = ghpringbuf_create(BUFFER_SIZE, sizeof(char), 0, NULL);
+	// rbuf[thread_number] = ghpringbuf_create(BUFFER_SIZE, sizeof(char), 0, NULL);
 	// Init the locks for the ring buffers
 	lock_init_nr (udp_poll_buffer_lock[thread_number], "ringBuffer_lock");
 
