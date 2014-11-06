@@ -337,3 +337,7 @@ endif
 ifeq ($(CONFIG_EXAMPLES_UDPSIMPLE_MULTITHREAD),y)
 CONFIGURED_APPS += examples/udp_multithread
 endif
+
+ifeq ($(CONFIG_EXAMPLES_UDPSIMPLE_MULTITHREAD_MCAST),y)
+CONFIGURED_APPS += examples/udp_multithread_mcast
+endif
