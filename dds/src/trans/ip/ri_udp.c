@@ -511,7 +511,28 @@ void rtps_udp_send (unsigned id, Locator_t *first, LocatorList_t *next, RMBUF *m
 			}
 			else {
 				lflags = (lp->flags & ~LOCF_MCAST) | LOCF_UCAST;
+
+/*  
+Fix the multicas issue with NuttX
+
+There are actually two modes of multicast: 
+ - the first just sends multicasts via the udp_send sockets and uses the default multicast
+  	forwarding of the OS kernel. This mode was used initially, but it turns out that relying
+  	on the OS to do proper multicast routing was not really working in a lot of cases, 
+  	especially if multiple Ethernet interfaces were present.
+
+ - the mechanism was changed and tried to be a bit more clever by manually sending the multicast 
+ 	on all meta receive locators that have the SRC_MCAST attribute (see the output of 'scx'), 
+ 	all interfaces by default. So they will actually be used in the latter case in a bidirectional 
+ 	manner.
+
+ Since NuttX does not support bidirectional sockets concurrently working the following option is added.
+*/
+#ifdef UDP_OS_MCAST				
+				ucp = NULL;
+#else
 				ucp = rtps_src_mcast_next (id, lp->kind, lflags, NULL);
+#endif
 				if (!ucp) {
 					ucp = send_any_cx;
 					slist = 0;
