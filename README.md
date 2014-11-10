@@ -9,6 +9,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [STM3240G-eval](#stm3240g-eval)
 - [Setting it up](#setting-it-up)
     + [Installing menuconfig](#installing-menuconfig)
+    + [Installing the code](#installing-the-code)
     + [Selecting a configuration](#selecting-a-configuration)
     + [Building](#building)
     + [Programming](#programming)
@@ -122,11 +123,25 @@ sudo make install
 sudo /sbin/ldconfig -v
 ```
 
+##### Installing the code
+```bash
+git clone https://github.com/ros2/ros2_embedded_nuttx
+cd ros2_embedded_nuttx
+rmdir stlink
+git clone https://github.com/ros2/stlink
+cd stlink
+./autogen.sh
+./configure
+make
+cd ..
+```
+
 ##### Selecting a configuration
 For Tinq the one you need to use is:
 ```bash
 cd nuttx/tools
 ./configure stm3240g-eval/dds
+cd ..
 ```
 (alternatively if you work with the STM32F4Discovery board do a `./configure stm32f4discovery/dds
 `)
