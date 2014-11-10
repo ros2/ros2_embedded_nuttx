@@ -35,3 +35,18 @@ ChangeLog
   REMOVAL PATCH:
     misc/Obsoleted/Patches/Remove-16z-2014-9-5.patch
 
+2014-11-10:  Removed support for the stm32f100rc_generic board configuration
+
+  REASON
+    This support was obsoleted because of a decision to stop support of
+    generic board configurations. Generic board configurations do not
+    provide support for any specific hardware but can be useful only if
+    there are not other examples for the setup for a particular
+    architecture.
+
+  NEW HOME:
+   misc/Obsoleted/configs/stm32f100rc_generic
+
+  REMOVAL PATCH
+    misc/Obsoleted/Patches/Remove-stm32f100rc_generic-2014-11-10.patch
+ 
