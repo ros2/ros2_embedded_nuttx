@@ -16,7 +16,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [Serial console](#serial-console)
     + [Modifying NuttX](#modifying-nuttx)
     + [Debugging](#debugging)
-    + [Rebasing NuttX](#Rebasing-nuttx)
+    + [Rebasing NuttX](#rebasing-nuttx)
     + [Memory inspection](#memory-inspection)
 - [Running in Linux](#running-in-linux)
 - [File structure](#file-structure)
