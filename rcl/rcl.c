@@ -158,19 +158,30 @@ void publish(char* text_to_publish)
 	ChatMsg_write (dw, &m, h);
 }
 
+/*
+	Create subscriber to a topic
+*/
 void create_subscriber(char* topic_name)
 {
-
+	/* TODO */
 }
 
+/*
+	Takes the last message from the topic subscribed
+*/
 void take(void)
 {
-
+	/* TODO */
 }
 
+/*
+	Waits for a topic to have available packages
+	and returns which one of those listening topics
+	have available packages
+*/
 void wait(bool non_blocking)
 {
-
+	/* TODO */
 }
 
 
