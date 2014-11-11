@@ -1773,7 +1773,7 @@ void rtps_ip_rx_fd (SOCKET fd, short revents, void *arg)
 		return;
 	}
 /* DEBUGGING purposes */
-#if 1
+#if 0
 	printf("Received %d bytes bytes\n", nread);	
 	printf("---------- \n");
 	int i;
