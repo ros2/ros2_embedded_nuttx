@@ -72,10 +72,10 @@ __________________________________
 - [x] Code small enough to fit in RAM and ROM (112 KB and 1 MB respectively)
 - [x] DDS chat application running
 - [x] DDS Debug Shell available
-- [ ] Tinq-embedded <-> Tinq Desktop interoperability (DDS embedded - DDS Desktop)
-- [ ] Tinq-embedded <-> OpenSplice Desktop interoperability 
+- [x] Tinq-embedded <-> Tinq Desktop interoperability (DDS embedded - DDS Desktop)
 - [ ] RCL construction
-- [ ] Real Time assessment
+- [ ] ROS 2.0 Embedded <-> ROS 2.0 Desktop (OpenSplice)
+- [ ] ROSIMU demo
 - [ ] Hardware frontier
 
 
