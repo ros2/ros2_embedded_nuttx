@@ -9,7 +9,7 @@ void publish(char* text_to_publish);
 
 void create_subscriber(char* topic_name);
 void take(void);
-void wait(bool non_blocking);
+void wait(int non_blocking);
 
 void delete_publisher(void);
 void delete_node(void);

@@ -6,6 +6,8 @@
 
 int ros_main(int argc, char *argv[])
 {
+	char buf[256];
+
 	/* Init the ROS Client Library */
 	rcl_init();
 	
@@ -23,9 +25,10 @@ int ros_main(int argc, char *argv[])
 	create_publisher();
 
 	int i;
-	for (i=0; i<10; i++){
-		publish("Hola ROS 2, ¿como estás?");
-		printf("Hola ROS 2, ¿como estás %d?\n",i);
+	for (;;){
+		sprintf(buf, "Hola ROS 2, ¿como estás %d?\n", i++);	
+		publish(buf);
+		printf(buf);
 	}
 
 }

@@ -179,7 +179,7 @@ void take(void)
 	and returns which one of those listening topics
 	have available packages
 */
-void wait(bool non_blocking)
+void wait(int non_blocking)
 {
 	/* TODO */
 }
