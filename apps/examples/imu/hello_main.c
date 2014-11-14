@@ -48,10 +48,18 @@ int main(int argc, FAR char *argv[])
 int imu_main(int argc, char *argv[])
 #endif
 {
-  printf("Hello, IMU!!\n");
-  get_who_am_i();
-  print_config();
+  // printf("Hello, IMU!!\n");
+  // get_who_am_i();
+  // print_config();
   setup();
+  print_config();
+
+  int i;
+  for (i=0; i<1000; i++){
+  	sleep(0.5);
+  	read_accel_x();
+  }
+
   print_config();
   return 0;
 }
