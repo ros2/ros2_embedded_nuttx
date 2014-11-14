@@ -80,7 +80,7 @@ INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
 			-I../../../dds/plugins/security/ -I${NSECP}/ \
 			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
 			-I${NUTTX_HEADERS} -I${NUTTX_HEADERS}/nuttx/net -I${NUTTX_BASE}/net -I${TRANS}/ringbuffer \
-			-I${NUTTX_HEADERS}/netinet
+			-I${NUTTX_HEADERS}/netinet -I.
 #-I/usr/include/libxml2 
 
 LIB_PATH =
@@ -162,7 +162,7 @@ ASRCS = $(NUTTX_BASE)/arch/arm/src/arm/setjmp.S
 
 # Application .c files
 #CSRCS =
-CSRCS = chat_msg.c 
+CSRCS = chat_msg.c lis302dlh.c 
 
 # The Tinq DDS sources
 TINQ_SCRCS =  ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \

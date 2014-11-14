@@ -4,7 +4,7 @@
 #
 
 config EXAMPLES_DDSIMU
-	bool "DDS IMU example using an LSM303DLHC"
+	bool "DDS IMU example using an lis302dlh"
 	default n
 	---help---
 		Enable the EXAMPLES_DDSIMU

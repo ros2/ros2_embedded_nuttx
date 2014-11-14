@@ -36,6 +36,9 @@
 #endif
 #include "dds/dds_aux.h"
 #include "dds/dds_debug.h"
+#include <stdio.h>
+ #include <stdint.h>
+#include "lis302dlh.h"
 
 #define	WAITSETS		/* Set this to use the WaitSet mechanism. */
 /*#define TRANSIENT_LOCAL	** Set to use Transient-local Durability. */
@@ -363,7 +366,9 @@ char			buf_t [256];
 
 void fetch_imu(void)
 {
-	sprintf(buf_t, "Embedded says hi\n");
+	uint16_t accx = read_accel_x();
+	sprintf(buf_t, "acc_x: %d", accx);
+	// sprintf(buf_t, "Embedded says hi\n");
 }
 
 static void *dds_send_imu (void *args)
@@ -371,11 +376,15 @@ static void *dds_send_imu (void *args)
 	ChatMsg_t				m;
 	DDS_InstanceHandle_t	h;
 
+	// Init I2C and print registers
+  	setup_i2c();
+  	print_config_i2c();		
+
 	m.chatroom = chatroom;
 	m.from = user_name;
 	h = 0;
 	for (;;){
-		sleep (0.5); // sleep 0.5 seconds
+		usleep (500); // sleep 0.5 seconds
 		if (!h)
 			h = ChatMsg_register (dw, &m);
 		//sprintf(buf_t, "Embedded says %s\n", buf);
