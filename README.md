@@ -73,10 +73,7 @@ __________________________________
 - [x] DDS chat application running
 - [x] DDS Debug Shell available
 - [x] Tinq-embedded <-> Tinq Desktop interoperability (DDS embedded - DDS Desktop)
-- [ ] DDSIMU demo
-- [ ] RCL construction
-- [ ] ROS 2.0 Embedded <-> ROS 2.0 Desktop (OpenSplice)
-- [ ] ROSIMU demo
+- [x] DDSIMU demo
 - [ ] Hardware frontier
 
 
