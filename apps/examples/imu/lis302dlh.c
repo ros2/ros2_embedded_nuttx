@@ -41,18 +41,17 @@ int write_register(uint8_t reg_val, uint8_t value)
 {
   int result;
   uint8_t reg_aux;
+  uint8_t data[2];
 
-  result = I2C_WRITE(i2c, &reg_val, 1);
+  data[0] = reg_val;
+  data[1] = value;
+  result = I2C_WRITE(i2c, data, 2);
   if (result < 0) {
     printf("Error Writing. Terminating\n");
     return 1;
   }
-  result = I2C_WRITE(i2c, &value, 1);
-  if (result < 0) {
-    printf("Error Writing. Terminating\n");
-    return 1;
-  }
-  printf("writting 0x%02x (%d) in register 0x%02x\n", value, value, reg_val);
+
+  //printf("writting 0x%02x (%d) in register 0x%02x\n", value, value, reg_val);
   return 0;
 }
 
