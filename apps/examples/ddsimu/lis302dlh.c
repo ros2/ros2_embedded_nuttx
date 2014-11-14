@@ -137,7 +137,7 @@ int setup_i2c(void)
   i2c = i2c_init(I2C_PORT, FREQUENCY, ACCEL_ADDR, ADDRESS_BITS);
   
   // temp = (uint8_t)((1 << LIS302_PM0) | (1 << LIS302_Zen) | (1 << LIS302_Yen) | (1 << LIS302_Xen)); /* All axes, full data rate */
-  temp = 0x7B;
+  temp = 0x7F; /* All axes, full data rate, power on */
   write_register(LIS302_CTRL_REG1, temp);
 
   temp = (uint8_t)(0);
@@ -155,6 +155,32 @@ uint16_t read_accel_x(void)
 
   result[0] = read_register(LIS302_OUT_X_L); 
   result[1] = read_register(LIS302_OUT_X_H); 
+
+  uint16_t accel_val = ((uint16_t)result[1] << 8) | result[0];
+  // printf("Accelerometer x value = 0x%02x (%d)\n", accel_val, accel_val);
+  return accel_val;  
+}
+
+uint16_t read_accel_y(void)
+{
+  uint8_t result[2];
+  uint16_t temp;
+
+  result[0] = read_register(LIS302_OUT_Y_L); 
+  result[1] = read_register(LIS302_OUT_Y_H); 
+
+  uint16_t accel_val = ((uint16_t)result[1] << 8) | result[0];
+  // printf("Accelerometer x value = 0x%02x (%d)\n", accel_val, accel_val);
+  return accel_val;  
+}
+
+uint16_t read_accel_z(void)
+{
+  uint8_t result[2];
+  uint16_t temp;
+
+  result[0] = read_register(LIS302_OUT_Z_L); 
+  result[1] = read_register(LIS302_OUT_Z_H); 
 
   uint16_t accel_val = ((uint16_t)result[1] << 8) | result[0];
   // printf("Accelerometer x value = 0x%02x (%d)\n", accel_val, accel_val);

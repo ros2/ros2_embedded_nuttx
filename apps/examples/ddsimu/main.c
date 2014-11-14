@@ -367,7 +367,10 @@ char			buf_t [256];
 void fetch_imu(void)
 {
 	uint16_t accx = read_accel_x();
-	sprintf(buf_t, "acc_x: %d", accx);
+	uint16_t accy = read_accel_y();
+	uint16_t accz = read_accel_z();
+
+	sprintf(buf_t, "acc_x: %d, acc_y: %d, acc_z: %d", accx, accy, accz);
 	// sprintf(buf_t, "Embedded says hi\n");
 }
 
