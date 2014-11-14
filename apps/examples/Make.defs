@@ -78,6 +78,10 @@ ifeq ($(CONFIG_EXAMPLES_DDS_PUBLISHER),y)
 CONFIGURED_APPS += examples/dds_publisher
 endif
 
+ifeq ($(CONFIG_EXAMPLES_DDSIMU),y)
+CONFIGURED_APPS += examples/ddsimu
+endif
+
 ifeq ($(CONFIG_EXAMPLES_DISCOVER),y)
 CONFIGURED_APPS += examples/discover
 endif
@@ -344,4 +348,8 @@ endif
 
 ifeq ($(CONFIG_EXAMPLES_UDPSIMPLE_MULTITHREAD_MCAST),y)
 CONFIGURED_APPS += examples/udp_multithread_mcast
+endif
+
+ifeq ($(CONFIG_EXAMPLES_IMU),y)
+CONFIGURED_APPS += examples/imu
 endif
