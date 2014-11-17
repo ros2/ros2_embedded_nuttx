@@ -479,6 +479,78 @@ static void proxy_dump (const char *cmd)
 	rtps_proxy_dump (ep);
 }
 
+#if defined (NUTTX_RTOS)
+#include <nuttx/config.h>
+#include <nuttx/progmem.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void free_getprogmeminfo(struct mallinfo * mem)
+{
+  size_t page = 0, stpage = 0xFFFF;
+  size_t pagesize = 0;
+  ssize_t status;
+
+  mem->arena    = 0;
+  mem->fordblks = 0;
+  mem->uordblks = 0;
+  mem->mxordblk = 0;
+
+  for (status=0, page=0; status >= 0; page++)
+    {
+      status = up_progmem_ispageerased(page);
+      pagesize = up_progmem_pagesize(page);
+
+      mem->arena += pagesize;
+
+      /* Is this beginning of new free space section */
+
+      if (status == 0)
+        {
+          if (stpage == 0xFFFF) stpage = page;
+          mem->fordblks += pagesize;
+        }
+      else if (status != 0)
+        {
+          mem->uordblks += pagesize;
+
+          if (stpage != 0xFFFF && up_progmem_isuniform())
+            {
+              stpage = page - stpage;
+              if (stpage > mem->mxordblk)
+                {
+                  mem->mxordblk = stpage;
+                }
+              stpage = 0xFFFF;
+            }
+        }
+    }
+
+  mem->mxordblk *= pagesize;
+}
+
+static void sram_dump (const char *cmd)
+{
+  struct mallinfo data;
+  struct mallinfo prog;
+
+#ifdef CONFIG_CAN_PASS_STRUCTS
+  data = mallinfo();
+#else
+  (void)mallinfo(&data);
+#endif
+
+  free_getprogmeminfo(&prog);
+
+  printf("              total       used       free    largest\n");
+  printf("Data:   %11d%11d%11d%11d\n",
+         data.arena, data.uordblks, data.fordblks, data.mxordblk);
+  printf("Prog:   %11d%11d%11d%11d\n",
+         prog.arena, prog.uordblks, prog.fordblks, prog.mxordblk);
+}
+
+#endif
+
 static void proxy_restart (const char *cmd)
 {
 	Endpoint_t	*ep;
@@ -1246,6 +1318,10 @@ void debug_command (const char *buf)
 		debug_pool_dump (1);
 	else if (!strncmp (cmd, "spool", 3))
 		debug_pool_dump (0);
+#if defined (NUTTX_RTOS)
+	else if (!strncmp (cmd, "sram", 3))
+		sram_dump (0);
+#endif	
 #ifdef RTPS_USED
 	else if (!strncmp (cmd, "scxq", 4))
 		rtps_ip_dump_queued ();
