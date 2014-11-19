@@ -11,7 +11,7 @@ ALT_STR =
 #ALT_NUM = 2
 #ALT_STR = -DALT2
 
-EXECUTABLE = chat${ALT_NUM}
+EXECUTABLE = publisher${ALT_NUM}
 
 BASE       = ../../src
 
@@ -81,7 +81,7 @@ sql_CSRCS  = ${SQL}/scan.c ${SQL}/parse.c ${SQL}/bytecode.c
 #dynip_CSRCS= ${DYNIP}/di_main.c ${DYNIP}/di_linux.c
 dbg_CSRCS  = ${DBG}/debug.c
 
-prog_CSRCS = imu.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
+prog_CSRCS = imu_publisher.c chat_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
              ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${dynip_CSRCS} ${co_CSRCS} \
 	     ${sec_CSRCS} ${splug_CSRCS}
 
@@ -89,7 +89,7 @@ prog_CSRCS = imu.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
 prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../api/headers/dds/*.h
+prog_CHDRS = ${BASE}/include/*.h ../../api/headers/dds/*.h chat_msg.h
 
 prog_OBJS  = ${prog_COBJS}
 
@@ -101,9 +101,7 @@ ${EXECUTABLE}:	${prog_OBJS}
 
 CC       = gcc
 
-INC_PATH = -I${BASE}/include -I../../api/headers -I/usr/include/libxml2 -I../../plugins/security/ \
-			-I${NSECP}/ -I../../../qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
-			-I.
+INC_PATH = -I${BASE}/include -I../../api/headers -I/usr/include/libxml2 -I../../plugins/security/ -I${NSECP}/ -I../../../qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/
 #LIB_PATH =
 LIB_PATH = -L../../../qeo-c-import/openssl/output/install/usr/local/lib
 LIBS     = 
