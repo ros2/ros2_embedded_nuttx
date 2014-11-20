@@ -11,9 +11,8 @@ ALT_STR =
 #ALT_NUM = 2
 #ALT_STR = -DALT2
 
-#EXECUTABLE = publisher${ALT_NUM}
-EXECUTABLE = publisher
-
+#EXECUTABLE = subscriber${ALT_NUM}
+EXECUTABLE = subscriber
 
 BASE       = ../../src
 
@@ -83,7 +82,7 @@ sql_CSRCS  = ${SQL}/scan.c ${SQL}/parse.c ${SQL}/bytecode.c
 #dynip_CSRCS= ${DYNIP}/di_main.c ${DYNIP}/di_linux.c
 dbg_CSRCS  = ${DBG}/debug.c
 
-prog_CSRCS = imu_publisher.c vector3_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
+prog_CSRCS = imu_subscriber.c vector3_msg.c ${dds_CSRCS} ${type_CSRCS} ${dcps_CSRCS} ${disc_CSRCS} \
              ${cache_CSRCS} ${dbg_CSRCS} ${sql_CSRCS} ${dynip_CSRCS} ${co_CSRCS} \
 	     ${sec_CSRCS} ${splug_CSRCS}
 

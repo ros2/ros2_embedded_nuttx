@@ -1,0 +1,26 @@
+
+
+module simple_msgs
+{
+
+module dds_
+{
+
+
+
+
+struct Vector3_
+{
+
+  double x_;
+  double y_;
+  double z_;
+
+};  // struct Vector3_
+
+//#pragma keylist Vector3_
+
+};  // module dds_
+
+};  // module simple_msgs
+

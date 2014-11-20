@@ -160,17 +160,14 @@ static void *dds_send_imu (void *args)
 {
 	Vector3_t				m;
 	DDS_InstanceHandle_t	h;
-	int 					i = 0;
 
 	h = 0;
-
 	for (;;){
 		sleep (1); // sleep 0.5 seconds
 		//sprintf(buf_t, "Embedded says %s\n", buf);
-		m.x_ = 1 + i;
-		m.y_ = 2 + i;
-		m.z_ = 3 + i;
-		i++;
+		m.x_ = 1;
+		m.y_ = 2;
+		m.z_ = 3;
 #if 0
 		/* According to https://github.com/brunodebus/tinq-core/issues/7#issuecomment-63740498:
 			the Vector3 shouldn't be registered if it doesn't contain a @key attribute
@@ -199,8 +196,7 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 	if (ret == DDS_RETCODE_OK)
 		do {
 #if 0
-/*  
-	Use a from field within the message to avoid to read the messages that this
+/*  Use a from field within the message to avoid to read the messages that this
 	node sent.
 */
 #ifndef DISPLAY_SELF
@@ -483,7 +479,8 @@ int main (int argc, const char **argv)
 #endif
 
 	// publisher thread
-	thread_create (rt2, dds_send_imu, dr);	
+	//thread_create (rt2, dds_send_imu, dr);	
+
 	// DDS Debug shell thread
 	do_dds_shell (dw);
 
