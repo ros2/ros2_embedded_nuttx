@@ -388,15 +388,15 @@ int main (int argc, const char **argv)
 		printf ("Can't create vector3 message type!\r\n");
 		exit (1);
 	}
-	error = DDS_DynamicTypeSupport_register_type (ts, part, "Vector3");
+	error = DDS_DynamicTypeSupport_register_type (ts, part, "simple_msgs::dds_::Vector3_");
 	if (error) {
 		printf ("Can't register vector3 message type.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Topic type ('%s') registered.\r\n", "Vector3");
+		printf ("DDS Topic type ('%s') registered.\r\n", "simple_msgs::dds_::Vector3_");
 
-	topic = DDS_DomainParticipant_create_topic (part, "imu_topic", "Vector3", NULL, NULL, 0);
+	topic = DDS_DomainParticipant_create_topic (part, "imu", "simple_msgs::dds_::Vector3_", NULL, NULL, 0);
 	if (!topic) {
 		printf ("Can't register vector3 message type.\r\n");
 		exit (1);
@@ -404,7 +404,7 @@ int main (int argc, const char **argv)
 	if (verbose)
 		printf ("DDS Vector3 Topic created.\r\n");
 
-	td = DDS_DomainParticipant_lookup_topicdescription (part, "imu_topic");
+	td = DDS_DomainParticipant_lookup_topicdescription (part, "imu");
 	if (!td) {
 		printf ("Can't get topicdescription.\r\n");
 		exit (1);
