@@ -39,7 +39,7 @@
 #include "dds/dds_dwriter.h"
 #include "dds/dds_dreader.h"
 
-#include "chat_msg.h"
+#include "vector3_msg.h"
 
 #define	WAITSETS		/* Set this to use the WaitSet mechanism. */
 /*#define TRANSIENT_LOCAL	** Set to use Transient-local Durability. */
@@ -74,7 +74,7 @@ DDS_DynamicDataReader	dr;
 
 void do_dds_shell (DDS_DataWriter dw)
 {
-	ChatMsg_t		m;
+	Vector3_t		m;
 	DDS_InstanceHandle_t	h;
 	char			buf [256];
 
@@ -88,10 +88,10 @@ void do_dds_shell (DDS_DataWriter dw)
 	printf ("Welcome to the Technicolor chatroom.\r\n");
 	printf ("Anything you type will be sent to all chatroom attendees.\r\n");
 	printf ("Type '!help' for chatroom options.\r\n");
-#endif
-
 	m.chatroom = chatroom;
 	m.from = user_name;
+#endif
+
 	h = 0;
 	while (!aborting) {
 		tty_gets (sizeof (buf), buf, 0, 1);
@@ -105,28 +105,17 @@ void do_dds_shell (DDS_DataWriter dw)
 				printf ("Attendees:\r\n\t%s\r\n", user_name);
 			else if (!memcmp (buf + 1, "user", 4)) {
 				if (h) {
-					ChatMsg_signal (dw, h, 1);
+					Vector3_signal (dw, h, 1);
 					h = 0;
 				}
 				strcpy (user_name, buf + 6);
 				printf ("You are now: %s\r\n", user_name);
 			}
-			else if (!memcmp (buf + 1, "room", 4)) {
-				if (h) {
-					ChatMsg_signal (dw, h, 1);
-					h = 0;
-				}
-				strcpy (chatroom, buf + 6);
-				printf ("Switched to chatroom: %s\r\n", chatroom);
-			}
-			else if (!strcmp (buf + 1, "info"))
-				printf ("Chatroom: %s, Username: %s\r\n", 
-							chatroom, user_name);
 			else if (!strcmp (buf + 1, "busy"))
-				ChatMsg_signal (dw, h, 0);
+				Vector3_signal (dw, h, 0);
 			else if (!strcmp (buf + 1, "away")) {
 				if (h) {
-					ChatMsg_signal (dw, h, 1);
+					Vector3_signal (dw, h, 1);
 					h = 0;
 				}
 			}
@@ -134,10 +123,7 @@ void do_dds_shell (DDS_DataWriter dw)
 				 (buf [1] == 'h' && buf [2] == '\0') ||
 				 (buf [1] == '?' && buf [2] == '\0')) {
 				printf ("Commands:\r\n");
-				printf ("    !room <room_name>   -> set the chatroom name.\r\n");
-				printf ("    !user <user_name>   -> set the user name.\r\n");
 				printf ("    !list               -> list the attendees.\r\n");
-				printf ("    !info               -> show chatroom and user.\r\n");
 				printf ("    !busy               -> momentarily not involved.\r\n");
 				printf ("    !away               -> gone away.\r\n");
 				printf ("    !help or !h or !?   -> Show this info.\r\n");
@@ -155,15 +141,12 @@ void do_dds_shell (DDS_DataWriter dw)
 		} else {
 #if 0			
 			if (!h)
-				h = ChatMsg_register (dw, &m);
+				h = Vector3_register (dw, &m);
 			m.message = buf;
-			ChatMsg_write (dw, &m, h);			
+			Vector3_write (dw, &m, h);			
 #endif
 			printf ("Commands:\r\n");
-			printf ("    !room <room_name>   -> set the chatroom name.\r\n");
-			printf ("    !user <user_name>   -> set the user name.\r\n");
 			printf ("    !list               -> list the attendees.\r\n");
-			printf ("    !info               -> show chatroom and user.\r\n");
 			printf ("    !busy               -> momentarily not involved.\r\n");
 			printf ("    !away               -> gone away.\r\n");
 			printf ("    !help or !h or !?   -> Show this info.\r\n");
@@ -175,25 +158,25 @@ void do_dds_shell (DDS_DataWriter dw)
 
 static void *dds_send_imu (void *args)
 {
-	ChatMsg_t				m;
+	Vector3_t				m;
 	DDS_InstanceHandle_t	h;
 
-	m.chatroom = chatroom;
-	m.from = user_name;
 	h = 0;
 	for (;;){
 		sleep (1); // sleep 0.5 seconds
-		if (!h)
-			h = ChatMsg_register (dw, &m);
 		//sprintf(buf_t, "Embedded says %s\n", buf);
-		m.message = "IMU message";
-		ChatMsg_write (dw, &m, h);
+		m.x_ = 1;
+		m.y_ = 2;
+		m.z_ = 3;
+		if (!h)
+			h = Vector3_register (dw, &m);
+		Vector3_write (dw, &m, h);
 	}
 }
 
 void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 {
-	ChatMsg_t		msg;
+	Vector3_t		msg;
 	DDS_InstanceStateKind	kind;
 	int			valid;
 	DDS_ReturnCode_t	ret;
@@ -201,32 +184,34 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 	ARG_NOT_USED (l)
 
 	memset (&msg, 0, sizeof (msg));
-	ret = ChatMsg_read_or_take (dr, &msg, DDS_NOT_READ_SAMPLE_STATE, 
+	ret = Vector3_read_or_take (dr, &msg, DDS_NOT_READ_SAMPLE_STATE, 
 					      DDS_ANY_VIEW_STATE,
 					      DDS_ANY_INSTANCE_STATE, 1,
 					      &valid, &kind);
 	if (ret == DDS_RETCODE_OK)
 		do {
+#if 0
 #ifndef DISPLAY_SELF
 			if (!strcmp (msg.from, user_name) &&
 			    !strcmp (msg.chatroom, chatroom))
 				break;
 #endif
+#endif
 			if (valid)
-				printf ("%s: %s\r\n", msg.from, msg.message);
+				printf ("IMU accel message: x=%f, y=%f and z=%d\r\n", msg.x_, msg.y_, msg.z_);
 			else if (kind == DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE)
-				printf ("%s is busy!\r\n", msg.from);
+				printf ("DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE!\r\n");
 			else if (kind == DDS_NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-				printf ("%s has left!\r\n", msg.from);
+				printf ("DDS_NOT_ALIVE_NO_WRITERS_INSTANCE_STATE!\r\n");
 		}
 		while (0);
 
-	ChatMsg_cleanup (&msg);
+	Vector3_cleanup (&msg);
 }
 
 #ifdef WAITSETS
 
-static void *chat_reader (void *args)
+static void *imu_reader (void *args)
 {
 	DDS_DynamicDataReader	dr;
 	DDS_WaitSet		ws;
@@ -276,12 +261,12 @@ static void *chat_reader (void *args)
 	return (NULL);
 }
 
-static void start_chat_reader (DDS_DynamicDataReader dr)
+static void start_imu_reader (DDS_DynamicDataReader dr)
 {
-	thread_create (rt, chat_reader, dr);
+	thread_create (rt, imu_reader, dr);
 }
 
-static void stop_chat_reader (DDS_DynamicDataReader dr)
+static void stop_imu_reader (DDS_DynamicDataReader dr)
 {
 	ARG_NOT_USED (dr)
 
@@ -386,28 +371,28 @@ int main (int argc, const char **argv)
 	if (verbose)
 		printf ("DDS Domain Participant created.\r\n");
 
-	ts = ChatMsg_type_new ();
+	ts = Vector3_type_new ();
 	if (!ts) {
-		printf ("Can't create chat message type!\r\n");
+		printf ("Can't create vector3 message type!\r\n");
 		exit (1);
 	}
-	error = DDS_DynamicTypeSupport_register_type (ts, part, "ChatMsg");
+	error = DDS_DynamicTypeSupport_register_type (ts, part, "Vector3");
 	if (error) {
-		printf ("Can't register chat message type.\r\n");
+		printf ("Can't register vector3 message type.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Topic type ('%s') registered.\r\n", "ChatMsg");
+		printf ("DDS Topic type ('%s') registered.\r\n", "Vector3");
 
-	topic = DDS_DomainParticipant_create_topic (part, "Chat", "ChatMsg", NULL, NULL, 0);
+	topic = DDS_DomainParticipant_create_topic (part, "imu_topic", "Vector3", NULL, NULL, 0);
 	if (!topic) {
-		printf ("Can't register chat message type.\r\n");
+		printf ("Can't register vector3 message type.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS ChatMsg Topic created.\r\n");
+		printf ("DDS Vector3 Topic created.\r\n");
 
-	td = DDS_DomainParticipant_lookup_topicdescription (part, "Chat");
+	td = DDS_DomainParticipant_lookup_topicdescription (part, "imu_topic");
 	if (!td) {
 		printf ("Can't get topicdescription.\r\n");
 		exit (1);
@@ -437,11 +422,11 @@ int main (int argc, const char **argv)
 	/* Create a Data Writer. */
 	dw = DDS_Publisher_create_datawriter (pub, topic, &wr_qos, NULL, 0);
 	if (!dw) {
-		printf ("Unable to create chat message writer.\r\n");
+		printf ("Unable to create vector3 message writer.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Chat message writer created.\r\n");
+		printf ("DDS Vector3 message writer created.\r\n");
 
 	sub = DDS_DomainParticipant_create_subscriber (part, NULL, NULL, 0); 
 	if (!sub) {
@@ -479,10 +464,10 @@ int main (int argc, const char **argv)
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Chat message reader created.\r\n");
+		printf ("DDS Vector message reader created.\r\n");
 
 #ifdef WAITSETS
-	start_chat_reader (dr);
+	start_imu_reader (dr);
 #endif
 
 	// publisher thread
@@ -491,7 +476,7 @@ int main (int argc, const char **argv)
 	do_dds_shell (dw);
 
 #ifdef WAITSETS
-	stop_chat_reader (dr);
+	stop_imu_reader (dr);
 #endif
 	DDS_Publisher_delete_datawriter (pub, dw);
 	usleep (200000);
@@ -499,9 +484,9 @@ int main (int argc, const char **argv)
 	if (verbose)
 		printf ("DDS Entities deleted (error = %u).\r\n", error);
 
-	ChatMsg_type_free (ts);
+	Vector3_type_free (ts);
 	if (verbose)
-		printf ("Chat Type deleted.\r\n");
+		printf ("Vector3 Type deleted.\r\n");
 
 	error = DDS_DomainParticipantFactory_delete_participant (part);
 	if (verbose)
