@@ -353,3 +353,11 @@ endif
 ifeq ($(CONFIG_EXAMPLES_IMU),y)
 CONFIGURED_APPS += examples/imu
 endif
+
+ifeq ($(CONFIG_EXAMPLES_IMUSUBSCRIBER),y)
+CONFIGURED_APPS += examples/imu_subscriber
+endif
+
+ifeq ($(CONFIG_EXAMPLES_IMUPUBLISHER),y)
+CONFIGURED_APPS += examples/imu_publisher
+endif

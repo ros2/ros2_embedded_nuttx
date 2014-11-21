@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_IMUPUBLISHER
+	bool "DDS IMU publisher"
+	default n
+	---help---
+		Enable the EXAMPLES_IMUPUBLISHER
+
+if EXAMPLES_IMUPUBLISHER
+
+config EXAMPLES_UDP_IPADDR
+	hex "Target IP address"
+	default 0xc0a80003
+
+config EXAMPLES_UDP_DRIPADDR
+	hex "Target default router address (Gateway)"
+	default 0xc0a80002
+
+config EXAMPLES_UDP_NETMASK
+	hex "Network mask"
+	default 0xffffff00
+
+
+endif # EXAMPLES_UDP
