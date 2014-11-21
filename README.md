@@ -74,7 +74,7 @@ __________________________________
 - [x] DDS Debug Shell available
 - [x] Tinq-embedded <-> Tinq Desktop interoperability (DDS embedded - DDS Desktop)
 - [x] DDSIMU demo (Tinq Desktop to Tinq Embedded using the same DDS type)
-- [ ] Tinq Desktop <-> OpenSplice Desktop interoperability
+- [~] Tinq Desktop <-> OpenSplice Desktop interoperability 
 - [ ] Tinq Embedded <-> OpenSplice Desktop interoperability
 - [ ] DDSIMU demo using a ROS message
 - [ ] rcl embedded
