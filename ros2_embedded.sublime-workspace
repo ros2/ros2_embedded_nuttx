@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"angul",
+				"angular_velocity_covariance"
+			],
+			[
+				"orie",
+				"orientation_covariance"
+			],
+			[
+				"li",
+				"linear_acceleration_covariance"
+			],
+			[
 				"vect",
 				"vector3"
 			],
@@ -163,7 +175,7 @@
 			"file": "README.md",
 			"settings":
 			{
-				"buffer_size": 10562,
+				"buffer_size": 10563,
 				"line_ending": "Unix"
 			}
 		},
@@ -200,37 +212,34 @@
 			}
 		},
 		{
-			"contents": "/*\n * Copyright (c) 2014 - Qeo LLC\n *\n * The source code form of this Qeo Open Source Project component is subject\n * to the terms of the Clear BSD license.\n *\n * You can redistribute it and/or modify it under the terms of the Clear BSD\n * License (http://directory.fsf.org/wiki/License:ClearBSD). See LICENSE file\n * for more details.\n *\n * The Qeo Open Source Project also includes third party Open Source Software.\n * See LICENSE file for more details.\n */\n\n#include <nuttx/config.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <ctype.h>\n#include <unistd.h>\n#include <poll.h>\n#include \"thread.h\"\n#include \"libx.h\"\n#include \"tty.h\"\n#ifdef DDS_SECURITY\n#include \"dds/dds_security.h\"\n#ifdef DDS_NATIVE_SECURITY\n#include \"nsecplug/nsecplug.h\"\n#else\n#include \"msecplug/msecplug.h\"\n#include \"assert.h\"\n#include \"../../plugins/secplug/xmlparse.h\"\n#endif\n#include \"../../plugins/security/engine_fs.h\"\n#endif\n#include \"dds/dds_aux.h\"\n#include \"dds/dds_debug.h\"\n#include <stdio.h>\n #include <stdint.h>\n \n#include \"lis302dlh.h\"\n//#include \"chat_msg.h\"\n#include \"vector3_msg.h\" \n\n#define	WAITSETS		/* Set this to use the WaitSet mechanism. */\n/*#define TRANSIENT_LOCAL	** Set to use Transient-local Durability. */\n/*#define RELIABLE		** Set this for Reliable transfers. */\n/*#define KEEP_ALL		** Set this for infinite history. */\n#define HISTORY		1	/* # of samples buffered. */\n#define	DISPLAY_SELF		/* Define this to display own messages. */\n\nconst char		*progname;\nchar			chatroom [64] = \"DDS\";		/* Chatroom name. */\nchar			user_name [64];			/* User name. */\nunsigned		domain_id;			/* Domain identifier. */\nint			verbose, aborting;\nthread_t		rt;\nthread_t		rt2;\n#ifdef DDS_SECURITY\nchar                    *engine_id;		/* Engine id. */\nchar                    *cert_path;		/* Certificates path. */\nchar                    *key_path;		/* Private key path. */\nchar                    *realm_name;		/* Realm name. */\n#endif\n\nDDS_DomainParticipant	part;\nDDS_DynamicTypeSupport	ts;\nDDS_Publisher		pub;\nDDS_Subscriber		sub;\nDDS_Topic		topic;\nDDS_TopicDescription	td;\nDDS_DynamicDataWriter	dw;\nDDS_DynamicDataReader	dr;\n\n/* usage -- Print out program usage. */\n\nvoid usage (void)\n{\n	fprintf (stderr, \"chat -- simple non-graphical chat demo program.\\r\\n\");\n	fprintf (stderr, \"Usage: chat [switches]\\r\\n\");\n	fprintf (stderr, \"\\r\\n\");\n	fprintf (stderr, \"Switches:\\r\\n\");\n	fprintf (stderr, \"   -r <chatroom>     Chatroom name (default=DDS).\\r\\n\");\n	fprintf (stderr, \"   -u <name>         User name (default=.pid.$PID).\\r\\n\");\n	fprintf (stderr, \"   -i <domain_id>    Domain identifier.\\r\\n\");\n#ifdef DDS_SECURITY\n	fprintf (stderr, \"   -e <name>         Pass the name of the engine.\\r\\n\");\n	fprintf (stderr, \"   -c <path>         Path of the certificate to use.\\r\\n\");\n	fprintf (stderr, \"   -k <path>         Path of the private key to use.\\r\\n\");\n	fprintf (stderr, \"   -z <realm>        The realm name.\\r\\n\");\n#endif\n	fprintf (stderr, \"   -v                Verbose.\\r\\n\");\n	fprintf (stderr, \"   -vv               Very verbose.\\r\\n\");\n	fprintf (stderr, \"   -h                Show some program help.\\r\\n\");\n	exit (1);\n}\n\n/* get_num -- Get a number from the command line arguments. */\n\nint get_num (const char **cpp, unsigned *num, unsigned min, unsigned max)\n{\n	const char	*cp = *cpp;\n\n	while (isspace (*cp))\n		cp++;\n	if (*cp < '0' || *cp > '9')\n		return (0);\n\n	*num = (unsigned) atoi (cp);\n	if (*num < min || *num > max)\n		return (0);\n\n	while (*cp)\n		cp++;\n\n	*cpp = cp;\n	return (1);\n}\n\n/* get_str -- Get a string from the command line arguments. */\n\nint get_str (const char **cpp, const char **name)\n{\n	const char	*cp = *cpp;\n\n	while (isspace (*cp))\n		cp++;\n\n	*name = cp;\n	while (*cp)\n		cp++;\n\n	*cpp = cp;\n	return (1);\n}\n\n#define	INC_ARG()	if (!*cp) { i++; cp = argv [i]; }\n\n/* do_switches -- Command line switch decoder. */\n\nint do_switches (int argc, const char **argv)\n{\n	int		i;\n	const char	*cp, *user, *room;\n#ifdef DDS_SECURITY\n	const char      *arg_input;\n#endif\n	progname = argv [0];\n	for (i = 1; i < argc; i++) {\n		cp = argv [i];\n		if (*cp++ != '-')\n			break;\n\n		while (*cp) {\n			switch (*cp++) {\n				case 'r':\n					INC_ARG ();\n					if (!get_str (&cp, &room)) {\n						printf (\"chatroom name expected!\\r\\n\");\n						usage ();\n					}\n					memcpy (chatroom, room, strlen (room) + 1);\n					break;\n\n				case 'u':\n					INC_ARG ();\n					if (!get_str (&cp, &user)) {\n						printf (\"user name expected!\\r\\n\");\n						usage ();\n					}\n					memcpy (user_name, user, strlen (user) + 1);\n					break;\n				case 'i':\n					INC_ARG ();\n					get_num (&cp, &domain_id, 0, 255);\n					break;\n# if 0\n				case 't':\n					trace = 1;\n					break;\n# endif\n#ifdef DDS_SECURITY\n			        case 'e':\n					INC_ARG ()\n					if (!get_str (&cp, &arg_input))\n						usage ();\n					engine_id = malloc (strlen (arg_input) + 1);\n					strcpy (engine_id, arg_input);\n					break;\n			        case 'c':\n					INC_ARG ()\n					if (!get_str (&cp, &arg_input))\n						usage ();\n					cert_path = malloc (strlen (arg_input) + 1);\n					strcpy (cert_path, arg_input);\n					break;\n			        case 'k':\n					INC_ARG ()\n					if (!get_str (&cp, &arg_input))\n						usage ();\n					key_path = malloc (strlen (arg_input) + 1);\n					strcpy (key_path, arg_input);\n\n					break;\n			        case 'z':\n					INC_ARG ()\n					if (!get_str (&cp, &arg_input))\n						usage ();\n					realm_name = malloc (strlen (arg_input) + 1);\n					strcpy (realm_name, arg_input);\n					break;\n#endif\n				case 'v':\n					verbose = 1;\n					if (*cp == 'v') {\n						verbose = 2;\n						cp++;\n					}\n					break;\n				default:\n					usage ();\n				break;\n			}\n		}\n	}\n	return (i);\n}\n\nvoid do_dds (DDS_DataWriter dw)\n{\n	Vector3_t		m;\n	DDS_InstanceHandle_t	h;\n	char			buf [256];\n\n\n#if !defined (NUTTX_RTOS)\n	tty_init ();\n	DDS_Handle_attach (tty_stdin,\n			   POLLIN | POLLPRI | POLLERR | POLLHUP | POLLNVAL,\n			   tty_input,\n			   NULL);\n#endif\n#if 0\n	printf (\"ROS 2 Embedded DDSIMU test program.\\r\\n\");\n	printf (\"Anything you type will be sent to all chatroom attendees.\\r\\n\");\n	printf (\"      (Please write messages of less than 255 characters).\\r\\n\");	\n	printf (\"Type '!help' for chatroom options.\\r\\n\");\n	m.chatroom = chatroom;\n	m.from = user_name;\n#endif\n	h = 0;\n	while (!aborting) {\n#if defined (NUTTX_RTOS)\n		/* Take into account that fgets reads the \"\\n\" character at the end\n		of each line. Code should consider this aspect in every case */\n		fgets(buf, 256, stdin);\n#else\n		tty_gets (sizeof (buf), buf, 0, 1);\n#endif\n		if (buf [0] == '!') {\n#if defined (NUTTX_RTOS)						\n			if (!strcmp (buf + 1, \"quit\\n\") ||\n			    (buf [1] == 'q' && buf [2] == '\\n')) {\n#else\n			if (!strcmp (buf + 1, \"quit\") ||\n			    (buf [1] == 'q' && buf [2] == '\\0')) {				\n#endif\n				aborting = 1;\n				break;\n			}\n#if defined (NUTTX_RTOS)						\n			else if (!strcmp (buf + 1, \"list\\n\"))\n#else\n			else if (!strcmp (buf + 1, \"list\"))\n#endif			\n				printf (\"Attendees:\\r\\n\\t%s\\r\\n\", user_name);\n#if defined (NUTTX_RTOS)						\n			else if (!memcmp (buf + 1, \"user\\n\", 4)) {\n#else\n			else if (!memcmp (buf + 1, \"user\", 4)) {\n#endif			\n				if (h) {\n					Vector3_signal (dw, h, 1);\n					h = 0;\n				}\n				strcpy (user_name, buf + 6);\n				printf (\"You are now: %s\\r\\n\", user_name);\n			}\n#if defined (NUTTX_RTOS)						\n			else if (!memcmp (buf + 1, \"room\\n\", 4)) {\n#else\n			else if (!memcmp (buf + 1, \"room\", 4)) {\n#endif						\n				if (h) {\n					Vector3_signal (dw, h, 1);\n					h = 0;\n				}\n				strcpy (chatroom, buf + 6);\n				printf (\"Switched to chatroom: %s\\r\\n\", chatroom);\n			}\n#if defined (NUTTX_RTOS)						\n			else if (!strcmp (buf + 1, \"info\\n\"))\n#else\n			else if (!strcmp (buf + 1, \"info\"))\n#endif			\n				printf (\"Chatroom: %s, Username: %s\\r\\n\", \n							chatroom, user_name);\n#if defined (NUTTX_RTOS)						\n			else if (!strcmp (buf + 1, \"busy\\n\"))\n#else\n			else if (!strcmp (buf + 1, \"busy\"))\n#endif			\n				Vector3_signal (dw, h, 0);\n#if defined (NUTTX_RTOS)						\n			else if (!strcmp (buf + 1, \"away\\n\")) {\n#else\n			else if (!strcmp (buf + 1, \"away\")) {\n#endif			\n				if (h) {\n					Vector3_signal (dw, h, 1);\n					h = 0;\n				}\n			}\n#if defined (NUTTX_RTOS)			\n			else if (!strcmp (buf + 1, \"help\\n\") ||\n				 (buf [1] == 'h' && buf [2] == '\\n\\0') ||\n				 (buf [1] == '?' && buf [2] == '\\n\\0')) {\n\n#else\n			else if (!strcmp (buf + 1, \"help\") ||\n				 (buf [1] == 'h' && buf [2] == '\\0') ||\n				 (buf [1] == '?' && buf [2] == '\\0')) {\n#endif\n				printf (\"Commands:\\r\\n\");\n				printf (\"    !room <room_name>   -> set the chatroom name.\\r\\n\");\n				printf (\"    !user <user_name>   -> set the user name.\\r\\n\");\n				printf (\"    !list               -> list the attendees.\\r\\n\");\n				printf (\"    !info               -> show chatroom and user.\\r\\n\");\n				printf (\"    !busy               -> momentarily not involved.\\r\\n\");\n				printf (\"    !away               -> gone away.\\r\\n\");\n				printf (\"    !help or !h or !?   -> Show this info.\\r\\n\");\n				printf (\"    !quit or !q         -> Quit the chatroom.\\r\\n\");\n				printf (\"    !!<command>         -> DDS debug command.\\r\\n\");\n				/* printf (\"    !$<command>         -> Shell command.\\r\\n\"); */\n			}			\n			else if (buf [1] == '!')\n				DDS_Debug_command (buf + 2);\n			/* else if (buf [1] == '$')\n				system (buf + 2); */\n			else\n				printf (\"?%s\\r\\n\", buf + 1);\n			continue;\n		} else {\n			printf(\"Writing to the other endpoints not allowed.\\n\");\n#if 0\n			if (!h)\n				h = Vector3_register (dw, &m);\n			//sprintf(buf_t, \"Embedded says %s\\n\", buf);\n			fetch_imu();\n			//m.message = buf_t;\n			m.message = buf;\n			Vector3_write (dw, &m, h);\n#endif\n		}\n	}\n}\n\n//char			buf_t [256];\nuint16_t accx;\nuint16_t accy = read_accel_y();\nuint16_t accz = read_accel_z();\n\nvoid fetch_imu(void)\n{\n	uint16_t accx = read_accel_x();\n	uint16_t accy = read_accel_y();\n	uint16_t accz = read_accel_z();\n\n	sprintf(buf_t, \"acc_x: %d, acc_y: %d, acc_z: %d\", accx, accy, accz);\n	// sprintf(buf_t, \"Embedded says hi\\n\");\n}\n\nstatic void *dds_send_imu (void *args)\n{\n	Vector3_t				m;\n	DDS_InstanceHandle_t	h;\n\n	// Init I2C and print registers\n  	setup_i2c();\n  	print_config_i2c();		\n\n	m.chatroom = chatroom;\n	m.from = user_name;\n	h = 0;\n	for (;;){\n		sleep (1); // sleep 0.5 seconds\n		//sprintf(buf_t, \"Embedded says %s\\n\", buf);\n		//sprintf(buf_t, \"Embedded says %s\\n\", buf);\n		m.x_ = 1 + i;\n		m.y_ = 2 + i;\n		m.z_ = 3 + i;\n		i++;\n#if 0\n		/* According to https://github.com/brunodebus/tinq-core/issues/7#issuecomment-63740498:\n			the Vector3 shouldn't be registered if it doesn't contain a @key attribute\n		*/		\n		if (!h)\n			h = Vector3_register (dw, &m);\n#endif\n		Vector3_write (dw, &m, h);\n	}\n}\n\nvoid read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)\n{\n	Vector3_t		msg;\n	DDS_InstanceStateKind	kind;\n	int			valid;\n	DDS_ReturnCode_t	ret;\n\n	ARG_NOT_USED (l)\n\n	memset (&msg, 0, sizeof (msg));\n	ret = Vector3_read_or_take (dr, &msg, DDS_NOT_READ_SAMPLE_STATE, \n					      DDS_ANY_VIEW_STATE,\n					      DDS_ANY_INSTANCE_STATE, 1,\n					      &valid, &kind);\n	if (ret == DDS_RETCODE_OK)\n		do {\n#ifndef DISPLAY_SELF\n			if (!strcmp (msg.from, user_name) &&\n			    !strcmp (msg.chatroom, chatroom))\n				break;\n#endif\n			if (valid)\n				printf (\"%s: %s\\r\\n\", msg.from, msg.message);\n			else if (kind == DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE)\n				printf (\"%s is busy!\\r\\n\", msg.from);\n			else if (kind == DDS_NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)\n				printf (\"%s has left!\\r\\n\", msg.from);\n		}\n		while (0);\n\n	Vector3_cleanup (&msg);\n}\n\n#ifdef WAITSETS\n\nstatic void *chat_reader (void *args)\n{\n	DDS_DynamicDataReader	dr;\n	DDS_WaitSet		ws;\n	DDS_SampleStateMask	ss = DDS_NOT_READ_SAMPLE_STATE;\n	DDS_ViewStateMask	vs = DDS_ANY_VIEW_STATE;\n	DDS_InstanceStateMask	is = DDS_ANY_INSTANCE_STATE;\n	DDS_ReadCondition	rc;\n	DDS_ConditionSeq	conds = DDS_SEQ_INITIALIZER (DDS_Condition);\n	DDS_Duration_t		to;\n	DDS_ReturnCode_t	ret;\n\n	dr = args;\n\n	ws = DDS_WaitSet__alloc ();\n	if (!ws)\n		fatal (\"Unable to allocate a WaitSet!\");\n\n	if (verbose)\n		printf (\"DDS Waitset allocated.\\r\\n\");\n\n	rc = DDS_DataReader_create_readcondition (dr, ss, vs, is);\n	if (!rc)\n		fatal (\"DDS_DataReader_create_readcondition () returned an error!\");\n\n	if (verbose)\n		printf (\"DDS Readcondition created.\\r\\n\");\n\n	ret = DDS_WaitSet_attach_condition (ws, rc);\n	if (ret)\n		fatal (\"Unable to attach condition to a WaitSet!\");\n\n	while (!aborting) {\n		to.sec = 0;\n		to.nanosec = 200000000;	/* Timeout after 200ms. */\n		ret = DDS_WaitSet_wait (ws, &conds, &to);\n		if (ret == DDS_RETCODE_TIMEOUT)\n			continue;\n\n		read_msg (NULL, dr);\n	}\n	ret = DDS_WaitSet_detach_condition (ws, rc);\n	if (ret)\n		fatal (\"Unable to detach condition from WaitSet (%s)!\", DDS_error (ret));\n\n	DDS_WaitSet__free (ws);\n\n	return (NULL);\n}\n\nstatic void start_chat_reader (DDS_DynamicDataReader dr)\n{\n	thread_create (rt, chat_reader, dr);\n}\n\nstatic void stop_chat_reader (DDS_DynamicDataReader dr)\n{\n	ARG_NOT_USED (dr)\n\n	thread_wait (rt, NULL);\n}\n\n#else\n\nstatic DDS_DataReaderListener msg_listener = {\n	NULL,		/* Sample rejected. */\n	NULL,		/* Liveliness changed. */\n	NULL,		/* Requested Deadline missed. */\n	NULL,		/* Requested incompatible QoS. */\n	read_msg,	/* Data available. */\n	NULL,		/* Subscription matched. */\n	NULL,		/* Sample lost. */\n	NULL		/* Cookie */\n};\n\n#endif\n#ifdef DDS_SECURITY\n\n#define fail_unless     assert\n\nstatic void enable_security (void)\n{\n	DDS_Credentials		credentials;\n	DDS_ReturnCode_t	error;\n#ifdef MSECPLUG_WITH_SECXML\n	/*int dhandle, thandle;*/\n#endif\n	error = DDS_SP_set_policy ();\n	if (error)\n		fatal (\"DDS_SP_set_policy() returned error (%s)!\", DDS_error (error));\n\n#ifdef MSECPLUG_WITH_SECXML\n	if (DDS_SP_parse_xml (\"security.xml\"))\n		fatal (\"SP: no DDS security rules in 'security.xml'!\\r\\n\");\n#else\n	DDS_SP_add_domain();\n	if (!realm_name)\n		DDS_SP_add_participant ();\n	else \n		DDS_SP_set_participant_access (DDS_SP_add_participant (), strcat(realm_name, \"*\"), 2, 0);\n#endif\n	if (!cert_path || !key_path)\n		fatal (\"Error: you must provide a valid certificate path and a valid private key path\\r\\n\");\n\n	if (engine_id) {\n		DDS_SP_init_engine (engine_id, init_engine_fs);\n		credentials.credentialKind = DDS_ENGINE_BASED;\n		credentials.info.engine.engine_id = engine_id;\n		credentials.info.engine.cert_id = cert_path;\n		credentials.info.engine.priv_key_id = key_path;\n	}\n	else {\n		credentials.credentialKind = DDS_FILE_BASED;\n		credentials.info.filenames.private_key_file = key_path;\n		credentials.info.filenames.certificate_chain_file = cert_path;\n	}\n\n	error = DDS_Security_set_credentials (\"Technicolor Chatroom\", &credentials);\n}\n\nstatic void cleanup_security (void)\n{\n	/* Cleanup security submodule. */\n	DDS_SP_access_db_cleanup ();\n	DDS_SP_engine_cleanup ();\n\n	/* Cleanup malloc-ed memory. */\n	if (engine_id)\n		free (engine_id);\n	if (cert_path)\n		free (cert_path);\n	if (key_path)\n		free (key_path);\n	if (realm_name)\n		free (realm_name);\n}\n\n#endif\n\n\n#if defined (NUTTX_RTOS)\n#include <arpa/inet.h>\n#include <netinet/in.h>\n#include <apps/netutils/netlib.h>\n#endif\n\n#ifdef CONFIG_BUILD_KERNEL\nint main(int argc, FAR char *argv[])\n#else\nint dds_chat_main(int argc, char *argv[])\n#endif\n{\n	DDS_DataWriterQos 	wr_qos;\n	DDS_DataReaderQos	rd_qos;\n	DDS_ReturnCode_t	error;	\n	struct in_addr addr;\n\n	/* Configure the network */\n	/* Set up our host address */\n	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_IPADDR);\n	netlib_sethostaddr(\"eth0\", &addr);\n\n	/* Set up the default router address */\n	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_DRIPADDR);\n	netlib_setdraddr(\"eth0\", &addr);\n\n	/* Setup the subnet mask */\n	addr.s_addr = HTONL(CONFIG_EXAMPLES_UDP_NETMASK);\n	netlib_setnetmask(\"eth0\", &addr);\n\n  	/* Start the application */\n  	printf(\"Network configured, starting DDS chat:\\n\");\n\n	sprintf (user_name, \".pid.%u\", getpid ());\n	do_switches (argc, argv);\n	if (verbose > 1)\n		DDS_Log_stdio (1);\n\n	//DDS_entity_name (\"ROS 2.0 embedded\");\n	DDS_entity_name (\"Technicolor Chatroom\");\n\n#ifdef DDS_SECURITY\n	if (cert_path || key_path || engine_id)\n		enable_security ();\n#endif\n	part = DDS_DomainParticipantFactory_create_participant (domain_id, NULL, NULL, 0);\n	if (!part) {\n		printf (\"Can't create participant!\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS Domain Participant created.\\r\\n\");\n\n	ts = Vector3_type_new ();\n	if (!ts) {\n		printf (\"Can't create chat message type!\\r\\n\");\n		exit (1);\n	}\n	error = DDS_DynamicTypeSupport_register_type (ts, part, \"simple_msgs::dds_::Vector3_\");\n	if (error) {\n		printf (\"Can't register chat message type.\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS Topic type ('%s') registered.\\r\\n\", \"simple_msgs::dds_::Vector3_\");\n\n	topic = DDS_DomainParticipant_create_topic (part, \"imu\", \"simple_msgs::dds_::Vector3_\", NULL, NULL, 0);\n	if (!topic) {\n		printf (\"Can't register chat message type.\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS imu Topic created.\\r\\n\");\n\n	td = DDS_DomainParticipant_lookup_topicdescription (part, \"imu\");\n	if (!td) {\n		printf (\"Can't get topicdescription.\\r\\n\");\n		exit (1);\n	}\n	pub = DDS_DomainParticipant_create_publisher (part, NULL, NULL, 0);\n	if (!pub) {\n		printf (\"DDS_DomainParticipant_create_publisher () failed!\\r\\n\");\n		exit (1);\n	}\n	DDS_Publisher_get_default_datawriter_qos (pub, &wr_qos);\n#ifdef TRANSIENT_LOCAL\n	wr_qos.durability.kind = DDS_TRANSIENT_LOCAL_DURABILITY_QOS;\n#endif\n#ifdef RELIABLE\n	wr_qos.reliability.kind = DDS_RELIABLE_RELIABILITY_QOS;\n#endif\n#ifdef KEEP_ALL\n	wr_qos.history.kind = DDS_KEEP_ALL_HISTORY_QOS;\n	wr_qos.history.depth = DDS_LENGTH_UNLIMITED;\n	wr_qos.resource_limits.max_samples_per_instance = HISTORY;\n	wr_qos.resource_limits.max_instances = HISTORY * 10;\n	wr_qos.resource_limits.max_samples = HISTORY * 4;\n#else\n	wr_qos.history.kind = DDS_KEEP_LAST_HISTORY_QOS;\n	wr_qos.history.depth = HISTORY;\n#endif\n	/* Create a Data Writer. */\n	dw = DDS_Publisher_create_datawriter (pub, topic, &wr_qos, NULL, 0);\n	if (!dw) {\n		printf (\"Unable to create chat message writer.\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS Chat message writer created.\\r\\n\");\n\n	sub = DDS_DomainParticipant_create_subscriber (part, NULL, NULL, 0); \n	if (!sub) {\n		printf (\"DDS_DomainParticipant_create_subscriber () returned an error!\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS Subscriber created.\\r\\n\");\n\n	DDS_Subscriber_get_default_datareader_qos (sub, &rd_qos);\n#ifdef TRANSIENT_LOCAL\n	rd_qos.durability.kind = DDS_TRANSIENT_LOCAL_DURABILITY_QOS;\n#endif\n#ifdef RELIABLE\n	rd_qos.reliability.kind = DDS_RELIABLE_RELIABILITY_QOS;\n#endif\n#ifdef KEEP_ALL\n	rd_qos.history.kind = DDS_KEEP_ALL_HISTORY_QOS;\n	rd_qos.history.depth = DDS_LENGTH_UNLIMITED;\n	rd_qos.resource_limits.max_samples_per_instance = HISTORY;\n	rd_qos.resource_limits.max_instances = HISTORY * 10;\n	rd_qos.resource_limits.max_samples = HISTORY * 4;\n#else\n	rd_qos.history.kind = DDS_KEEP_LAST_HISTORY_QOS;\n	rd_qos.history.depth = HISTORY;\n#endif\n	dr = DDS_Subscriber_create_datareader (sub, td, &rd_qos,\n#ifndef WAITSETS\n			 &msg_listener, DDS_DATA_AVAILABLE_STATUS);\n#else\n			 NULL, 0);\n#endif\n	if (!dr) {\n		printf (\"DDS_DomainParticipant_create_datareader () returned an error!\\r\\n\");\n		exit (1);\n	}\n	if (verbose)\n		printf (\"DDS Chat message reader created.\\r\\n\");\n\n#ifdef WAITSETS\n	//start_chat_reader (dr);\n#endif\n\n	thread_create (rt2, dds_send_imu, dr);\n\n	do_dds (dw);\n\n#ifdef WAITSETS\n	//stop_chat_reader (dr);\n#endif\n	DDS_Publisher_delete_datawriter (pub, dw);\n	usleep (200000);\n	error = DDS_DomainParticipant_delete_contained_entities (part);\n	if (verbose)\n		printf (\"DDS Entities deleted (error = %u).\\r\\n\", error);\n\n	Vector3_type_free (ts);\n	if (verbose)\n		printf (\"Chat Type deleted.\\r\\n\");\n\n	error = DDS_DomainParticipantFactory_delete_participant (part);\n	if (verbose)\n		printf (\"DDS Participant deleted (error = %u).\\r\\n\", error);\n\n#ifdef DDS_SECURITY\n	if (cert_path || key_path || engine_id)\n		cleanup_security ();\n#endif\n	return (0);\n}",
-			"file": "apps/examples/imu_publisher/main.c",
-			"file_size": 19559,
-			"file_write_time": 130610037944220586,
+			"file": "/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Imu32.msg",
 			"settings":
 			{
-				"buffer_size": 19640,
+				"buffer_size": 1388,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "apps/examples/imu_publisher/Makefile",
+			"file": "/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Vector3Float.msg",
 			"settings":
 			{
-				"buffer_size": 10458,
+				"buffer_size": 74,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "apps/examples/imu_subscriber/Makefile",
+			"file": "/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu32/publisher.cpp",
 			"settings":
 			{
-				"buffer_size": 10501,
+				"buffer_size": 2392,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "dds/src/trans/ip/ri_udp.c",
+			"file": "/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu32/subscriber.cpp",
 			"settings":
 			{
-				"buffer_size": 51710,
+				"buffer_size": 2935,
 				"line_ending": "Unix"
 			}
 		}
@@ -435,6 +444,34 @@
 	},
 	"file_history":
 	[
+		"/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Vector3.msg",
+		"/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Quaternion32.msg",
+		"/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Header.msg",
+		"/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu_float/publisher.cpp",
+		"/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Vector3Float.msg",
+		"/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu_float/subscriber.cpp",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_publisher/imu_publisher.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_subscriber/imu_subscriber.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_subscriber/vector3_msg.h",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_subscriber/vector3_msg.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_publisher_vector3int/imu_publisher.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_publisher_vector3int/vector3_msg.h",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_publisher_vector3int/vector3_msg.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_publisher/vector3_msg.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/api/headers/dds/dds_xtypes.h",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/vector_float32_publisher/vector3_msg.h",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/trans/ip/ri_udp.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/imu_publisher/main.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/imu_subscriber/Makefile",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/imu_publisher/Makefile",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_subscriber_vector3int/imu_subscriber.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_subscriber_vector3int/vector3_msg.c",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_subscriber_vector3int/vector3_msg.h",
+		"/home/victor/ros2_ws/src/ros2/examples/userland/src/imu_int/publisher.cpp",
+		"/home/victor/ros2_ws/src/ros2/examples/userland/src/imu_int/subscriber.cpp",
+		"/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Vector3_Int.msg",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/type_data.h",
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/api/symbols/libdds.ldver",
 		"/home/victor/Dropbox/OSRF/tinq-core/dds/apps/imu_subscriber/Makefile.old",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/ddsimu/main.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_subscriber/imu_subscriber.",
@@ -446,7 +483,6 @@
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/udpsimple_mcast/udpsimple_mcast.c",
 		"/home/victor/Dropbox/OSRF/tinq-core/dds/apps/imu_subscriber/Makefile",
 		"/home/victor/ros2_ws/install/share/simple_msgs/dds_opensplice/Vector3_.idl",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/type_data.h",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu/imu.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/dcps/dcps_writer.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/chat/main.c",
@@ -457,7 +493,6 @@
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/nuttx/sched/clock/clock_abstime2ticks.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/chat/chat_msg.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/chat/chat_msg.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/api/headers/dds/dds_xtypes.h",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/hunter/mainHunter.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu_publisher/imu_inspired.c",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/imu/Makefile",
@@ -536,33 +571,7 @@
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/nuttx/include/netinet/in.h",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/thread.h",
 		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/udp/udp-client.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/rtps/rtps_msg.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/tools/serial_terminal/bin/reflex_terminal",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/udp_multithread_mcast/udp_multithread_mcast.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/udp_multithread_mcast/README.md",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/tools/openocd-source/tools/git2cl/git2cl",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/tools/gdb_init_commands",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/tools/gccarm.installed",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/udp_multithread/udp_multithread.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/doc/dita/cmake_opts.dita",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/dds/chat_msg.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/co/skiplist.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/domain.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/disc/disc_main.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/debug.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/dcps/main.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/idl/idlparser_support.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/idl/idlparser_support.c",
-		"/home/victor/Dropbox/OSRF/tinq-core/dds/apps/idl/out.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/idl/idlparser.y",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/include/rtps_data.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/nuttx/tools/discover.py",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/disc/disc_sedp.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/nuttx/net/devif/devif_initialize.c",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/apps/examples/dds_publisher/chat_msg.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/doc/dds_full.h",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/apps/idl/examples/DDS/xtypes.idl",
-		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/rcl/README.md"
+		"/home/victor/Dropbox/OSRF/ros2_embedded_nuttx/dds/src/rtps/rtps_msg.h"
 	],
 	"find":
 	{
@@ -585,6 +594,39 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"ros_msg",
+			"Vector3Float",
+			"linear_acceleration",
+			"set_accel_data",
+			"Vector3Float",
+			"float64",
+			"int32",
+			"Vector3Float",
+			"Vector3Int",
+			"d",
+			"get_double",
+			"Int",
+			"int",
+			"DDS_FLOAT_32_TYPE",
+			"DDS_INT_32_TYPE",
+			"int",
+			"simple_msgs::dds_::Vector3Int_",
+			"get_double",
+			"DDS_INT_32_TYPE",
+			"M_2",
+			"simple_msgs::dds_::Vector3_",
+			"DDS_DynamicData_set_float64_value",
+			"DDS_FLOAT_64_TYPE",
+			"double",
+			"Vector3",
+			"DDS_DynamicData_set_float64_value",
+			"DDS_FLOAT_64_TYPE",
+			"dds_send_imu",
+			"do_switches",
+			"start_chat_reader",
+			"stop_chat_reader",
+			"start_imu_reader",
+			"chatroom",
 			"Chat",
 			"ChatMsg",
 			"chat_msg",
@@ -679,40 +721,7 @@
 			"writeread",
 			"WRITEREAD",
 			"writeread",
-			"I2C_WRITE",
-			"NULL",
-			"lis320dlh_basic_setup",
-			"uint8_t",
-			"CFLAGS",
-			"INC_PATH",
-			"/**\n * @}\n */\n",
-			"/**\n  * @}\n  */ \n",
-			"/**\n  * @}\n  */  \n",
-			"/**\n  * @}\n  */\n",
-			"/**\n  * @}\n  */\n  \n",
-			"chat_reader",
-			"Embedded",
-			"chatroom",
-			"do_switches",
-			"m",
-			"do_chat",
-			"Usage",
-			"usage",
-			"DDDS_TYPECODE",
-			"UDP_OS_MCAST",
-			"bool",
-			"thread_recvfrom",
-			"recv",
-			"recvfrom",
-			"disc_get_data",
-			"DUDP_OS_MCAST",
-			"$",
-			"UDP_JOIN_DATA",
-			"log_printf",
-			"fd",
-			"->fd",
-			"ip_cx_st",
-			"IP_CX"
+			"I2C_WRITE"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -769,7 +778,7 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10562,
+						"buffer_size": 10563,
 						"regions":
 						{
 						},
@@ -836,8 +845,8 @@
 						"selection":
 						[
 							[
-								5135,
-								5135
+								7503,
+								7503
 							]
 						],
 						"settings":
@@ -847,10 +856,10 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2970.0,
+						"translation.y": 4470.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
@@ -880,7 +889,7 @@
 						"translation.y": 792.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
@@ -909,131 +918,133 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 6,
 					"type": "text"
 				}
 			]
 		},
 		{
-			"selected": 0,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 6,
-					"file": "apps/examples/imu_publisher/main.c",
+					"file": "/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Imu32.msg",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 19640,
+						"buffer_size": 1388,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								9531,
-								9531
+								1325,
+								1325
 							]
 						],
 						"settings":
 						{
 							"apply_syntax_touched": true,
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 7854.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 3,
 					"type": "text"
 				},
 				{
 					"buffer": 7,
-					"file": "apps/examples/imu_publisher/Makefile",
+					"file": "/home/victor/ros2_ws/src/ros2/examples/simple_msgs/msg/Vector3Float.msg",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10458,
+						"buffer_size": 74,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6167,
-								6167
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"apply_syntax_touched": true,
-							"syntax": "Packages/Makefile/Makefile.tmLanguage"
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
-						"translation.x": -0.0,
-						"translation.y": 2288.0,
+						"translation.x": 0.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 8,
-					"file": "apps/examples/imu_subscriber/Makefile",
+					"file": "/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu32/publisher.cpp",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 10501,
+						"buffer_size": 2392,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								6884,
-								6884
-							]
-						],
-						"settings":
-						{
-							"apply_syntax_touched": true,
-							"syntax": "Packages/Makefile/Makefile.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 2266.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "dds/src/trans/ip/ri_udp.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 51710,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								14202,
-								14202
+								1957,
+								1957
 							]
 						],
 						"settings":
 						{
 							"apply_syntax_touched": true,
 							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 11249.0,
+						"translation.y": 660.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/home/victor/ros2_ws/src/ros2/examples/userland/src/imu/imu32/subscriber.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2935,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2451,
+								2451
+							]
+						],
+						"settings":
+						{
+							"apply_syntax_touched": true,
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1067,7 +1078,7 @@
 		"cols":
 		[
 			0.0,
-			0.492612160032,
+			0.444278044593,
 			1.0
 		],
 		"rows":
