@@ -13,12 +13,12 @@
 #include "libx.h"
 #include "vector3_msg.h"
 
-#define M_1	"x"
-#define M_2	"y"
-#define M_0	"z"
-#define X_ID	1
-#define Y_ID	2
-#define Z_ID	0
+#define M_0	"x"
+#define M_1	"y"
+#define M_2	"z"
+#define X_ID	0
+#define Y_ID	1
+#define Z_ID	2
 
 static DDS_DynamicType Vector3_type;
 
