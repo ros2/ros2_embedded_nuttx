@@ -973,7 +973,7 @@ void marshallDynamic (const DDS_DynamicData dd, DDS_DynamicData *dd_out,
 		xd_dump (1, ddr->ddata);
 	}
 #endif
-	len = cdr_marshalled_size (4, ddr->ddata, tp, 1, 0, 0, NULL) + 4;
+	len = cdr_marshalled_size (CDR_DOFS, ddr->ddata, tp, 1, 0, 0, NULL) + 4;
 	fail_unless (len != 0);
 
 	out = malloc (((len + 3) & ~3) + 4);
@@ -983,7 +983,7 @@ void marshallDynamic (const DDS_DynamicData dd, DDS_DynamicData *dd_out,
 	memset (out, 0xdf, ((len + 3) & ~3) + 4);
 #endif
 	for (swap = 0; swap <= 1; swap++) {
-		len = cdr_marshall (out + 4, 4, ddr->ddata, tp, 1, 0, 0, swap, &rc);
+		len = cdr_marshall (out + 4, CDR_DOFS, ddr->ddata, tp, 1, 0, 0, swap, &rc);
 		fail_unless (len && rc == DDS_RETCODE_OK);
 
 		out [0] = out [2] = out [3] = 0;
@@ -1001,7 +1001,7 @@ void marshallDynamic (const DDS_DynamicData dd, DDS_DynamicData *dd_out,
 #endif
 		}
 #endif
-		ddo = cdr_dynamic_data (out + 4, 4, tp, 0, 0, swap);
+		ddo = cdr_dynamic_data (out + 4, CDR_DOFS, tp, 0, 0, swap);
 		fail_unless (ddo != NULL);
 
 #if defined (DUMP_DATA) && defined (PARSE_DATA)

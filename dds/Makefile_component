@@ -76,10 +76,10 @@ include $(projectdir/)build/Makefile_component_top
 
 DDS_TYPE_SYSTEM:=XTYPES
 
-# Workaround for raw multicast to different endian hosts
-
-dds_EXTRA_DEFINES           += -DRTPS_MARSHALL_ALWAYS -DDDS_HIST_PURGE_NA
-
+# Workaround for raw multicast to different endian hosts, History counts for Unregister/Dispose, CDR align at encapsulation header
+ 
+dds_EXTRA_DEFINES           += -DRTPS_MARSHALL_ALWAYS -DDDS_HIST_PURGE_NA -DCDR_DOFS=4
+ 
 dds.LIBRARIES               := libdds
 
 dds.libdds_SRCS             := \

@@ -348,7 +348,7 @@ static void *dcps_get_cdata_cdr (void                *bufp,
 		copy_data = (sdbp != NULL && cp->c_db->nrefs != 1);
 
 		/* Convert to dynamic data. */
-		ddp = cdr_dynamic_data (sdata, 4, tp, 0, copy_data, swap);
+		ddp = cdr_dynamic_data (sdata, CDR_DOFS, tp, 0, copy_data, swap);
 #if defined (DDS_DEBUG) && defined (DUMP_DDATA)
 		dbg_printf ("dcps_get_cdata_cdr:\r\n");
 		xd_dump (1, ddp);
@@ -382,7 +382,7 @@ static void *dcps_get_cdata_cdr (void                *bufp,
 
 	tp = ts->ts_cdr;
 #endif
-	alloc_size = cdr_unmarshalled_size (sdata, 4, tp, 0, 0, swap, 0, NULL);
+	alloc_size = cdr_unmarshalled_size (sdata, CDR_DOFS, tp, 0, 0, swap, 0, NULL);
 	if (!alloc_size) {
 		log_printf (DCPS_ID, 0, "dds_get_cdata: cdr_unmarshalled_size failed (writer=%u)!\r\n", cp->c_writer);
 		/*log_print_region (RTPS_ID, 0, cp->c_data, cp->c_length, 1, 1);*/
@@ -421,7 +421,7 @@ static void *dcps_get_cdata_cdr (void                *bufp,
 		ddbp = NULL;
 		*auxp = dp;
 	}
-	*error = cdr_unmarshall (dp, sdata, 4, tp, 0, 0, swap, 0);
+	*error = cdr_unmarshall (dp, sdata, CDR_DOFS, tp, 0, 0, swap, 0);
 	if (*error) {
 		log_printf (DCPS_ID, 0, "dds_get_cdata: error %d unmarshalling CDR data (writer=%u)!\r\n", *error, cp->c_writer);
 		/*log_print_region (RTPS_ID, 0, cp->c_data, cp->c_length, 1, 1);*/
@@ -592,7 +592,7 @@ static void *dcps_get_cdata_raw (void                *bufp,
 		}
 
 		/* Finally convert to dynamic data. */
-		ddp = cdr_dynamic_data (cdr + 4, 4, ts->ts_cdr, 0, 1, 0);
+		ddp = cdr_dynamic_data (cdr + 4, CDR_DOFS, ts->ts_cdr, 0, 1, 0);
 #if defined (DDS_DEBUG) && defined (DUMP_DDATA)
 		dbg_printf ("dcps_get_cdata_raw:\r\n");
 		xd_dump (1, ddp);

@@ -980,7 +980,7 @@ TypeSupport_t *vtc_type (TypeLib *lp, unsigned char *vtc)
 	dds_ts->ts_prefer = MODE_CDR;
 	dds_ts->ts_cdr = tp;
 	if (keys && !dkeys)
-		dds_ts->ts_mkeysize = cdr_marshalled_size (4, NULL, tp, 0, 
+		dds_ts->ts_mkeysize = cdr_marshalled_size (CDR_DOFS, NULL, tp, 0, 
 							   1, 1, &error);
 	dds_ts->ts_users = 1;
 	return (dds_ts);

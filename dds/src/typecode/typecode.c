@@ -676,7 +676,7 @@ DDS_TypeSupport *DDS_DynamicType_register (const DDS_TypeSupport_meta *tc)
 	if (dyn_keys)
 		dds_ts->ts_mkeysize = 0;
 	else
-		dds_ts->ts_mkeysize = cdr_marshalled_size (4, NULL, ts, 1, 1, &error);
+		dds_ts->ts_mkeysize = cdr_marshalled_size (CDR_DOFS, NULL, ts, 1, 1, &error);
 	dds_ts->ts_meta = mp;
 	dds_ts->ts_users = 1;
 #ifndef CDR_ONLY
@@ -999,7 +999,7 @@ size_t DDS_MarshalledDataSize (const void            *sample,
 
 	switch (ts->ts_prefer) {
 		case MODE_CDR:
-			length = cdr_marshalled_size (4, sample, ts->ts_cdr, 0, 0, ret);
+			length = cdr_marshalled_size (CDR_DOFS, sample, ts->ts_cdr, 0, 0, ret);
 			if (!length)
 				return (0);
 			break;
@@ -1040,7 +1040,7 @@ DDS_ReturnCode_t DDS_MarshallData (void                  *buffer,
 			if (!ts->ts_cdr)
 				return (DDS_RETCODE_BAD_PARAMETER);
 
-			ret = cdr_marshall (dp + 4, 4, data, ts->ts_cdr, 0, 0, 0);
+			ret = cdr_marshall (dp + 4, CDR_DOFS, data, ts->ts_cdr, 0, 0, 0);
 			if (ret)
 				return (ret);
 
@@ -1091,7 +1091,7 @@ size_t DDS_UnmarshalledDataSize (DBW                   data,
 		int swap = (type & 1) ^ ENDIAN_CPU;
 
 		if (ts->ts_cdr)
-			return (cdr_unmarshalled_size (data.data, 4, ts->ts_cdr,
+			return (cdr_unmarshalled_size (data.data, CDR_DOFS, ts->ts_cdr,
 							       0, 0, swap, error));
 		else if (error)
 			*error = DDS_RETCODE_UNSUPPORTED;
@@ -1134,7 +1134,7 @@ DDS_ReturnCode_t DDS_UnmarshallData (void                  *buffer,
 
 	if ((type >> 1) == MODE_CDR) {
 		if (ts->ts_cdr)
-			ret = cdr_unmarshall (buffer, DBW_PTR (*data), 4,
+			ret = cdr_unmarshall (buffer, DBW_PTR (*data), CDR_DOFS,
 					      ts->ts_cdr, 0, 0, swap);
 		else
 			ret = DDS_RETCODE_UNSUPPORTED;
@@ -1182,7 +1182,7 @@ size_t DDS_KeySizeFromNativeData (const unsigned char   *data,
 	}
 	switch (ts->ts_prefer) {
 		case MODE_CDR:
-			l = cdr_marshalled_size (4, data, ts->ts_cdr, 1, 0, error);
+			l = cdr_marshalled_size (CDR_DOFS, data, ts->ts_cdr, 1, 0, error);
 			prof_stop (tc_k_s_nat, 1);
 			return (l);
 #ifndef CDR_ONLY
@@ -1231,7 +1231,7 @@ DDS_ReturnCode_t DDS_KeyFromNativeData (unsigned char         *key,
 				swap = 0;
 				msize = 0;
 			}
-			ret = cdr_marshall (key, 4, data, ts->ts_cdr, 1, msize, swap);
+			ret = cdr_marshall (key, CDR_DOFS, data, ts->ts_cdr, 1, msize, swap);
 			prof_stop (tc_k_g_nat, 1);
 			return (ret);
 #ifndef CDR_ONLY
@@ -1270,7 +1270,7 @@ DDS_ReturnCode_t DDS_KeyToNativeData (void                  *data,
 				swap = 0;
 				msize = 0;
 			}
-			ret = cdr_unmarshall (data, key, 4, ts->ts_cdr, 1,
+			ret = cdr_unmarshall (data, key, CDR_DOFS, ts->ts_cdr, 1,
 								msize, swap);
 			prof_stop (tc_k_p_nat, 1);
 			break;
@@ -1312,7 +1312,7 @@ size_t DDS_KeySizeFromMarshalled (DBW                   data,
 	swap = (type & 1) ^ ENDIAN_CPU;
 	if ((type >> 1) == MODE_CDR) {
 		if (ts->ts_cdr) {
-			l = cdr_key_size (data.data, 4, ts->ts_cdr, key, 0, swap, error);
+			l = cdr_key_size (data.data, CDR_DOFS, ts->ts_cdr, key, 0, swap, error);
 			prof_stop (tc_k_s_marsh, 1);
 			return (l);
 		}
@@ -1332,7 +1332,7 @@ size_t DDS_KeySizeFromMarshalled (DBW                   data,
 #endif
 	else if ((type >> 1) == MODE_RAW)
 		if (ts->ts_cdr) {
-			l = cdr_marshalled_size (4, data.data, ts->ts_cdr, 1, 0, error);
+			l = cdr_marshalled_size (CDR_DOFS, data.data, ts->ts_cdr, 1, 0, error);
 			prof_stop (tc_k_s_marsh, 1);
 			return (l);
 		}
@@ -1368,12 +1368,12 @@ DDS_ReturnCode_t DDS_KeyFromMarshalled (unsigned char         *dst,
 		if (ts->ts_cdr) {
 			if (ts->ts_mkeysize && ts->ts_mkeysize <= 16) {
 				swap = (type & 1) ^ ENDIAN_BIG;
-				ret = cdr_key_fields (dst, 4, data.data, 4, 
+				ret = cdr_key_fields (dst, CDR_DOFS, data.data, CDR_DOFS, 
 					       ts->ts_cdr, key, 1, swap, iswap);
 			}
 			else {
 				swap = (type & 1) ^ ENDIAN_CPU;
-				ret = cdr_key_fields (dst, 4, data.data, 4,
+				ret = cdr_key_fields (dst, CDR_DOFS, data.data, CDR_DOFS,
 					       ts->ts_cdr, key, 0, swap, iswap);
 			}
 			prof_stop (tc_k_g_marsh, 1);
@@ -1404,7 +1404,7 @@ DDS_ReturnCode_t DDS_KeyFromMarshalled (unsigned char         *dst,
 				swap = 0;
 				msize = 0;
 			}
-			ret = cdr_marshall (dst, 4, data.data, ts->ts_cdr, 1, msize, swap);
+			ret = cdr_marshall (dst, CDR_DOFS, data.data, ts->ts_cdr, 1, msize, swap);
 			prof_stop (tc_k_g_marsh, 1);
 			return (ret);
 		}
@@ -1417,7 +1417,7 @@ DDS_ReturnCode_t DDS_KeyFromMarshalled (unsigned char         *dst,
 
 #ifndef CDR_ONLY
 
-#define	KEY_HSIZE	4	/* Assume same alignment for the MD5 checksum
+#define	KEY_HSIZE CDR_DOFS	/* Assume same alignment for the MD5 checksum
 				   data as for transported key fields. */
 
 /* DDS_HashFromKey -- Calculate the hash value from a key. */
@@ -1456,7 +1456,7 @@ DDS_ReturnCode_t DDS_HashFromKey (unsigned char         hash [16],
 	else if (ts->ts_mkeysize)
 		n = ts->ts_mkeysize;
 	else {
-		n = cdr_key_size (key, 4, ts->ts_cdr, 1, 1, swap, &ret);
+		n = cdr_key_size (key, CDR_DOFS, ts->ts_cdr, 1, 1, swap, &ret);
 		if (!n)
 			return (ret);
 	}
@@ -1474,7 +1474,7 @@ DDS_ReturnCode_t DDS_HashFromKey (unsigned char         hash [16],
 #ifdef MAX_KEY_BUFFER
 		}
 #endif
-		ret = cdr_key_fields (dp, KEY_HSIZE, key, 4, ts->ts_cdr,
+		ret = cdr_key_fields (dp, KEY_HSIZE, key, CDR_DOFS, ts->ts_cdr,
 								1, 1, swap, 0);
 		if (ret) {
 #ifdef MAX_KEY_BUFFER

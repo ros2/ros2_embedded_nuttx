@@ -753,7 +753,8 @@ int rtps_msg_add_data (RemReader_t        *rrp,
 				else if (!tp || (ENDIAN_CPU == ENDIAN_BIG && ts->ts_fksize))
 					memcpy (mep->d + ofs, hp + fofs, dlen);
 				else {
-					cdr_key_fields (mep->d + ofs, 4, hp, 4 + fofs, tp,
+					// cdr_key_fields (mep->d + ofs, 4, hp, 4 + fofs, tp,
+					cdr_key_fields (mep->d + ofs, CDR_DOFS, hp, CDR_DOFS, tp,
 							1, 1, ENDIAN_CPU ^ ENDIAN_BIG, 0);
 					while (clen < dlen)
 						mep->d [ofs + clen++] = 0;

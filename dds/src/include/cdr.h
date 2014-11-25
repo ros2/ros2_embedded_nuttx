@@ -17,6 +17,10 @@
 
 #include "typecode.h"
 
+#ifndef CDR_DOFS
+#define	CDR_DOFS	0
+#endif
+
 #define	cdr_is_container(tc)	((tc) >= CDR_TYPECODE_STRUCT && (tc) <= CDR_TYPECODE_ARRAY)
 #define	cdr_is_struct(tc)	((tc) >= CDR_TYPECODE_STRUCT && (tc) <= CDR_TYPECODE_ENUM)
 #define	cdr_is_array(tc)	((tc) == CDR_TYPECODE_ARRAY || (tc) == CDR_TYPECODE_SEQUENCE)

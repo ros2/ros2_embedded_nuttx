@@ -20,6 +20,10 @@
 #include <stdio.h>
 #include "xtypes.h"
 
+#ifndef CDR_DOFS
+#define CDR_DOFS 0
+#endif
+
 size_t cdr_marshalled_size (size_t           hsize,
 			    const void       *data,
 			    const Type       *type,
