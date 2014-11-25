@@ -15,6 +15,8 @@
 #include "dds/dds_dwriter.h"
 #include "dds/dds_dreader.h"
 
+#define FRAMEID_LEN	100
+
 typedef struct Time_
 {
 
@@ -33,9 +35,8 @@ typedef struct Header_
   _seq_type seq;
 
   Time_t stamp;
-
-  typedef char* _frame_id_type;
-  _frame_id_type frame_id;
+  
+  char frame_id[FRAMEID_LEN];
 
 } Header_t;
 

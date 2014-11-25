@@ -11,12 +11,72 @@
 #include "libx.h"
 #include "imu32_msg.h"
 
-#define M_0	"x"
-#define M_1	"y"
-#define M_2	"z"
-#define X_ID	0
-#define Y_ID	1
-#define Z_ID	2
+// stamp
+#define stamp_sec		"sec"
+#define stamp_nanosec	"nanosec"
+#define stamp 			"stamp"
+
+#define stamp_sec_id		0
+#define stamp_nanosec_id	1
+#define stamp_id			1
+
+// header		
+#define header_seq		"seq"
+#define header_stamp	"stamp"
+#define header_frameid 	"frame_id"
+#define header 			"header"
+
+#define header_seq_id		0
+#define header_stamp_id		1
+#define header_frameid_id 	2
+#define header_id 			0
+
+// orientation
+#define orientation_x	"x"
+#define orientation_y	"y"
+#define orientation_z	"z"
+#define orientation_w	"w"
+#define orientation		"orientation"		
+
+#define orientation_x_id	0
+#define orientation_y_id	1
+#define orientation_z_id	2
+#define orientation_w_id	3
+#define orientation_id		1
+
+//angular_velocity
+#define angular_velocity_x		"x"
+#define angular_velocity_y		"y"
+#define angular_velocity_z		"z"
+#define angular_velocity		"angular_velocity"
+
+#define angular_velocity_x_id		0
+#define angular_velocity_y_id		1
+#define angular_velocity_z_id		2
+#define angular_velocity_id			3
+
+//linear_acceleration
+#define linear_acceleration_x		"x"
+#define linear_acceleration_y		"y"
+#define linear_acceleration_z		"z"
+#define linear_acceleration			"linear_acceleration"
+
+#define linear_acceleration_x_id		0
+#define linear_acceleration_y_id		1
+#define linear_acceleration_z_id		2
+#define linear_acceleration_id			5
+
+//orientation_covariance
+#define orientation_covariance		"orientation_covariance"
+#define orientation_covariance_id	2
+
+//angular_velocity_covariance
+#define angular_velocity_covariance "angular_velocity_covariance"
+#define angular_velocity_covariance_id 	4
+
+//linear_acceleration_covariance
+#define linear_acceleration_covariance "linear_acceleration_covariance"
+#define linear_acceleration_covariance_id 	6
 
 static DDS_DynamicType Imu32_type;
 
@@ -28,7 +88,18 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 {
 	DDS_TypeDescriptor *desc;
 	DDS_MemberDescriptor *md = NULL;
-	DDS_DynamicTypeBuilder tb = NULL;
+	DDS_DynamicTypeBuilder ssb;
+	DDS_DynamicTypeBuilder tb_header = NULL;
+	DDS_DynamicTypeBuilder tb_time = NULL;	
+	DDS_DynamicTypeBuilder tb_orientation = NULL;
+	DDS_DynamicTypeBuilder tb_angular_velocity = NULL;
+	DDS_DynamicTypeBuilder tb_linear_acceleration = NULL;			
+	DDS_DynamicTypeBuilder tb_imu23 = NULL;
+	DDS_DynamicTypeBuilder tb_float_array;
+	DDS_DynamicType s_type, header_type, time_type, orientation_type,
+							angular_velocity_type, linear_acceleration_type,
+							float_array_type;
+	DDS_BoundSeq bounds;
 	DDS_DynamicTypeSupport ts = NULL;
 	DDS_ReturnCode_t rc;
 
@@ -36,48 +107,241 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 	if (!desc)
 		return (NULL);
 
-	desc->kind = DDS_STRUCTURE_TYPE;
-	desc->name = "Imu32";
-
 	do {
-		tb = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
-			break;
 
+		// MemberDescriptor to be reused on the type definitions
 		md = DDS_MemberDescriptor__alloc ();
 		if (!md)
 			break;
 
-		/* Add structure members: */
-		md->name = M_0;
-		md->id = 0;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
-		md->index = 0;
-		rc = DDS_DynamicTypeBuilder_add_member (tb, md);
+		/* The Imu32 type support is coded following the type definition in 
+		the header imu32_msg.h */
+
+		/* Create time: */		
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "time";
+		tb_time = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb)
+			break;
+		md->name = stamp_sec;
+		md->id = md->index= stamp_sec_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_INT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_time, md);
 		if (rc)
 			break;
+		md->name = stamp_nanosec;
+		md->id = md->index = stamp_nanosec_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_INT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_time, md);
+		if (rc)
+			break;
+		time_type = DDS_DynamicTypeBuilder_build (tb_time);
+		if (!time_type)
+			break;
 
-		md->name = M_1;
-		md->id = 1;
+		/* Create String. */
+		ssb = DDS_DynamicTypeBuilderFactory_create_string_type (FRAMEID_LEN);
+		if (!ssb)
+			break;
+		s_type = DDS_DynamicTypeBuilder_build (ssb);
+		if (!s_type)
+			break;
+
+		/* Create header: */
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "header";
+		tb_header = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb)
+			break;
+		md->name = header_seq;
+		md->id = md->index = header_seq_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_INT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_header, md);
+		if (rc)
+			break;
+		md->name = header_stamp;
+		md->id = md->index = header_stamp_id;		
+		md->type = time_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_header, md);
+		if (rc)
+			break;
+		md->name = header_frameid;
+		md->id = md->index = header_frameid_id;		
+		md->type = s_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_header, md);
+		if (rc)
+			break;
+		header_type = DDS_DynamicTypeBuilder_build (tb_header);
+		if (!header_type)
+			break;
+
+		/* Create orientation: */
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "orientation";
+		tb_orientation = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb)
+			break;
+		md->name = orientation_x;
+		md->id = md->index = orientation_x_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
+		if (rc)
+			break;
+		md->name = orientation_y;
+		md->id = orientation_y_id;
 		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
 		md->index = 1;
-		rc = DDS_DynamicTypeBuilder_add_member (tb, md);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
 		if (rc)
 			break;
-
-		md->name = M_2;
-		md->id = 2;
+		md->name = orientation_z;
+		md->id = orientation_z_id;
 		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
 		md->index = 2;
-		rc = DDS_DynamicTypeBuilder_add_member (tb, md);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
+		if (rc)
+			break;
+		md->name = orientation_w;
+		md->id = orientation_w_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		md->index = 3;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
+		if (rc)
+			break;
+		orientation_type = DDS_DynamicTypeBuilder_build (tb_orientation);
+		if (!orientation_type)
+			break;
+
+		/* Create angular_velocity: */
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "angular_velocity";
+		tb_angular_velocity = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb)
+			break;
+		md->name = angular_velocity_x;
+		md->id = md->index = angular_velocity_x_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_angular_velocity, md);
+		if (rc)
+			break;
+		md->name = angular_velocity_y;
+		md->id = md->index = angular_velocity_y_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_angular_velocity, md);
+		if (rc)
+			break;
+		md->name = angular_velocity_z;
+		md->id = md->index = angular_velocity_z_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_angular_velocity, md);
+		if (rc)
+			break;
+		angular_velocity_type = DDS_DynamicTypeBuilder_build (tb_angular_velocity);
+		if (!angular_velocity_type)
+			break;
+
+		/* Create linear_acceleration: */
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "linear_acceleration";
+		tb_linear_acceleration = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb)
+			break;
+		md->name = linear_acceleration_x;
+		md->id = md->index = linear_acceleration_x_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_linear_acceleration, md);
+		if (rc)
+			break;
+		md->name = linear_acceleration_y;
+		md->id = md->index = linear_acceleration_y_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_linear_acceleration, md);
+		if (rc)
+			break;
+		md->name = linear_acceleration_z;
+		md->id = md->index = linear_acceleration_z_id;		
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE);
+		rc = DDS_DynamicTypeBuilder_add_member (tb_linear_acceleration, md);
+		if (rc)
+			break;
+		linear_acceleration_type = DDS_DynamicTypeBuilder_build (tb_linear_acceleration);
+		if (!linear_acceleration_type)
+			break;
+
+		/* Create float array type */
+		DDS_SEQ_INIT (bounds);
+		dds_seq_require (&bounds, 1);
+		DDS_SEQ_LENGTH (bounds) = 1;
+		DDS_SEQ_ITEM (bounds, 0) = 9;		
+		tb_float_array = DDS_DynamicTypeBuilderFactory_create_array_type (
+			DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_32_TYPE),
+			&bounds);
+		if (!tb_float_array)
+			break;		
+		float_array_type = DDS_DynamicTypeBuilder_build (tb_float_array);
+		if (!float_array_type)
+			break;
+
+		// Create Imu32
+		desc->kind = DDS_STRUCTURE_TYPE;
+		desc->name = "Imu32";
+		tb_imu23 = DDS_DynamicTypeBuilderFactory_create_type (desc);
+		if (!tb_aux)
+			break;
+					// header
+		md->name = header;
+		md->id = md->index = header_id;		
+		md->type = header_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// orientation
+		md->name = orientation;
+		md->id = md->index = orientation_id;		
+		md->type = orientation_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// orientation_covariance
+		md->name = orientation_covariance;
+		md->id = md->index = orientation_covariance_id;		
+		md->type = float_array_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// angular_velocity
+		md->name = angular_velocity;
+		md->id = md->index = angular_velocity_id;		
+		md->type = angular_velocity_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// angular_velocity_covariance
+		md->name = angular_velocity_covariance;
+		md->id = md->index = angular_velocity_covariance_id;		
+		md->type = float_array_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// linear_acceleration
+		md->name = linear_acceleration;
+		md->id = md->index = linear_acceleration_id;		
+		md->type = linear_acceleration_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
+		if (rc)
+			break;
+					// linear_acceleration_covariance
+		md->name = linear_acceleration_covariance;
+		md->id = md->index = linear_acceleration_covariance_id;		
+		md->type = float_array_type;
+		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 
 		/* Finally create the Dynamic Type t. */
-		Imu32_type = DDS_DynamicTypeBuilder_build (tb);
+		Imu32_type = DDS_DynamicTypeBuilder_build (tb_imu23);
 		if (!Imu32_type)
 			break;
-
 		/* Create a Typesupport package from the type. */
 		ts = DDS_DynamicTypeSupport_create_type_support (Imu32_type);
 	}
@@ -85,8 +349,21 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 
 	if (md)
 		DDS_MemberDescriptor__free (md);
-	if (tb)
-		DDS_DynamicTypeBuilderFactory_delete_type (tb);
+	if (tb_header)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_header);
+	if (tb_time)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_time);
+	if (tb_orientation)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_orientation);
+	if (tb_angular_velocity)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_angular_velocity);
+	if (tb_linear_acceleration)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_linear_acceleration);
+	if (tb_imu23)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_imu23);
+	if (tb_float_array)
+		DDS_DynamicTypeBuilderFactory_delete_type (tb_float_array);		
+
 	if (desc)
 		DDS_TypeDescriptor__free (desc);
 	return (ts);
