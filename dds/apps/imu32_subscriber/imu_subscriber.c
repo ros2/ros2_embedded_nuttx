@@ -39,7 +39,7 @@
 #include "dds/dds_dwriter.h"
 #include "dds/dds_dreader.h"
 
-#include "vector3_msg.h"
+#include "imu32_msg.h"
 
 #define	WAITSETS		/* Set this to use the WaitSet mechanism. */
 /*#define TRANSIENT_LOCAL	** Set to use Transient-local Durability. */
@@ -74,7 +74,7 @@ DDS_DynamicDataReader	dr;
 
 void do_dds_shell (DDS_DataWriter dw)
 {
-	Vector3_t		m;
+	Imu32_t		m;
 	DDS_InstanceHandle_t	h;
 	char			buf [256];
 
@@ -105,17 +105,17 @@ void do_dds_shell (DDS_DataWriter dw)
 				printf ("Attendees:\r\n\t%s\r\n", user_name);
 			else if (!memcmp (buf + 1, "user", 4)) {
 				if (h) {
-					Vector3_signal (dw, h, 1);
+					Imu32_signal (dw, h, 1);
 					h = 0;
 				}
 				strcpy (user_name, buf + 6);
 				printf ("You are now: %s\r\n", user_name);
 			}
 			else if (!strcmp (buf + 1, "busy"))
-				Vector3_signal (dw, h, 0);
+				Imu32_signal (dw, h, 0);
 			else if (!strcmp (buf + 1, "away")) {
 				if (h) {
-					Vector3_signal (dw, h, 1);
+					Imu32_signal (dw, h, 1);
 					h = 0;
 				}
 			}
@@ -141,9 +141,9 @@ void do_dds_shell (DDS_DataWriter dw)
 		} else {
 #if 0			
 			if (!h)
-				h = Vector3_register (dw, &m);
+				h = Imu32_register (dw, &m);
 			m.message = buf;
-			Vector3_write (dw, &m, h);			
+			Imu32_write (dw, &m, h);			
 #endif
 			printf ("Commands:\r\n");
 			printf ("    !list               -> list the attendees.\r\n");
@@ -158,30 +158,30 @@ void do_dds_shell (DDS_DataWriter dw)
 
 static void *dds_send_imu (void *args)
 {
-	Vector3_t				m;
+	Imu32_t				m;
 	DDS_InstanceHandle_t	h;
 
 	h = 0;
 	for (;;){
 		sleep (1); // sleep 0.5 seconds
 		//sprintf(buf_t, "Embedded says %s\n", buf);
-		m.x_ = 1;
-		m.y_ = 2;
-		m.z_ = 3;
+		m.linear_acceleration.x_ = 1;
+		m.linear_acceleration.y_ = 2;
+		m.linear_acceleration.z_ = 3;
 #if 0
 		/* According to https://github.com/brunodebus/tinq-core/issues/7#issuecomment-63740498:
-			the Vector3 shouldn't be registered if it doesn't contain a @key attribute
+			the Imu32 shouldn't be registered if it doesn't contain a @key attribute
 		*/		
 		if (!h)
-			h = Vector3_register (dw, &m);
+			h = Imu32_register (dw, &m);
 #endif
-		Vector3_write (dw, &m, h);
+		Imu32_write (dw, &m, h);
 	}
 }
 
 void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 {
-	Vector3_t		msg;
+	Imu32_t		msg;
 	DDS_InstanceStateKind	kind;
 	int			valid;
 	DDS_ReturnCode_t	ret;
@@ -189,7 +189,7 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 	ARG_NOT_USED (l)
 
 	memset (&msg, 0, sizeof (msg));
-	ret = Vector3_read_or_take (dr, &msg, DDS_NOT_READ_SAMPLE_STATE, 
+	ret = Imu32_read_or_take (dr, &msg, DDS_NOT_READ_SAMPLE_STATE, 
 					      DDS_ANY_VIEW_STATE,
 					      DDS_ANY_INSTANCE_STATE, 1,
 					      &valid, &kind);
@@ -206,7 +206,8 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 #endif
 #endif
 			if (valid)
-				printf ("IMU accel message: x=%f, y=%f and z=%f\r\n", msg.x_, msg.y_, msg.z_);
+				printf ("Imu32 ROS message received: linear_acceleration_x=%f, linear_acceleration_y=%f and linear_acceleration_z=%f\r\n", 
+					msg.linear_acceleration.x_, msg.linear_acceleration.y_, msg.linear_acceleration.z_);
 			else if (kind == DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE)
 				printf ("DDS_NOT_ALIVE_DISPOSED_INSTANCE_STATE!\r\n");
 			else if (kind == DDS_NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
@@ -214,7 +215,7 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 		}
 		while (0);
 
-	Vector3_cleanup (&msg);
+	Imu32_cleanup (&msg);
 }
 
 #ifdef WAITSETS
@@ -379,28 +380,28 @@ int main (int argc, const char **argv)
 	if (verbose)
 		printf ("DDS Domain Participant created.\r\n");
 
-	ts = Vector3_type_new ();
+	ts = Imu32_type_new ();
 	if (!ts) {
-		printf ("Can't create vector3 message type!\r\n");
+		printf ("Can't create Imu32 message type!\r\n");
 		exit (1);
 	}
-	error = DDS_DynamicTypeSupport_register_type (ts, part, "simple_msgs::dds_::Vector3Float_");
+	error = DDS_DynamicTypeSupport_register_type (ts, part, "simple_msgs::dds_::Imu32_");
 	if (error) {
-		printf ("Can't register vector3 message type.\r\n");
+		printf ("Can't register Imu32 message type.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Topic type ('%s') registered.\r\n", "simple_msgs::dds_::Vector3Float_");
+		printf ("DDS Topic type ('%s') registered.\r\n", "simple_msgs::dds_::Imu32_");
 
-	topic = DDS_DomainParticipant_create_topic (part, "imu", "simple_msgs::dds_::Vector3Float_", NULL, NULL, 0);
+	topic = DDS_DomainParticipant_create_topic (part, "imu_", "simple_msgs::dds_::Imu32_", NULL, NULL, 0);
 	if (!topic) {
-		printf ("Can't register vector3 message type.\r\n");
+		printf ("Can't register Imu32 message type.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Vector3 Topic created.\r\n");
+		printf ("DDS Imu32 Topic created.\r\n");
 
-	td = DDS_DomainParticipant_lookup_topicdescription (part, "imu");
+	td = DDS_DomainParticipant_lookup_topicdescription (part, "imu_");
 	if (!td) {
 		printf ("Can't get topicdescription.\r\n");
 		exit (1);
@@ -430,11 +431,11 @@ int main (int argc, const char **argv)
 	/* Create a Data Writer. */
 	dw = DDS_Publisher_create_datawriter (pub, topic, &wr_qos, NULL, 0);
 	if (!dw) {
-		printf ("Unable to create vector3 message writer.\r\n");
+		printf ("Unable to create Imu32 message writer.\r\n");
 		exit (1);
 	}
 	if (verbose)
-		printf ("DDS Vector3 message writer created.\r\n");
+		printf ("DDS Imu32 message writer created.\r\n");
 
 	sub = DDS_DomainParticipant_create_subscriber (part, NULL, NULL, 0); 
 	if (!sub) {
@@ -493,9 +494,9 @@ int main (int argc, const char **argv)
 	if (verbose)
 		printf ("DDS Entities deleted (error = %u).\r\n", error);
 
-	Vector3_type_free (ts);
+	Imu32_type_free (ts);
 	if (verbose)
-		printf ("Vector3 Type deleted.\r\n");
+		printf ("Imu32 Type deleted.\r\n");
 
 	error = DDS_DomainParticipantFactory_delete_participant (part);
 	if (verbose)

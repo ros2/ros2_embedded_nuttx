@@ -19,40 +19,24 @@
 
 typedef struct Time_
 {
-
-  typedef int32_t _sec_type;
-  _sec_type sec;
-
-  typedef uint32_t _nanosec_type;
-  _nanosec_type nanosec;
-
+  int32_t sec;
+  uint32_t nanosec;
 } Time_t; // struct Time_
 
 
 typedef struct Header_
 {
-  typedef uint32_t _seq_type;
-  _seq_type seq;
-
+  uint32_t seq;
   Time_t stamp;
-  
   char frame_id[FRAMEID_LEN];
-
 } Header_t;
 
 typedef struct Quaternion32_
 {
-  typedef float _x_type;
-  _x_type x;
-
-  typedef float _y_type;
-  _y_type y;
-
-  typedef float _z_type;
-  _z_type z;
-
-  typedef float _w_type;
-  _w_type w;
+  float x;
+  float y;
+  float z;
+  float w;
 
 } Quaternion32_t ;
 

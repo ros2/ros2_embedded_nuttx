@@ -14,7 +14,7 @@
 // stamp
 #define stamp_sec		"sec"
 #define stamp_nanosec	"nanosec"
-#define stamp 			"stamp"
+#define stamp_string 			"stamp"
 
 #define stamp_sec_id		0
 #define stamp_nanosec_id	1
@@ -24,7 +24,7 @@
 #define header_seq		"seq"
 #define header_stamp	"stamp"
 #define header_frameid 	"frame_id"
-#define header 			"header"
+#define header_string 			"header"
 
 #define header_seq_id		0
 #define header_stamp_id		1
@@ -36,7 +36,7 @@
 #define orientation_y	"y"
 #define orientation_z	"z"
 #define orientation_w	"w"
-#define orientation		"orientation"		
+#define orientation_string		"orientation"		
 
 #define orientation_x_id	0
 #define orientation_y_id	1
@@ -48,7 +48,7 @@
 #define angular_velocity_x		"x"
 #define angular_velocity_y		"y"
 #define angular_velocity_z		"z"
-#define angular_velocity		"angular_velocity"
+#define angular_velocity_string		"angular_velocity"
 
 #define angular_velocity_x_id		0
 #define angular_velocity_y_id		1
@@ -59,7 +59,7 @@
 #define linear_acceleration_x		"x"
 #define linear_acceleration_y		"y"
 #define linear_acceleration_z		"z"
-#define linear_acceleration			"linear_acceleration"
+#define linear_acceleration_string			"linear_acceleration"
 
 #define linear_acceleration_x_id		0
 #define linear_acceleration_y_id		1
@@ -67,18 +67,21 @@
 #define linear_acceleration_id			5
 
 //orientation_covariance
-#define orientation_covariance		"orientation_covariance"
+#define orientation_covariance_string		"orientation_covariance"
 #define orientation_covariance_id	2
 
 //angular_velocity_covariance
-#define angular_velocity_covariance "angular_velocity_covariance"
+#define angular_velocity_covariance_string "angular_velocity_covariance"
 #define angular_velocity_covariance_id 	4
 
 //linear_acceleration_covariance
-#define linear_acceleration_covariance "linear_acceleration_covariance"
+#define linear_acceleration_covariance_string "linear_acceleration_covariance"
 #define linear_acceleration_covariance_id 	6
 
 static DDS_DynamicType Imu32_type;
+static DDS_DynamicType s_type, header_type, time_type, orientation_type,
+							angular_velocity_type, linear_acceleration_type,
+							float_array_type;
 
 /* Imu32_type_new -- Create Imu32_t type support data.  If errors occur, it 
 		       returns NULL.  Otherwise the returned type support data
@@ -96,9 +99,6 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 	DDS_DynamicTypeBuilder tb_linear_acceleration = NULL;			
 	DDS_DynamicTypeBuilder tb_imu23 = NULL;
 	DDS_DynamicTypeBuilder tb_float_array;
-	DDS_DynamicType s_type, header_type, time_type, orientation_type,
-							angular_velocity_type, linear_acceleration_type,
-							float_array_type;
 	DDS_BoundSeq bounds;
 	DDS_DynamicTypeSupport ts = NULL;
 	DDS_ReturnCode_t rc;
@@ -119,9 +119,9 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 
 		/* Create time: */		
 		desc->kind = DDS_STRUCTURE_TYPE;
-		desc->name = "time";
+		desc->name = "stamp";
 		tb_time = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
+		if (!tb_time)
 			break;
 		md->name = stamp_sec;
 		md->id = md->index= stamp_sec_id;
@@ -151,7 +151,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 		desc->kind = DDS_STRUCTURE_TYPE;
 		desc->name = "header";
 		tb_header = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
+		if (!tb_header)
 			break;
 		md->name = header_seq;
 		md->id = md->index = header_seq_id;
@@ -179,7 +179,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 		desc->kind = DDS_STRUCTURE_TYPE;
 		desc->name = "orientation";
 		tb_orientation = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
+		if (!tb_orientation)
 			break;
 		md->name = orientation_x;
 		md->id = md->index = orientation_x_id;		
@@ -216,7 +216,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 		desc->kind = DDS_STRUCTURE_TYPE;
 		desc->name = "angular_velocity";
 		tb_angular_velocity = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
+		if (!tb_angular_velocity)
 			break;
 		md->name = angular_velocity_x;
 		md->id = md->index = angular_velocity_x_id;		
@@ -244,7 +244,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 		desc->kind = DDS_STRUCTURE_TYPE;
 		desc->name = "linear_acceleration";
 		tb_linear_acceleration = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb)
+		if (!tb_linear_acceleration)
 			break;
 		md->name = linear_acceleration_x;
 		md->id = md->index = linear_acceleration_x_id;		
@@ -286,52 +286,52 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 		desc->kind = DDS_STRUCTURE_TYPE;
 		desc->name = "Imu32";
 		tb_imu23 = DDS_DynamicTypeBuilderFactory_create_type (desc);
-		if (!tb_aux)
+		if (!tb_imu23)
 			break;
 					// header
-		md->name = header;
+		md->name = header_string;
 		md->id = md->index = header_id;		
 		md->type = header_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// orientation
-		md->name = orientation;
+		md->name = orientation_string;
 		md->id = md->index = orientation_id;		
 		md->type = orientation_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// orientation_covariance
-		md->name = orientation_covariance;
+		md->name = orientation_covariance_string;
 		md->id = md->index = orientation_covariance_id;		
 		md->type = float_array_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// angular_velocity
-		md->name = angular_velocity;
+		md->name = angular_velocity_string;
 		md->id = md->index = angular_velocity_id;		
 		md->type = angular_velocity_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// angular_velocity_covariance
-		md->name = angular_velocity_covariance;
+		md->name = angular_velocity_covariance_string;
 		md->id = md->index = angular_velocity_covariance_id;		
 		md->type = float_array_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// linear_acceleration
-		md->name = linear_acceleration;
+		md->name = linear_acceleration_string;
 		md->id = md->index = linear_acceleration_id;		
 		md->type = linear_acceleration_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
 		if (rc)
 			break;
 					// linear_acceleration_covariance
-		md->name = linear_acceleration_covariance;
+		md->name = linear_acceleration_covariance_string;
 		md->id = md->index = linear_acceleration_covariance_id;		
 		md->type = float_array_type;
 		rc = DDS_DynamicTypeBuilder_add_member (tb_imu23, md);
@@ -422,27 +422,122 @@ DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
 				Imu32_t              *data,
 				DDS_InstanceHandle_t   h)
 {
-	DDS_DynamicData	d;
+	DDS_DynamicData	d_imu32, d_time, d_header,
+					d_orientation, d_angular_velocity,
+					d_linear_acceleration;	
 	DDS_ReturnCode_t rc;
 
-	d = DDS_DynamicDataFactory_create_data (Imu32_type);
-	if (!d)
+	d_imu32 = DDS_DynamicDataFactory_create_data (Imu32_type);
+	if (!d_imu32)
 		return (DDS_RETCODE_OUT_OF_RESOURCES);
 
 	do {
-		rc = DDS_DynamicData_set_float32_value (d, X_ID, data->x_);
+
+		/* According to @jvoe in #28:
+
+		For data creation, it's slightly different. To add array data, use 
+		DDS_DynamicData_set_float32_values(). To add a substruct, first create 
+		the substruct data, populating all data member fields, and add the complete 
+		substruct as member data to the top struct with DDS_DynamicData_set_complex_value(). 
+		*/
+
+		/* Time */
+		d_time = DDS_DynamicDataFactory_create_data (time_type);
+		if (!d_time)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		rc = DDS_DynamicData_set_int32_value (d_time, stamp_sec_id, data->header.stamp.sec);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_uint32_value (d_time, stamp_nanosec_id, data->header.stamp.nanosec);
 		if (rc)
 			break;
 
-		rc = DDS_DynamicData_set_float32_value (d, Y_ID, data->y_);
+		/* Header */
+		d_header = DDS_DynamicDataFactory_create_data (header_type);
+		if (!d_header)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		rc = DDS_DynamicData_set_uint32_value (d_header, header_seq_id, data->header.seq);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_uint32_value (d_header, header_stamp_id, data->header.stamp);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_string_value (d_header, header_frameid_id, data->header.frame_id);
 		if (rc)
 			break;
 
-		rc = DDS_DynamicData_set_float32_value (d, Z_ID, data->z_);
+		/* Quaternion: orientation */
+		d_orientation = DDS_DynamicDataFactory_create_data (orientation_type);
+		if (!d_orientation)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_x_id, data->orientation.x);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_y_id, data->orientation.y);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_z_id, data->orientation.z);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_w_id, data->orientation.w);
 		if (rc)
 			break;
 
-		rc = DDS_DynamicDataWriter_write (dw, d, h);
+		/* Vector3: angular_velocity */
+		d_angular_velocity = DDS_DynamicDataFactory_create_data (angular_velocity_type);
+		if (!d_angular_velocity)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_x_id, data->angular_velocity.x_);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_y_id, data->angular_velocity.y_);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_z_id, data->angular_velocity.z_);
+		if (rc)
+			break;
+
+		/* Vector3: linear_acceleration */
+		d_linear_acceleration = DDS_DynamicDataFactory_create_data (linear_acceleration_type);
+		if (!d_linear_acceleration)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_x_id, data->linear_acceleration.x_);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_y_id, data->linear_acceleration.y_);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_z_id, data->linear_acceleration.z_);
+		if (rc)
+			break;
+
+		/* Imu32 */
+		rc = DDS_DynamicData_set_complex_value (d_imu32, header_id, d_header);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_complex_value (d_imu32, orientation_id, d_orientation);
+		if (rc)
+			break;
+			/* not sure if the DDS_Float32Seq is passed appropiately */		
+		rc = DDS_DynamicData_set_float32_values (d_imu32, orientation_covariance_id, data->orientation_covariance);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_id, d_angular_velocity);
+		if (rc)
+			break;
+			/* not sure if the DDS_Float32Seq is passed appropiately */		
+		rc = DDS_DynamicData_set_float32_values (d_imu32, angular_velocity_covariance_id, data->angular_velocity_covariance);
+		if (rc)
+			break;
+		rc = DDS_DynamicData_set_complex_value (d_imu32, linear_acceleration_id, d_linear_acceleration);
+		if (rc)
+			break;
+			/* not sure if the DDS_Float32Seq is passed appropiately */		
+		rc = DDS_DynamicData_set_float32_values (d_imu32, linear_acceleration_covariance_id, data->linear_acceleration_covariance);
+		if (rc)
+			break;
+
+		rc = DDS_DynamicDataWriter_write (dw, d_imu32, h);
 	}
 	while (0);
 
@@ -465,11 +560,94 @@ DDS_ReturnCode_t Imu32_signal (DDS_DynamicDataWriter  dw,
 	return (rc);
 }
 
-static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, double *s, DDS_MemberId id)
+static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu32_t *s)
 {
 	DDS_ReturnCode_t rc;
+	DDS_DynamicData	d_imu32, d_time, d_header,
+					d_orientation, d_angular_velocity,
+					d_linear_acceleration;	
 
-	rc = DDS_DynamicData_get_float32_value (d, s, id);
+	/* Header */
+	rc = DDS_DynamicData_set_complex_value(d, &d_header, header_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_uint32_value (d_header, &s->header.seq, header_seq_id);
+	if (rc)
+		return (rc);
+		/* stamp */
+	rc = DDS_DynamicData_set_complex_value(d_header, &d_time, stamp_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_int32_value (d_time, &s->header.stamp.sec, stamp_sec_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_int32_value (d_time, &s->header.stamp.nanosec, stamp_nanosec_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_string_value (d_header, &s->header.frame_id, header_frameid_id);
+	if (rc)
+		return (rc);
+
+	/* orientation */
+	rc = DDS_DynamicData_set_complex_value(d, &d_orientation, orientation_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_orientation, &s->orientation.x, orientation_x_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_orientation, &s->orientation.y, orientation_y_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_orientation, &s->orientation.z, orientation_z_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_orientation, &s->orientation.w, orientation_w_id);
+	if (rc)
+		return (rc);
+
+	/* orientation_covariance */
+		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
+	rc = DDS_DynamicData_get_float32_values (d, &s->orientation_covariance, orientation_covariance_id);
+	if (rc)
+		return (rc);
+
+	/* angular_velocity */
+	rc = DDS_DynamicData_set_complex_value(d, &d_angular_velocity, angular_velocity_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_angular_velocity, &s->angular_velocity.x_, angular_velocity_x_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_angular_velocity, &s->angular_velocity.y_, angular_velocity_y_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_angular_velocity, &s->angular_velocity.z_, angular_velocity_z_id);
+	if (rc)
+		return (rc);
+
+	/* angular_velocity_covariance */
+		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
+	rc = DDS_DynamicData_get_float32_values (d, &s->angular_velocity_covariance, angular_velocity_covariance_id);
+	if (rc)
+		return (rc);
+
+	/* linear_acceleration */
+	rc = DDS_DynamicData_set_complex_value(d, &d_linear_acceleration, linear_acceleration_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_linear_acceleration, &s->linear_acceleration.x_, linear_acceleration_x_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_linear_acceleration, &s->linear_acceleration.y_, linear_acceleration_y_id);
+	if (rc)
+		return (rc);
+	rc = DDS_DynamicData_get_float32_value (d_linear_acceleration, &s->linear_acceleration.z_, linear_acceleration_z_id);
+	if (rc)
+		return (rc);
+
+	/* linear_acceleration_covariance */
+		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
+	rc = DDS_DynamicData_get_float32_values (d, &s->linear_acceleration_covariance, linear_acceleration_covariance_id);
 	if (rc)
 		return (rc);
 	return (DDS_RETCODE_OK);
@@ -528,15 +706,7 @@ DDS_ReturnCode_t Imu32_read_or_take (DDS_DynamicDataReader dr,
 		}
 
 		/* Valid dynamic data sample received: parse the member fields. */
-		rc = get_datatype (d, &data->x_, X_ID);
-		if (rc)
-			break;
-
-		rc = get_datatype (d, &data->y_, Y_ID);
-		if (rc)
-			break;
-
-		rc = get_datatype (d, &data->z_, Z_ID);
+		rc = get_datatype (d, &data);
 		if (rc)
 			break;
 
@@ -551,21 +721,26 @@ DDS_ReturnCode_t Imu32_read_or_take (DDS_DynamicDataReader dr,
 
 void Imu32_cleanup (Imu32_t *data)
 {
-// Not necessary with primitive types
-#if 0
-	if (data->x_) {
-		free (data->x_);
-		data->x_ = NULL;
+	if (data->header.time) {
+		free (data->header.time);
+		data->header.time = NULL;
 	}
-	if (data->y_) {
-		free (data->y_);
-		data->y_ = NULL;
+	if (data->header) {
+		free (data->header);
+		data->header = NULL;
 	}
-	if (data->z_) {
-		free (data->z_);
-		data->z_ = NULL;
+	if (data->orientation) {
+		free (data->orientation);
+		data->orientation = NULL;
 	}
-#endif
+	if (data->angular_velocity) {
+		free (data->angular_velocity);
+		data->angular_velocity = NULL;
+	}
+	if (data->linear_acceleration) {
+		free (data->linear_acceleration);
+		data->linear_acceleration = NULL;
+	}
 }
 
 
