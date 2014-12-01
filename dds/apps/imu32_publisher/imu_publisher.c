@@ -176,6 +176,7 @@ static void *dds_send_imu (void *args)
 			h = Imu32_register (dw, &m);
 #endif
 		Imu32_write (dw, &m, h);
+		printf("IMU message sent\n");
 	}
 }
 
