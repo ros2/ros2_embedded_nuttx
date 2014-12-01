@@ -508,7 +508,7 @@ int main (int argc, const char **argv)
 #endif
 
 	// publisher thread
-	//thread_create (rt2, dds_send_imu, dr);	
+	thread_create (rt2, dds_send_imu, dr);	
 
 	// DDS Debug shell thread
 	do_dds_shell (dw);
