@@ -62,21 +62,22 @@ __________________________________
 
 - [x] Quick overview/understand fo the OMG DDS standart 
 - [x] Evaluate different Open Source DDS implementations and select one meant for embedded devices (Tinq selected)
-- [x] Prototype with FreeRTOS (discarded)
-- [x] Prototype with Riot (discarded)
+- [x] Prototype with [FreeRTOS](https://github.com/ros2/ros2_embedded_freertos) (discarded)
+- [x] Prototype with [Riot](https://github.com/ros2/ros2_embedded_riot) (discarded)
 - [x] Prototype with NuttX (current prototype)
 - [x] Use the network stack to create a simple UDP/IP example over Ethernet
 - [x] NSH (NuttX Shell) infraestructure set up
 - [x] Adjust DDS interfaces to match with NuttX (pseudo-POSIX)
 - [x] DDS compiling and linking on top of NuttX
-- [x] Code small enough to fit in RAM and ROM (112 KB and 1 MB respectively)
+- [x] Code small enough to fit in RAM and ROM (refer to [this discussion](https://github.com/brunodebus/tinq-core/issues/7#issuecomment-63401794) for an approximate size of RAM, current ROM image is about 700 KB)
 - [x] DDS chat application running
 - [x] DDS Debug Shell available
 - [x] Tinq-embedded <-> Tinq Desktop interoperability (DDS embedded - DDS Desktop)
-- [x] DDSIMU demo (Tinq Desktop to Tinq Embedded using the same DDS type)
-- [~] Tinq Desktop <-> OpenSplice Desktop interoperability 
-- [ ] Tinq Embedded <-> OpenSplice Desktop interoperability
-- [ ] DDSIMU demo using a ROS message
+- [x] DDSIMU demo using ChatMsg type (Tinq Desktop to Tinq Embedded using the same DDS type)
+- [x] Tinq Desktop <-> OpenSplice Desktop interoperability 
+- [x] Tinq Embedded <-> OpenSplice Desktop interoperability
+- [x]  [DDSAccel](https://github.com/ros2/ros2_embedded_nuttx/wiki/DDSAccel-demo-(Vector3-ROS-type-Desktop---Embedded)) demo using a ROS [Vector3](http://docs.ros.org/api/geometry_msgs/html/msg/Vector3.html) message 
+- [ ] DDSIMU demo using a ROS [Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html) message
 - [ ] rcl embedded
 - [ ] create `ros2_middleware_tinq`
 - [ ] Hardware frontier
