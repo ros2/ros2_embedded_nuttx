@@ -528,13 +528,12 @@ There are actually two modes of multicast:
 
  Since NuttX does not support bidirectional sockets concurrently working the following option is added.
 
-#ifdef UDP_OS_MCAST				
-				ucp = NULL;
-#else
-				ucp = rtps_src_mcast_next (id, lp->kind, lflags, NULL);
-#endif
 */
+#ifdef UDP_OS_MCAST				
+				ucp = rtps_src_mcast_next (id, lp->kind, lflags, NULL);
+#else
 				ucp = NULL;
+#endif
 				if (!ucp) {
 					ucp = send_any_cx;
 					slist = 0;
