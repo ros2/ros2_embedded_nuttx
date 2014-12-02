@@ -193,7 +193,9 @@ void read_msg (DDS_DataReaderListener *l, DDS_DataReader dr)
 					      DDS_ANY_VIEW_STATE,
 					      DDS_ANY_INSTANCE_STATE, 1,
 					      &valid, &kind);
+	printf("Message read or taken\n");
 	if (ret == DDS_RETCODE_OK)
+		printf("ret code OK\n");
 		do {
 #if 0
 /*  Use a from field within the message to avoid to read the messages that this
