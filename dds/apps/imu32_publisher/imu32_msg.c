@@ -155,7 +155,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 			break;
 		md->name = header_seq;
 		md->id = md->index = header_seq_id;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_INT_32_TYPE);
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_UINT_32_TYPE);
 		rc = DDS_DynamicTypeBuilder_add_member (tb_header, md);
 		if (rc)
 			break;
