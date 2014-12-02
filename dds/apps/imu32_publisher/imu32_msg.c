@@ -131,7 +131,7 @@ DDS_DynamicTypeSupport Imu32_type_new (void)
 			break;
 		md->name = stamp_nanosec;
 		md->id = md->index = stamp_nanosec_id;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_INT_32_TYPE);
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_UINT_32_TYPE);
 		rc = DDS_DynamicTypeBuilder_add_member (tb_time, md);
 		if (rc)
 			break;
