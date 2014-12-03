@@ -164,7 +164,22 @@ static void *dds_send_imu (void *args)
 	h = 0;
 	for (;;){
 		sleep (1); // sleep 0.5 seconds
-		//sprintf(buf_t, "Embedded says %s\n", buf);
+
+		m.orientation.x = 10;
+		m.orientation.y = 10;
+		m.orientation.z = 10;
+		m.orientation.w = 10;
+
+		m.orientation_covariance[0] = 0;
+		m.orientation_covariance[1] = 1;
+		m.orientation_covariance[2] = 2;
+		m.orientation_covariance[3] = 3;
+		m.orientation_covariance[4] = 4;
+		m.orientation_covariance[5] = 5;
+		m.orientation_covariance[6] = 6;
+		m.orientation_covariance[7] = 7;
+		m.orientation_covariance[8] = 8;
+
 		m.linear_acceleration.x_ = 1;
 		m.linear_acceleration.y_ = 2;
 		m.linear_acceleration.z_ = 3;

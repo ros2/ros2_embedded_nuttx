@@ -423,9 +423,10 @@ DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
 				DDS_InstanceHandle_t   h)
 {
 	DDS_DynamicData	d_imu32, d_time, d_header,
-					d_orientation, d_angular_velocity,
-					d_linear_acceleration;	
+					d_orientation, d_orientation_covariance, d_angular_velocity, d_angular_velocity_covariance,
+					d_linear_acceleration, d_linear_acceleration_covariance;	
 	DDS_ReturnCode_t rc;
+	int i;
 
 	d_imu32 = DDS_DynamicDataFactory_create_data (Imu32_type);
 	if (!d_imu32)
@@ -518,26 +519,47 @@ DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
 		rc = DDS_DynamicData_set_complex_value (d_imu32, orientation_id, d_orientation);
 		if (rc)
 			break;
-			/* not sure if the DDS_Float32Seq is passed appropiately */		
-		rc = DDS_DynamicData_set_float32_values (d_imu32, orientation_covariance_id, data->orientation_covariance);
+		d_orientation_covariance = DDS_DynamicDataFactory_create_data (float_array_type);
+		if (!d_orientation_covariance)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		for (i = 0; i< 9; i++){
+			rc = DDS_DynamicData_set_float32_value (d_orientation_covariance, i, data->orientation_covariance[i]);
+			if (rc)
+				break;			
+		}
+		rc = DDS_DynamicData_set_complex_value (d_imu32, orientation_covariance_id, d_orientation_covariance);
 		if (rc)
 			break;
 		rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_id, d_angular_velocity);
 		if (rc)
 			break;
-			/* not sure if the DDS_Float32Seq is passed appropiately */		
-		rc = DDS_DynamicData_set_float32_values (d_imu32, angular_velocity_covariance_id, data->angular_velocity_covariance);
+		d_angular_velocity_covariance = DDS_DynamicDataFactory_create_data (float_array_type);
+		if (!d_angular_velocity_covariance)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		for (i = 0; i< 9; i++){
+			rc = DDS_DynamicData_set_float32_value (d_angular_velocity_covariance, i, data->angular_velocity_covariance[i]);
+			if (rc)
+				break;			
+		}
+		rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_covariance_id, d_angular_velocity_covariance);
 		if (rc)
 			break;
 		rc = DDS_DynamicData_set_complex_value (d_imu32, linear_acceleration_id, d_linear_acceleration);
 		if (rc)
 			break;
-			/* not sure if the DDS_Float32Seq is passed appropiately */		
-		rc = DDS_DynamicData_set_float32_values (d_imu32, linear_acceleration_covariance_id, data->linear_acceleration_covariance);
+		d_linear_acceleration_covariance = DDS_DynamicDataFactory_create_data (float_array_type);
+		if (!d_linear_acceleration_covariance)
+			return (DDS_RETCODE_OUT_OF_RESOURCES);		
+		for (i = 0; i< 9; i++){
+			rc = DDS_DynamicData_set_float32_value (d_linear_acceleration_covariance, i, data->linear_acceleration_covariance[i]);
+			if (rc)
+				break;			
+		}
+		rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_covariance_id, d_linear_acceleration_covariance);
 		if (rc)
 			break;
 
-		rc = DDS_DynamicDataWriter_write (dw, d_imu32, h);
+		rc = DDS_DataWriter_write (dw, d_imu32, h);
 	}
 	while (0);
 
