@@ -419,6 +419,154 @@ DDS_InstanceHandle_t Imu32_register (DDS_DynamicDataWriter  dw,
 /* Imu32_write -- Write a message on the dynamic type writer. */
 
 DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
+                Imu32_t              *data,
+                DDS_InstanceHandle_t   h)
+{
+DDS_DynamicData d_imu32, d_time, d_header,
+                d_orientation, d_angular_velocity,
+                d_linear_acceleration,
+                d_orientation_cov, d_angular_velocity_cov,
+                d_linear_acceleration_cov;
+DDS_Float32Seq fseq = DDS_SEQ_INITIALIZER (float);
+DDS_ReturnCode_t rc;
+
+d_imu32 = DDS_DynamicDataFactory_create_data (Imu32_type);
+if (!d_imu32)
+    return (DDS_RETCODE_OUT_OF_RESOURCES);
+
+do {
+
+    /* According to @jvoe in #28:
+
+    For data creation, it's slightly different. To add array data, use 
+    DDS_DynamicData_set_float32_values(). To add a substruct, first create 
+    the substruct data, populating all data member fields, and add the complete 
+    substruct as member data to the top struct with DDS_DynamicData_set_complex_value(). 
+    */
+
+    /* Time */
+    d_time = DDS_DynamicDataFactory_create_data (time_type);
+    if (!d_time)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);      
+    rc = DDS_DynamicData_set_int32_value (d_time, stamp_sec_id, data->header.stamp.sec);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_uint32_value (d_time, stamp_nanosec_id, data->header.stamp.nanosec);
+    if (rc)
+        break;
+
+    /* Header */
+    d_header = DDS_DynamicDataFactory_create_data (header_type);
+    if (!d_header)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);      
+    rc = DDS_DynamicData_set_uint32_value (d_header, header_seq_id, data->header.seq);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_header, header_stamp_id, d_time);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_string_value (d_header, header_frameid_id, data->header.frame_id);
+    if (rc)
+        break;
+
+    /* Quaternion: orientation */
+    d_orientation = DDS_DynamicDataFactory_create_data (orientation_type);
+    if (!d_orientation)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);      
+    rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_x_id, data->orientation.x);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_y_id, data->orientation.y);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_z_id, data->orientation.z);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_orientation, orientation_w_id, data->orientation.w);
+    if (rc)
+        break;
+
+    /* Vector3: angular_velocity */
+    d_angular_velocity = DDS_DynamicDataFactory_create_data (angular_velocity_type);
+    if (!d_angular_velocity)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);      
+    rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_x_id, data->angular_velocity.x_);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_y_id, data->angular_velocity.y_);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_angular_velocity, angular_velocity_z_id, data->angular_velocity.z_);
+    if (rc)
+        break;
+
+    /* Vector3: linear_acceleration */
+    d_linear_acceleration = DDS_DynamicDataFactory_create_data (linear_acceleration_type);
+    if (!d_linear_acceleration)
+        return (DDS_RETCODE_OUT_OF_RESOURCES);      
+    rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_x_id, data->linear_acceleration.x_);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_y_id, data->linear_acceleration.y_);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_float32_value (d_linear_acceleration, linear_acceleration_z_id, data->linear_acceleration.z_);
+    if (rc)
+        break;
+
+    /* Imu32 */
+    rc = DDS_DynamicData_set_complex_value (d_imu32, header_id, d_header);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, orientation_id, d_orientation);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_id, d_angular_velocity);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, linear_acceleration_id, d_linear_acceleration);
+    if (rc)
+        break;
+
+    d_orientation_cov = DDS_DynamicDataFactory_create_data (float_array_type);
+    dds_seq_from_array (&fseq, data->orientation_covariance, 9);
+    rc = DDS_DynamicData_set_float32_values (d_orientation_cov, 0/*orientation_covariance_id*/, &fseq);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, orientation_covariance_id, d_orientation_cov);
+    if (rc)
+        break;
+
+    d_angular_velocity_cov = DDS_DynamicDataFactory_create_data (float_array_type);
+    dds_seq_from_array (&fseq, data->angular_velocity_covariance, 9);
+    rc = DDS_DynamicData_set_float32_values (d_angular_velocity_cov, 0/*angular_velocity_covariance_id*/, &fseq);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, angular_velocity_covariance_id, d_angular_velocity_cov);
+    if (rc)
+        break;
+
+    d_linear_acceleration_cov = DDS_DynamicDataFactory_create_data (float_array_type);
+    dds_seq_from_array (&fseq, data->linear_acceleration_covariance, 9);
+    rc = DDS_DynamicData_set_float32_values (d_linear_acceleration_cov, 0/*linear_acceleration_covariance_id*/, &fseq);
+    if (rc)
+        break;
+    rc = DDS_DynamicData_set_complex_value (d_imu32, linear_acceleration_covariance_id, d_linear_acceleration_cov);
+    if (rc)
+        break;
+
+	rc = DDS_DataWriter_write (dw, d_imu32, h);
+
+} while (0);
+
+DDS_DynamicDataFactory_delete_data (d_imu32);
+return (rc);
+}
+
+#if 0
+/* Imu32_write -- Write a message on the dynamic type writer. */
+
+DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
 				Imu32_t              *data,
 				DDS_InstanceHandle_t   h)
 {
@@ -566,6 +714,7 @@ DDS_ReturnCode_t Imu32_write (DDS_DynamicDataWriter  dw,
 	DDS_DynamicDataFactory_delete_data (d_imu32);
 	return (rc);
 }
+#endif
 
 /* Imu32_signal -- Indicate a vector3 signal on the dynamic type writer. */
 
