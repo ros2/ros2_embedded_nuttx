@@ -116,7 +116,7 @@ To get a serial console type:
 Install the following requirements:
 
 ```bash
-sudo apt-get install libssl-dev libxml2-dev pkg-config
+sudo apt-get install libssl-dev libxml2-dev pkg-config picocom screen
 ```
 
 ##### Installing `menuconfig`
