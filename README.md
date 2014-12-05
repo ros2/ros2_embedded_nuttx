@@ -112,6 +112,13 @@ To get a serial console type:
 
 ###Setting it up
 
+####Requirements
+Install the following requirements:
+
+```bash
+sudo apt-get install libssl-dev libxml2-dev pkg-config
+```
+
 ##### Installing `menuconfig`
 ```bash
 git clone http://ymorin.is-a-geek.org/git/kconfig-frontends
