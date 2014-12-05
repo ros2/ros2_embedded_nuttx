@@ -116,17 +116,14 @@ To get a serial console type:
 Install the following requirements:
 
 ```bash
-sudo apt-get install libssl-dev libxml2-dev pkg-config picocom screen
+sudo apt-get install libssl-dev libxml2-dev pkg-config picocom screen libusb-1.0-0-dev gcc-arm-none-eabi
 ```
 
 ##### Installing `menuconfig`
 ```bash
 git clone http://ymorin.is-a-geek.org/git/kconfig-frontends
 cd kconfig-frontends/
-sudo apt-get install gperf
-sudo apt-get install flex
-sudo apt-get install bison
-sudo apt-get install libncurses5-dev
+sudo apt-get install autotools-dev autoconf gperf flex bison libncurses5-dev libtool
 ./bootstrap
 ./configure
 make
@@ -147,11 +144,18 @@ make
 cd ..
 ```
 
+##### Installing openocd
+```bash
+cd tools
+make openocd
+cd ..
+```
+
 ##### Selecting a configuration
 For Tinq the one you need to use is:
 ```bash
 cd nuttx/tools
-./configure stm3240g-eval/dds
+./configure.sh stm3240g-eval/dds
 cd ..
 ```
 (alternatively if you work with the STM32F4Discovery board do a `./configure stm32f4discovery/dds
