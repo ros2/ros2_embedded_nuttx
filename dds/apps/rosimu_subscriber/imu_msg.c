@@ -188,23 +188,20 @@ DDS_DynamicTypeSupport Imu_type_new (void)
 		if (rc)
 			break;
 		md->name = orientation_y;
-		md->id = orientation_y_id;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);
-		md->index = 1;
+		md->id = md->index = orientation_y_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);		
 		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
 		if (rc)
 			break;
 		md->name = orientation_z;
-		md->id = orientation_z_id;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);
-		md->index = 2;
+		md->id = md->index = orientation_z_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);		
 		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
 		if (rc)
 			break;
 		md->name = orientation_w;
-		md->id = orientation_w_id;
-		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);
-		md->index = 3;
+		md->id = md->index = orientation_w_id;
+		md->type = DDS_DynamicTypeBuilderFactory_get_primitive_type (DDS_FLOAT_64_TYPE);		
 		rc = DDS_DynamicTypeBuilder_add_member (tb_orientation, md);
 		if (rc)
 			break;
