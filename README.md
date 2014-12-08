@@ -20,6 +20,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [Memory inspection](#memory-inspection)
 - [Running in Linux](#running-in-linux)
 - [File structure](#file-structure)
+- [DDS Debug Shell](#dds-debug-shell)
 - [ROS Client Library](#ros-client-library)
 - [Applications](#applications)
 - [Communication](#communication)
@@ -318,6 +319,72 @@ tree -L 1
 - **ros2_embedded.\***: Sublime text configuration files.
 - **stlink**: a modified version of stlink compatible with the implementations.
 - **tools**: a set of useful tools for development.
+
+
+### DDS Debug Shell
+
+[Tinq's]() DDS implemmentation comes together with a `DDS Debug Shell` that has proved to be terribly useful to debug problems when working with DDS. The shell can be used prepending `!!` to any of the available commands:
+
+```bash
+!!help
+Following commands are available:
+    ssys                  Display system-specific data.
+    stimer                Display the timers.
+    sstr                  Display the string cache.
+    spool                 Display the pools.
+    spoola                Display the pools (extended).
+    scx [<cx>]            Display connections.
+    scxa [<cx>]           Display connections (extended).
+    scxq                  Display queued connections.
+    sloc                  Display locators.
+    sconfig               Display configuration data.
+    sdomain <d> <lf> <rf> Display domain (d) info.
+                          <lf> and <rf> are bitmaps for local/remote info.
+                          1=Locator, 2=Builtin, 4=Endp, 8=Type, 10=Topic.
+    sdisc                 Display discovery info.
+    sdisca                Display all discovery info (sdisc + endpoints)
+    stype [<name>]        Display Type information.
+    sqos                  Display QoS parameters.
+    stopic <d> [<name>]   Display Topic information.
+    sendpoints            Display the DCPS/RTPS Readers/Writers.
+    scache <ep>           Display an RTPS Endpoint Cache.
+    sdcache <ep>          Display a DCPS Endpoint Cache.
+    qcache <ep> [<query>] Query cache data of the specified endpoint:
+                          where: <ep>: endpoint, <query>: SQL Query string.
+    sproxy [<ep>]         Display Proxy contexts.
+    rproxy [<ep>]         Restart Proxy context.
+    seqos <ep>            Display endpoint QoS parameters.
+    scrypto <ep>          Display entity crypto parameters.
+    sscache               Display security cache.
+    rehs                  Request a rehandshake.
+    srx                   Display the RTPS Receiver context.
+    stx                   Display the RTPS Transmitter context.
+    sfd                   Display the status of the file descriptors.
+    asp <d>               Assert participant.
+    ase <ep>              Assert writer endpoint.
+    dtls                  Display DTLS connection related info.
+    spdb                  Display the policy database.
+    sfwd                  Display the forwarder state.
+    ftrace <n>            Start forwarder tracing for <n> events.
+    d [<p> [<n>]]         Dump memory.
+    da [<p> [<n>]]        Dump memory in ASCII.
+    db [<p> [<n>]]        Dump memory in hex bytes.
+    ds [<p> [<n>]]        Dump memory in hex 16-bit values.
+    dl [<p> [<n>]]        Dump memory in hex 32-bit values.
+    dm [<p> [<n>]]        Dump memory in mixed hex/ASCII.
+    indent <tab> <n>      Set indent type (if <tab>=1: use TABs).
+    taflags <flags>       Set type attribute display flags.
+                          <flags>: 1=header, 2=size, 4=elsize, 8=ofs.
+    server [<port>]       Start debug server on the given port.
+    env                   Display configuration data (=sconf).
+    set <var> <value>     Set the configuration variable to given value.
+    unset <var>           Unset the configuration variable.
+    suspend <value>       Suspend with given mode.
+    activate <value>      Activate with given mode.
+    help                  Display general help.
+    exit                  Close remote connection.
+
+```
 
 ### ROS Client Library
 The [ROS Client Library](rcl/README.md) (rcl) for embedded (implemented under the `rcl` directory) allows to code ROS applications using the ROS 2 API. Refer to [rcl.h](rcl/rcl.h) for a list of functions.
