@@ -736,14 +736,14 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 					d_linear_acceleration;	
 
 	/* Header */
-	rc = DDS_DynamicData_set_complex_value(d, &d_header, header_id);
+	rc = DDS_DynamicData_get_complex_value(d, &d_header, header_id);
 	if (rc)
 		return (rc);
 	rc = DDS_DynamicData_get_uint32_value (d_header, &s->header.seq, header_seq_id);
 	if (rc)
 		return (rc);
 		/* stamp */
-	rc = DDS_DynamicData_set_complex_value(d_header, &d_time, stamp_id);
+	rc = DDS_DynamicData_get_complex_value(d_header, &d_time, stamp_id);
 	if (rc)
 		return (rc);
 	rc = DDS_DynamicData_get_int32_value (d_time, &s->header.stamp.sec, stamp_sec_id);
@@ -757,7 +757,7 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* orientation */
-	rc = DDS_DynamicData_set_complex_value(d, &d_orientation, orientation_id);
+	rc = DDS_DynamicData_get_complex_value(d, &d_orientation, orientation_id);
 	if (rc)
 		return (rc);
 	rc = DDS_DynamicData_get_float64_value (d_orientation, &s->orientation.x, orientation_x_id);
@@ -780,7 +780,7 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* angular_velocity */
-	rc = DDS_DynamicData_set_complex_value(d, &d_angular_velocity, angular_velocity_id);
+	rc = DDS_DynamicData_get_complex_value(d, &d_angular_velocity, angular_velocity_id);
 	if (rc)
 		return (rc);
 	rc = DDS_DynamicData_get_float64_value (d_angular_velocity, &s->angular_velocity.x_, angular_velocity_x_id);
@@ -800,7 +800,7 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* linear_acceleration */
-	rc = DDS_DynamicData_set_complex_value(d, &d_linear_acceleration, linear_acceleration_id);
+	rc = DDS_DynamicData_get_complex_value(d, &d_linear_acceleration, linear_acceleration_id);
 	if (rc)
 		return (rc);
 	rc = DDS_DynamicData_get_float64_value (d_linear_acceleration, &s->linear_acceleration.x_, linear_acceleration_x_id);
@@ -874,7 +874,7 @@ DDS_ReturnCode_t Imu_read_or_take (DDS_DynamicDataReader dr,
 		}
 
 		/* Valid dynamic data sample received: parse the member fields. */
-		rc = get_datatype (d, data);
+		rc = get_datatype (d, &data);
 		if (rc)
 			break;
 
