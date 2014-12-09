@@ -160,6 +160,7 @@ static void *dds_send_imu (void *args)
 {
 	Imu_t				m;
 	DDS_InstanceHandle_t	h;
+	int i = 0;
 
 	h = 0;
 	for (;;){
@@ -180,9 +181,9 @@ static void *dds_send_imu (void *args)
 		m.orientation_covariance[7] = 7;
 		m.orientation_covariance[8] = 8;
 
-		m.linear_acceleration.x_ = 1;
-		m.linear_acceleration.y_ = 2;
-		m.linear_acceleration.z_ = 3;
+		m.linear_acceleration.x_ = 1 + i;
+		m.linear_acceleration.y_ = 2 + i;
+		m.linear_acceleration.z_ = 3 + i;
 #if 0
 		/* According to https://github.com/brunodebus/tinq-core/issues/7#issuecomment-63740498:
 			the Imu shouldn't be registered if it doesn't contain a @key attribute
@@ -192,6 +193,7 @@ static void *dds_send_imu (void *args)
 #endif
 		Imu_write (dw, &m, h);
 		printf("IMU message sent\n");
+		i++;
 	}
 }
 

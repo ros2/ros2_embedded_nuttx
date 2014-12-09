@@ -424,7 +424,8 @@ DDS_DynamicData d_imu, d_time, d_header,
                 d_linear_acceleration,
                 d_orientation_cov, d_angular_velocity_cov,
                 d_linear_acceleration_cov;
-DDS_Float32Seq fseq = DDS_SEQ_INITIALIZER (float);
+
+DDS_Float64Seq fseq = DDS_SEQ_INITIALIZER (double);
 DDS_ReturnCode_t rc;
 
 d_imu = DDS_DynamicDataFactory_create_data (Imu_type);
@@ -552,7 +553,7 @@ do {
     if (rc)
         break;
 
-	rc = DDS_DataWriter_write (dw, d_imu, h);
+	rc = DDS_DynamicDataWriter_write (dw, d_imu, h);
 
 } while (0);
 
@@ -735,6 +736,8 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 					d_orientation, d_angular_velocity,
 					d_linear_acceleration;	
 
+	DDS_Float64Seq fseq = DDS_SEQ_INITIALIZER (double);
+
 	/* Header */
 	rc = DDS_DynamicData_get_complex_value(d, &d_header, header_id);
 	if (rc)
@@ -749,10 +752,10 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 	rc = DDS_DynamicData_get_int32_value (d_time, &s->header.stamp.sec, stamp_sec_id);
 	if (rc)
 		return (rc);
-	rc = DDS_DynamicData_get_int32_value (d_time, &s->header.stamp.nanosec, stamp_nanosec_id);
+	rc = DDS_DynamicData_get_uint32_value (d_time, &s->header.stamp.nanosec, stamp_nanosec_id);
 	if (rc)
 		return (rc);
-	rc = DDS_DynamicData_get_string_value (d_header, &s->header.frame_id, header_frameid_id);
+	rc = DDS_DynamicData_get_string_value (d_header, s->header.frame_id, header_frameid_id);
 	if (rc)
 		return (rc);
 
@@ -773,11 +776,11 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 	if (rc)
 		return (rc);
 
-	/* orientation_covariance */
-		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
-	rc = DDS_DynamicData_get_float64_values (d, &s->orientation_covariance, orientation_covariance_id);
+	/* orientation_covariance */	
+	rc = DDS_DynamicData_get_float64_values (d, &fseq, orientation_covariance_id);	
 	if (rc)
 		return (rc);
+	dds_seq_to_array (&fseq, s->orientation_covariance, 9);
 
 	/* angular_velocity */
 	rc = DDS_DynamicData_get_complex_value(d, &d_angular_velocity, angular_velocity_id);
@@ -794,10 +797,10 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* angular_velocity_covariance */
-		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
-	rc = DDS_DynamicData_get_float64_values (d, &s->angular_velocity_covariance, angular_velocity_covariance_id);
+	rc = DDS_DynamicData_get_float64_values (d, &fseq, angular_velocity_covariance_id);	
 	if (rc)
 		return (rc);
+	dds_seq_to_array (&fseq, s->angular_velocity_covariance, 9);
 
 	/* linear_acceleration */
 	rc = DDS_DynamicData_get_complex_value(d, &d_linear_acceleration, linear_acceleration_id);
@@ -814,10 +817,11 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* linear_acceleration_covariance */
-		/* There's probably a  need for an intermediate step converting the data into an DDS_Float32Seq and the into the array */
-	rc = DDS_DynamicData_get_float64_values (d, &s->linear_acceleration_covariance, linear_acceleration_covariance_id);
+	rc = DDS_DynamicData_get_float64_values (d, &fseq, linear_acceleration_covariance_id);	
 	if (rc)
 		return (rc);
+	dds_seq_to_array (&fseq, s->linear_acceleration_covariance, 9);
+
 	return (DDS_RETCODE_OK);
 }
 
@@ -874,7 +878,7 @@ DDS_ReturnCode_t Imu_read_or_take (DDS_DynamicDataReader dr,
 		}
 
 		/* Valid dynamic data sample received: parse the member fields. */
-		rc = get_datatype (d, &data);
+		rc = get_datatype (d, data);
 		if (rc)
 			break;
 
