@@ -68,7 +68,7 @@ DDS_ReturnCode_t Vector3_dos_read_or_take (DDS_DynamicDataReader dr,
 
 
 /* Cleanup dynamic message data. */
-void Vector3_dos_cleanup (Vector3_t *data);
+void Vector3_dos_cleanup (Vector3_dos_t *data);
 
 
 #endif /* __vector3_msg_h_ */

@@ -225,7 +225,7 @@ DDS_ReturnCode_t Vector3_dos_write (DDS_DynamicDataWriter  dw,
 	        break;
 
 	    /* Write everything over the network */
-		rc = DDS_DataWriter_write (dw, d_vector3_dos, h);
+		rc = DDS_DynamicDataWriter_write (dw, d_vector3_dos, h);
 	}
 	while (0);
 
@@ -338,7 +338,7 @@ DDS_ReturnCode_t Vector3_dos_read_or_take (DDS_DynamicDataReader dr,
 		}
 
 		/* Valid dynamic data sample received: parse the member fields. */
-		rc = get_datatype (d, &data);
+		rc = get_datatype (d, data);
 		if (rc)
 			break;
 
@@ -351,7 +351,7 @@ DDS_ReturnCode_t Vector3_dos_read_or_take (DDS_DynamicDataReader dr,
 
 /* Vector3_dos_cleanup -- Cleanup dynamic message data. */
 
-void Vector3_dos_cleanup (Vector3_t *data)
+void Vector3_dos_cleanup (Vector3_dos_t *data)
 {
 // Not necessary with primitive types
 #if 0
