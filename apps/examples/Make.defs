@@ -361,3 +361,7 @@ endif
 ifeq ($(CONFIG_EXAMPLES_IMUPUBLISHER),y)
 CONFIGURED_APPS += examples/imu_publisher
 endif
+
+ifeq ($(CONFIG_EXAMPLES_ROSIMUPUBLISHER),y)
+CONFIGURED_APPS += examples/rosimu_publisher
+endif
