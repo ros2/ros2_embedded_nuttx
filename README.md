@@ -78,7 +78,7 @@ __________________________________
 - [x] Tinq Desktop <-> OpenSplice Desktop interoperability 
 - [x] Tinq Embedded <-> OpenSplice Desktop interoperability
 - [x]  [DDSAccel](https://github.com/ros2/ros2_embedded_nuttx/wiki/DDSAccel-demo-(Vector3-ROS-type-Desktop---Embedded)) demo using a ROS [Vector3](http://docs.ros.org/api/geometry_msgs/html/msg/Vector3.html) message 
-- [x] ROSIMU demo using a ROS [Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html) message
+- [x] [ROSIMU](https://github.com/ros2/ros2_embedded_nuttx/wiki/ROSIMU-demo-(Imu-ROS-msg-type,-lis302dlh-accel)) demo using a ROS [Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html) message
 - [ ] rcl embedded
 - [ ] create `ros2_middleware_tinq`
 - [ ] Hardware frontier
