@@ -734,7 +734,7 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 	DDS_ReturnCode_t rc;
 	DDS_DynamicData	d_imu, d_time, d_header,
 					d_orientation, d_angular_velocity,
-					d_linear_acceleration;	
+					d_linear_acceleration, d_floats;	
 
 	DDS_Float64Seq fseq = DDS_SEQ_INITIALIZER (double);
 
@@ -776,11 +776,17 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 	if (rc)
 		return (rc);
 
-	/* orientation_covariance */	
-	rc = DDS_DynamicData_get_float64_values (d, &fseq, orientation_covariance_id);	
+	/* orientation_covariance */
+	rc = DDS_DynamicData_get_complex_value (d, &d_floats, orientation_covariance_id);
 	if (rc)
-		return (rc);
-	dds_seq_to_array (&fseq, s->orientation_covariance, 9);
+	    return (rc);
+	/* Clean way to get the complete array data via a sequence, but double memcpy(): */
+	rc = DDS_DynamicData_get_float64_values (d_floats, &fseq, 0);
+	if (rc)
+	    return (rc);
+	/* You can already use the sequence data via DDS_SEQ_ITEM(fseq, i) to access an
+	   individual element, or copy everything to the s->orientation_covariance member: */
+	dds_seq_to_array (&fseq, s->orientation_covariance, sizeof (s->orientation_covariance) / sizeof (double));
 
 	/* angular_velocity */
 	rc = DDS_DynamicData_get_complex_value(d, &d_angular_velocity, angular_velocity_id);
@@ -797,10 +803,17 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* angular_velocity_covariance */
-	rc = DDS_DynamicData_get_float64_values (d, &fseq, angular_velocity_covariance_id);	
+	rc = DDS_DynamicData_get_complex_value (d, &d_floats, angular_velocity_covariance_id);
 	if (rc)
-		return (rc);
-	dds_seq_to_array (&fseq, s->angular_velocity_covariance, 9);
+	    return (rc);
+	/* Clean way to get the complete array data via a sequence, but double memcpy(): */
+	rc = DDS_DynamicData_get_float64_values (d_floats, &fseq, 0);
+	if (rc)
+	    return (rc);
+	/* You can already use the sequence data via DDS_SEQ_ITEM(fseq, i) to access an
+	   individual element, or copy everything to the s->orientation_covariance member: */
+	dds_seq_to_array (&fseq, s->angular_velocity_covariance, sizeof (s->angular_velocity_covariance) / sizeof (double));
+
 
 	/* linear_acceleration */
 	rc = DDS_DynamicData_get_complex_value(d, &d_linear_acceleration, linear_acceleration_id);
@@ -817,10 +830,17 @@ static DDS_ReturnCode_t get_datatype (DDS_DynamicData d, Imu_t *s)
 		return (rc);
 
 	/* linear_acceleration_covariance */
-	rc = DDS_DynamicData_get_float64_values (d, &fseq, linear_acceleration_covariance_id);	
+	rc = DDS_DynamicData_get_complex_value (d, &d_floats, linear_acceleration_covariance_id);
 	if (rc)
-		return (rc);
-	dds_seq_to_array (&fseq, s->linear_acceleration_covariance, 9);
+	    return (rc);
+	/* Clean way to get the complete array data via a sequence, but double memcpy(): */
+	rc = DDS_DynamicData_get_float64_values (d_floats, &fseq, 0);
+	if (rc)
+	    return (rc);
+	/* You can already use the sequence data via DDS_SEQ_ITEM(fseq, i) to access an
+	   individual element, or copy everything to the s->orientation_covariance member: */
+	dds_seq_to_array (&fseq, s->linear_acceleration_covariance, sizeof (s->linear_acceleration_covariance) / sizeof (double));
+
 
 	return (DDS_RETCODE_OK);
 }

@@ -176,7 +176,7 @@ void do_dds (DDS_DataWriter dw)
 				printf ("?%s\r\n", buf + 1);
 			continue;
 		} else {
-			printf("Writing to the other endpoints not allowed.\n");
+			printf("Writing to the other endpoints not allowed. Type !!help for DDS Shell commands.\n");
 #if 0
 			if (!h)
 				h = Imu_register (dw, &m);
@@ -204,9 +204,12 @@ void fetch_imu(void)
 	accy =G_CONST*read_accel_y()/1000;
 	accz =G_CONST*read_accel_z()/1000;
 
-	printf("acc_x: %d, acc_y: %d, acc_z: %d\n", accx, accy, accz);
+	// printf("acc_x: %d, acc_y: %d, acc_z: %d\n", accx, accy, accz);
 	// sprintf(buf_t, "Embedded says hi\n");
 }
+
+// print out the speed of publishing
+#define TIMETEST
 
 static void *dds_send_imu (void *args)
 {
@@ -218,10 +221,16 @@ static void *dds_send_imu (void *args)
   	print_config_i2c();		
 
 	h = 0;
-	for (;;){
-		sleep (0.5);		
-		fetch_imu();
+#ifdef TIMETEST
+	int nruns = 0;
+	uint32_t start;
+	uint32_t elapsed;
+	start = clock_systimer();
+#endif
 
+	for (;;){
+		//sleep (0.5);		
+		fetch_imu();
 #if 0
 		m.orientation.x = 10;
 		m.orientation.y = 10;
@@ -251,6 +260,19 @@ static void *dds_send_imu (void *args)
 			h = Imu_register (dw, &m);
 #endif
 		Imu_write (dw, &m, h);
+
+#ifdef TIMETEST
+		nruns++;
+		if (nruns == 10){
+			elapsed = clock_systimer() - start; // in miliseconds
+
+			float period =  (10.0*1000) / (float) elapsed; 
+			printf("elapsed: %d miliseconds to send 10 readings\n", elapsed);
+			//printf("Period: %f Hz\n", period);			
+			start = clock_systimer();
+			nruns = 0;
+		}
+#endif
 	}
 }
 
@@ -607,15 +629,14 @@ int dds_publisher_main(int argc, char *argv[])
 		printf ("DDS Chat message reader created.\r\n");
 
 #ifdef WAITSETS
-	start_imu_reader (dr);
+	//start_imu_reader (dr);
 #endif
 
 	thread_create (rt2, dds_send_imu, dr);
-
 	do_dds (dw);
 
 #ifdef WAITSETS
-	stop_imu_reader (dr);
+	//stop_imu_reader (dr);
 #endif
 	DDS_Publisher_delete_datawriter (pub, dw);
 	usleep (200000);
