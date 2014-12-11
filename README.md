@@ -18,6 +18,7 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
     + [Debugging](#debugging)
     + [Rebasing NuttX](#rebasing-nuttx)
     + [Memory inspection](#memory-inspection)
+- [Threading](#threading) 
 - [Running in Linux](#running-in-linux)
 - [File structure](#file-structure)
 - [DDS Debug Shell](#dds-debug-shell)
@@ -257,7 +258,14 @@ cd nuttx
 source tools/showsize.sh nuttx
 ```
 
-###Running in Linux
+### Threading
+
+As it's implemented in this prototype, an application has at least 6 threads:
+- [dds_thread_core](https://github.com/ros2/ros2_embedded_nuttx/blob/master/dds/src/dds/dds.c#L961): thread taking care of having a Domain Participant up and handling all the DDS core aspects
+- [A thread for each locator (4)](https://github.com/ros2/ros2_embedded_nuttx/blob/master/dds/src/rtps/rtps_main.c#L851): This prototype includes a udp pseudo-poll implementation that uses a thread continuosly receiving on each locator (asociated with a file descriptor). The content is stored in a ringbuffer and fetched from the `dds_thread_core` thread. 
+- application threads: each application can launch its own threads using the NuttX primitives. E.g.: [ROSIMU demo](https://github.com/ros2/ros2_embedded_nuttx/wiki/ROSIMU-demo-(Imu-ROS-msg-type,-lis302dlh-accel)) uses two more threads.
+
+### Running in Linux
 NuttX includes a simulator that allows to run the applications (with some resctrictions, refer to [nuttx/configs/sim/README.txt](nuttx/configs/sim/README.txt)) directly in Linux. A simple setup can be achieved through:
 ```
 cd nuttx
