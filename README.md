@@ -22,9 +22,10 @@ This repository prototypes ROS 2.0 for embedded systems using NuttX, Tinq and th
 - [Running in Linux](#running-in-linux)
 - [File structure](#file-structure)
 - [DDS Debug Shell](#dds-debug-shell)
-- [ROS Client Library](#ros-client-library)
-- [Applications](#applications)
+- [ROS Client Library (wip)](#ros-client-library)
+    + [Applications](#applications)
 - [Communication](#communication)
+- [Limitations](#limitations)
 
 
  The prototype has been built in a modular way using the following blocks:
@@ -428,10 +429,19 @@ int ros_main(int argc, char *argv[])
 
 Refer to the [rcl/README.md](rcl/README.md) for further instructions on how to use the ROS 2 API to code applications.
 
-### Applications
+#### Applications
 Applications are coded at `apps/ros`. Refer to `apps/ros/publisher` for an example.
 
 ### Communication
 - [development discussion](https://github.com/brunodebus/tinq-core/issues/7)
 
+### Limitations
+
+- Current example applications (e.g. the [ROSIMU](https://github.com/ros2/ros2_embedded_nuttx/wiki/ROSIMU-demo-(Imu-ROS-msg-type,-lis302dlh-accel)) demo) publish at about 3 Hz. The reason behind this matter is the 4 threads (one for each locator blocked in a `recvfrom` call) simulating UDP polling (refer to [threading](#threading)). Without these 4 threads (which are needed for DDS communication), the code has proved to be able to publish at up to 50 Hz. This limitation should be address by implementing real UDP `poll()` or `select()` support. Refer to [nuttx official repository/TODO](http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/TODO), particularly the `UDP READ-AHEAD?` and `NO POLL/SELECT ON UDP SOCKETS` tickets.
+- Tinq QoS parameters hasn't been tested. There's no guarantee that it'll work.
+- In NuttX we can't simultaneously read and write from a socket (refer to https://github.com/brunodebus/tinq-core/issues/7#issuecomment-62443465). Tinq has been implemented with this assumption in mind thereby a set of fixes were applied to make it work.
+- The implementation does not support different message types with the same topic name ([issue](https://github.com/ros2/ros2_embedded_nuttx/issues/27)). Refer to the [discussion](https://github.com/brunodebus/tinq-core/issues/7#issuecomment-62636116).
+- Tinq implementation does not interoperate with RTI's Connext. Refer to the [issue](https://github.com/ros2/ros2_embedded_nuttx/issues/26).
+
+ 
 ![](http://www.osrfoundation.org/wordpress/wp-content/uploads/2014/07/osrf_masthead.png)
