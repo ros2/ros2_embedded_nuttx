@@ -304,7 +304,7 @@ echo "0" > /proc/sys/net/ipv4/conf/eth0/force_igmp_version
 tree -L 1
 .
 ├── apps
-├── dds
+├── tinq-core
 ├── misc
 ├── nuttx
 ├── NxWidgets
@@ -319,7 +319,7 @@ tree -L 1
 ```
 
 - **apps**: NuttX applications. The subdirectory `examples` contains some of the DDS apps.
-- **dds**: Tinq's DDS implementation hacked to work with NuttX.
+- **tinq-core**: Tinq's DDS implementation hacked to work with NuttX.
 - **misc**: Variety of things.
 - **nuttx**: The NuttX RTOS.
 - **NxWidgets**: a special graphical user interface.
