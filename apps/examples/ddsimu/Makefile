@@ -54,7 +54,7 @@ ALT_STR =
 
 EXECUTABLE = ddsimu${ALT_NUM}
 
-BASE       = ../../../dds/src
+BASE       = ../../../tinq-core/dds/src
 
 RTPS       = ${BASE}/rtps
 TRANS      = ${BASE}/trans
@@ -70,15 +70,15 @@ SQL        = ${BASE}/sql
 SECURITY   = ${BASE}/security
 NSEC	   = ${BASE}/nsec
 
-SECP       = ../../../dds/plugins/secplug
-NSECP      = ../../../dds/plugins/nsecplug
+SECP       = ../../../tinq-core/dds/plugins/secplug
+NSECP      = ../../../tinq-core/dds/plugins/nsecplug
 
 # NuttX base files
 NUTTX_BASE = ../../../nuttx
 NUTTX_HEADERS = ${NUTTX_BASE}/include
-INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
-			-I../../../dds/plugins/security/ -I${NSECP}/ \
-			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
+INC_PATH = -I${BASE}/include -I../../../tinq-core/dds/api/headers \
+			-I../../../tinq-core/dds/plugins/security/ -I${NSECP}/ \
+			-I../../../tinq-core/dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
 			-I${NUTTX_HEADERS} -I${NUTTX_HEADERS}/nuttx/net -I${NUTTX_BASE}/net -I${TRANS}/ringbuffer \
 			-I${NUTTX_HEADERS}/netinet -I.
 #-I/usr/include/libxml2 
@@ -150,7 +150,7 @@ prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 
 #prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h chat_msg.h
+prog_CHDRS = ${BASE}/include/*.h ../../../tinq-core/dds/api/headers/dds/*.h chat_msg.h
 
 
 #######################################################

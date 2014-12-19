@@ -18,7 +18,7 @@ ALT_STR =
 #ALT_STR = -DALT2
 
 
-BASE       = ../../../dds/src
+BASE       = ../../../tinq-core/dds/src
 RCL 	   = ../../../rcl
 
 RTPS       = ${BASE}/rtps
@@ -41,9 +41,9 @@ NSECP      = ../../../dds/plugins/nsecplug
 # NuttX base files
 NUTTX_BASE = ../../../nuttx
 NUTTX_HEADERS = ${NUTTX_BASE}/include
-INC_PATH = -I${BASE}/include -I../../../dds/api/headers \
-			-I../../../dds/plugins/security/ -I${NSECP}/ \
-			-I../../../dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
+INC_PATH = -I${BASE}/include -I../../../tinq-core/dds/api/headers \
+			-I../../../tinq-core/dds/plugins/security/ -I${NSECP}/ \
+			-I../../../tinq-core/dds/qeo-c-import/openssl/outputNative/openssl/HOSTLINUX/Debug/src/openssl-1.0.1f/include/ \
 			-I${NUTTX_HEADERS} -I${NUTTX_HEADERS}/nuttx/net -I${NUTTX_BASE}/net -I${TRANS}/ringbuffer \
 			-I${NUTTX_HEADERS}/netinet -I${RCL}/ -I${RCL}/aux
 #-I/usr/include/libxml2 
@@ -115,7 +115,7 @@ prog_CSRCS += ${rtps_CSRCS} ${trans_CSRCS}
 
 
 #prog_COBJS = ${prog_CSRCS:.c=.o}
-prog_CHDRS = ${BASE}/include/*.h ../../../dds/api/headers/dds/*.h ${RCL}/aux/chat_msg.h ${RCL}/rcl.h
+prog_CHDRS = ${BASE}/include/*.h ../../../tinq-core/dds/api/headers/dds/*.h ${RCL}/aux/chat_msg.h ${RCL}/rcl.h
 
 
 #######################################################

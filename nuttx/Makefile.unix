@@ -572,5 +572,5 @@ ifneq ($(APPDIR),)
 endif
 
 dds_clean:
-	$(Q) $(MAKE) -C "$(TOPDIR)/../dds/apps/chat" TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C "$(TOPDIR)/../tinq-core/dds/apps/chat" TOPDIR="$(TOPDIR)" clean
 
