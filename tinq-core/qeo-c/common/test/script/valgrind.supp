@@ -1,0 +1,98 @@
+# --- dlopen/dlclose
+{
+   dlopen reachabel at exit
+   Memcheck:Leak
+   ...
+   fun:dlopen_doit
+}
+{
+   dlopen reachabel at exit
+   Memcheck:Leak
+   ...
+   fun:dlopen@@GLIBC_2.1
+}
+{
+   dlclose reachabel at exit
+   Memcheck:Leak
+   ...
+   fun:dlclose_doit
+}
+# --- check
+{
+   check reachable at exit
+   Memcheck:Leak
+   ...
+   fun:srunner_run_init
+}
+{
+   check: reachable at exit
+   Memcheck:Leak
+   fun:malloc
+   fun:add_suite
+}
+{
+   check: reachable at exit
+   Memcheck:Leak
+   fun:malloc
+   fun:emalloc
+}
+{
+   check: reachable at exit
+   Memcheck:Leak
+   fun:realloc
+   fun:erealloc
+}
+{
+   check: pipe used in forking
+   Memcheck:Leak
+   fun:malloc
+   ...
+   fun:setup_pipe
+   fun:receive_test_result
+}
+{                                                                                                            
+   SSL library init http://rt.openssl.org/Ticket/Display.html?id=2561                                                                          
+   Memcheck:Leak                                                                                             
+   ...
+   fun:load_builtin_compressions
+   fun:SSL_COMP_get_compression_methods
+   fun:SSL_library_init                                                                                      
+   ...
+}
+{                                                                                                            
+   SSL
+   Memcheck:Leak                                                                                             
+   fun:malloc
+   ...
+   fun:CRYPTO_malloc
+}
+{
+   DDS log data race
+   Helgrind:Race
+   ...
+   fun:log_printf
+}
+{
+   DDS log unlock problem
+   Helgrind:UnlockUnlocked
+   ...
+   fun:log_printf
+}
+{
+   DDS log unlock problem
+   Helgrind:UnlockForeign
+   ...
+   fun:log_printf
+}
+{
+   DDS log unlock problem
+   Helgrind:UnlockBogus
+   ...
+   fun:log_printf
+}
+{
+   DDS log pthread bug
+   Helgrind:Misc
+   ...
+   fun:log_printf
+}

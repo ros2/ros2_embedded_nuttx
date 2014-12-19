@@ -1,0 +1,9 @@
+{ 
+  "locators": [ 
+    { 
+      "type": "TCPv4",
+      "address": "localhost",
+      "port": 7400
+    }
+  ]
+}

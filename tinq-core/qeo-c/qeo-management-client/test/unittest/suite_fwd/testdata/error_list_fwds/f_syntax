@@ -1,0 +1,12 @@
+{
+  "forwarders": [ 
+    {
+      "locators": [
+        {
+          "type": "TCPv4",
+          "address": "212.118.224.153"
+        }
+      ] 
+    }
+  ]
+}

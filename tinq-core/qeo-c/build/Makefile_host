@@ -1,0 +1,140 @@
+## FILE: Makefile_host 
+#
+# Description: This is an internal Makefile (i.e. component Makefiles should
+# not reference it directly) that is used to figure out on which host platform
+# we are running. It is responsible for:
+# - setting all variables that can be used to figure out on which host platform
+#   we are running.
+# - initializing projectdir and projectdir/ if these variables have not yet
+#   been set (Makefile_host is one of the first Makefiles being read, so it is
+#   ideally suited for doing this). 
+# - checking if we are using a make version that is compatible with the build
+#   environment (either clearmake or a GNU make variant that supports second
+#   expansion)
+#
+# Input variables:
+#
+# Output variables: OUTPUT_PREFIX/
+#
+# Build rules: 
+# - output_prefix
+#
+# Called from: tools.mak, Makefile_include_components
+
+ifndef MAKEFILE_HOST_INCLUDED
+
+# These check need only be executed once. Avoid multiple inclusion
+MAKEFILE_HOST_INCLUDED=1
+
+##< Set projectdir and projectdir/ if they have not already been initialized
+ifeq ($(projectdir),)
+ifneq ($(projectdir/),)
+projectdir=$(patsubst %/,%,$(projectdir/))
+else
+projectdir:=$(patsubst %/,%,$(dir $(shell cd `$(readlink) -f build || $(ls) -d build` >/dev/null && $(pwd) 2>/dev/null)))
+projectdir:=$(patsubst .,,$(projectdir))
+projectdir:=$(filter /%,$(projectdir))
+endif
+endif
+
+ifeq ($(projectdir),)
+$(shell $(echo) "" >&2) 
+$(shell $(echo) "Could not determine projectdir. This probably means one of ls, readlink or pwd" >&2)
+$(shell $(echo) "is not working correctly. Either:" >&2)
+$(shell $(echo) "- provide working versions of ls, readlink and pwd on the commandline (e.g. ls=/bin/ls)," >&2)
+$(shell $(echo) "- or set projectdir to the directory that holds the build subdirectory" >&2)
+$(shell $(echo) "" >&2) 
+die
+endif
+
+ifndef projectdir/
+projectdir/=$(projectdir)/
+endif
+##> 
+
+# Get the operating system name 
+HOSTOS   := $(shell $(uname) -s 2>/dev/null)
+
+ifeq ($(HOSTOS),)
+$(error Could not determine the host operating system (uname -s). Aborting)
+$(shell $(echo) "" >&2)  
+$(shell $(echo) "Could not determine the host operating system (uname -s). Aborting" >&2)
+$(shell $(echo) "" >&2)  
+die
+endif
+
+# Get the machine (hardware) name
+HOSTMACHINE := $(shell $(uname) -m 2>/dev/null)
+
+ifeq ($(HOSTMACHINE),)
+$(error Could not determine the host operating system (uname -m). Aborting)
+$(shell $(echo) "" >&2)  
+$(shell $(echo) "Could not determine the host operating system (uname -m). Aborting" >&2)
+$(shell $(echo) "" >&2)  
+die
+endif
+
+HOSTMACHINE_CAPS := $(strip $(shell $(echo) $(HOSTMACHINE) | $(tr) "[a-z]" "[A-Z]"))
+
+ifeq ($(HOSTMACHINE_CAPS),)
+$(error Could not determine the host operating system in all caps (echo $$(HOSTMACHINE) | tr "[a-z]" "[A-Z]"). Aborting)
+$(shell $(echo) "" >&2)  
+$(shell $(echo) "Could not determine the host operating system in all caps (echo $$(HOSTMACHINE) | tr \"[a-z]\" \"[A-Z]\"). Aborting" >&2)
+$(shell $(echo) "" >&2)  
+die
+endif
+
+
+# Combine the two
+HOSTTYPE:=$(HOSTMACHINE)_$(HOSTOS)
+
+# Get the kernel release version
+HOSTKERNELRELEASE := $(shell $(uname) -r 2>/dev/null)
+
+##< Check if we are using a valid make version
+# We are using clearmake to build
+ifeq ($(patsubst %clearmake,clearmake,$(MAKE)),clearmake)
+
+# We are using GNU Make
+else
+ifeq ($(filter second-expansion,$(.FEATURES)),second-expansion)
+
+else
+$(error This build system requires a make variant that supports second expansion. GNU Make > 3.81 should work. Alternatively, use clearmake -C gnu)
+endif
+endif
+##>
+
+# Include host definitions
+include $(projectdir/)build/supported_hosts/$(HOSTTYPE).host
+
+# Include extra host definitions. These are typically used to overrule some
+# variables for e.g. the case where you are working inside clearcase. These
+# extra files should be removed when extracting an sdk
+##<
+EXTRA_HOST_DEFINITIONS:=$(filter-out %~,$(wildcard $(projectdir/)build/supported_hosts/$(HOSTTYPE).host.*))
+
+ifneq ($(EXTRA_HOST_DEFINITIONS),)
+sinclude $(EXTRA_HOST_DEFINITIONS)
+endif
+##>
+
+ifndef FUNCTIONS_INCLUDED
+include $(projectdir/)build/Makefile_functions
+endif
+
+##< Create the / variant of OUTPUT_PREFIX and a rule to print the output_prefix
+$(call addHelp,OUTPUT_PREFIX,\
+  This variable can be used to override the path where derived objects - i.e.@\
+  the result files of build commands - need to be put. It should always be@\
+  predefined to a sane value compile. Currently it is set to:@@$(OUTPUT_PREFIX)@@\
+  but that can be because you overruled it on the command line,0._Variables_that_influence_the_build_process)
+
+output_prefix:
+	@echo $(OUTPUT_PREFIX)
+
+OUTPUT_PREFIX/:=$(OUTPUT_PREFIX)/
+##>
+
+endif
+# vim: foldmethod=marker foldmarker=##<,##> :

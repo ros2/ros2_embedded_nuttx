@@ -1,0 +1,111 @@
+ifneq ($($(qeo-forwarder_INCLUDED)),1)
+
+override COMPONENT := qeo-forwarder
+override COMPONENT_SEARCH_PATH_PREFIX :=  $(projectdir/)../../*/%/Makefile_component
+
+qeo-forwarder_INCLUDES := api/headers
+qeo-forwarder_CFLAGS   :=
+qeo-forwarder_LIBS     := -lqeoforwarder
+qeo-forwarder_LIBS     += $$(miniupnpc_LIBS)
+ifndef JNIBUILD
+qeo-forwarder_LIBS     += $$(qeo-native_LIBS)
+else
+qeo-forwarder_LIBS     += $$(qeo-java_LIBS)
+endif
+
+qeo-forwarder_PARTS_INSTALL := qeo-forwarder@$$(bindir/)qeo-forwarder:755\
+	libqeoforwarder.so@$$(libdir/)libqeoforwarder.so:755
+ifndef JNIBUILD
+qeo-forwarder_DEPS          := qeo-native miniupnpc
+else
+qeo-forwarder_DEPS          := qeo-java miniupnpc
+endif
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-forwarder.LIBRARIES = libqeoforwarder
+
+ifndef JNIBUILD
+#regular build
+qeo-forwarder.libqeoforwarder_LDADD         := $(qeo-native_LIBS) $(miniupnpc_LIBS)
+qeo-forwarder.libqeoforwarder_LOCALDEFINES  := $(qeo-native_CFLAGS) $(miniupnpc_CFLAGS) -Wall -Werror
+qeo-forwarder.libqeoforwarder_LOCALINCLUDES := $(qeo-native_INCLUDES) $(miniupnpc_INCLUDES) api/headers
+else
+#JNI build
+qeo-forwarder.libqeoforwarder_LDADD         := $(qeo-java_LIBS) $(miniupnpc_LIBS)
+qeo-forwarder.libqeoforwarder_LOCALDEFINES  := $(qeo-java_CFLAGS) $(miniupnpc_CFLAGS) -Wall -Werror
+qeo-forwarder.libqeoforwarder_LOCALINCLUDES := $(qeo-java_INCLUDES) $(qeo-c-core_INCLUDES) $(miniupnpc_INCLUDES) api/headers
+endif
+qeo-forwarder.libqeoforwarder_SRCS          := $(addprefix src/, forwarder.c)
+
+qeo-forwarder.PROGRAMS = qeo-forwarder
+
+qeo-forwarder.qeo-forwarder_LDADD         := $(qeo-forwarder_LIBS)
+#-L$(qeo-forwarder_PREFIX)
+qeo-forwarder.qeo-forwarder_LOCALDEFINES  := $(qeo-forwarder_CFLAGS) -Wall -Werror
+qeo-forwarder.qeo-forwarder_LOCALINCLUDES := $(qeo-forwarder_INCLUDES)
+qeo-forwarder.qeo-forwarder_SRCS          := $(addprefix src/, main.c)
+qeo-forwarder.qeo-forwarder_LDDEPS        := libqeoforwarder.so
+
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+#### sdk packaging ###
+.PHONY: $(COMPONENT)_sdk $(COMPONENT)_sdk_clean
+
+qeo-forwarder.sdk.dir := $($(COMPONENT)_$(E)_PREFIX)/sdk
+qeo-forwarder.sdk.dirInstall := $(qeo-forwarder.sdk.dir)/install
+qeo-forwarder.sdk.dirInstallSymbols := $(qeo-forwarder.sdk.dir)/install_symbols
+
+qeo-forwarder.sdk.libs := miniupnpc qeoforwarder
+qeo-forwarder.sdk.apps := qeo-forwarder
+
+$(COMPONENT)_sdk_clean:
+	$(rm) -rf $(qeo-forwarder.sdk.dir)
+    
+ifeq ($(qeo-forwarder_DEBUG), 1)
+$(COMPONENT)_sdk: INSTALL_DIR=$(qeo-forwarder.sdk.dir)/install_unprocessed_debug
+$(COMPONENT)_sdk: recursive_devel_install
+else
+$(COMPONENT)_sdk: INSTALL_DIR=$(qeo-forwarder.sdk.dir)/install_unprocessed
+$(COMPONENT)_sdk: DEBUG_INSTALL_DIR=$(qeo-forwarder.sdk.dir)/install_unprocessed_symbols
+$(COMPONENT)_sdk: recursive_devel_stripped_install
+endif
+	$(mkdir) -p $(qeo-forwarder.sdk.dirInstall)/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)
+	$(mkdir) -p $(qeo-forwarder.sdk.dirInstall)/bin/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)
+	$(foreach f,$(qeo-forwarder.sdk.libs),$(cp) -P $(INSTALL_DIR)/${libdir}/lib$(f).so* $(qeo-forwarder.sdk.dirInstall)/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)/ &&) /bin/true 
+	$(foreach f,$(qeo-forwarder.sdk.apps),$(cp) -P $(INSTALL_DIR)/${bindir}/$(f) $(qeo-forwarder.sdk.dirInstall)/bin/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)/ &&) /bin/true
+ifneq ($(qeo-forwarder_DEBUG), 1)
+	$(mkdir) -p $(qeo-forwarder.sdk.dirInstallSymbols)/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)
+	$(mkdir) -p $(qeo-forwarder.sdk.dirInstallSymbols)/bin/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)
+	$(foreach f,$(qeo-forwarder.sdk.libs),$(cp) -P $(DEBUG_INSTALL_DIR)/${libdir}/lib$(f).so* $(qeo-forwarder.sdk.dirInstallSymbols)/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME) &&) /bin/true
+	$(foreach f,$(qeo-forwarder.sdk.apps),$(cp) -P $(DEBUG_INSTALL_DIR)/${bindir}/$(f) $(qeo-forwarder.sdk.dirInstallSymbols)/bin/$($(COMPONENT)_$(E)_CONFIGURATION_NAME) &&) /bin/true
+endif
+
+$($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_lib_$(E).tgz: $(COMPONENT)_sdk
+	$(tar) --owner=root --group=root -czf $@ -C $(qeo-forwarder.sdk.dirInstall) lib bin
+
+$($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_headers_$(E).tgz: $(COMPONENT)_sdk
+	$(tar) --owner=root --group=root -czf $@ -C api/headers .
+
+$($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_symbols_$(E).tgz: $(COMPONENT)_sdk
+	$(tar) --owner=root --group=root -czf $@ -C $(qeo-forwarder.sdk.dirInstallSymbols) lib bin
+
+ifeq ($(qeo-forwarder_DEBUG), 1)
+$(COMPONENT)_sdk_lib_$(E)_DEBUG.tgz: $($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_lib_$(E).tgz
+	$(cp) $< $@
+
+$(COMPONENT)_sdk_headers_$(E)_DEBUG.tgz: $($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_headers_$(E).tgz
+	$(cp) $< $@
+else
+$(COMPONENT)_sdk_lib_$(E).tgz: $($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_lib_$(E).tgz
+	$(cp) $< $@
+
+$(COMPONENT)_sdk_headers_$(E).tgz: $($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_headers_$(E).tgz
+	$(cp) $< $@
+
+$(COMPONENT)_sdk_symbols_$(E).tgz: $($(COMPONENT)_$(E)_PREFIX)/$(COMPONENT)_sdk_symbols_$(E).tgz
+	$(cp) $< $@
+endif

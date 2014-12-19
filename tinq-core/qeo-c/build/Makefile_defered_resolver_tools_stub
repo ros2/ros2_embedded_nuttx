@@ -1,0 +1,6 @@
+DEFERED_RESOLVER_VAR:=$(word 1, $(DEFERED_RESOLVE))
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+DEFERED_RESOLVE:=$(filter-out $(word 1, $(DEFERED_RESOLVE)),$(DEFERED_RESOLVE))
+ifneq ($(DEFERED_RESOLVE),)
+include $(projectdir/)build/Makefile_defered_resolver_tools_stub
+endif

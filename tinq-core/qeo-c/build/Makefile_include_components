@@ -1,0 +1,82 @@
+ifndef MAKEFILE_INITIALIZED
+include $(projectdir/)build/Makefile_init
+endif
+
+$(call addHelp,COMPONENT_SEARCH_PATH_PREFIX,\
+  This variable can be set to a pattern that will be prefixed to the default@\
+  component search path. For example$(comma) by specifying:@@\
+  COMPONENT_SEARCH_PATH_PREFIX=/work/extra_components/%/project/Makefile_component@@\
+  the first directory that will be searched for components will be the@\
+  /work/extra_components/precompiled folder. When the build system looks for a@\
+  component identified as <componentContractIdentifier> it will replace the %@\
+  by <componentContractIdentifier>$(comma) and include the file@@\
+  /work/extra_components/<componentContractIdentifier>/project/Makefile_component@@\
+  if it exists. If it does not exist$(comma) the default component search path will be@\
+  used to find another Makefile that defines the component. If that fails$(comma) an@\
+  error will be reported by the build environment. COMPONENT_SEARCH_PATH_PREFIX@\
+  can hold multiple patterns$(comma) separated by spaces.,0._Variables_that_influence_the_build_process)
+
+##< Canonicalize NEEDED_COMPONENTS
+# Remove duplicates
+NEEDED_COMPONENTS:=$(sort $(NEEDED_COMPONENTS))
+# Make sure the target environment is added to each component
+NEEDED_COMPONENTS:=$(foreach comp, $(NEEDED_COMPONENTS), $(comp)$(subst 1,:$(E),$(subst 2,,$(words $(subst :, ,$(comp))))))
+# Filter out the components that have already been resolved
+NEEDED_COMPONENTS:=$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))
+##> Canonicalize NEEDED_COMPONENTS
+
+# If all needed component have been found, stop further recursion
+ifneq ($(NEEDED_COMPONENTS),)
+
+# This part, if it exists, implements the internal search for components
+# (without using pkgconfig)
+
+sinclude $(projectdir/)build/Makefile_include_components.search_path
+
+# If we did not find one of the needed component here (for this target
+# architecture - other architectures are done at the end of this Makefile), we
+# produce a fatal error and stop. 
+ifneq ($(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))),) 
+
+# If we are working on host, before giving up we check if we can find a
+# pkgconfig file for the component.  If we do, we use the pkgconfig information
+# to emulate a component Makefile
+
+TRY_PKGCONFIG=$(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS)))
+include $(patsubst %,$(projectdir/)build/Makefile_pkgconfig,$(TRY_PKGCONFIG))
+
+ifneq ($(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))),) 
+# Used when querying: don't bail out if you cannot find a dependency
+ifneq ($(MAKE_RESILIENT),1)
+# GNU make error handling
+$(error Did not find a definition for the following component(s): $(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))))
+
+# Fallback for clearmake
+$(shell echo "Did not find a definition for the following component(s):" $(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS)))>&2)
+die
+else
+$(shell echo "Did not find a definition for the following component(s):" $(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS)))>&2)
+NEEDED_COMPONENTS:=$(filter-out $(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))),$(NEEDED_COMPONENTS))
+endif
+endif
+endif
+endif
+
+
+
+# Recursive tail call to include components, with a different E value, to
+# resolve the remaining components for a different target environment. We only
+# do this is INC_DEPTH is empty (i.e. the toplevel)
+ifeq ($(INC_DEPTH),)
+NEEDED_COMPONENTS:=$(NEEDED_COMPONENTS)
+ifeq ($(filter %:$(E),$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))),) 
+ifneq ($(E):$(filter $(COMPONENT_BUILD_MANAGER):$(ORIGE),$(ALL_COMPONENTS)),$(ORIGE):$(COMPONENT_BUILD_MANAGER):$(ORIGE))
+include $(projectdir/)build/Makefile_switch_env
+endif
+endif
+else
+
+STACK_$(words $(INC_DEPTH)):=$(STACK_$(words $(INC_DEPTH))) $(NEEDED_COMPONENTS)
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> :

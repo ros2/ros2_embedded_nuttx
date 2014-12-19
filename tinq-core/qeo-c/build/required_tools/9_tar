@@ -1,0 +1,21 @@
+ifndef tar
+tar=$(shell if tar --usage > /dev/null 2>/dev/null; then $(echo) tar; fi)
+endif
+
+ifeq ($(tar),)
+tar=$(shell if gnutar --usage > /dev/null 2>/dev/null; then $(echo) gnutar; fi)
+endif
+
+ifeq ($(tar),)
+tar=$(shell if gtar --usage > /dev/null 2>/dev/null; then $(echo) gtar; fi)
+endif
+
+ifeq ($(tar),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working tar in the path. This is required. Provide tar on the commandline (e.g. tar=/bin/tar).") 
+$(shell $(echo) "Could not find a working tar in the path. This is required. Provide tar on the commandline (e.g. tar=/bin/tar)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

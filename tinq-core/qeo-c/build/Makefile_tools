@@ -1,0 +1,12 @@
+sinclude $(projectdir/)build/Makefile_tools_list
+
+RULES:=$(MAKECMDGOALS)
+
+ifneq ($(RULES),)
+include $(projectdir/)build/Makefile_tools_required
+endif
+
+ifneq ($(NEEDED_TOOLS),)
+sinclude $(projectdir/)build/Makefile_include_components.search_path
+include $(projectdir/)build/Makefile_tools_resolve
+endif

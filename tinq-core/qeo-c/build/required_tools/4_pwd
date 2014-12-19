@@ -1,0 +1,13 @@
+ifndef pwd
+pwd=$(shell if pwd > /dev/null 2>/dev/null; then $(echo) pwd; fi)
+endif
+
+ifeq ($(pwd),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working pwd in the path. This is required if you do not specify projectdir. Provide pwd on the commandline (e.g. pwd=/bin/pwd).") 
+$(shell $(echo) "Could not find a working pwd in the path. This is required if you do not specify projectdir. Provide pwd on the commandline (e.g. pwd=/bin/pwd)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

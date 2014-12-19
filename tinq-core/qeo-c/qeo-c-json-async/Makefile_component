@@ -1,0 +1,81 @@
+ifneq ($($(qeo-c-json-async_INCLUDED)),1)
+override COMPONENT := technicolor.middleware.core.qeo-c-json-async
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+qeo-c-json-async_INCLUDES := api/headers $$(qeo-c-core_INCLUDES)
+qeo-c-json-async_CFLAGS   := -std=gnu99
+qeo-c-json-async_LIBS     := -lqeojson-async
+qeo-c-json-async_LIBS     += $$(qeo-c-json_LIBS)
+
+
+qeo-c-json-async_PARTS_INSTALL      := \
+	libqeojson-async.so@$$(libdir/)libqeojson-async.so:755
+qeo-c-json-async_ELEM_INSTALL       := 
+
+qeo-c-json-async_TEST_PARTS         :=
+qeo-c-json-async_TEST_PARTS_INSTALL := \
+	systest_event_public@$$(bindir/)systest/public/event:755
+qeo-c-json-async_TEST_PARTS_INSTALL += \
+	libutapi.so@$$(libdir/)unittests/libutapi.so:755
+qeo-c-json-async_TEST_ELEM_INSTALL  := \
+    test/script/qeo_test_run.sh@$$(bindir/)qeo_test_run.sh:755 \
+	d:$$(bindir/)credtool \
+	../common/test/tools/qeo-credentials/*@$$(bindir/)credtool \
+	test/script/addon-qeocreds.source@$$(bindir/)addon-qeocreds.source:644 \
+	test/script/addon-valgrind.source@$$(bindir/)addon-valgrind.source:644 \
+	test/script/valgrind.supp@$$(bindir/)valgrind.supp:644
+
+qeo-c-json-async_DEPS               := qeo-c-json jansson
+qeo-c-json-async_TEST_DEPS          := unittest-check
+qeo-c-json-async_TEST_RUN           := $$(bindir/)qeo_test_run.sh create_qeo_home_for_junit
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-c-json-async.LIBRARIES := libqeojson-async
+
+qeo-c-json-async.libqeojson-async_LOCALDEFINES  := $(qeo-c-json-async_CFLAGS) -Wall -Werror
+qeo-c-json-async.libqeojson-async_LOCALINCLUDES := src/ src/../../qeo-c-core/src/uthash/src $(qeo-c-json-async_INCLUDES) $(qeo-c-json_INCLUDES) $(jansson_INCLUDES)
+qeo-c-json-async.libqeojson-async_SRCS          := $(addprefix src/, qeo_json_async.c)
+qeo-c-json-async.libqeojson-async_LDADD         := $(qeo-c-json_LIBS) $(jansson_LIBS)
+
+### System tests ###
+
+# Test libraries
+
+qeo-c-json-async.libstoragepath_LOCALDEFINES  := -Wall -Werror
+qeo-c-json-async.libstoragepath_LOCALINCLUDES := $(qeo-c-util_INCLUDES) 
+qeo-c-json-async.libstoragepath_SRCS          := $(addprefix test/util/, get_device_storage_path.c)
+ 
+# Build rules for system tests
+
+qeo-c-json-async_SYSTESTS = event
+
+qeo-c-json-async.PROGRAMS += $(foreach test, $(qeo-c-json_SYSTESTS), systest_$(test)_public)
+
+define qeo-c-json-async_SYSTEST_TEMPL
+qeo-c-json-async.systest_$(1)_public_LDADD         := $(qeo-c-json-async_LIBS) $(jansson_LIBS)
+qeo-c-json-async.systest_$(1)_public_LOCALDEFINES  := $(qeo-c-json-async_CFLAGS) -Wall -Werror -D_GNU_SOURCE 
+qeo-c-json-async.systest_$(1)_public_LOCALINCLUDES := $(qeo-c-json-async_INCLUDES) $(jansson_INCLUDES)
+qeo-c-json-async.systest_$(1)_public_SRCS          := $(addprefix test/systest/, $(1)_main.c verbose.c)
+endef
+$(foreach test, $(qeo-c-json-async_SYSTESTS), $(eval $(call qeo-c-json-async_SYSTEST_TEMPL,$(test))))
+
+#### Unit test libraries ###
+
+qeo-c-json-async.LIBRARIES += libutapi
+
+qeo-c-json-async.libutapi_SRCS          := $(addprefix libqeojson-async:src/, qeo_json_async.c) \
+                                $(addprefix test/unittest/, suite_api_inargs.c)
+qeo-c-json-async.libutapi_LOCALINCLUDES := src $(qeo-c-json-async_INCLUDES) $(unittest-check_INCLUDES) $(libjansson_INCLUDES)
+qeo-c-json-async.libutapi_LOCALDEFINES  := -Wall -Werror
+qeo-c-json-async.libutapi_LDADD         := $(qeo-c-core_LIBS) $(unittest-check_LIBS)  $(qeo-c-json-async_LIBS) -L$(qeo-c-json_PREFIX)
+qeo-c-json-async.libutapi_LDDEPS        := libqeojson-async.so  
+
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :
+

@@ -1,0 +1,55 @@
+$(COMPONENT).$(MODULE)_SRCS            := $(addprefix $($(COMPONENT)_COMP_DIR)/,$($(COMPONENT).$(MODULE)_SRCS))
+$(COMPONENT).$(MODULE)_OBJS            := $(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$($(COMPONENT).$(MODULE)_SRCS))))
+
+
+MODULE_EXPANDED_LOCALINCLUDES=$(foreach path,$(MODULE_LOCALINCLUDES),$(addprefix -I,$(filter /%,$(path)))$(addprefix -I$($(COMPONENT_FROM_TARGET)_COMP_DIR/),$(filter-out /%, $(path))))
+$($(COMPONENT)_PREFIX/)$(MODULE)_makefile_stub: MODULE_LOCALINCLUDES:=$($(COMPONENT).$(MODULE)_LOCALINCLUDES)
+$($(COMPONENT)_PREFIX/)$(MODULE)_makefile_stub: MODULE_LOCALDEFINES:=$($(COMPONENT).$(MODULE)_LOCALDEFINES)
+$($(COMPONENT)_PREFIX/)$(MODULE)_makefile_stub: MODULE_SRCS:=$($(COMPONENT).$(MODULE)_SRCS)
+$($(COMPONENT)_PREFIX/)$(MODULE)_makefile_stub: MODULE_OBJS:=$(notdir $($(COMPONENT).$(MODULE)_OBJS))
+$($(COMPONENT)_PREFIX/)$(MODULE)_makefile_stub: $($(COMPONENT).$(MODULE)_SRCS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP) 
+	$(mkdir) -p $(@D)
+	$(echo) obj-m+=$(patsubst %_makefile_stub,%,$(@F)).o > $@
+	for obj in $(MODULE_OBJS); do $(echo) CFLAGS_$$obj:=$(MODULE_EXPANDED_LOCALINCLUDES) $(MODULE_LOCALDEFINES) >> $@; done
+	$(echo) $(patsubst %_makefile_stub,%,$(@F))-objs=$(MODULE_OBJS) >> $@ 
+	for src in $(MODULE_SRCS); do ln -sf $$src $(@D)/`basename $$src`; done
+
+
+# To build a kernel module, recursively call the kernel build system to build
+# all kernel modules defined in this component
+$($(COMPONENT)_PREFIX)/$(MODULE).ko: $($(COMPONENT)_PREFIX)/build_all_kernel_modules
+
+# If any of the makefile stubs changes (or if we added new modules) we need to
+# regenerate the Makefile used for recursive building the modules
+$($(COMPONENT)_PREFIX)/Makefile: $($(COMPONENT)_PREFIX)/$(MODULE)_makefile_stub 
+
+
+# If one of the source changed, or if we made modifications to the makefile
+# (GNU make) we need to call the kernel build system again
+$($(COMPONENT)_PREFIX)/build_all_kernel_modules: $($(COMPONENT).$(MODULE)_SRCS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP) 
+
+ifneq ($($(COMPONENT)_$(E)_COMMON_MODULE_RULES_GENERATED),1)
+
+$($(COMPONENT)_PREFIX)/build_all_kernel_modules: $($(COMPONENT)_PREFIX)/Makefile $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)
+	$(GNU_MAKE) V=1 -C $(@D) all KBUILD_EXTRA_SYMBOLS=$(wildcard $(addsuffix /Module.symvers, $(sort $(dir $(filter %.ko,$^)))))
+	touch $@
+
+ifeq ($($(E)_KERNEL_DIR),)
+$(error E_KERNEL_DIR not set in $(E).env. Set it if you want to be able to compile kernel modules)
+$(shell echo E_KERNEL_DIR not set in $(E).env. Set it if you want to be able to compile kernel modules >&2)
+die
+endif
+
+
+$($(COMPONENT)_PREFIX)/Makefile: KERNEL_DIR:=$($(E)_KERNEL_DIR)
+$($(COMPONENT)_PREFIX)/Makefile: KERNEL_BUILD_EXTRA_PARAMS:=$($(E)_KERNEL_BUILD_EXTRA_PARAMS)
+$($(COMPONENT)_PREFIX)/Makefile:
+	$(mkdir) -p $(@D)
+	$(echo) all: > $@
+	$(echo) "@make -C $(KERNEL_DIR) M=$(@D) modules $(KERNEL_BUILD_EXTRA_PARAMS)" | tr "@" "\t" >> $@
+	$(echo) include $^ >> $@
+
+$(COMPONENT)_$(E)_COMMON_MODULE_RULES_GENERATED:=1
+endif
+
+

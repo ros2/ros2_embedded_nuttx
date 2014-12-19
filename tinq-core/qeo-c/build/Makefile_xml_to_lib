@@ -1,0 +1,266 @@
+## FILE: Makefile_xml_to_lib
+#
+# Description: This Makefile will generate a library from a service definition
+#
+# PROTOTYPE!
+
+# dds generation
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-ddscpp.generated
+$($(COMPONENT)_PREFIX/)%-ddscpp.generated: /%.ddl $$(ddsCodegen_HOSTLINUX_PARTS)
+	mkdir -p $(@D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(@F))
+	cd $(@D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(@F)) && $(coredx_ddl) -l cpp -f $^
+	touch $@
+
+# dds compilation
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-ddscpp.generated
+$($(COMPONENT)_PREFIX/)%-ddscpp.a: $($(COMPONENT)_PREFIX/)%-ddscpp.generated
+	for i in `ls $(<D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(<F))/*.cc`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(<F))/include -I$(<D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(<F)) $(addprefix -I,$(ddsCPP_INCLUDES)) -c $$i -o `echo $$i | sed -e "s/\.cc$$/.o/g"` || exit -1; done
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-ddscpp.generated,%-ddscpp.dir,$(^F))/*.o
+
+# rebusC generation
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c.generated
+$($(COMPONENT)_PREFIX/)%-c.generated: /%.xml
+	echo Need to build $@ from $^
+	rm -rf $(@D)/$(patsubst %-c.generated,%-c.dir,$(@F))
+	$(rebusCodegenC.sh) $< $(@D)/$(patsubst %-c.generated,%-c.dir,$(@F)) --variant=all
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-cons.generated
+$($(COMPONENT)_PREFIX/)%-c-cons.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-prov.generated
+$($(COMPONENT)_PREFIX/)%-c-prov.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-headers.generated
+$($(COMPONENT)_PREFIX/)%-c-headers.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-cons_stub.generated
+$($(COMPONENT)_PREFIX/)%-c-cons_stub.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-prov_stub.generated
+$($(COMPONENT)_PREFIX/)%-c-prov_stub.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-mock.generated
+$($(COMPONENT)_PREFIX/)%-c-mock.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+# Persistency
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-c-db.generated
+$($(COMPONENT)_PREFIX/)%-c-db.generated: $($(COMPONENT)_PREFIX/)%-c.generated
+	touch $@
+
+# rebusC compilation
+
+$($(COMPONENT)_PREFIX/)%-c-cons_stub.a: $($(COMPONENT)_PREFIX/)%-c-cons_stub.generated
+	mkdir -p $(^D)/$(patsubst %-c-cons_stub.generated,%-c-cons_stub.dir,$(^F))
+	for i in `ls $(^D)/$(patsubst %-c-cons_stub.generated,%-c.dir,$(^F))/*.c| grep '_cons_stub.c$$' | grep -v '_mock.c$$' | grep -v 'rgc_'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o `echo $$i | sed "s/\.c$$/.o/g" | sed "s/-c.dir/-c-cons_stub.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(^D)/$(patsubst %-c-cons_stub.generated,%-c-cons_stub.dir,$(^F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-c-cons_stub.generated,%-c-cons_stub.dir,$(^F))/*.o
+
+$($(COMPONENT)_PREFIX/)%-c-prov_stub.a: $($(COMPONENT)_PREFIX/)%-c-prov_stub.generated
+	mkdir -p $(^D)/$(patsubst %-c-prov_stub.generated,%-c-prov_stub.dir,$(^F))
+	for i in `ls $(^D)/$(patsubst %-c-prov_stub.generated,%-c.dir,$(^F))/*.c| grep '_prov_stub.c$$' | grep -v '_mock.c$$' | grep -v 'rgc_'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o `echo $$i | sed "s/\.c$$/.o/g" | sed "s/-c.dir/-c-prov_stub.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(^D)/$(patsubst %-c-prov_stub.generated,%-c-prov_stub.dir,$(^F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-c-prov_stub.generated,%-c-prov_stub.dir,$(^F))/*.o
+
+$($(COMPONENT)_PREFIX/)%-c-prov.a: $($(COMPONENT)_PREFIX/)%-c-prov.generated
+	mkdir -p $(^D)/$(patsubst %-c-prov.generated,%-c-prov.dir,$(^F))
+	cd $(^D)/$(patsubst %-c-prov.generated,%-c.dir,$(^F))/ ; for i in `ls *.c| grep -v '_cons.c$$' | grep -v '_stub.c$$' | grep -v '_mock.c$$' | grep -v 'rgc_'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o $(^D)/$(patsubst %-c-prov.generated,%-c-prov.dir,$(^F))/`echo $$i | sed "s/\.c$$/.o/g"` || exit -1; done ; cd -
+	rm -f $@
+	find $(^D)/$(patsubst %-c-prov.generated,%-c-prov.dir,$(^F)) -name '*.o' > $(patsubst %.a,%.lst,$@)
+	find $(^D)/$(patsubst %-c-prov.generated,%-c-prov.dir,$(^F)) -name '*.o' | xargs $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@
+
+$($(COMPONENT)_PREFIX/)%-c-cons.a: $($(COMPONENT)_PREFIX/)%-c-cons.generated
+	mkdir -p $(^D)/$(patsubst %-c-cons.generated,%-c-cons.dir,$(^F))
+	cd $(^D)/$(patsubst %-c-cons.generated,%-c.dir,$(^F))/ ; for i in `ls *.c| grep -v '_db_cons.c$$' | grep -v '_prov.c$$' | grep -v '_stub.c$$' | grep -v '_mock.c$$' | grep -v 'rgc_'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o $(^D)/$(patsubst %-c-cons.generated,%-c-cons.dir,$(^F))/`echo $$i | sed "s/\.c$$/.o/g"` || exit -1; done ; cd -
+	rm -f $@
+	find $(^D)/$(patsubst %-c-cons.generated,%-c-cons.dir,$(^F)) -name '*.o' > $(patsubst %.a,%.lst,$@)
+	find $(^D)/$(patsubst %-c-cons.generated,%-c-cons.dir,$(^F)) -name '*.o' | xargs $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@
+
+$($(COMPONENT)_PREFIX/)%-c-mock.a: $($(COMPONENT)_PREFIX/)%-c-mock.generated
+	mkdir -p $(^D)/$(patsubst %-c-mock.generated,%-c-mock.dir,$(^F))
+	for i in `ls $(^D)/$(patsubst %-c-mock.generated,%-c.dir,$(^F))/*.c| grep '_mock.c$$'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o `echo $$i | sed "s/\.c$$/.o/g" | sed "s/-c.dir/-c-mock.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(^D)/$(patsubst %-c-mock.generated,%-c-mock.dir,$(^F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-c-mock.generated,%-c-mock.dir,$(^F))/*.o
+
+$($(COMPONENT)_PREFIX/)%-c-headers.a: $($(COMPONENT)_PREFIX/)%-c-headers.generated
+	mkdir -p $(@D)
+	rm -f $@
+	touch $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@
+
+$($(COMPONENT)_PREFIX/)%-c.a: $($(COMPONENT)_PREFIX/)%-c.generated
+	for i in `ls $(^D)/$(patsubst %-c.generated,%-c.dir,$(^F))/*.c| grep -v '_db_cons.c$$' | grep -v '_stub.c$$' | grep -v '_mock.c$$' | grep -v 'rgc_'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed "s/\.c$$/.o/g"` || exit -1; done
+	rm -f $@
+	echo $(^D)/$(patsubst %-c.generated,%-c.dir,$(^F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-c.generated,%-c.dir,$(^F))/*.o
+
+# Persistency
+$($(COMPONENT)_PREFIX/)%-c-db.a: $($(COMPONENT)_PREFIX/)%-c-db.generated
+	mkdir -p $(^D)/$(patsubst %-c-db.generated,%-c-db.dir,$(^F))
+	for i in `ls $(^D)/$(patsubst %-c-db.generated,%-c.dir,$(^F))/*.c| grep '_db_cons.c$$' `; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(log_INCLUDES) $(configAdminPersistency_INCLUDES)) $(rebusC_CFLAGS) -Wall -Werror -DLOG_NAME=$(COMPONENT_FROM_TARGET) -DSTANDALONE -c $$i -o `echo $$i | sed "s/\.c$$/.o/g" | sed "s/-c.dir/-c-db.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(^D)/$(patsubst %-c-db.generated,%-c-db.dir,$(^F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(^D)/$(patsubst %-c-db.generated,%-c-db.dir,$(^F))/*.o
+
+
+# rgc generation
+
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-rgc.generated
+$($(COMPONENT)_PREFIX/)%-rgc.generated: /%.xml
+	echo Need to build $@ from $^
+	rm -rf $(@D)/$(patsubst %-rgc.generated,%-rgc.dir,$(@F))
+	$(rgcCodegen.sh) $< $(@D)/$(patsubst %-rgc.generated,%-rgc.dir,$(@F))
+	touch $@
+
+$($(COMPONENT)_PREFIX/)%-rgc.a: $($(COMPONENT)_PREFIX/)%-rgc.generated $($(COMPONENT)_PREFIX/)%-c.generated
+	for i in `ls $(<D)/$(patsubst %-rgc.generated,%-rgc.dir,$(<F))/*.c | grep -v '_stub.c$$' | grep -v '_mock.c$$'`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_C_TO_O) $(addprefix -I,$(rebusC_INCLUDES) $(configAdmin_INCLUDES) $(configAdmin_INCLUDES)/rgc $(log_INCLUDES) $(<D)/$(patsubst %-rgc.generated,%-rgc.dir,$(<F)) $(<D)/$(patsubst %-rgc.generated,%-c.dir,$(<F))) $(rebusC_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed "s/\.c$$/.o/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-rgc.generated,%-rgc.dir,$(<F))/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-rgc.generated,%-rgc.dir,$(<F))/*.o
+
+# ------------------------------------------
+# RebusCPP over RebusC
+# ------------------------------------------
+.PRECIOUS: $($(COMPONENT)_PREFIX/)%-cpp.generated
+$($(COMPONENT)_PREFIX/)%-cpp.generated: /%.xml $($(COMPONENT)_PREFIX/)%-c.generated
+	echo Need to build $@ from $<
+	rm -rf $(@D)/$(patsubst %-cpp.generated,%-cpp.dir,$(@F))
+	$(rebusCodegenCPP.sh) $< $(@D)/$(patsubst %-cpp.generated,%-cpp.dir,$(@F)) NOT_INSTALLED
+	touch $@
+
+$($(COMPONENT)_PREFIX/)%-cpp-common.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/src/{*_api.cpp,*_dts.cpp,service_copy_arg.cpp,service_diff.cpp,service_require_proxies.cpp,service_types.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-c.dir,$(<F)) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusC_INCLUDES) $(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-common.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-cons.a: $($(COMPONENT)_PREFIX/)%-cpp.generated $($(COMPONENT)_PREFIX/)%-cpp-common.a $($(COMPONENT)_PREFIX/)%-c-cons.a
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-cons.dir,$(<F))/src
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/src/{*_cevt.cpp,*_cpx.cpp,*_crpc.cpp,*_consumer*.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-c.dir,$(<F)) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusC_INCLUDES) $(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-cons.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-cons.dir,$(<F))/src/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-cons.dir,$(<F))/src/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov.a: $($(COMPONENT)_PREFIX/)%-cpp.generated $($(COMPONENT)_PREFIX/)%-cpp-common.a $($(COMPONENT)_PREFIX/)%-c-prov.a
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov.dir,$(<F))/src
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/src/{*_pevt.cpp,*_ppx.cpp,*_prpc.cpp,*_provider*.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-c.dir,$(<F)) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusC_INCLUDES) $(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov.dir,$(<F))/src/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov.dir,$(<F))/src/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-stub.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-stub.dir,$(<F))/skeleton
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/skeleton/*_prov.cpp`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-stub.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-stub.dir,$(<F))/skeleton/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-stub.dir,$(<F))/skeleton/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-oo-stub.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-oo-stub.dir,$(<F))/skeleton
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/skeleton/{*_impl.cpp,*_prov_oo.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-oo-stub.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-oo-stub.dir,$(<F))/skeleton/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-oo-stub.dir,$(<F))/skeleton/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-headers.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(@D)
+	rm -f $@
+	touch $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-test.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-test.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/*_provider.cpp`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-test.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-test.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-test.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-cons-test.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-test.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/*_consumer.cpp`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-cons-test.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-test.dir,$(<F))/test/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-test.dir,$(<F))/test/*.o
+
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-perfooltest.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perfooltest.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/ooltest_*_provider.cpp`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-perfooltest.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perfooltest.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perfooltest.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-cons-perfooltest.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perfooltest.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/ooltest_consumer.cpp`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-cons-perfooltest.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perfooltest.dir,$(<F))/test/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perfooltest.dir,$(<F))/test/*.o
+
+
+$($(COMPONENT)_PREFIX/)%-cpp-libprov-perftest-ll.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ll.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/{test_ll_libprovider*.cpp,test_common.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-libprov-perftest-ll.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ll.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ll.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-libcons-perftest-ll.a: $($(COMPONENT)_PREFIX/)%-cpp.generated  $($(COMPONENT)_PREFIX/)%-cpp-common.a
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ll.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/{test_ll_libconsumer*.cpp,test_common.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-libcons-perftest-ll.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ll.dir,$(<F))/test/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ll.dir,$(<F))/test/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-perftest-ll.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ll.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/{test_ll_libprovider*.cpp,test_common.cpp,test_ll_provider_main.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-perftest-ll.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ll.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ll.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-cons-perftest-ll.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ll.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/{test_ll_libconsumer*.cpp,test_common.cpp,test_ll_consumer_main.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-cons-perftest-ll.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ll.dir,$(<F))/test/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ll.dir,$(<F))/test/*.o
+
+
+$($(COMPONENT)_PREFIX/)%-cpp-libprov-perftest-ool.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ool.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/{test_ool_libprovider*.cpp,test_common.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-libprov-perftest-ool.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ool.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-libprov-perftest-ool.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-libcons-perftest-ool.a: $($(COMPONENT)_PREFIX/)%-cpp.generated  $($(COMPONENT)_PREFIX/)%-cpp-common.a
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ool.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/{test_ool_libconsumer*.cpp,test_common.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-libcons-perftest-ool.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ool.dir,$(<F))/test/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-libcons-perftest-ool.dir,$(<F))/test/*.o $(<D)/$(patsubst %-cpp.generated,%-cpp-common.dir,$(<F))/src/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-prov-perftest-ool.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ool.dir,$(<F))/impl
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/impl/{test_ool_libprovider*.cpp,test_common.cpp,test_ool_provider_main.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-prov-perftest-ool.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ool.dir,$(<F))/impl/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-prov-perftest-ool.dir,$(<F))/impl/*.o
+
+$($(COMPONENT)_PREFIX/)%-cpp-cons-perftest-ool.a: $($(COMPONENT)_PREFIX/)%-cpp.generated
+	mkdir -p $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ool.dir,$(<F))/test
+	for i in `ls $(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/test/{test_ool_libconsumer*.cpp,test_common.cpp,test_ool_consumer_main.cpp}`; do echo COMPILING $$i;  $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CPP_TO_O) -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F))/include -I$(<D)/$(patsubst %-cpp.generated,%-cpp.dir,$(<F)) $(addprefix -I,$(rebusCPP_INCLUDES) $(log_INCLUDES)) $(REBUSCPP_CFLAGS) -DLOG_NAME=$(COMPONENT_FROM_TARGET) -c $$i -o `echo $$i | sed -e "s/\.cpp$$/.o/g" -e "s/-cpp.dir/-cpp-cons-perftest-ool.dir/g"` || exit -1; done
+	rm -f $@
+	echo $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ool.dir,$(<F))/test/*.o > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(<D)/$(patsubst %-cpp.generated,%-cpp-cons-perftest-ool.dir,$(<F))/test/*.o

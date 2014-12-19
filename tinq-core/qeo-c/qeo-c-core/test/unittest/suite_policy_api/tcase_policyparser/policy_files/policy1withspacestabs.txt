@@ -1,0 +1,31 @@
+ 
+[meta]
+# policy file format version
+version=1.0
+# sequence number  
+seqnr=42
+ 
+[uid:1]
+# below coarse grained rules
+org::qeo::topicone =   r w
+org::qeo::homeautomation::lightswitch_request   =	r
+org::qeo::*=	r
+ 
+# below fine grained rules involving uid's
+org::qeo::topic1  =   r  <uid: 1;uid:2;uid:    4   > w   <uid  :1;uid:  3;uid: 5>
+[uid:2]
+# below coarse grained rules
+          org::qeo::topicone=r w
+org::qeo::homeautomation::lightswitch_request=	r
+	org::qeo::*=r
+ 
+[uid:3]
+*=rw
+org::qeo::topic1=r<uid:1;uid:2;uid:4> w<uid:1;uid:3;uid:5 ;uid:2       >
+
+[uid:4]
+*=r
+
+[uid:5]
+*=r
+

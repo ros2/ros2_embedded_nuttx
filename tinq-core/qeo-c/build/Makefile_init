@@ -1,0 +1,35 @@
+.SECONDEXPANSION:
+.SUFFIXES:
+
+all:
+
+MAKEFILE_INITIALIZED:=1
+
+PATTERN_RULES:=
+
+# The GNU make function used to document targets
+addHelp=$(eval HELP_TOPICS+=$(subst >,_c,$(subst <,_o,$(subst _,__,$1))))$(eval HELP_TOPIC_$(subst >,_c,$(subst <,_o,$(subst _,__,$1)))_MESSAGE:=$2)$(eval HELP_TOPIC_$(subst >,_c,$(subst <,_o,$(subst _,__,$1)))_TYPE:=$3)
+
+include $(projectdir/)build/Makefile_init_tools
+
+ifndef MAKEFILE_HOST_INCLUDED
+include $(projectdir/)build/Makefile_host
+endif
+
+include $(projectdir/)build/Makefile_init_variables
+
+# If the common Makefile functions have not been included, include them now
+ifndef FUNCTIONS_INCLUDED
+include $(projectdir/)build/Makefile_functions
+endif
+
+
+# Some versions of clearmake do not set MAKECMDGOALS, but for some reason they
+# do set MAKECMDGOALS in the environment of shells started from within
+# clearmake. So, this is a safety mechanism that sets MAKECMDGOALS by fetching
+# the value of MAKECMDGOALS from the environment.
+ifeq ($(patsubst %clearmake,clearmake,$(MAKE)),clearmake)
+ifndef MAKECMDGOALS
+MAKECMDGOALS:=$(shell echo $$MAKECMDGOALS)
+endif
+endif

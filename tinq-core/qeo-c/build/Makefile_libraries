@@ -1,0 +1,8 @@
+# Initialize LIB to the first element inside $(COMPONENT).LIBRARIES_RUN
+LIB:=$(word 1, $($(COMPONENT).LIBRARIES_RUN))
+
+# Remove $(LIB) from $(COMPONENT).LIBRARIES_RUN
+$(COMPONENT).LIBRARIES_RUN:=$(filter-out $(LIB), $($(COMPONENT).LIBRARIES_RUN))
+
+# Include Makefile_lib to generate the lib build commands
+include $(projectdir/)build/Makefile_lib

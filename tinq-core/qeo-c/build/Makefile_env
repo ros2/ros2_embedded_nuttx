@@ -1,0 +1,340 @@
+## FILE: Makefile_env
+# 
+# Description: Template Makefile included by toplevel Makefiles
+# - Put a default value (/) in INSTALL_DIR 
+
+ifndef TOOLS_MAK_INCLUDED
+TOOLS_MAK_INCLUDED:=
+endif
+
+ifeq ($(filter $(patsubst %,%.,$($(COMPONENT)_GROUP))$(COMPONENT).$(E), $(TOOLS_MAK_INCLUDED)),)
+
+  # COMPONENT is specified in the format group.subgroup.component
+  # The following code resets COMPONENT to component, and stores group.subgroup
+  # in component_GROUP
+  #
+  ifeq ($(findstring .,$(COMPONENT)),.)
+  REAL_COMPONENT:=$(word $(words $(subst ., ,$(COMPONENT))),$(subst ., ,$(COMPONENT)))
+  $(REAL_COMPONENT)_GROUP:=$(patsubst %.$(REAL_COMPONENT),%,$(COMPONENT))
+  override COMPONENT:=$(REAL_COMPONENT)
+  endif
+
+  CFLAGS:=
+  XFLAGS:=
+  TOOLS_MAK_INCLUDED+=$(patsubst %,%.,$($(COMPONENT)_GROUP))$(COMPONENT).$(E)
+
+  ifeq ($(ALL_COMPONENTS),)
+  # The first time we assign something ALL_COMPONENTS we have to make sure
+  # simple (i.e. immediate) evaluation is used
+  # All component in ALL_COMPONENTS should have a target environment suffix
+    ALL_COMPONENTS:=$(COMPONENT):$(E)
+  else
+  # All component in ALL_COMPONENTS should have a target environment suffix
+    ALL_COMPONENTS+=$(COMPONENT):$(E)
+  endif
+
+  # The resolve stack is used to figure out which components are defined by
+  # which Makefile. We keep a list for the current depth of resolved
+  # components.
+  RESSTACK_$(words $(INC_DEPTH)):=$(RESSTACK_$(words $(INC_DEPTH))) $(COMPONENT)
+
+##< DEBUG variable
+$(call addHelp,DEBUG,\
+  When this variable is set to 1$(comma) all parts of all components will be compiled@\
+  for debugging$(comma) provided the target environment definition specifies how a@\
+  component can be compiled for debugging.,0._Variables_that_influence_the_build_process)
+
+$(call addHelp,<componentContractIdentifier>_DEBUG,\
+  When this variable is set to 1$(comma) all parts of the component identified@\
+  by <componentContractIdentifier> will be compiled for debugging$(comma) provided@\
+  the target environment definition specifies how a component can be compiled@\
+  for debugging.,0._Variables_that_influence_the_build_process)
+
+  ifeq ($(DEBUG),1)
+    $(COMPONENT)_DEBUG:=1
+  endif
+##>
+
+##< COVERAGE variable 
+$(call addHelp,COVERAGE,\
+  When this variable is set to 1$(comma) all parts of all components will be compiled@\
+  for collecting coverage information$(comma) provided the target environment definition@\
+  specifies how a component can be compiled for coverage information collection.,0._Variables_that_influence_the_build_process)
+
+$(call addHelp,<componentContractIdentifier>_COVERAGE,\
+  When this variable is set to 1$(comma) all parts of the component identified@\
+  by <componentContractIdentifier> will be compiled for collecting coverage@\
+  information$(comma) provided the target environment definition specifies how a@\
+  component can be compiled for coverage information collection.,0._Variables_that_influence_the_build_process)
+
+  ifeq ($(COVERAGE),1)
+    $(COMPONENT)_COVERAGE:=1
+  endif
+##>
+
+##< PROFILE variable 
+$(call addHelp,PROFILE,\
+  When this variable is set to 1$(comma) all parts of all components will be compiled@\
+  for collecting profiling information$(comma) provided the target environment definition@\
+  specifies how a component can be compiled for profiling information collection.,0._Variables_that_influence_the_build_process)
+
+$(call addHelp,<componentContractIdentifier>_PROFILE,\
+  When this variable is set to 1$(comma) all parts of the component identified@\
+  by <componentContractIdentifier> will be compiled for collecting profiling@\
+  information$(comma) provided the target environment definition specifies how a@\
+  component can be compiled for profiling information collection.,0._Variables_that_influence_the_build_process)
+
+  ifeq ($(PROFILE),1)
+    $(COMPONENT)_PROFILE:=1
+  endif
+##>
+
+  ifndef $(COMPONENT)_TRACE_LEVEL
+    ifdef TRACE_LEVEL
+      $(COMPONENT)_TRACE_LEVEL := $(TRACE_LEVEL)
+    else
+      $(COMPONENT)_TRACE_LEVEL := 2
+    endif
+  endif
+
+  # Foreach component include the tools. This also set default flags for the
+  # compiler, ...
+  include $(projectdir/)build/tools.mak
+
+##< INSTALL_DIR/DESTDIR variable
+  ifndef INSTALL_DIR
+$(call addHelp,DESTDIR,\
+  This variable specifies the installation directory for all install commands.,0._Variables_that_influence_the_build_process)
+  ifdef DESTDIR
+  INSTALL_DIR:=$(DESTDIR)
+  else
+  INSTALL_DIR=/
+  endif
+  endif
+##> 
+
+$(call addHelp,bindir,\
+The directory where binaries will be installed. After installation this@\
+directory should be added to the PATH variable to assure the installed@\
+component will execute correctly.,0b._Variables_that_influence_installation)
+	
+  ifndef bindir
+    bindir:=.
+  endif
+ 
+$(call addHelp,bindir,\
+The directory where header files will be installed.,0b._Variables_that_influence_installation)
+  ifndef incdir
+    incdir:=.
+  endif
+
+$(call addHelp,libdir,\
+The directory where libraries will be installed. After installation this@\
+directory should be added to the library search path - by modifying ld.so.conf@\
+or by putting it in LD_LIBRARY_PATH - to assure the installed component will@\
+execute correctly.,0b._Variables_that_influence_installation)
+
+  ifndef libdir
+    libdir=.
+  endif
+
+  ifndef pkgconfigdir
+    pkgconfigdir=.
+  endif
+
+  ifndef datadir
+    datadir=.
+  endif
+
+  ifndef sysconfdir
+    sysconfdir=.
+  endif
+
+  ifndef rgcdir
+    rgcdir=.
+  endif
+
+  ifndef viewmapdir
+    viewmapdir=.
+  endif
+
+  ifndef clifwmapdir
+    clifwmapdir=.
+  endif
+
+  ifndef luamoddir
+    luamoddira=.
+  endif
+
+  ifndef lualibdir
+    lualibdir=.
+  endif
+
+
+  ifneq ($(filter /%,$(prefix)),)
+    override prefix:=$(patsubst /%,%,$(prefix))
+  endif
+
+  ifdef prefix
+    prefix/=$(prefix)/
+  endif
+
+  ifeq ($(filter $(prefix/)%,$(bindir)),)
+    bindir:=$(prefix/)$(bindir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(libdir)),)
+    libdir:=$(prefix/)$(libdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(incdir)),)
+    incdir:=$(prefix/)$(incdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(pkgconfigdir)),)
+    pkgconfigdir:=$(prefix/)$(pkgconfigdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(datadir)),)
+    datadir:=$(prefix/)$(datadir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(lualibdir)),)
+    lualibdir:=$(prefix/)$(lualibdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(luamoddir)),)
+    luamoddir:=$(prefix/)$(luamoddir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(viewmapdir)),)
+    viewmapdir:=$(prefix/)$(viewmapdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(clifwmapdir)),)
+    clifwmapdir:=$(prefix/)$(clifwmapdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(rgcdir)),)
+    rgcdir:=$(prefix/)$(rgcdir)
+  endif
+  ifeq ($(filter $(prefix/)%,$(sysconfdir)),)
+    sysconfdir:=$(prefix/)$(sysconfdir)
+  endif
+
+  ifneq ($(filter /%,$(libdir)),)
+    libdir:=$(patsubst /%,%,$(libdir))
+  endif
+
+  ifneq ($(filter /%,$(bindir)),)
+    bindir:=$(patsubst /%,%,$(bindir))
+  endif
+
+  ifneq ($(filter /%,$(incdir)),)
+    incdir:=$(patsubst /%,%,$(incdir))
+  endif
+
+  ifneq ($(filter /%,$(pkgconfigdir)),)
+    pkgconfigdir:=$(patsubst /%,%,$(pkgconfigdir))
+  endif
+
+  ifneq ($(filter /%,$(datadir)),)
+    datadir:=$(patsubst /%,%,$(datadir))
+  endif
+
+  ifneq ($(filter /%,$(lualibdir)),)
+    lualibdir:=$(patsubst /%,%,$(lualibdir))
+  endif
+
+  ifneq ($(filter /%,$(luamoddir)),)
+    luamoddir:=$(patsubst /%,%,$(luamoddir))
+  endif
+
+  ifneq ($(filter /%,$(rgcdir)),)
+    rgcdir:=$(patsubst /%,%,$(rgcdir))
+  endif
+
+  ifneq ($(filter /%,$(viewmapdir)),)
+    viewmapdir:=$(patsubst /%,%,$(viewmapdir))
+  endif
+
+  ifneq ($(filter /%,$(clifwmapdir)),)
+    clifwmapdir:=$(patsubst /%,%,$(clifwmapdir))
+  endif
+
+  ifneq ($(filter /%,$(sysconfdir)),)
+    sysconfdir:=$(patsubst /%,%,$(sysconfdir))
+  endif
+
+  ifndef libdir/
+    libdir/=$(libdir)/
+  endif
+
+  ifndef bindir/
+    bindir/=$(bindir)/
+  endif
+
+  ifndef incdir/
+    incdir/=$(incdir)/
+  endif
+  
+  ifndef pkgconfigdir/
+    pkgconfigdir/=$(pkgconfigdir)/
+  endif
+
+  ifndef datadir/
+    datadir/=$(datadir)/
+  endif
+
+  ifndef luamoddir/
+    luamoddir/=$(luamoddir)/
+  endif
+
+  ifndef lualibdir/
+    lualibdir/=$(lualibdir)/
+  endif
+
+  ifndef rgcdir/
+    rgcdir/=$(rgcdir)/
+  endif
+
+  ifndef viewmapdir/
+    viewmapdir/=$(viewmapdir)/
+  endif
+
+  ifndef clifwmapdir/
+    clifwmapdir/=$(clifwmapdir)/
+  endif
+
+  ifndef sysconfdir/
+    sysconfdir/=$(sysconfdir)/
+  endif
+
+  ifeq ($($(COMPONENT)_PREFIX),)
+    $(COMPONENT)_PREFIX:=$(OUTPUT_PREFIX/)$(COMPONENT)/$(E)
+
+    ifeq ($($(COMPONENT)_PROFILE), 1)
+    	$(shell echo $(COMPONENT) compiled to collect profiling info >&2)
+        $(COMPONENT)_PREFIX:=$($(COMPONENT)_PREFIX)/Profile
+    endif
+
+    ifeq ($($(COMPONENT)_DEBUG), 1)
+    	$(shell echo $(COMPONENT) compiled in debug mode >&2)
+        $(COMPONENT)_PREFIX:=$($(COMPONENT)_PREFIX)/Debug
+    endif
+
+    ifeq ($($(COMPONENT)_COVERAGE), 1)
+    	$(shell echo $(COMPONENT) compiled to collect coverage info >&2)
+        $(COMPONENT)_PREFIX:=$($(COMPONENT)_PREFIX)/Coverage
+    endif
+
+
+    $(COMPONENT)_PREFIX/:=$($(COMPONENT)_PREFIX)/
+    $(COMPONENT)_$(E)_PREFIX:=$($(COMPONENT)_PREFIX)
+    $(COMPONENT)_$(E)_PREFIX/:=$($(COMPONENT)_$(E)_PREFIX)/
+
+    # This code infers the component from the output name of the object file, libname, ... . 
+    COMPONENT_FROM_TARGET=$(word 1,$(strip $(subst /, ,$(patsubst $(OUTPUT_PREFIX/)%,%,$@))))
+
+    # This code infers the component from the first dependency in the OUTPUT_PREFIX directory
+    COMPONENT_FROM_DEPS=$(word 1,$(strip $(subst /, ,$(patsubst $(OUTPUT_PREFIX/)%,%,$<))))
+    
+    # This code infers the target environment from the output name of the object file, libname, ... . 
+    E_FROM_TARGET=$(word 2,$(strip $(subst /, ,$(patsubst $(OUTPUT_PREFIX/)%,%,$@))))
+    
+    # This code infers the target environment from the first dependency in the OUTPUT_PREFIX directory
+    E_FROM_DEPS=$(word 2,$(strip $(subst /, ,$(patsubst $(OUTPUT_PREFIX/)%,%,$(filter $(OUTPUT_PREFIX/)%,$<)))))
+  endif 
+endif
+# vim: foldmethod=marker foldmarker=##<,##> :

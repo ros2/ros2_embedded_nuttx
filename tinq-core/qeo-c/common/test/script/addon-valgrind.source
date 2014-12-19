@@ -1,0 +1,133 @@
+valgrind_tool()
+{
+    echo ${USEVG} | cut -d- -f 1
+}
+
+valgrind_debug_enabled()
+{
+    local debug=0
+
+    debug=$(echo ${USEVG} | cut -d- -f 2)
+    [ "debug" =  "${debug}" ]
+}
+
+valgrind_tool_is_memcheck()
+{
+    [ "memcheck" = $(valgrind_tool) ]
+}
+
+valgrind_tool_is_massif()
+{
+    [ "massif" = $(valgrind_tool) ]
+}
+
+valgrind_tool_is_helgrind()
+{
+    [ "helgrind" = $(valgrind_tool) ]
+}
+
+valgrind_tool_is_drd()
+{
+    [ "drd" = $(valgrind_tool) ]
+}
+
+valgrind_enabled()
+{
+    [ -n "${USEVG}" -a "0" != "${USEVG}" ]
+}
+
+valgrind_cmd()
+{
+    local logdir=$1
+    local logname=$2
+    local workdir=${logdir}/vg_${logname}
+    local supp=$3
+    local cmd=''
+
+    if [ "-h" = "$1" ]; then
+        echo "Usage: USEVG='memcheck|massif|helgrind|drd' valgrind_cmd <logdir> <logname> <suppressions>"
+        return
+    elif valgrind_enabled; then
+        mkdir -p ${workdir}
+        if valgrind_tool_is_massif; then
+            cmd='valgrind --tool=massif --time-unit=ms'
+        else
+            cmd="valgrind --suppressions=${supp} --trace-children=yes --num-callers=50"
+            if valgrind_tool_is_memcheck; then
+                cmd="${cmd} --leak-check=full --show-reachable=yes --track-origins=yes"
+            elif valgrind_tool_is_helgrind; then
+                cmd="${cmd} --tool=helgrind --read-var-info=yes"
+            elif valgrind_tool_is_drd; then
+                cmd="${cmd} --tool=drd --read-var-info=yes"
+            fi
+            if valgrind_debug_enabled; then
+                cmd="${cmd} --vgdb=yes --vgdb-error=1"
+            else
+                cmd="${cmd} --log-file=${workdir}/vg.%p"
+            fi
+        fi
+    fi
+    echo ${cmd}
+}
+
+clean_valgrind()
+{
+    local logdir=$1
+    local logname=$2
+    local workdir=${logdir}/vg_${logname}
+        
+    rm ${workdir}/* > /dev/null 2>&1
+}
+
+check_valgrind()
+{
+    local logdir=$1
+    local logname=$2
+    local workdir=${logdir}/vg_${logname}
+    local ret=0
+    local lost
+    local errors
+    local fn
+
+    if valgrind_enabled; then
+        for fn in `find ${workdir} -type f -name "vg.*"`; do
+            local ok=1
+            
+            echo "Processing Valgrind file ${fn}"
+            lost=$(cat ${fn} | awk 'BEGIN{sum=0};/definitely lost:/{gsub(",","",$4);sum=sum+$4};END{print sum}')
+            if [ ! "0" == "${lost}" ]; then
+                echo "Error: *** leaking ${lost} bytes" >&2
+                ok=0
+            fi
+            lost=$(cat ${fn} | awk 'BEGIN{sum=0};/indirectly lost:/{gsub(",","",$4);sum=sum+$4};END{print sum}')
+            if [ ! "0" == "${lost}" ]; then
+                echo "Error: indirectly leaking ${lost} bytes" >&2
+                ok=0
+            fi
+            lost=$(cat ${fn} | awk 'BEGIN{sum=0};/possibly lost:/{gsub(",","",$4);sum=sum+$4};END{print sum}')
+            if [ ! "0" == "${lost}" ]; then
+                echo "Error: possibly leaking ${lost} bytes" >&2
+                ok=0
+            fi
+            lost=$(cat ${fn} | awk 'BEGIN{sum=0};/still reachable:/{gsub(",","",$4);sum=sum+$4};END{print sum}')
+            if [ ! "0" == "${lost}" ]; then
+                echo "Error: still reachable ${lost} bytes" >&2
+                ok=0
+            fi
+            errors=$(cat ${fn} | awk '/ERROR SUMMARY/{print $4; exit}')
+            if [ ! "0" == "${errors}" ]; then
+                echo "Error: ${errors} errors" >&2
+                ok=0
+            fi
+            if [ "1" == "${VERBOSE}" ]; then
+                grep "bytes allocated" ${fn} | sed 's/.*\(total.*\)/\1/'
+            fi
+            if [ 1 -eq ${ok} ]; then
+                rm ${fn}
+            else
+                ret=1
+            fi
+        done
+    fi
+    return ${ret}
+}

@@ -1,0 +1,76 @@
+COMPONENT_BUILD_MANAGER:=middleware
+
+ifndef projectdir
+projectdir=/middleware
+endif
+
+ifndef projectdir/
+projectdir/=$(projectdir)/
+endif
+
+ifndef DESTDIR
+DESTDIR=/vobs/do_vob1/do_store/deploy_host
+endif
+
+ifndef E
+E=HOSTLINUX
+endif
+
+# allign folder structure: (bin, include, lib and share all @ topllevel)
+override prefix=
+override bindir=bin
+
+
+NEEDED_COMPONENTS:=sdkd nllcmd deviceInfo logProvider logConsLib
+NEEDED_TARGETS:=$(foreach component,$(NEEDED_COMPONENTS),$(component)_recursive_test_install)
+
+.PHONY: deploy_host
+
+deploy_host: $(NEEDED_TARGETS) startLcm.sh stopLcm.sh
+
+startLcm.sh:
+	echo '#!/bin/bash' > $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@
+	echo 'if [ $$# == "0" ]; then' >> $(DESTDIR)/$@
+	echo 'cat <<HELP' >> $(DESTDIR)/$@
+	echo 'start nllcmd, sdkd, ft_prov and info_prov on a certain interface' >> $(DESTDIR)/$@
+	echo 'usage: $$0 <interface>' >> $(DESTDIR)/$@
+	echo 'HELP' >> $(DESTDIR)/$@
+	echo 'else' >> $(DESTDIR)/$@
+	echo "	INTF_IP=\`ifconfig \$$1 |grep 'inet addr' |awk '{print \$$2}' |awk -F: '{print \$$2}'\`" >> $(DESTDIR)/$@
+	echo '	BASEDIR=$$(cd `dirname $$0` && pwd)' >> $(DESTDIR)/$@
+	echo '	export $(LIBRARY_PATH_FLAVOUR)=$$BASEDIR/lib:$($(LIBRARY_PATH_FLAVOUR))' >> $(DESTDIR)/$@
+	echo '	export PATH=$$BASEDIR/bin:$$PATH' >> $(DESTDIR)/$@
+	echo '	export COREDX_IP_ADDR=$$INTF_IP' >> $(DESTDIR)/$@
+	echo '	export LOG_OUTPUT=rebus stdout' >>  $(DESTDIR)/$@
+	echo "	export LCM_CERTIFICATE_STORE=$(projectdir/)build/package" >> $(DESTDIR)/$@
+	echo "	export LCM_PRE_POST_HOOK_DIR=/tmp" >> $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@
+	echo '	info_prov &' >>  $(DESTDIR)/$@
+	echo '	sdkd &' >>  $(DESTDIR)/$@
+	echo '	ft_prov &' >>  $(DESTDIR)/$@
+	echo '	INSTALLPATH=/tmp/lcm_local systst_nllcmd start &' >>  $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@
+	echo '	sleep 0.1' >>  $(DESTDIR)/$@
+	echo '	echo "[INFO] sdkd, info_prov and nllcmd started and listening on $$INTF_IP"' >>  $(DESTDIR)/$@
+	echo 'fi' >> $(DESTDIR)/$@
+	chmod +x $(DESTDIR)/$@
+	
+stopLcm.sh:
+	echo '#!/bin/bash' > $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@
+	echo 'killall info_prov' >> $(DESTDIR)/$@
+	echo 'killall sdkd' >> $(DESTDIR)/$@
+	echo 'killall ft_prov' >> $(DESTDIR)/$@
+	echo 'INSTALLPATH=/tmp/lcm_local systst_nllcmd stop' >> $(DESTDIR)/$@
+	echo 'rm -rf /tmp/lcm_local' >> $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@	
+	echo 'sleep 1' >> $(DESTDIR)/$@
+	echo 'killall -9 info_prov sdkd nllcmd cmdproxy ft_prov &&> /dev/null' >> $(DESTDIR)/$@
+	echo '' >> $(DESTDIR)/$@	
+	echo 'sleep 0.1' >>  $(DESTDIR)/$@
+	echo 'echo "[INFO] sdkd, info_prov, ft_prov and nllcmd killed :)"' >>  $(DESTDIR)/$@
+	chmod +x $(DESTDIR)/$@
+
+include $(projectdir/)build/Makefile_include_components
+include $(projectdir/)build/Makefile_last

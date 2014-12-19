@@ -1,0 +1,40 @@
+{
+  "href" : "file:///tmp/file/",
+  "PKI" : {
+    "scep" : {
+      "href" : "file:///tmp/file/"
+    }
+  },
+  "location" : {
+    "forwarders" : {
+      "href" : "xxxxxx"
+    }
+  },
+  "policy" : {
+    "check" : {
+      "href" : "file:///tmp/file/"
+    },
+    "pull" : {
+      "href" : "file:///tmp/file/"
+    }
+  },
+  "oauth" : {
+    "token" : {
+      "href" : "file:///tmp/file/"
+    },
+    "authorization" : {
+      "google" : {
+        "href" : "file:///tmp/file/"
+      },
+      "yahoo" : {
+        "href" : "file:///tmp/file/"
+      }
+    }
+  },
+  "management" : {
+    "href" : "file:///tmp/file/"
+  },
+  "ui" : {
+    "href" : "file:///tmp/file/"
+  }
+}

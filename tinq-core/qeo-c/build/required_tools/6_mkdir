@@ -1,0 +1,17 @@
+ifndef mkdir
+mkdir=$(shell if mkdir --version > /dev/null 2>/dev/null; then $(echo) mkdir; fi)
+endif
+
+ifeq ($(mkdir),)
+mkdir=$(shell if gmkdir --version > /dev/null 2>/dev/null; then $(echo) gmkdir; fi)
+endif
+
+ifeq ($(mkdir),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working mkdir in the path. This is required if you do not specify projectdir. Provide mkdir on the commandline (e.g. mkdir=/bin/mkdir).") 
+$(shell $(echo) "Could not find a working mkdir in the path. This is required if you do not specify projectdir. Provide mkdir on the commandline (e.g. mkdir=/bin/mkdir)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

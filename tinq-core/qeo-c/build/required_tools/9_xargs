@@ -1,0 +1,17 @@
+ifndef xargs
+xargs=$(shell if xargs -r --version > /dev/null 2>/dev/null; then $(echo) xargs; fi)
+endif
+
+ifeq ($(xargs),)
+xargs=$(shell if gxargs -r --version > /dev/null 2>/dev/null; then $(echo) gxargs; fi)
+endif
+
+ifeq ($(xargs),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working xargs in the path. This is required. Provide xargs on the commandline (e.g. xargs=/bin/xargs).") 
+$(shell $(echo) "Could not find a working xargs in the path. This is required. Provide xargs on the commandline (e.g. xargs=/bin/xargs)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

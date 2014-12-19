@@ -1,0 +1,122 @@
+
+0: Initial situation
+
+    [meta]
+    version = 1
+
+    [uid:1]
+    topic1 = rw
+    * = rw
+    
+    [uid:2]
+    topic2 = rw
+    prefix_* = r<uid:2>w<uid:1>
+    * = r
+
+1: First scan of policy file: generate prefix lenght sorted list
+    
+    name      fine grained?
+    
+    topic1       false 
+    topic2       false 
+    prefix_*     true  
+    *	         false 
+    
+2: Second scan: complete/expand
+
+    [meta]
+    version = 1
+
+    [uid:1]
+    topic1 = rw
+    topic2 = rw
+    prefix_* = r<uid:1,uid:2>w<uid:1,uid:2>  # Inverse: r<>w<>
+    * = rw
+    
+    [uid:2]
+    topic1 = r
+    topic2 = rw
+    prefix_* = r<uid:2>w<uid:1>              # Inverse: r<uid:1>w<uid:2>
+    * = r
+
+4a: Prefix with policy version, expand uids + wildcard removal
+
+    [uid:1]
+    topic1   -> r  -> 1_topic1
+		!r -> NULL
+    	     -> w  -> 1_topic1
+		!w -> NULL
+    topic2   -> r  -> 1_topic2
+		!r -> NULL
+    	     -> w  -> 1_topic2
+	     -> !w -> NULL
+    prefix_* -> r  -> 1_prefix_def_uid1_r (*), 1_prefix_def_uid1_w, 1_prefix_def_uid2_w
+		!r -> NULL
+                w  -> 1_prefix_def_uid1_w (*), 1_prefix_def_uid1_r, 1_prefix_def_uid2_r
+		!w -> NULL
+    *        -> r  -> 1_def 
+		!r -> NULL
+    	     -> w  -> 1_def
+	        !w -> NULL
+    
+    [uid:2]
+    topic1   -> r  -> 1_topic1 
+		!r -> NULL
+    	     -> w  -> NULL
+	        !w -> 1_topic1
+    topic2   -> r  -> 1_topic2
+		!r -> NULL
+             -> w  -> 1_topic2
+		!w -> NULL
+    prefix_* -> w  -> 1_prefix_def_uid2_w (*), 1_prefix_def_uid1_r
+		!w -> 1_prefix_def_uid2_r
+                r  -> 1_prefix_def_uid2_r (*), 1_prefix_def_uid2_w 
+		!r -> 1_prefix_def_uid1_w
+    *        -> r  -> 1_def 
+		!r -> NULL
+    		w  -> NULL
+    		!w -> 1_def
+
+5a: Use !r and !w to generate policy file:
+    
+    [uid:1]
+    
+    1_prefix_def_uid1_r r    // Boilerplate
+    1_prefix_def_uid1_w w    // Boilerplate
+
+    !1_prefix_def_uid*_w  w  // Boilerplate
+    !1_prefix_def_uid*_r  r  // Boilerplate
+
+    !DISABLED_READER   w     // Boilerplate
+    !DISABLED_WRITER   r     // Boilerplate
+
+    // Not allowed stuff goes here
+    // End not allowed stuff 
+
+
+    * w                      // Boilerplate
+    * r                      // Boilerplate
+
+
+    [uid:2]
+    
+    1_prefix_def_uid2_r r    // Boilerplate
+    1_prefix_def_uid2_w w    // Boilerplate
+
+    !1_prefix_def_uid*_w  w  // Boilerplate
+    !1_prefix_def_uid*_r  r  // Boilerplate
+
+    // Not allowed stuff goes here
+    !1_topic1 w
+    !1_prefix_def_uid1_w r
+    !1_prefix_def_uid2_r w
+    !1_def w
+    // End not allowed stuff 
+
+    !DISABLED_READER   w     // Boilerplate
+    !DISABLED_WRITER   r     // Boilerplate
+
+    * w                      // Boilerplate
+    * r                      // Boilerplate
+
+5b: Use r and w of actual uid to set partitions

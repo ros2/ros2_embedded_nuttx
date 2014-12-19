@@ -1,0 +1,21 @@
+{
+  "href" : "http://join.qeodev.org/" :"test",
+  "PKI" : {
+    "scep" : {
+      "href" : "https://join.qeodev.org:8442/ra/scep/pkiclient.exe"
+    }
+  },
+  "location" : {
+    "forwarders" : {
+      "href" : "https://join.qeodev.org:8443/pull/forwarders"
+    }
+  },
+  "policy" : {
+    "check" : {
+      "href" : "http://join.qeodev.org/pull/checkpolicy"
+    },
+    "pull" : {
+      "href" : "https://join.qeodev.org:8443/pull/policy"
+    }
+  }
+}

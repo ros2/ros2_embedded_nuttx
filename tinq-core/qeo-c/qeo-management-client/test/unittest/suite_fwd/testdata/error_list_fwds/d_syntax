@@ -1,0 +1,13 @@
+{
+  "forwarders": [ 
+    {
+      "id": "20",
+      "locators": [
+        {
+          "type": "TCPv4",
+          "port": 7400
+        }
+      ] 
+    }
+  ]
+}

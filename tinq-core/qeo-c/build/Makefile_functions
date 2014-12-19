@@ -1,0 +1,54 @@
+# Common Makefile functions. Included only once, and reused by all other
+# Makefiles
+
+FUNCTIONS_INCLUDED:=1
+empty:=
+space:=$(empty) $(empty)
+numbers:=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+comma:=,
+cb:=)
+
+# Defered resolver
+DEFERED_RESOLVER_CB=)
+DEFERED_RESOLVER_OB=$$(
+DEFERED_RESOLVER_SPLIT_VAR_FROM_TOCHANGE=$(subst $(DEFERED_RESOLVER_CB), ,$(subst $(DEFERED_RESOLVER_OB),,$(tochange)))
+DEFERED_RESOLVER=$(subst @%,$(space),$(subst $(space),,$(foreach elem,$(subst $$, $$,$(subst $(space),@%$(space),$($(DEFERED_RESOLVER_VAR)))),\
+		 $(foreach tochange,$(filter $(DEFERED_RESOLVER_OB)%,$(elem)),\
+		                              $(subst $(space),@%$(space),$($(word 1,$(DEFERED_RESOLVER_SPLIT_VAR_FROM_TOCHANGE))))\
+		                              $(word 2,$(DEFERED_RESOLVER_SPLIT_VAR_FROM_TOCHANGE))\
+		 )\
+		 $(filter-out $(DEFERED_RESOLVER_OB)%,$(elem))\
+		 )))
+
+# Install format related functions
+# The below listed expression transforms the $(COMPONENT)_PARTS_INSTALL
+# variable into a set of commands that build the requested layout, with the
+# requested permissions. The input format is of the form
+#
+# path_to_part@installed:mode/path:mode for copying files (:mode is optional)
+# s:from@to for symbolic links
+# d:dir/ec/to/ry for making empty directories
+# 
+
+CI_REMOVE_SOURCE_FROM_ONE_PART_AND_SPLIT=$(subst /, ,$(word $(words $(subst |,| ,$(subst @, ,$t))),$(subst |,| ,$(subst @, ,$t))))
+CI_EXTRACT_SOURCE_FROM_ONE_PART=$(firstword $(subst |,| ,$(subst @, ,$t)))
+CI_EXTRACT_SOURCES_FROM_PARTS=$(foreach t, $(filter-out s:% d:%,$($(CI_PARTS_VAR))),$(patsubst %|,%,$(CI_EXTRACT_SOURCE_FROM_ONE_PART)))
+
+CI_REMOVE_MODE_FROM_ONE_SPLIT_TARGET=$(firstword $(subst :, ,$d))
+CI_EXTRACT_MODE_FROM_ONE_SPLIT_TARGET=$(word 2,$(subst :, ,$d))
+
+CI_EXTRACT_TARGET_FROM_ONE_PART=$(subst $(space),/,$(foreach d,$(CI_REMOVE_SOURCE_FROM_ONE_PART_AND_SPLIT),$(CI_REMOVE_MODE_FROM_ONE_SPLIT_TARGET)))
+CI_EXTRACT_TARGETS_FROM_PARTS=$(foreach t, $(filter-out s:% d:%,$($(CI_PARTS_VAR))), $(subst $(space),/,$(CI_EXTRACT_TARGET_FROM_ONE_PART)))
+
+CONVERT_PATH_TO_RELATIVE_PATH=$(subst $(space),/,$(patsubst %,..,$(subst /, ,$(subst //,/,$(subst //,/,$(patsubst %/,%,$(patsubst ./%,%,$(CI_EXTRACT_TARGET_FROM_ONE_PART))))))))$$SRC_SUFFIX
+
+CI_MAKE_DIRS=$(addprefix $(mkdir) -p , $(addsuffix && , $(sort $(dir $(CI_EXTRACT_TARGETS_FROM_PARTS))))) true
+
+INSTALL_SCRIPT_TRANSFORM='s:@libdir@:/$(libdir):g;s:@datadir@:/$(datadir):g;s:@bindir@:/$(bindir):g;s:@sysconfdir@:/$(sysconfdir):g;s:@rgcdir@:/$(rgcdir):g;s:@clifwmapdir@:/$(clifwmapdir):g;s:@luamoddir@:/$(luamoddir):g;s:@lualibdir@:/$(lualibdir):g'
+
+CI_COPY_FILES=$(foreach t, $(filter-out s:% d:%,$($(CI_PARTS_VAR))), $(subst %, ,$(addsuffix %sed%$(INSTALL_SCRIPT_TRANSFORM)%>,$(addprefix cat%,$(filter %|,$(CI_EXTRACT_SOURCE_FROM_ONE_PART)))))$(addprefix $(CP) -f ,$(filter-out %|,$(CI_EXTRACT_SOURCE_FROM_ONE_PART))) $(CI_EXTRACT_TARGET_FROM_ONE_PART) && )true
+CI_LINK_COPY_FILES=$(foreach t, $(filter-out s:% d:%,$($(CI_PARTS_VAR))), if [ -d $(CI_EXTRACT_TARGET_FROM_ONE_PART) ] ; then cd $(CI_EXTRACT_TARGET_FROM_ONE_PART) && $(LN) -s -f $(CONVERT_PATH_TO_RELATIVE_PATH)$(CI_EXTRACT_SOURCE_FROM_ONE_PART) .; else cd `dirname $(CI_EXTRACT_TARGET_FROM_ONE_PART)` && $(LN) -s -f $(patsubst ../%,%,$(CONVERT_PATH_TO_RELATIVE_PATH))$(CI_EXTRACT_SOURCE_FROM_ONE_PART) `basename $(CI_EXTRACT_TARGET_FROM_ONE_PART)`; fi && cd $$DIR && )true
+CI_CHANGE_MODE=$(projectdir/)build/changemode.sh $(foreach t,$(filter-out s:% d:%,$($(CI_PARTS_VAR))),$(word 2,$(subst |,$(space),$(subst @,$(space),$t))))
+CI_MAKE_LINKS=$(foreach t, $(patsubst s:%,%,$(filter s:%,$($(CI_PARTS_VAR)))), $(LN) -sf $(CI_EXTRACT_SOURCE_FROM_ONE_PART) $(CI_EXTRACT_TARGET_FROM_ONE_PART) && )true
+CI_MAKE_ONLY_DIRS=$(foreach t, $(patsubst d:%,%,$(filter d:%,$($(CI_PARTS_VAR)))), $(mkdir) -p $t && )true
+

@@ -1,0 +1,13 @@
+qeoforwarder_0.1 {
+global:
+    forwarder_config_public_locator;
+    forwarder_config_local_port;
+    forwarder_config_local_discovery;
+    forwarder_config_upnp;
+    forwarder_start;
+    forwarder_stop;
+
+local:
+    *;
+};
+

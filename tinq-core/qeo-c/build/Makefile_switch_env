@@ -1,0 +1,16 @@
+# No recursing when the only thing left is the *: from list components
+ifneq ($(NEEDED_COMPONENTS),*:$(E))
+# No recursing when we have no components left to resolve
+ifneq ($(NEEDED_COMPONENTS),)
+RESET_COMPONENTS:=$(foreach comp,$(ALL_COMPONENTS),$(word 1, $(subst :, ,$(comp))))
+
+include $(patsubst %,$(projectdir/)build/Makefile_reset,$(RESET_COMPONENTS))
+
+# Reset E to the target environment of the requested component
+override E:=$(word 2,$(subst :, ,$(NEEDED_COMPONENTS)))
+include $(projectdir/)build/Makefile_include_components
+# Reset E to the variable passed on the command line or inside the toplevel
+# Makefile
+override E:=$(ORIGE)
+endif
+endif

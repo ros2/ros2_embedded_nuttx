@@ -1,0 +1,296 @@
+## FILE: Makefile_lib
+#
+# Description: This Makefile will be included once for each library defined in
+# each component Makefile. It is responsible for generating the build commands
+# for the library for which this Makefile was included.
+#
+# Input variables:
+# - COMPONENT
+# - LIB
+# - $(COMPONENT).$(LIB)_SRCS
+# - $(COMPONENT).$(LIB)_CCDEPS
+# - $(COMPONENT).$(LIB)_IMPLEMENTS
+# - $(COMPONENT).$(LIB)_LDDEPS
+# - $(COMPONENT).$(LIB)_LDFLAGS
+# - $(COMPONENT).$(LIB)_LDADD
+# - $(COMPONENT).$(LIB)_LOCALINCLUDES (src_to_o)
+# - $(COMPONENT).$(LIB)_LOCALDEFINES (src_to_o)
+# - $(COMPONENT)_COVERAGE
+#
+
+
+COMPONENT_SET:=$(COMPONENT)
+
+# For testing purposes (like unit testing part of a library, rest of the
+# library is replaced by mocks) it is possible to loan an object from another
+# part. This part implements the loaning 
+##<
+# To loan an object from another part we use the format
+# <partname_from_which_we_loan>:<src/file.c> in the SRCS list.
+$(COMPONENT).$(LIB)_LOANED_SRCS:=$(foreach src, $($(COMPONENT).$(LIB)_SRCS), $(subst :,$(src),$(findstring :,$(src))))
+
+# If we have such sources, we add the object files build for the part from
+# which we loan to the LOANED_OBJS of this part.
+ifneq ($($(COMPONENT).$(LIB)_LOANED_SRCS),)
+$(COMPONENT).$(LIB)_LOANED_OBJS:=$(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(foreach loan,$($(COMPONENT).$(LIB)_LOANED_SRCS),$(addprefix $($(COMPONENT)_PREFIX/),$(addsuffix _dir$($(COMPONENT)_COMP_DIR)/,$(filter $($(COMPONENT).LIBRARIES) $($(COMPONENT).PROGRAMS),$(firstword $(subst :, ,$(loan))))))$(word 2,$(subst :, ,$(loan)))))))
+$(COMPONENT).$(LIB)_LOANED_OBJS_SHARED:=$(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(foreach loan,$($(COMPONENT).$(LIB)_LOANED_SRCS),$(addprefix $($(COMPONENT)_PREFIX/),$(addsuffix _dir$($(E)_SHARED_DIR_INFIX)$($(COMPONENT)_COMP_DIR)/,$(filter $($(COMPONENT).LIBRARIES) $($(COMPONENT).PROGRAMS),$(firstword $(subst :, ,$(loan))))))$(word 2,$(subst :, ,$(loan)))))))
+endif
+
+# And finally we filter-out the loaned sources from our list of sources
+$(COMPONENT).$(LIB)_SRCS            := $(filter-out $($(COMPONENT).$(LIB)_LOANED_SRCS),$($(COMPONENT).$(LIB)_SRCS))
+##>
+
+$(COMPONENT).$(LIB)_SRCS            := $(addprefix $($(COMPONENT)_COMP_DIR)/,$(filter-out /%,$($(COMPONENT).$(LIB)_SRCS))) $(filter /%,$($(COMPONENT).$(LIB)_SRCS))
+$(COMPONENT).$(LIB)_OBJS            := $(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$($(COMPONENT).$(LIB)_SRCS))))
+$(COMPONENT).$(LIB)_OBJS_OUT        := $(addprefix $($(COMPONENT)_PREFIX/)$(LIB)_dir, $($(COMPONENT).$(LIB)_OBJS))
+$(COMPONENT).$(LIB)_OBJS_OUT_SHARED := $(addprefix $(addsuffix $($(E)_SHARED_DIR_INFIX),$($(COMPONENT)_PREFIX/)$(LIB)_dir), $($(COMPONENT).$(LIB)_OBJS))
+$(COMPONENT).$(LIB)_LDDEPS          := $(addprefix $($(COMPONENT)_PREFIX/),$($(COMPONENT).$(LIB)_LDDEPS))
+$(COMPONENT).$(LIB)_CCDEPS          := $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$($(COMPONENT).$(LIB)_CCDEPS))) $(filter /%,$($(COMPONENT).$(LIB)_CCDEPS))
+
+##< Find out if this program is a test part, or a normal part
+ifneq ($(filter $($(COMPONENT)_PREFIX/)$(LIB)$(LIBSUFFIX) $($(COMPONENT)_PREFIX/)$(LIB).a $($(COMPONENT)_PREFIX/)$(LIB)_pic.a, $($(COMPONENT)_PARTS)),)
+$(COMPONENT).$(LIB)_TEST:=0
+else
+ifneq ($(filter $($(COMPONENT)_PREFIX/)$(LIB)$(LIBSUFFIX) $($(COMPONENT)_PREFIX/)$(LIB).a $($(COMPONENT)_PREFIX/)$(LIB)_pic.a, $($(COMPONENT)_TEST_PARTS)),)
+$(COMPONENT).$(LIB)_TEST:=1
+else
+# Not listed as a test lib or a test part. 
+# Look at all the dependencies of the defined parts to see if it used as a
+# dependency of a normal part
+ALL_PROGRAMS:=$(foreach part,$($(COMPONENT).PROGRAMS),$($(COMPONENT)_PREFIX/)$(part))
+ALL_LIBS_NO_EXT:=$(foreach part,$($(COMPONENT).LIBRARIES),$($(COMPONENT)_PREFIX/)$(part))
+ALL_LIBS:=$(addsuffix $(LIBSUFFIX),$(ALL_LIBS_NO_EXT))\
+	  $(addsuffix .a,$(ALL_LIBS_NO_EXT))\
+	  $(addsuffix _pic.a,$(ALL_LIBS_NO_EXT))
+
+ALL_DEFINED_PARTS:=$(sort $(ALL_PROGRAMS) $(ALL_LIBS))
+ALL_PARTS:=$(sort $(patsubst %.a,%,$(patsubst %$(LIBSUFFIX),%,$(filter $($(COMPONENT)_PARTS),$(ALL_DEFINED_PARTS)))))
+
+EXTRA_NORMAL_PARTS_SHORT:=$(sort $(patsubst %.a,%,$(patsubst %$(LIBSUFFIX),%,$(foreach part,$(notdir $(ALL_PARTS)),$($(COMPONENT).$(part)_LDDEPS)))))
+EXTRA_NORMAL_PARTS:=$(filter-out $(ALL_PARTS),$(filter /%,$(EXTRA_NORMAL_PARTS_SHORT)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$(EXTRA_NORMAL_PARTS_SHORT))))
+CONSERVATIVE=0
+ifneq ($(EXTRA_NORMAL_PARTS),)
+	ALL_PARTS:=$(sort $(ALL_PARTS) $(EXTRA_NORMAL_PARTS))
+	EXTRA_NORMAL_PARTS_SHORT:=$(sort $(patsubst %.a,%,$(patsubst %$(LIBSUFFIX),%,$(foreach part,$(notdir $(ALL_PARTS)),$($(COMPONENT).$(part)_LDDEPS)))))
+	EXTRA_NORMAL_PARTS:=$(filter-out $(ALL_PARTS),$(filter /%,$(EXTRA_NORMAL_PARTS_SHORT)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$(EXTRA_NORMAL_PARTS_SHORT))))
+        ifneq ($(EXTRA_NORMAL_PARTS),)
+	        ALL_PARTS:=$(sort $(ALL_PARTS) $(EXTRA_NORMAL_PARTS))
+	        EXTRA_NORMAL_PARTS_SHORT:=$(sort $(patsubst %.a,%,$(patsubst %$(LIBSUFFIX),%,$(foreach part,$(notdir $(ALL_PARTS)),$($(COMPONENT).$(part)_LDDEPS)))))
+	        EXTRA_NORMAL_PARTS:=$(filter-out $(ALL_PARTS),$(filter /%,$(EXTRA_NORMAL_PARTS_SHORT)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$(EXTRA_NORMAL_PARTS_SHORT))))
+                ifneq ($(EXTRA_NORMAL_PARTS),)
+	                ALL_PARTS:=$(sort $(ALL_PARTS) $(EXTRA_NORMAL_PARTS))
+	                EXTRA_NORMAL_PARTS_SHORT:=$(sort $(patsubst %.a,%,$(patsubst %$(LIBSUFFIX),%,$(foreach part,$(notdir $(ALL_PARTS)),$($(COMPONENT).$(part)_LDDEPS)))))
+	                EXTRA_NORMAL_PARTS:=$(filter-out $(ALL_PARTS),$(filter /%,$(EXTRA_NORMAL_PARTS_SHORT)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$(EXTRA_NORMAL_PARTS_SHORT))))
+                        ifneq ($(EXTRA_NORMAL_PARTS),)
+                                $(shell echo It is possible that some parts have been classified as normal parts where they really are test parts. >&2)
+                                $(shell echo You might get coverage results for test parts. >&2)
+				CONSERVATIVE=1
+                        endif
+               endif
+        endif
+endif
+
+# If conservative is false, we could follow the dependency graph of the normal
+# parts, in maximum 3 hops. So we know all the parts that are "normal" by
+# extension.
+ifeq ($(CONSERVATIVE),0)
+	# If the library is in the ALL_PARTS variable, it is a normal part
+        ifeq ($(LIB),$(filter $(LIB),$(notdir $(ALL_PARTS))))
+                $(COMPONENT).$(LIB)_TEST:=0
+	# Otherwise: it is a test part
+        else
+                $(COMPONENT).$(LIB)_TEST:=1
+        endif
+# We could not figure out if this was a test part or not (can only happen if
+# you have a large chain of non-installed parts - typically archives - that
+# depend on each other
+else
+	$(COMPONENT).$(LIB)_TEST:=0
+endif
+endif
+endif
+##>
+
+$(COMPONENT).$(LIB)_$(E)_LDDEPS:=$($(COMPONENT).$(LIB)_LDDEPS)
+
+##< Generate needed services
+ifneq ($($(COMPONENT).$(LIB)_IMPLEMENTS),)
+$(COMPONENT).$(LIB)_IMPLEMENTS    := $(addprefix $($(COMPONENT)_COMP_DIR)/,$(filter-out /%,$($(COMPONENT).$(LIB)_IMPLEMENTS))) $(filter /%,$($(COMPONENT).$(LIB)_IMPLEMENTS))
+
+GENERATOR_FROM_XML:=$(foreach xml,$($(COMPONENT).$(LIB)_IMPLEMENTS),$(word 1,$(subst .ddl:, ,$(subst .xml:, ,$(xml))))-$(word 1,$(subst -, ,$(word 2,$(subst .ddl:, ,$(subst .xml:, ,$(xml)))))))
+LIBS_FROM_XML:=$(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .a,$(foreach xml,$($(COMPONENT).$(LIB)_IMPLEMENTS),$(word 1,$(subst .ddl:, ,$(subst .xml:, ,$(xml))))-$(word 2,$(subst .ddl:, ,$(subst .xml:, ,$(xml)))))))
+
+#TODO Check which variables have to be made $(E) specific like the LDDEPS
+$(COMPONENT).$(LIB)_CCDEPS        += $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .generated,$(GENERATOR_FROM_XML)))
+$(COMPONENT).$(LIB)_$(E)_LDDEPS   += $(patsubst %-full.a,%.a,$(LIBS_FROM_XML))
+$(COMPONENT).$(LIB)_LOCALINCLUDES += $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir,$(GENERATOR_FROM_XML))) \
+                                     $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/include,$(GENERATOR_FROM_XML))) \
+                                     $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/src/client,$(GENERATOR_FROM_XML))) \
+                                     $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/src/server,$(GENERATOR_FROM_XML)))
+$(COMPONENT).$(LIB)_LDADD         := $(patsubst %-full.a,-Wl$(comma)--whole-archive %.a -Wl$(comma)--no-whole-archive,$(LIBS_FROM_XML)) $($(COMPONENT).$(LIB)_LDADD)
+
+ifneq ($(filter %-ddscpp,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=coredx_ddl
+  ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=coredx_ddl
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=coredx_ddl
+  endif
+endif
+ifneq ($(filter %-cpp,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rebusCodegenCPP.sh coredx_ddl
+  ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rebusCodegenCPP.sh coredx_ddl
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rebusCodegenCPP.sh coredx_ddl
+  endif
+endif
+ifneq ($(filter %-c,$(GENERATOR_FROM_XML))$(filter %-cstub,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rebusCodegenC.sh
+  ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rebusCodegenC.sh
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rebusCodegenC.sh
+  endif
+endif
+ifneq ($(filter %-rgc,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rgcCodegen.sh
+  ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rgcCodegen.sh
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rgcCodegen.sh
+  endif
+endif
+endif
+##>
+
+$(COMPONENT)_$(E)_$(LIB)_LDADD      := $($(COMPONENT).$(LIB)_LDADD)
+
+$($(COMPONENT)_PREFIX/)$(LIB).a: override COMPONENT:=$(COMPONENT_SET)
+$($(COMPONENT)_PREFIX/)$(LIB).a: LOANED:=$($(COMPONENT).$(LIB)_LOANED_OBJS)
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_PRE_LOCALINCLUDES:=$(COMPONENT)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_PRE2_LOCALINCLUDES:=$(COMPONENT).$(LIB)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_PRE_LOCALDEFINES:=$(COMPONENT)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_PRE2_LOCALDEFINES:=$(COMPONENT).$(LIB)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_LOCALDEFINES:=$($(PART_PRE_LOCALDEFINES)) $($(PART_PRE2_LOCALDEFINES))
+$($(COMPONENT)_PREFIX/)$(LIB).a: THIS_A_LDDEPS:=$($(COMPONENT).$(LIB)_$(E)_LDDEPS)
+$($(COMPONENT)_PREFIX/)$(LIB).a: PART_LOCALINCLUDES:=$($(PART_PRE_LOCALINCLUDES)) $($(PART_PRE2_LOCALINCLUDES))
+ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+$($(COMPONENT)_PREFIX/)$(LIB).a: $($(COMPONENT).$(LIB)_OBJS_OUT) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)                                            $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).a: $($(COMPONENT).$(LIB)_OBJS_OUT) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+endif
+	$(rm) -f $@
+	echo $(filter %.o, $^) $(LOANED) > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(filter %.o, $^) $(LOANED)
+	$(CAT) $(patsubst %.a,%.lst,$(filter %.a, $(THIS_A_LDDEPS))) /dev/null >> $(patsubst %.a,%.lst,$@)
+	$(CAT) $(patsubst %.a,%.lst,$(filter %.a, $(THIS_A_LDDEPS))) /dev/null | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN)) rv $@ 
+    # PRAETP: You have to be careful if you are archiving files with identical names. Based on how xargs works this will work or not.
+    # It is best to avoid this alltogether (if possible). If you are archive files with identical names in 'one' ar statement, this will be accepted.
+    # If you split this over multiple 'ar -r' statements, this won't work.
+    # I found this out the hard way when building a big .a for iOS.
+
+
+$($(COMPONENT)_PREFIX/)$(LIB)_pic.a: THIS_PIC_OBJ:=$($(COMPONENT).$(LIB)_OBJS_OUT_SHARED)
+$($(COMPONENT)_PREFIX/)$(LIB)_pic.a: THIS_PIC_LDDEPS:=$($(COMPONENT).$(LIB)_$(E)_LDDEPS)
+$($(COMPONENT)_PREFIX/)$(LIB)_pic.a: $($(COMPONENT)_PREFIX/)$(LIB)$(LIBSUFFIX)
+	$(rm) -f $@
+	echo $(THIS_PIC_OBJ) > $(patsubst %.a,%.lst,$@)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN) rv $@ $(THIS_PIC_OBJ)
+	$(CAT) $(patsubst %.a,%.lst,$(filter %.a, $(THIS_PIC_LDDEPS))) /dev/null >> $(patsubst %.a,%.lst,$@)
+	$(CAT) $(patsubst %.a,%.lst,$(filter %.a, $(THIS_PIC_LDDEPS))) /dev/null | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LIBRARIAN)) rv $@ 
+
+%/$(LIB)_pic.a: $($(COMPONENT)_PREFIX/)$(LIB)_pic.a
+	$(CP) $< $@
+
+LIB_FROM_SO=$(patsubst %.so,%,$(@F))
+ifeq ($($(COMPONENT)_COVERAGE),1)
+ifeq ($(strip $($(COMPONENT).$(LIB)_NO_COVERAGE)),1)
+$($(COMPONENT)_PREFIX/)$(LIB).so: $(COMPONENT)_$(E)_TMP_CFLAGS:=$($(COMPONENT)_$(E)_TMP_CFLAGS_NO_COVERAGE)
+endif
+endif
+$($(COMPONENT)_PREFIX/)$(LIB).so: override COMPONENT:=$(COMPONENT_SET)
+$($(COMPONENT)_PREFIX/)$(LIB).so: LOANED:=$($(COMPONENT).$(LIB)_LOANED_OBJS_SHARED)
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_PRE_LOCALINCLUDES:=$(COMPONENT)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_PRE2_LOCALINCLUDES:=$(COMPONENT).$(LIB)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_PRE_LOCALDEFINES:=$(COMPONENT)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_PRE2_LOCALDEFINES:=$(COMPONENT).$(LIB)_LOCALDEFINES
+ifneq ($($(E)_SHARED_DIR_INFIX),)
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_SHARED_LIB_CFLAGS:=$($(E)_SHARED_LIB_CFLAGS)
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_LOCALDEFINES:=$($(PART_PRE_LOCALDEFINES)) $($(PART_PRE2_LOCALDEFINES)) $(PART_SHARED_LIB_CFLAGS)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_LOCALDEFINES:=$($(PART_PRE_LOCALDEFINES)) $($(PART_PRE2_LOCALDEFINES))
+endif
+$($(COMPONENT)_PREFIX/)$(LIB).so: PART_LOCALINCLUDES:=$($(PART_PRE_LOCALINCLUDES)) $($(PART_PRE2_LOCALINCLUDES))
+ifneq ($(filter $(TARG_OS),MACOS IOS),)
+ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+$($(COMPONENT)_PREFIX/)$(LIB).so: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)                                            $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) -shared -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_SO)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).so: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) -shared -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_SO)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+endif
+else
+ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+$($(COMPONENT)_PREFIX/)$(LIB).so: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)                                            $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) $(addprefix -Wl$(comma)--version-script=,$(wildcard $($(COMPONENT_FROM_TARGET)_COMP_DIR)/api/symbols/$(patsubst %.so,%,$(@F)).ldver)) -shared -Wl,-soname,$(@F)$(addprefix .,$($(COMPONENT_FROM_TARGET)_MAJOR_VERSION)) -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_SO)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).so: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) $(addprefix -Wl$(comma)--version-script=,$(wildcard $($(COMPONENT_FROM_TARGET)_COMP_DIR)/api/symbols/$(patsubst %.so,%,$(@F)).ldver)) -shared -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_SO)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+endif
+endif
+ifneq ($($(COMPONENT)_MAJOR_VERSION),)
+	cd $(@D) && $(RM) -f $(@F)$(addprefix .,$($(COMPONENT_FROM_TARGET)_MAJOR_VERSION))
+	cd $(@D) && $(LN) -s $(@F) $(@F)$(addprefix .,$($(COMPONENT_FROM_TARGET)_MAJOR_VERSION))
+endif
+
+LIB_FROM_DYLIB=$(patsubst %.dylib,%,$(@F))
+ifeq ($($(COMPONENT)_COVERAGE),1)
+ifeq ($(strip $($(COMPONENT).$(LIB)_NO_COVERAGE)),1)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: $(COMPONENT)_$(E)_TMP_CFLAGS:=$($(COMPONENT)_$(E)_TMP_CFLAGS_NO_COVERAGE)
+endif
+endif
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: override COMPONENT:=$(COMPONENT_SET)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: LOANED:=$($(COMPONENT).$(LIB)_LOANED_OBJS_SHARED)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_PRE_LOCALINCLUDES:=$(COMPONENT)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_PRE2_LOCALINCLUDES:=$(COMPONENT).$(LIB)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_PRE_LOCALDEFINES:=$(COMPONENT)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_PRE2_LOCALDEFINES:=$(COMPONENT).$(LIB)_LOCALDEFINES
+ifneq ($($(E)_SHARED_DIR_INFIX),)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_SHARED_LIB_CFLAGS:=$($(E)_SHARED_LIB_CFLAGS)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_LOCALDEFINES:=$($(PART_PRE_LOCALDEFINES)) $($(PART_PRE2_LOCALDEFINES)) $(PART_SHARED_LIB_CFLAGS)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_LOCALDEFINES:=$($(PART_PRE_LOCALDEFINES)) $($(PART_PRE2_LOCALDEFINES))
+endif
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: PART_LOCALINCLUDES:=$($(PART_PRE_LOCALINCLUDES)) $($(PART_PRE2_LOCALINCLUDES))
+ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)                                            $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) -shared -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_DYLIB)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+else
+$($(COMPONENT)_PREFIX/)$(LIB).dylib: $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED) $$($(COMPONENT).$(LIB)_$(E)_LDDEPS) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_LIB) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) -shared -o $@ $(filter %.o, $^) $(LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(LIB_FROM_DYLIB)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+endif
+ifneq ($($(COMPONENT)_MAJOR_VERSION),)
+	cd $(@D) && $(RM) -f $(@F)$(addprefix .,$($(COMPONENT_FROM_TARGET)_MAJOR_VERSION))
+	cd $(@D) && $(LN) -s $(@F) $(@F)$(addprefix .,$($(COMPONENT_FROM_TARGET)_MAJOR_VERSION))
+endif
+
+include $(projectdir/)build/Makefile_src_to_o
+
+ifeq ($($(COMPONENT)_COVERAGE),1)
+ifneq ($($(COMPONENT).$(LIB)_TEST), 1)
+$(COMPONENT)_$(E)_COVERAGE_FILES+=$(sort $($(COMPONENT).$(LIB)_OBJS_OUT) $($(COMPONENT).$(LIB)_OBJS_OUT_SHARED))
+endif
+endif
+
+$(COMPONENT).$(LIB)_SRCS:=
+$(COMPONENT).$(LIB)_OBJS:=
+$(COMPONENT).$(LIB)_OBJS_OUT:=
+$(COMPONENT).$(LIB)_LOCALINCLUDES:=
+$(COMPONENT).$(LIB)_LOCALDEFINES:=
+$(COMPONENT).$(LIB)_LDADD:=
+$(COMPONENT).$(LIB)_LDFLAGS:=
+LIB:=
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

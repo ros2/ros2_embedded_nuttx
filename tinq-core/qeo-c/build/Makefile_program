@@ -1,0 +1,162 @@
+## FILE: Makefile_program
+#
+# Description: This Makefile will be included once for each program defined in
+# each component Makefile. It is responsible for generating the build commands
+# for the program for which this Makefile was included.
+#
+# Input variables:
+# - COMPONENT
+# - PROGRAM
+# - $(COMPONENT).$(PROGRAM)_SRCS
+# - $(COMPONENT).$(PROGRAM)_CCDEPS
+# - $(COMPONENT).$(PROGRAM)_IMPLEMENTS
+# - $(COMPONENT).$(PROGRAM)_LDDEPS
+# - $(COMPONENT).$(PROGRAM)_LDFLAGS
+# - $(COMPONENT).$(PROGRAM)_LDADD
+# - $(COMPONENT).$(PROGRAM)_LOCALINCLUDES (src_to_o)
+# - $(COMPONENT).$(PROGRAM)_LOCALDEFINES (src_to_o)
+# - $(COMPONENT)_COVERAGE
+#
+
+
+COMPONENT_SET:=$(COMPONENT)
+
+# For testing purposes (like unit testing part of a library, rest of the
+# library is replaced by mocks) it is possible to loan an object from another
+# part. This part implements the loaning 
+##<
+# To loan an object from another part we use the format
+# <partname_from_which_we_loan>:<src/file.c> in the SRCS list.
+$(COMPONENT).$(PROGRAM)_LOANED_SRCS:=$(foreach src, $($(COMPONENT).$(PROGRAM)_SRCS), $(subst :,$(src),$(findstring :,$(src))))
+
+# If we have such sources, we add the object files build for the part from
+# which we loan to the LOANED_OBJS of this part.
+ifneq ($($(COMPONENT).$(PROGRAM)_LOANED_SRCS),)
+$(COMPONENT).$(PROGRAM)_LOANED_OBJS:=$(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(foreach loan,$($(COMPONENT).$(PROGRAM)_LOANED_SRCS),$(addprefix $($(COMPONENT)_PREFIX/),$(addsuffix _dir/$($(COMPONENT)_COMP_DIR)/,$(filter $($(COMPONENT).LIBRARIES) $($(COMPONENT).PROGRAMS),$(firstword $(subst :, ,$(loan))))))$(word 2,$(subst :, ,$(loan)))))))
+endif
+
+# And finally we filter-out the loaned sources from our list of sources
+$(COMPONENT).$(PROGRAM)_SRCS            := $(filter-out $($(COMPONENT).$(PROGRAM)_LOANED_SRCS),$($(COMPONENT).$(PROGRAM)_SRCS))
+##>
+
+$(COMPONENT).$(PROGRAM)_SRCS     := $(addprefix $($(COMPONENT)_COMP_DIR)/,$(filter-out /%,$($(COMPONENT).$(PROGRAM)_SRCS))) $(filter /%,$($(COMPONENT).$(PROGRAM)_SRCS))
+$(COMPONENT).$(PROGRAM)_OBJS     := $(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$($(COMPONENT).$(PROGRAM)_SRCS))))
+$(COMPONENT).$(PROGRAM)_OBJS_OUT := $(addprefix $($(COMPONENT)_PREFIX/)$(PROGRAM)_dir, $($(COMPONENT).$(PROGRAM)_OBJS))
+
+$(COMPONENT).$(PROGRAM)_LDDEPS   := $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$($(COMPONENT).$(PROGRAM)_LDDEPS))) $(filter /%,$($(COMPONENT).$(PROGRAM)_LDDEPS))
+$(COMPONENT).$(PROGRAM)_CCDEPS   := $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$($(COMPONENT).$(PROGRAM)_CCDEPS))) $(filter /%,$($(COMPONENT).$(PROGRAM)_CCDEPS))
+
+##< Find out if this program is a test part, or a normal part
+ifneq ($(filter $($(COMPONENT)_PREFIX/)$(PROGRAM), $($(COMPONENT)_PARTS)),)
+$(COMPONENT).$(PROGRAM)_TEST:=0
+else
+ifneq ($(filter $($(COMPONENT)_PREFIX/)$(PROGRAM), $($(COMPONENT)_TEST_PARTS)),)
+$(COMPONENT).$(PROGRAM)_TEST:=1
+else
+# Not listed as a test program or a normal part. Assuming test (worst case).
+$(COMPONENT).$(PROGRAM)_TEST:=1
+endif
+endif
+##>
+
+##< Generate needed services
+ifneq ($($(COMPONENT).$(PROGRAM)_IMPLEMENTS),)
+$(COMPONENT).$(PROGRAM)_IMPLEMENTS    := $(addprefix $($(COMPONENT)_COMP_DIR)/,$(filter-out /%,$($(COMPONENT).$(PROGRAM)_IMPLEMENTS))) $(filter /%,$($(COMPONENT).$(PROGRAM)_IMPLEMENTS))
+
+GENERATOR_FROM_XML:=$(foreach xml,$($(COMPONENT).$(PROGRAM)_IMPLEMENTS),$(word 1,$(subst .ddl:, ,$(subst .xml:, ,$(xml))))-$(word 1,$(subst -, ,$(word 2,$(subst .ddl:, ,$(subst .xml:, ,$(xml)))))))
+LIBS_FROM_XML:=$(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .a,$(foreach xml,$($(COMPONENT).$(PROGRAM)_IMPLEMENTS),$(word 1,$(subst .ddl:, ,$(subst .xml:, ,$(xml))))-$(word 2,$(subst .ddl:, ,$(subst .xml:, ,$(xml)))))))
+
+$(COMPONENT).$(PROGRAM)_CCDEPS        += $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .generated,$(GENERATOR_FROM_XML)))
+$(COMPONENT).$(PROGRAM)_LDDEPS        += $(patsubst %-full.a,%.a,$(LIBS_FROM_XML))
+$(COMPONENT).$(PROGRAM)_LOCALINCLUDES += $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir,$(GENERATOR_FROM_XML))) \
+                                         $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/include,$(GENERATOR_FROM_XML))) \
+                                         $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/src/client,$(GENERATOR_FROM_XML))) \
+                                         $(addprefix $($(COMPONENT)_PREFIX),$(addsuffix .dir/src/server,$(GENERATOR_FROM_XML)))
+$(COMPONENT).$(PROGRAM)_LDADD         := $(patsubst %-full.a,-Wl$(comma)--whole-archive %.a -Wl$(comma)--no-whole-archive,$(LIBS_FROM_XML)) $($(COMPONENT).$(PROGRAM)_LDADD)
+
+ifneq ($(filter %-ddscpp,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=coredx_ddl
+  ifneq ($($(COMPONENT).$(PROGRAM)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=coredx_ddl
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=coredx_ddl
+  endif
+endif
+ifneq ($(filter %-cpp,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rebusCodegenCPP.sh coredx_ddl
+  ifneq ($($(COMPONENT).$(PROGRAM)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rebusCodegenCPP.sh coredx_ddl
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rebusCodegenCPP.sh coredx_ddl
+  endif
+endif
+ifneq ($(filter %-c,$(GENERATOR_FROM_XML))$(filter %-cstub,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rebusCodegenC.sh
+  ifneq ($($(COMPONENT).$(PROGRAM)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rebusCodegenC.sh
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rebusCodegenC.sh
+  endif
+endif
+ifneq ($(filter %-rgc,$(GENERATOR_FROM_XML)),)
+  NEEDED_TOOLS+=rgcCodegen.sh
+  ifneq ($($(COMPONENT).$(PROGRAM)_TEST), 1)
+    $(COMPONENT)_NEEDED_TOOLS+=rgcCodegen.sh
+  else
+    $(COMPONENT)_NEEDED_TOOLS_TEST+=rgcCodegen.sh
+  endif
+endif
+endif
+##>
+
+$(COMPONENT)_$(E)_$(PROGRAM)_LDFLAGS:=
+
+ifeq ($($(COMPONENT)_STATIC_LINK),1)
+$(COMPONENT)_$(E)_$(PROGRAM)_LDFLAGS+=-static
+endif
+
+$(COMPONENT)_$(E)_$(PROGRAM)_LDFLAGS+=$($(COMPONENT).$(PROGRAM)_LDFLAGS)
+$(COMPONENT)_$(E)_$(PROGRAM)_LDADD:=$($(COMPONENT).$(PROGRAM)_LDADD)
+
+$($(COMPONENT)_PREFIX/)$(PROGRAM): override COMPONENT:=$(COMPONENT_SET)
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PROGRAM_LOANED:=$($(COMPONENT).$(PROGRAM)_LOANED_OBJS)
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_COMPONENT_LOCALINCLUDES:=$(COMPONENT)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_PROGRAM_LOCALINCLUDES:=$(COMPONENT).$(PROGRAM)_LOCALINCLUDES
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_COMPONENT_LOCALDEFINES:=$(COMPONENT)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_PROGRAM_LOCALDEFINES:=$(COMPONENT).$(PROGRAM)_LOCALDEFINES
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_LOCALINCLUDES:=$($(PART_COMPONENT_LOCALINCLUDES)) $($(PART_PROGRAM_LOCALINCLUDES))
+$($(COMPONENT)_PREFIX/)$(PROGRAM): PART_LOCALDEFINES:=$($(PART_COMPONENT_LOCALDEFINES)) $($(PART_PROGRAM_LOCALDEFINES))
+ifeq ($($(COMPONENT).$(PROGRAM)_TEST),1)
+ifeq ($($(COMPONENT)_STATIC_LINK),1)
+$($(COMPONENT)_PREFIX/)$(PROGRAM): $($(COMPONENT).$(PROGRAM)_OBJS_OUT) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS_STATIC) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS_STATIC) $(patsubst %$(LIBSUFFIX),%.a,$($(COMPONENT).$(PROGRAM)_LDDEPS)) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+else
+$($(COMPONENT)_PREFIX/)$(PROGRAM): $($(COMPONENT).$(PROGRAM)_OBJS_OUT) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)        $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_PARTS)        $($(COMPONENT).$(PROGRAM)_LDDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+endif
+else
+ifeq ($($(COMPONENT)_STATIC_LINK),1)
+$($(COMPONENT)_PREFIX/)$(PROGRAM): $($(COMPONENT).$(PROGRAM)_OBJS_OUT) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS_STATIC)                                                   $(patsubst %$(LIBSUFFIX),%.a,$($(COMPONENT).$(PROGRAM)_LDDEPS)) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+else
+$($(COMPONENT)_PREFIX/)$(PROGRAM): $($(COMPONENT).$(PROGRAM)_OBJS_OUT) $$($(COMPONENT)_$(E)_CT_NEEDED_PARTS)                                                          $($(COMPONENT).$(PROGRAM)_LDDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+endif
+endif
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_LINKER) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_BEGIN_PROGRAM) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_LFLAGS) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(@F)_LDFLAGS) -o $@ $(filter %.o, $^) $(PROGRAM_LOANED) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_$(@F)_LDADD) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_STD_LIBS_PARAM)
+
+include $(projectdir/)build/Makefile_src_to_o
+
+ifeq ($($(COMPONENT)_COVERAGE),1)
+ifneq ($($(COMPONENT).$(PROGRAM)_TEST), 1)
+$(COMPONENT)_$(E)_COVERAGE_FILES+=$($(COMPONENT).$(PROGRAM)_OBJS_OUT)
+endif
+endif
+
+$(COMPONENT).$(PROGRAM)_SRCS:=
+$(COMPONENT).$(PROGRAM)_OBJS:=
+$(COMPONENT).$(PROGRAM)_OBJS_OUT:=
+$(COMPONENT).$(PROGRAM)_LOCALINCLUDES:=
+$(COMPONENT).$(PROGRAM)_LOCALDEFINES:=
+$(COMPONENT).$(PROGRAM)_LDADD:=
+$(COMPONENT).$(PROGRAM)_LDFLAGS:=
+PROGRAM:=
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

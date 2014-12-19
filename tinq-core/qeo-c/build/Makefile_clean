@@ -1,0 +1,19 @@
+ifneq ($($(COMPONENT)_CLEAN),1)
+$(COMPONENT)_CLEAN:=1
+
+.PHONY: $(COMPONENT)_clean $(COMPONENT)_$(E)_clean
+
+$(COMPONENT)_clean: COMPONENT:=$(COMPONENT)
+$(COMPONENT)_clean: 
+	$(rm) -rf $(OUTPUT_PREFIX/)$(patsubst %_clean,%,$@)
+	
+$(COMPONENT)_$(E)_clean: $(COMPONENT)_clean
+
+.PHONY: $(COMPONENT)_clean_all $(COMPONENT)_$(E)_clean_all
+
+$(COMPONENT)_clean_all:
+	$(rm) -rf $(OUTPUT_PREFIX/)
+
+$(COMPONENT)_$(E)_clean_all: $(COMPONENT)_clean_all
+	
+endif

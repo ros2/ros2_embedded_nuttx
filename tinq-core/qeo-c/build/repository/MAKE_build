@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+set -u
+
+set -- -C $(dirname $0)/project -f Makefile_component
+
+__SUPPORT_COMPONENT_INSTALL_PATH=1
+if [ -n "${COMPONENT_INSTALL_PATH:-}" ]; then
+    set -- "$@" prefix="${COMPONENT_INSTALL_PATH}"
+
+    PKG_CONFIG_PATH="${COMPONENT_INSTALL_PATH}/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+    export PKG_CONFIG_PATH
+else
+    set -- "$@" prefix="/usr"
+fi
+
+make "$@"
+
+exit 0

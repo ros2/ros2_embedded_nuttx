@@ -1,0 +1,82 @@
+ifneq ($($(qeo-c_INCLUDED)),1)
+
+override COMPONENT := technicolor.middleware.core.qeo-c
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+qeo-c_INCLUDES := api/headers $$(qeo-c-core_INCLUDES)
+qeo-c_CFLAGS   := -std=gnu99
+qeo-c_LIBS     := -lqeoc
+qeo-c_LIBS     += $$(qeo-c-core_LIBS)
+
+qeo-c_PARTS_INSTALL      := \
+	libqeoc.so@$$(libdir/)libqeoc.so:755
+qeo-c_ELEM_INSTALL       := 
+
+qeo-c_TEST_PARTS         :=
+qeo-c_TEST_PARTS_INSTALL := \
+	systest_event_public@$$(bindir/)systest/public/event:755 \
+	systest_stress_factory_public@$$(bindir/)systest_disabled/public/factory:755 \
+	systest_state_public@$$(bindir/)systest/public/state:755 \
+	systest_policy_public@$$(bindir/)systest/public/policy:755 \
+	systest_policy_updates_public@$$(bindir/)systest/public/policy_updates:755 \
+	systest_policy_missing_user_public@$$(bindir/)systest/public/policy_missing_user:755 \
+	systest_state_open_realm_public@$$(bindir/)systest/public/state_open_realm:755 \
+    systest_open_realm_forbidden_topics_public@$$(bindir/)systest/public/open_realm_forbidden_topics:755
+qeo-c_TEST_PARTS_INSTALL += \
+	libutapi.so@$$(libdir/)unittests/libutapi.so:755
+qeo-c_TEST_ELEM_INSTALL  := \
+	test/script/qeo_test_run.sh@$$(bindir/)qeo_test_run.sh:755 \
+	d:$$(bindir/)credtool \
+	../common/test/tools/qeo-credentials/*@$$(bindir/)credtool \
+	test/script/addon-qeocreds.source@$$(bindir/)addon-qeocreds.source:644 \
+	test/script/addon-valgrind.source@$$(bindir/)addon-valgrind.source:644 \
+	test/script/valgrind.supp@$$(bindir/)valgrind.supp:644
+
+qeo-c_TEST_RUN           := $$(bindir/)qeo_test_run.sh
+
+qeo-c_DEPS               := qeo-c-core qeo-c-util
+qeo-c_TEST_DEPS          := unittest-check
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-c.LIBRARIES := libqeoc
+
+qeo-c.libqeoc_LOCALDEFINES  := $(qeo-c_CFLAGS) -DXTYPES_USED -Wall -Werror
+qeo-c.libqeoc_LOCALINCLUDES := src/ $(qeo-c_INCLUDES)
+qeo-c.libqeoc_SRCS          := $(addprefix src/, event_rw.c state_rw.c callback.c util.c)
+qeo-c.libqeoc_LDADD         := $(qeo-c-core_LIBS)
+
+### System tests ###
+ 
+# Build rules for system tests
+
+qeo-c_SYSTESTS = event state stress_factory policy policy_updates policy_missing_user state_open_realm open_realm_forbidden_topics
+
+qeo-c.PROGRAMS += $(foreach test, $(qeo-c_SYSTESTS), systest_$(test)_public)
+
+define qeo-c_SYSTEST_TEMPL
+qeo-c.systest_$(1)_public_LDADD         := $(qeo-c_LIBS)
+qeo-c.systest_$(1)_public_LOCALDEFINES  := $(qeo-c_CFLAGS) -Wall -Werror
+qeo-c.systest_$(1)_public_LOCALINCLUDES := $(qeo-c_INCLUDES)
+qeo-c.systest_$(1)_public_SRCS          := $(addprefix test/systest/, $(1)_main.c tsm_types.c verbose.c common.c) \
+                                           $(addprefix test/systest/qdm/, qeo_types.c qeo_DeviceInfo.c qeo_RegistrationCredentials.c qeo_RegistrationRequest.c)
+endef
+$(foreach test, $(qeo-c_SYSTESTS), $(eval $(call qeo-c_SYSTEST_TEMPL,$(test))))
+
+#### Unit test libraries ###
+
+qeo-c.LIBRARIES += libutapi
+
+qeo-c.libutapi_SRCS          := $(addprefix libqeoc:src/, event_rw.c state_rw.c callback.c util.c) \
+                                $(addprefix test/unittest/, suite_api_inargs.c)
+qeo-c.libutapi_LOCALINCLUDES := src $(qeo-c_INCLUDES) $(unittest-check_INCLUDES)
+qeo-c.libutapi_LOCALDEFINES  := -Wall -Werror
+qeo-c.libutapi_LDADD         := $(qeo-c-core_LIBS) $(unittest-check_LIBS) -L$(qeo-c_PREFIX)
+qeo-c.libutapi_LDDEPS        := libqeoc.so
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

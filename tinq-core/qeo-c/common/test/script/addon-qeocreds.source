@@ -1,0 +1,74 @@
+function generate_rid()
+{
+    local rid
+    #generate random rid. Strip off leading 0 as qeo can't handle this
+    rid=$(od -An -N8 -tx8 /dev/urandom | tr -d ' ' | sed 's/^0*//')
+    echo ${rid}
+}
+
+function create_home_qeo()
+{
+    local d
+    local rid
+    
+    echo "Creating test credentials..."
+ 
+    # main credentials dir
+    d=${SELF_DIR}/../share/home.qeo/
+    rm -rf ${d}
+    rid=$(generate_rid)
+    echo "generated rid ${rid}"
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d} ${d} ${rid} 1 1 > /dev/null 2>&1 || exit 1
+ 
+    # policy test credentials dirs (3 users: 106, 107, 108)
+    d=${SELF_DIR}/../share/home.policy/
+    rm -rf ${d}
+    rid=$(generate_rid)
+    echo "generated rid2 ${rid}"
+    policy='*=r<uid:106;uid:107;uid:108> w<uid:106;uid:107;uid:108>'
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_1/ ${d} ${rid} 1 106 "${policy}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_2/ ${d} ${rid} 1 107 "${policy}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_3/ ${d} ${rid} 1 108 "${policy}" > /dev/null 2>&1 || exit 1
+    # make sure they all have the most recent policy file
+    cp ${d}user_3/*.mime ${d}user_1/*.mime
+    cp ${d}user_3/*.mime ${d}user_2/*.mime
+    
+    # policy_updates test credentials dirs (3 users: 106, 107, 108 all different policies)
+    d=${SELF_DIR}/../share/home.policy_updates/
+    rm -rf ${d}
+    rid=$(generate_rid)
+    policy_coarse='*=rw'
+    policy='*=r<uid:106;uid:107;uid:108> w<uid:106;uid:107;uid:108>'
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_1/ ${d} ${rid} 1 106 "${policy_coarse}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_2/ ${d} ${rid} 1 107 "${policy_coarse}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_3/ ${d} ${rid} 1 108 "${policy}" > /dev/null 2>&1 || exit 1
+    
+    # policy_missing_user test credentials dirs (3 users: 106, 107, 108 where user 108 is not mentioned in the policy file)
+    d=${SELF_DIR}/../share/home.policy_missing_user/
+    rm -rf ${d}
+    rid=$(generate_rid)
+    policy='*=r<uid:106;uid:107> w<uid:106;uid:107>'
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_1/ ${d} ${rid} 1 106 "${policy}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_2/ ${d} ${rid} 1 107 "${policy}" > /dev/null 2>&1 || exit 1
+    ${SELF_DIR}/credtool/generate_qeo_storage.sh ${d}user_3/ ${d} ${rid} 1 108 "${policy}" > /dev/null 2>&1 || exit 1
+    # take the policy file of user 2 for user 1 and user 3
+    cp ${d}user_2/*.mime ${d}user_1/*.mime    
+    cp ${d}user_2/*.mime ${d}user_3/*.mime    
+
+    echo "Test credentials created!"
+}
+
+function set_home_qeo()
+{
+    local test=$1
+
+    # start with predefined credentials for system tests
+    if [ -d ${SELF_DIR}/../share/home.${test} ]; then
+        QEO_STORAGE_DIR=${SELF_DIR}/../share/home.${test}/
+    else
+        QEO_STORAGE_DIR=${SELF_DIR}/../share/home.qeo/
+    fi
+    export QEO_STORAGE_DIR
+    echo "Using QEO_STORAGE_DIR=${QEO_STORAGE_DIR}"
+
+}

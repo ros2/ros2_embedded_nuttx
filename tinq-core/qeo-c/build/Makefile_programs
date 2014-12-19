@@ -1,0 +1,8 @@
+# Initialize PROGRAM to the first element inside $(COMPONENT).PROGRAMS_RUN
+PROGRAM:=$(word 1, $($(COMPONENT).PROGRAMS_RUN))
+
+# Remove $(PROGRAM) from $(COMPONENT).PROGRAMS_RUN
+$(COMPONENT).PROGRAMS_RUN:=$(filter-out $(PROGRAM), $($(COMPONENT).PROGRAMS_RUN))
+
+# Include Makefile_program to generate the program build commands
+include $(projectdir/)build/Makefile_program

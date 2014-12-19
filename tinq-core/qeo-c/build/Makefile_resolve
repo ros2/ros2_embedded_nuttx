@@ -1,0 +1,4 @@
+EXPAND_DT:=$(sort $(foreach x,$(EXPAND_DT), $(x) $($(word 1,$(subst :, ,$(x)))_$(word 2,$(subst :, ,$(x)))_DT_DEPS)))
+EXPAND_CT:=$(sort $(foreach x,$(EXPAND_CT), $(x) $($(word 1,$(subst :, ,$(x)))_$(word 2,$(subst :, ,$(x)))_CT_DEPS)))
+EXPAND_DT_TEST:=$(sort $(foreach x,$(EXPAND_DT_TEST), $(x) $($(word 1,$(subst :, ,$(x)))_$(word 2,$(subst :, ,$(x)))_DT_DEPS)))
+EXPAND_CT_TEST:=$(sort $(foreach x,$(EXPAND_CT_TEST), $(x) $($(word 1,$(subst :, ,$(x)))_$(word 2,$(subst :, ,$(x)))_CT_DEPS)))

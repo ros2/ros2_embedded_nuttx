@@ -1,0 +1,9 @@
+{                                                                                                            
+   SSL library init http://rt.openssl.org/Ticket/Display.html?id=2561                                                                          
+   Memcheck:Leak                                                                                             
+   ...
+   fun:load_builtin_compressions
+   fun:SSL_COMP_get_compression_methods
+   fun:SSL_library_init                                                                                      
+   ...
+}

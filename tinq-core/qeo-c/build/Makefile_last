@@ -1,0 +1,46 @@
+include $(projectdir/)build/Makefile_tools
+COVERAGE:=
+include $(projectdir/)build/Makefile_switch_env
+
+RUN_COMPONENTS:=$(ALL_COMPONENTS)
+
+complete_GRAPH_LEGEND:='digraph cluster_legend {label="legend for all the graphs"; subgraph cluster_nd{ label="normal\ndependency\n \n "; comp1 [width=0.5, label=" "];comp2 [width=0.5, label=" "]; comp1 -> comp2 [weight=5] } subgraph cluster_td{ label="test\ndependency\n \n "; comp3 [width=0.5, label=" "];comp4 [width=0.5, label=" "]; comp3 -> comp4 [ style=dashed,weight=5 ] } subgraph cluster_dd{ label="deploy\ntime\ndependency\n "; comp5 [width=0.5, label=" "];comp6 [width=0.5, label=" "]; comp5 -> comp6 [ weight=5,color=blue ] } subgraph cluster_cd{ label="compile\ntime\ndependency\n "; comp7 [width=0.5, label=" "];comp8 [width=0.5, label=" "]; comp7 -> comp8 [weight=5,color=red ] } subgraph cluster_tdd{ label="deploy\ntime\ntest\ndependency"; comp9 [width=0.5, label=" "];comp10 [width=0.5, label=" "]; comp9 -> comp10[ style=dashed,weight=5,color=blue ] } subgraph cluster_tcd{ label="compile\ntime\ntest\ndependency"; comp11 [width=0.5, label=" "];comp12 [width=0.5, label=" "]; comp11-> comp12[ style=dashed,weight=5,color=red ] } }'
+
+
+complete.dot: $(sort $(addsuffix .dot,$(foreach c,$(ALL_COMPONENTS),$(firstword $(subst :, ,$(c))))))
+	echo $(complete_GRAPH_LEGEND) > $@
+
+	echo "digraph $(patsubst %.dot,%,$@)_dependency_graph {" >> $@
+	cat $^ | egrep -v "^digraph|^}|^label=" | sort -u >> $@
+	echo "label=\"Unreduced graph of all the dependencies in CoreMW\nSee following graphs for a per component view\"" >> $@
+	echo "}" >> $@
+	
+	cat $^ >> $@
+
+complete_reduced.dot: $(sort $(addsuffix .dot,$(foreach c,$(ALL_COMPONENTS),$(firstword $(subst :, ,$(c))))))
+	echo $(complete_GRAPH_LEGEND) > $@
+
+	(echo "digraph $(patsubst %.dot,%,$@)_dependency_graph {" ;\
+	cat $^ | egrep -v "^digraph|^}|^label=" | sort -u ;\
+	echo "label=\"Join/Union of the transitive reduction of the dependencies\n and the transitive reduction of the test dependencies in CoreMW\nSee following graphs for a per component view\"" ;\
+	echo "}" ) | tred >> $@
+	
+	for i in $^; do (cat $$i | grep -v "style=dashed" | tred | grep -v "^}" ; cat $$i | egrep -- "->.*dashed|^[^>]*$$" | tred |  sed "s/\([;{}]\)$$/\1@/g" | tr "\n@" "#\n" | sed "s/#//g" | grep -- "->.*dashed" ; echo "}") > `echo $$i | sed "s/.dot$$/_reduced.dot/g"`; done
+	
+	cat $(patsubst %.dot,%_reduced.dot,$^) >> $@
+		
+complete_no_test.dot: $(sort $(addsuffix .dot,$(foreach c,$(ALL_COMPONENTS),$(firstword $(subst :, ,$(c))))))
+	echo $(complete_GRAPH_LEGEND) > $@
+
+	(echo "digraph $(patsubst %.dot,%,$@)_dependency_graph {" ;\
+	cat $^ | egrep -v "^digraph|^}|^label=|style=dashed"  | sort -u ;\
+	echo "label=\"Transitive reduction of the dependencies in CoreMW\nWithout test dependencies\nSee following graphs for a per component view\"";\
+	echo "}" )| tred >> $@
+	
+	for i in $^; do cat $$i | grep -v "style=dashed" | tred | gvpr 'BEG_G{$$tvroot=node($$,ARGV[0]);$$tvtype=TV_fwd;}N{$$tvroot=NULL;$$.reachable=1;}END_G{node_t n;int delnodes[node_t]; for (n=fstnode($$);n;n = nxtnode(n)) if(n.reachable!=1)delnodes[n]=1; for (delnodes[n])delete($$,n);write($$);}' -a `echo $$i | sed "s/.dot//g"` > `echo $$i | sed "s/.dot$$/_no_test.dot/g"`; done
+	
+	cat $(patsubst %.dot,%_no_test.dot,$^) >> complete_no_test.dot
+	
+include $(patsubst %,$(projectdir/)build/Makefile_per_component, $(ALL_COMPONENTS))
+
+$(shell $(echo) >&2)

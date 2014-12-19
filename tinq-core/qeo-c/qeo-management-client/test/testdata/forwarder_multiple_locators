@@ -1,0 +1,24 @@
+{ 
+  "locators": [ 
+    { 
+      "type": "TCPv4",
+      "address": "212.118.224.153",
+      "port": 8080
+    },
+    { 
+      "type": "TCPv6",
+      "address": "www.google.com",
+      "port": 7400
+    },
+    { 
+      "type": "UDPv4",
+      "address": "212.118.224.153",
+      "port": 6666
+    },
+    { 
+      "type": "UDPv6",
+      "address": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+      "port": 7777
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+## FILE: Makefile_anttasks
+#
+# This makefile needs to be included if the common ant tasks need to be build.
+#
+
+ifneq ($(ANT_TASK_DEF_INCLUDED),1)
+
+ANT_TASK_DEF_INCLUDED := 1
+
+ANT_TASK_OUT_DIR := $(OUTPUT_PREFIX/)anttasks
+ANT_TASK_JAR := $(ANT_TASK_OUT_DIR)/anttasks_classes.jar
+
+$(ANT_TASK_OUT_DIR)/anttasks_build: $(ANT_TASK_JAR)
+	touch $@
+
+NEEDED_TOOLS+=ant java
+
+$(ANT_TASK_JAR):
+	$(ant) -f $(projectdir/)build/ant/compile.xml -Djava.dir=$(projectdir/)build/ant/tasks/java -Dclass.dir=$(ANT_TASK_OUT_DIR)/classes -Dclasspath="$(ANT_TASK_OUT_DIR)" -Ddestination.jar=$@
+
+endif
+
+

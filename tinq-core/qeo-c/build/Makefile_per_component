@@ -1,0 +1,141 @@
+# Put the component part of the first element of the RUN_COMPONENTS list in
+# CUR_COMPONENT
+CUR_COMPONENT  := $(firstword $(subst :, ,$(firstword $(RUN_COMPONENTS))))
+# Put the target environment part part of the first element of the
+# RUN_COMPONENTS list in CUR_E
+CUR_E          := $(word 2, $(subst :, ,$(firstword $(RUN_COMPONENTS))))
+# Remove the first element from the RUN_COMPONENTS list
+RUN_COMPONENTS := $(wordlist 2, $(words $(RUN_COMPONENTS)), $(RUN_COMPONENTS)) 
+
+# The resolve process will iterate over all components and calculate the set of
+# all descendants in the dependency graphs (compile time and deploy time
+# dependency graphs). We initialize EXPAND_CT and EXPAND_DT to the current
+# component. At the end of the process EXPAND_CT holds the decendants of the
+# node in the compile time dependency graph + the node itself. EXPAND_DT holds
+# the same for the deploy time dependency graph
+#
+##<
+
+ifneq ($(MAKE_DOES_NOT_SUPPORT_FUNCTIONS),1)
+ct_expand=$(sort $(1) $(if $($(subst :,_,$(1))_CT_DEPS),$(foreach x,$($(subst :,_,$(1))_CT_DEPS),$(call ct_expand,$(x)))))
+dt_expand=$(sort $(1) $(if $($(subst :,_,$(1))_DT_DEPS),$(foreach x,$($(subst :,_,$(1))_DT_DEPS),$(call dt_expand,$(x)))))
+
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS:=$(call ct_expand,$(CUR_COMPONENT):$(CUR_E))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS:=$(call dt_expand,$(CUR_COMPONENT):$(CUR_E))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS:=$(foreach x,$($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS),$(call ct_expand,$(x)))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS:=$(foreach x,$($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS),$(call dt_expand,$(x)))
+else
+EXPAND_CT=$(CUR_COMPONENT):$(CUR_E)
+EXPAND_DT=$(CUR_COMPONENT):$(CUR_E)
+EXPAND_CT_TEST=$($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS)
+EXPAND_DT_TEST=$($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS)
+
+include $(patsubst %,$(projectdir/)build/Makefile_resolve, $(ALL_COMPONENTS))
+
+# Assign EXPAND_CT and EXPAND_DT to <comp>_ALL_CT_DEPS and <comp>_$(CUR_E)_ALL_DT_DEPS
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS:=$(EXPAND_DT)
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS:=$(EXPAND_CT)
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS:=$(EXPAND_DT_TEST)
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS:=$(EXPAND_CT_TEST)
+endif
+
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS_SHORT := $(foreach comp,$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS),$(firstword $(subst :, ,$(comp))))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS_SHORT := $(foreach comp,$($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS),$(firstword $(subst :, ,$(comp))))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS_SHORT := $(foreach comp,$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS),$(firstword $(subst :, ,$(comp))))
+$(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS_SHORT := $(foreach comp,$($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS),$(firstword $(subst :, ,$(comp))))
+##>
+
+##< Autoconf stuff
+AUTOCONF_IMPLIED_DIRS=$(foreach comp,$(subst :,_,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS))),$($(comp)_PREFIX)/installed)
+AUTOCONF_IMPLIED_LIBS=$(addprefix -L,$(addsuffix /lib,$(AUTOCONF_IMPLIED_DIRS))) $(filter -L%,$(foreach comp,$(subst :,_,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS))),$($(comp)_LIBS)))
+comma=,
+
+#Hack for mac/iOS (does not support -rpath-link)
+ifeq ($(filter $(TARG_OS),MACOS IOS),)
+AUTOCONF_IMPLIED_LIBS+=$(addprefix -Wl$(comma)-rpath-link$(comma),$(addsuffix /lib,$(AUTOCONF_IMPLIED_DIRS))) $(patsubst -L%,-Wl$(comma)-rpath-link$(comma)%,$(filter -L%,$(foreach comp,$(subst :,_,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS))),$($(comp)_LIBS))))
+endif
+
+AUTOCONF_IMPLIED_INCLUDE_DIRS=$(foreach comp,$(subst :,_,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS))),$($(comp)_INCLUDES))
+AUTOCONF_IMPLIED_INCLUDES=$(addprefix -I,$(addsuffix /include,$(AUTOCONF_IMPLIED_DIRS))) $(foreach path,$(AUTOCONF_IMPLIED_INCLUDE_DIRS),$(addprefix -I,$(filter /%,$(path)))$(addprefix -I$(WORKSPACE)/,$(filter-out /%, $(path))))
+
+$(CUR_COMPONENT)_$(CUR_E)_CONFIGURE := $(mkdir) -p $($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/build && cd $($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/build && if [ -z "$$CONFIGURE_DIR" ]; then export CONFIGURE_DIR=$($(CUR_COMPONENT)_COMP_DIR)/src/; fi && export PKG_CONFIG_PATH='$(subst $(space),:,$(addsuffix /lib/pkgconfig,$(AUTOCONF_IMPLIED_DIRS)))' && AUTOHEADER=/bin/true AUTOCONF=/bin/true ACLOCAL=/bin/true AUTOMAKE=/bin/true AR='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_LIBRARIAN))' RANLIB='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_RANLIB))' CC='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_CC))' CXX='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_CCC))' LD='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_LD))' NM='$(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(CUR_COMPONENT)_$(CUR_E)_NM))' CFLAGS='$($(CUR_COMPONENT)_$(CUR_E)_CFLAGS) $($(CUR_COMPONENT)_$(CUR_E)_TMP_CFLAGS)' CPPFLAGS='$($(CUR_COMPONENT)_$(CUR_E)_CPPFLAGS) $(AUTOCONF_IMPLIED_INCLUDES) $($(CUR_COMPONENT)_$(CUR_E)_TMP_CFLAGS)' LDFLAGS='$($(CUR_COMPONENT)_$(CUR_E)_STD_BEGIN_PROGRAM) $($(CUR_COMPONENT)_$(CUR_E)_LDFLAGS) $(AUTOCONF_IMPLIED_LIBS) $($(CUR_COMPONENT)_$(CUR_E)_TMP_LFLAGS)' $(projectdir/)build/reconfigure --host=$($(CUR_COMPONENT)_$(CUR_E)_CONFIGURATION_NAME) --prefix=/
+$(CUR_COMPONENT)_$(CUR_E)_AUTOTOOLS_MAKE := cd $($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/build && unset MAKEFLAGS && $(GNU_MAKE) am__configure_deps=
+$(CUR_COMPONENT)_$(CUR_E)_AUTOTOOLS_INSTALL := cd $($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/build && unset MAKEFLAGS && $(GNU_MAKE) am__configure_deps= DESTDIR=$($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/installed install && cd $($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/installed && for i in `find . -name "*.pc"`; do perl -i -p -e "s:^prefix=/$$:prefix=$($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/installed:g" $$i; done && for i in `find . -name "*.la"`; do perl -i -p -e "s:([ =\'])//lib([\'/]):\$$1$($(CUR_COMPONENT)_$(CUR_E)_PREFIX)/installed/lib\$$2:g" $$i; done
+
+$(CUR_COMPONENT)_$(CUR_E)_COMPONENT_MAKEFILE     := $(patsubst $(CUR_COMPONENT):$(CUR_E)@%,%,$(filter $(CUR_COMPONENT):$(CUR_E)@%,$(RESOLVED)))
+ifneq ($(MAKE_MONITORS_BUILD_RULES),1)
+$(CUR_COMPONENT)_$(CUR_E)_COMPONENT_MAKEFILE_DEP := $($(CUR_COMPONENT)_$(CUR_E)_COMPONENT_MAKEFILE)
+endif
+##>
+
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_PARTS        := $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS)),$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_PARTS))
+
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_TEST_PARTS   := $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS)),$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_PARTS))
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_TEST_PARTS   += $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS)),$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_EXPORTED_TEST_PARTS))
+
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_CLASSES     := $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS)),$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_CLASSES))
+
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_TEST_CLASSES     := $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS)),$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_CLASSES))
+
+$(CUR_COMPONENT)_$(CUR_E)_CT_NEEDED_PARTS_STATIC := $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS)),$(patsubst %$(LIBSUFFIX),%.a,$($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_PARTS)))
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_PARTS             := $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS), $($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_PARTS))
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_TEST_PARTS        := $(sort $($(CUR_COMPONENT)_$(CUR_E)_TEST_PARTS) $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS), $($(word 1, $(subst :, ,$(x)))_$(word 2, $(subst :, ,$(x)))_PARTS)) $($(CUR_COMPONENT)_$(CUR_E)_FULL_PARTS))
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_INSTALL           := $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS), echo $(subst :,_,$(x)) && $($(subst :,_,$(x))_INSTALL) &&)
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_DEVEL_INSTALL     := $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS), echo $(subst :,_,$(x)) && $($(subst :,_,$(x))_DEVEL_INSTALL) &&)
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_CLEAN             := $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS), $(subst :,_,$(x)_clean))
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_BINARY_MAKEFILES  := $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS), $($(subst :,_,$x)_PREFIX/)$(subst :,_,$x)_binary_makefile)
+
+$(CUR_COMPONENT)_$(CUR_E)_FULL_TEST_INSTALL      := $($(CUR_COMPONENT)_$(CUR_E)_TEST_INSTALL) && $(foreach x, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_TEST_DEPS), echo $(subst :,_,$(x)) && $($(subst :,_,$(x))_INSTALL) && $($(subst :,_,$(x))_EXPORTED_TEST_INSTALL) &&) $($(CUR_COMPONENT)_$(CUR_E)_FULL_INSTALL)
+
+$(CUR_COMPONENT)_$(CUR_E)_CCDEPS                 := $($(CUR_COMPONENT)_CCDEPS) $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS)), $($(subst :,_,$(x))_BUILT_HEADERS))
+$(CUR_COMPONENT)_$(CUR_E)_TEST_CCDEPS            := $($(CUR_COMPONENT)_TEST_CCDEPS) $(foreach x,$(filter-out $(CUR_COMPONENT):$(CUR_E),$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_TEST_DEPS)), $($(subst :,_,$(x))_BUILT_HEADERS))
+
+ifeq ($($(CUR_COMPONENT)_CMDS),)
+$(CUR_COMPONENT)_CMDS:=1
+
+ifeq ($(CUR_E),$(ORIGE))
+$(CUR_COMPONENT)_DT_TGZS:=$(addsuffix .tgz, $(subst :,_,$($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS)))
+$(CUR_COMPONENT)-tgzs: $($(CUR_COMPONENT)_DT_TGZS)
+
+$(CUR_COMPONENT)_DT_ZIPS:=$(addsuffix .zip, $($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS_SHORT))
+$(CUR_COMPONENT)-zips: $($(CUR_COMPONENT)_DT_ZIPS)
+
+$(CUR_COMPONENT)_CT_REPOS:=$(addsuffix -repository.tgz, $(filter-out :%,$(subst :, :,$($(CUR_COMPONENT)_$(CUR_E)_ALL_CT_DEPS))))
+$(CUR_COMPONENT)_DT_REPOS:=$(addsuffix -repository.tgz, $(filter-out :%,$(subst :, :,$($(CUR_COMPONENT)_$(CUR_E)_ALL_DT_DEPS))))
+$(CUR_COMPONENT)_dist: $(sort $($(CUR_COMPONENT)_CT_REPOS) $($(CUR_COMPONENT)_DT_REPOS))
+endif
+
+$(CUR_COMPONENT).dot: CTDEPS:=$(filter-out $(CUR_COMPONENT),$(filter-out :%,$(subst :, :,$(filter-out $($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS)))))
+$(CUR_COMPONENT).dot: DTDEPS:=$(filter-out $(CUR_COMPONENT),$(filter-out :%,$(subst :, :,$(filter-out $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS)))))
+$(CUR_COMPONENT).dot: TCTDEPS:=$(filter-out $(CUR_COMPONENT),$(filter-out :%,$(subst :, :,$(filter-out $($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS)))))
+$(CUR_COMPONENT).dot: TDTDEPS:=$(filter-out $(CUR_COMPONENT),$(filter-out :%,$(subst :, :,$(filter-out $($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS)))))
+$(CUR_COMPONENT).dot: TDEPS:=$(filter-out $(CUR_COMPONENT),$(filter-out :%,$(subst :, :,$(filter-out $($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS),$(filter $($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS))))))
+$(CUR_COMPONENT).dot: DEPS:=$(filter-out $(CUR_COMPONENT), $(filter-out :%,$(subst :, :,$(filter $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS),$($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS)))))
+$(CUR_COMPONENT).dot: TOOLS:=$(sort $($(CUR_COMPONENT)_NEEDED_TOOLS))
+$(CUR_COMPONENT).dot: TTOOLS:=$(sort $($(CUR_COMPONENT)_NEEDED_TOOLS_TEST))
+$(CUR_COMPONENT).dot: $(filter-out $(CUR_COMPONENT).dot,$(addsuffix .dot, $(filter-out :%,$(subst :, :,$($(CUR_COMPONENT)_$(CUR_E)_DT_TEST_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_CT_TEST_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_CT_DEPS) $($(CUR_COMPONENT)_$(CUR_E)_DT_DEPS)))))
+	echo "digraph $(patsubst %.dot,%,$@)_dependency_graph {" > $@
+	echo "label=\"$(addprefix $(addsuffix .,$($(patsubst %.dot,%,$@)_GROUP)),$(patsubst %.dot,%,$@))\"" >> $@
+	run="" && for group in `echo $($(patsubst %.dot,%,$@)_GROUP) | tr "." " "`; do run="_$$run"$$group; echo -n "subgraph cluster_$$run { label=\"$$group\" " >> $@ ; done
+	echo -n "$(patsubst %.dot,%,$@) ;" >> $@
+	for group in `echo $($(patsubst %.dot,%,$@)_GROUP) | tr "." " "`; do echo -n "}" >> $@ ; done
+	echo >> $@
+	for dep in $(CTDEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ color=red ]"; done >> $@
+	for dep in $(DTDEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ color=blue ]"; done >> $@
+	for dep in $(TCTDEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ color=red, style=dashed ]"; done >> $@
+	for dep in $(TDTDEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ color=blue, style=dashed  ]"; done >> $@
+	for dep in $(TDEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ style=dashed ]"; done >> $@
+	for dep in $(DEPS); do echo "$(patsubst %.dot,%,$@) -> $$dep [ ]"; done >> $@
+	for dep in $(filter-out $(CTDEPS),$(sort $(foreach tool, $(TOOLS), $($(tool)_COMPONENT)))); do echo "$(patsubst %.dot,%,$@) -> $$dep [ color=red ]"; done >> $@
+	for dep in$(filter-out $(filter-out $(CTDEPS),$(sort $(foreach tool, $(TOOLS), $($(tool)_COMPONENT)))),$(filter-out $(CTDEPS) $(TCTDEPS),$(sort $(foreach tool, $(TOOLS), $($(tool)_COMPONENT))))); do echo "$(patsubst %.dot,%,$@) -> $$dep [ style=dashed, color=red ]"; done >> $@
+	cat $^ | egrep -v "^digraph|^}|^label=" | sort -u >> $@
+	echo "}" >> $@
+endif
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

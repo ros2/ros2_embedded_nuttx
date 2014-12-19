@@ -1,0 +1,17 @@
+ifndef cp
+cp=$(shell if cp --version > /dev/null 2>/dev/null; then $(echo) cp; fi)
+endif
+
+ifeq ($(cp),)
+cp=$(shell if gcp --version > /dev/null 2>/dev/null; then $(echo) gcp; fi)
+endif
+
+ifeq ($(cp),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working cp in the path. This is required. Provide cp on the commandline (e.g. cp=/bin/cp).") 
+$(shell $(echo) "Could not find a working cp in the path. This is required. Provide cp on the commandline (e.g. cp=/bin/cp)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

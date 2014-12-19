@@ -1,0 +1,69 @@
+{
+    "topic": "org.qeo.testmodule.Test2",
+    "behavior": "state",
+    "properties": {
+        "from": {
+            "type": "int32",
+            "key": true
+        },
+        "message": {
+            "type": "string"
+        },
+        "myEnum": {
+            "type": "enum",
+            "item": {
+                "enum": "org.qeo.testmodule.myenum",
+                "values": {
+                    "ZERO": 0,
+                    "ONE": 1,
+                    "TWO": 2
+                }
+            }
+        },
+        "mySubStruct": {
+            "type": "object",
+            "key": true,
+            "item": {
+                "topic": "org.qeo.testmodule.Test1", 
+                "properties": {
+                    "field1": {
+                        "type": "int32"
+                    },
+                    "field2": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "myArrayOfString": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "myArrayOfInt": {
+            "type": "array",
+            "items": {
+                "type": "int32"
+            }
+        },
+        "myArrayOfStruct": {
+            "type": "array",
+            "key": true,
+            "items": {
+                "type": "object",
+                "item": {
+                    "topic": "org.qeo.testmodule.Test1", 
+                    "properties": {
+                        "field1": {
+                            "type": "int32"
+                        },
+                        "field2": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

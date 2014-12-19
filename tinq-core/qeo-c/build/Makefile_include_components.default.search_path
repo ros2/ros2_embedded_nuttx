@@ -1,0 +1,7 @@
+# A default component search path , which can be overruled in a toplevel
+# Makefile (or on the command line)
+sinclude $(projectdir/)build/Makefile_include_components.binary.search_path
+
+ifndef COMPONENT_SEARCH_PATH
+COMPONENT_SEARCH_PATH:=$(COMPONENT_SEARCH_PATH_PREFIX) $(projectdir/)../%/Makefile_component  $(projectdir/)../../%/Makefile_component $(projectdir/)../qeo-c/%/Makefile_component $(projectdir/)../../qeo-c/%/Makefile_component 
+endif

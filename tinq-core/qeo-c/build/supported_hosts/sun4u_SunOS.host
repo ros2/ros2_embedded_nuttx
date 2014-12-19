@@ -1,0 +1,5 @@
+# The directory that holds Technicolor specific tools (the BELL is legacy)
+TECHNICOLOR_TOOLS_BIN        := $(WORKSPACE)/../../cm4/tools/BELL/bin5
+
+# All derived objects are output to this directory
+OUTPUT_INFIX          := output

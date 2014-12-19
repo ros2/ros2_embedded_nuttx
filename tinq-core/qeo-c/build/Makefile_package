@@ -1,0 +1,497 @@
+# Rules for packaging up and installing components
+
+ifndef INSTALL_DIR
+ifdef DESTDIR
+INSTALL_DIR:=$(DESTDIR)
+endif
+endif
+
+ifndef INSTALL_DIR
+INSTALL_DIR=/
+endif
+
+# Packaging rules (tgz, tpu, -test.tgz, -full.tgz, -full.tpu, -repository.tgz) 
+##<
+# A tgz file containing all parts and elems of a component
+%/$(COMPONENT)_$(E).tgz     : $$($(COMPONENT)_$(E)_PARTS)      $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	export DIR=`mktemp -d /tmp/$(patsubst %.tgz,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && $($(patsubst %.tgz,%,$(@F))_INSTALL) && \
+	if [ $(firstword $($(patsubst %.tgz,%,$(@F))_PARTS)) ]           ; then find $$DIR -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1 | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %.tgz,%,$(@F))_STRIP)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %.tgz,%,$(@F))_STRIP)) --strip-unneeded -R .pdr -R .comment -R .note; fi && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && $(tar) --owner=root --group=root -C $$DIR -czf $@ . &&  $(rm) -rf $$DIR
+
+%/$(COMPONENT)_$(E)-devel.tgz     : $$($(COMPONENT)_$(E)_PARTS)      $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	export DIR=`mktemp -d /tmp/$(patsubst %.tgz,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && $($(patsubst %-devel.tgz,%,$(@F))_INSTALL) && $($(patsubst %-devel.tgz,%,$(@F))_DEVEL_INSTALL) && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && $(tar) --owner=root --group=root -C $$DIR -czf $@ . &&  $(rm) -rf $$DIR
+
+PATTERN_RULES+=%/$(COMPONENT)_$(E).tpu
+%/$(COMPONENT)_$(E).tpu_NEEDED_TOOLS:=tputool
+%/$(COMPONENT)_$(E).tpu     : TPU_COMPONENT:=$(COMPONENT)
+%/$(COMPONENT)_$(E).tpu     : $$($(COMPONENT)_$(E)_PARTS)      $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP) $$(tputool_HOSTLINUX_FULL_PARTS)
+	export DIR=`mktemp -d /tmp/$(patsubst %.tpu,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && export RESOURCE_GROUP=$($(TPU_COMPONENT)_RESOURCE_GROUP) && export TRUST_LEVEL=$($(TPU_COMPONENT)_TRUST_LEVEL) && export MAKE_MANIFEST=1 && export COMPONENT_NAME=$(TPU_COMPONENT) && $($(patsubst %.tpu,%,$(@F))_INSTALL) && cd $$DIR &&  \
+	if [ $(firstword $($(patsubst %.tpu,%,$(@F))_PARTS)) ]           ; then find $$DIR -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1 | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %.tpu,%,$(@F))_STRIP)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %.tpu,%,$(@F))_STRIP)) --strip-unneeded -R .pdr -R .comment -R .note; fi && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && LOG_OUTPUT=stdout $(tputool) create_and_sign -n Technicolor -c $(projectdir/)build/package/pkg-sign-cert.pem -p $(projectdir/)build/package/pkg-sign-key.pem -i $$DIR -o $@ &&  $(rm) -rf $$DIR
+ifdef DEPLOYED_LIBRARY_DIR
+	$(mkdir) -p $(DEPLOYED_LIBRARY_DIR)
+	cd $(DEPLOYED_LIBRARY_DIR) && for LIB in $(filter %$(LIBSUFFIX),$($(patsubst %.tpu,%,$(@F))_PARTS) $($(patsubst %.tpu,%,$(@F))_ELEM)); do echo $$LIB `basename $$LIB`; $(LN) -fs $$LIB `basename $$LIB`; done
+endif
+PATTERN_RULES+=%/$(COMPONENT)_$(E)-test-full.tpu
+%/$(COMPONENT)_$(E)-test-full.tpu_NEEDED_TOOLS:=tputool
+%/$(COMPONENT)_$(E)-test-full.tpu      : TPU_COMPONENT:=$(COMPONENT)
+%/$(COMPONENT)_$(E)-test-full.tpu      : $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_ELEM) $$($(COMPONENT)_TEST_ELEM) $$(tputool_HOSTLINUX_FULL_PARTS)
+	export DIR=`mktemp -d /tmp/$(patsubst %-test-full.tpu,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && export RESOURCE_GROUP=$($(TPU_COMPONENT)_RESOURCE_GROUP) && export TRUST_LEVEL=$($(TPU_COMPONENT)_TRUST_LEVEL) && export MAKE_MANIFEST=1 && export COMPONENT_NAME=$(TPU_COMPONENT) && $($(patsubst %-test-full.tpu,%,$(@F))_FULL_TEST_INSTALL)   \
+	if [ $(firstword $($(patsubst %-test-full.tpu,%,$(@F))_FULL_PARTS)) ] ; then find $$DIR -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1 | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-test-full.tpu,%,$(@F))_STRIP)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-test-full.tpu,%,$(@F))_STRIP)) --strip-unneeded -R .pdr -R .comment -R .note; fi && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && LOG_OUTPUT=stdout $(tputool) create_and_sign -n Technicolor -c $(projectdir/)build/package/pkg-sign-cert.pem -p $(projectdir/)build/package/pkg-sign-key.pem -i $$DIR -o $@ &&  $(rm) -rf $$DIR
+
+# A tgz file containing all parts and elems + all test parts and test elems of a component
+%/$(COMPONENT)_$(E)-test.tgz: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_TEST_PARTS) $$($(COMPONENT)_ELEM) $$($(COMPONENT)_TEST_ELEM)
+	export DIR=`mktemp -d /tmp/$(patsubst %.tgz,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && $($(patsubst %-test.tgz,%,$(@F))_INSTALL) && \
+	cd $$ODIR && cd $$DIR && $($(patsubst %-test.tgz,%,$(@F))_TEST_INSTALL) && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && $(tar) --owner=root --group=root -C $$DIR -czf $@ . &&  $(rm) -rf $$DIR
+
+%/$(COMPONENT)_$(E)-test-full.tgz: testbindir:=$(bindir)
+%/$(COMPONENT)_$(E)-test-full.tgz: testlibdir:=$(libdir)
+%/$(COMPONENT)_$(E)-test-full.tgz: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_ELEM) $$($(COMPONENT)_TEST_ELEM)
+	export DIR=`mktemp -d /tmp/$(patsubst %.tgz,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && $($(patsubst %-test-full.tgz,%,$(@F))_FULL_TEST_INSTALL) \
+	echo '#!/bin/sh' > test_run.sh && \
+	echo 'cd $$(dirname $$0)' >> test_run.sh && \
+	echo 'export PATH=`pwd`/$(testbindir):$$PATH' >> test_run.sh && \
+	echo 'export $(LIBRARY_PATH_FLAVOUR)=`pwd`/$(testlibdir):$($(LIBRARY_PATH_FLAVOUR))' >> test_run.sh && \
+	echo '$($(patsubst %-test-full.tgz,%,$(@F))_TEST_RUN)' >> test_run.sh && \
+	chmod +x test_run.sh && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && $(tar) --owner=root --group=root -C $$DIR -czf $@ . &&  $(rm) -rf $$DIR
+
+
+%/$(COMPONENT)_$(E)-full.tgz: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	export DIR=`mktemp -d /tmp/$(patsubst %-full.tgz,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && $($(patsubst %-full.tgz,%,$(@F))_FULL_INSTALL) \
+	if [ $(firstword $($(patsubst %-full.tgz,%,$(@F))_FULL_PARTS)) ] ; then find $$DIR -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1 | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-full.tgz,%,$(@F))_STRIP)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-full.tgz,%,$(@F))_STRIP)) --strip-unneeded -R .pdr -R .comment -R .note; fi && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && mkdir -p $(@D) && $(tar) --owner=root --group=root -C $$DIR -czf $@ . &&  $(rm) -rf $$DIR
+
+PATTERN_RULES+=%/$(COMPONENT)_$(E)-full.tpu
+%/$(COMPONENT)_$(E)-full.tpu_NEEDED_TOOLS:=tputool
+%/$(COMPONENT)_$(E)-full.tpu: TPU_COMPONENT:=$(COMPONENT)
+%/$(COMPONENT)_$(E)-full.tpu: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP) $$(tputool_HOSTLINUX_FULL_PARTS)
+	export DIR=`mktemp -d /tmp/$(patsubst %-full.tpu,%,$(@F))_build.XXXXXXXX` && ODIR=`pwd` && ls -d $$DIR	&& \
+	cd $$DIR && export RESOURCE_GROUP=$($(TPU_COMPONENT)_RESOURCE_GROUP) && export TRUST_LEVEL=$($(TPU_COMPONENT)_TRUST_LEVEL) && export MAKE_MANIFEST=1 && export COMPONENT_NAME=$(TPU_COMPONENT) && $($(patsubst %-full.tpu,%,$(@F))_FULL_INSTALL)  \
+	if [ $(firstword $($(patsubst %-full.tpu,%,$(@F))_FULL_PARTS)) ] ; then find $$DIR -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1 | $(filter $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-full.tpu,%,$(@F))_STRIP)) $(xargs) -r $(filter-out $(LIBRARY_PATH_FLAVOUR)=%,$($(patsubst %-full.tpu,%,$(@F))_STRIP)) --strip-unneeded -R .pdr -R .comment -R .note; fi && \
+	$(mkdir) -p $(@D) && \
+	cd $$ODIR && LOG_OUTPUT=stdout $(tputool) create_and_sign -n Technicolor -c $(projectdir/)build/package/pkg-sign-cert.pem -p $(projectdir/)build/package/pkg-sign-key.pem -i $$DIR -o $@ &&  $(rm) -rf $$DIR
+
+ifeq ($(E),$(ORIGE))
+# Source package
+$(COMPONENT)-repository.tgz_NEEDED_RULES:=$(OUTPUT_PREFIX/)$(COMPONENT)-repository.tgz
+$(COMPONENT)-repository.tgz: $(OUTPUT_PREFIX/)$(COMPONENT)-repository.tgz
+	$(CP) $< $@
+
+# Source package
+$(COMPONENT)-docs.tgz_NEEDED_RULES:=$(OUTPUT_PREFIX/)$(COMPONENT)-docs.tgz
+$(COMPONENT)-docs.tgz: $(OUTPUT_PREFIX/)$(COMPONENT)-docs.tgz
+	$(CP) $< $@
+endif
+
+ifneq ($(OFFICIALBUILD),1)
+override LABELVER=`date +%y.%m.%d-%H:%M`.blackbuild.`id -un`
+endif
+
+
+PATTERN_RULES+=%/$(COMPONENT)-repository.tgz
+%/$(COMPONENT)-repository.tgz_NEEDED_TOOLS:=doxygen
+%/$(COMPONENT)-repository.tgz: $($(COMPONENT)_DOC_PARTS)
+	$(mkdir) -p $(OUTPUT_PREFIX/)src
+	$(rm) -rf $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))
+	$(cp) -prL $(dir $($(patsubst %-repository.tgz,%,$(@F))_COMP_DIR)) $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))
+	find $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F)) -name "*~" -o -name "*.bak" -o -name ".cmake.state" -o -name ".abe.*" -o -name "*.clearcase" -o -name "*.search_path" -o -name "$(@F)" | $(xargs) -r $(rm) -rf
+	for DIR in documentation patents licenses certifications $(tar) --owner=root --group=rootget; do $(mkdir) -p $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/$$DIR; done
+	for OP in build install clean; do $(cp) -p $(projectdir/)build/repository/MAKE_$$OP $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F)); done
+	LICENSE="$($(patsubst %-repository.tgz,%,$(@F))_LICENSE)"; FILE="$(projectdir/)build/licenses/$$LICENSE.pdf"; ODIR=$(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F)); [ -f "$$FILE" ] && $(cp) "$$FILE" $$ODIR/metadata/licenses || echo "No license file found for \"$$LICENSE\"" >&2; rm -rf $$ODIR/project/build/licenses
+	cat $(projectdir/)build/doc/INSTALL.txt | sed '/<PREREQ>/ c \
+	This document accompanies the MediaGEN component $(patsubst %-repository.tgz,%,$(@F)), but most of it also\
+	@applies to all the other MediaGEN components. The only exception to this is\
+	@the next chapter, called "$(patsubst %-repository.tgz,%,$(@F)) prerequisites", which specifically lists the\
+	@other MediaGEN components that need to be installed prior to building/running\
+	@this component.\
+	@\
+	@$(patsubst %-repository.tgz,%,$(@F)) prerequisites\
+	@$(shell echo $(patsubst %-repository.tgz,%,$(@F)) prerequisites | sed "s/./-/g")\
+	@\
+	@This section contains the prerequisites for the $(patsubst %-repository.tgz,%,$(@F)) component. This list is\
+	@autogenerated. If the remainder of this section is empty, it means this\
+	@component has no prerequisites. Otherwise, it should list the prerequisites\
+	@for building and running the production and test parts of this component.\
+	$(patsubst %,@@To build $(patsubst %-repository.tgz,%,$(@F))$(comma) you need to install the development files of the MediaGEN@components called@@$(sort $(foreach dep,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_CT_DEPS),$(firstword $(subst :, ,$(dep))))),$(sort $(patsubst %,a,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_CT_DEPS))))\
+	$(patsubst %,@@To run $(patsubst %-repository.tgz,%,$(@F))$(comma) you need to install the MediaGEN components called@@$(sort $(foreach dep,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_DT_DEPS),$(firstword $(subst :, ,$(dep))))),$(sort $(patsubst %,a,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_DT_DEPS))))\
+	$(patsubst %,@@To build the tests of $(patsubst %-repository.tgz,%,$(@F))$(comma) you need to install the MediaGEN components called@@$(sort $(foreach dep,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_CT_TEST_DEPS),$(firstword $(subst :, ,$(dep))))),$(sort $(patsubst %,a,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_CT_TEST_DEPS))))\
+	$(patsubst %,@@To run the tests of $(patsubst %-repository.tgz,%,$(@F))$(comma) you need to install the MediaGEN components called@@$(sort $(foreach dep,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_DT_TEST_DEPS),$(firstword $(subst :, ,$(dep))))),$(sort $(patsubst %,a,$($(patsubst %-repository.tgz,%,$(@F))_$(ORIGE)_DT_TEST_DEPS))))\
+	@\
+	' | tr "@" "\n" > $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/documentation/INSTALL.txt
+	DIR=$(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/documentation && ODIR=`pwd` && cd $$DIR && $($(patsubst %-repository.tgz,%,$(@F))_DOC_INSTALL)
+	if [ -e $($(patsubst %-repository.tgz,%,$(@F))_COMP_DIR)/api/headers ] ; then mkdir -p $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/documentation/api && cd $($(patsubst %-repository.tgz,%,$(@F))_COMP_DIR)/api/headers && SOURCE_DIRS="$($(patsubst %-repository.tgz,%,$(@F))_COMP_DIR)/api/headers" PROJECT=$(addprefix $(addsuffix .,$($(patsubst %-repository.tgz,%,$(@F))_GROUP)),$(patsubst %-repository.tgz,%,$(@F))) OUTPUT_DIR=$(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/documentation/api $(doxygen) $(projectdir/)build/Doxyfile; fi
+	mkdir -p $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/project/build && echo $(LABELVER) > $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/project/build/version
+	echo "COMPONENT_NAME=$(patsubst %-repository.tgz,%,$(@F))" > $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/manifest.txt
+	echo "COMPONENT_TECHNICOLOR_VERSION=" >> $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/manifest.txt
+	echo "COMPONENT_EXTERNAL_VERSION=" >> $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/manifest.txt
+	echo "COMPONENT_BU_VERSION=$(LABELVER)" >> $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/manifest.txt
+	echo "COMPONENT_ARCHITECTURE=" >> $(OUTPUT_PREFIX/)src/$(patsubst %-repository.tgz,%,$(@F))/metadata/manifest.txt
+	$(tar) --owner=root --group=root -czf $@ -C $(OUTPUT_PREFIX/)src $(patsubst %-repository.tgz,%,$(@F))
+
+PATTERN_RULES+=%/$(COMPONENT)-docs.tgz
+%/$(COMPONENT)-docs.tgz_NEEDED_TOOLS:=doxygen
+%/$(COMPONENT)-docs.tgz: $($(COMPONENT)_DOC_PARTS)
+	$(mkdir) -p $(OUTPUT_PREFIX/)docs/$(patsubst %-docs.tgz,%,$(@F))
+	DIR=$(OUTPUT_PREFIX/)docs/$(patsubst %-docs.tgz,%,$(@F)) && ODIR=`pwd` && cd $$DIR && $($(patsubst %-docs.tgz,%,$(@F))_DOC_INSTALL)
+	echo $(LABELVER) > $(OUTPUT_PREFIX/)docs/$(patsubst %-docs.tgz,%,$(@F))/version
+	$(tar) --owner=root --group=root -czf $@ -C $(OUTPUT_PREFIX/)docs $(patsubst %-docs.tgz,%,$(@F))
+##>
+
+# Install rules. 
+##<
+.PHONY: $(COMPONENT)_$(E)-copy $(COMPONENT)_$(E)_install $(COMPONENT)_$(E)_devel_install $(COMPONENT)_$(E)-full-copy $(COMPONENT)_$(E)_recursive_install
+
+$(COMPONENT)_$(E)-copy: $(COMPONENT)_$(E)_install
+$(COMPONENT)_$(E)_install: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_install,%,$(patsubst %-copy,%,$(@F)))_INSTALL) 
+
+$(COMPONENT)_$(E)_devel_install: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_devel_install,%,$(@F))_INSTALL) && $($(patsubst %_devel_install,%,$(@F))_DEVEL_INSTALL)
+
+$(COMPONENT)_$(E)_recursive_devel_install: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_devel_install,%,$(@F))_FULL_INSTALL) true
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_devel_install,%,$(@F))_FULL_DEVEL_INSTALL) true
+ifdef DEBUG_INSTALL_DIR
+	mkdir -p $(DEBUG_INSTALL_DIR)
+	for i in `(cd $(INSTALL_DIR) && find . -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1)`; do mkdir -p  $(DEBUG_INSTALL_DIR)/`dirname $$i`; $(CP) $(INSTALL_DIR)/$$i $(DEBUG_INSTALL_DIR)/$$i; $($(COMPONENT)_$(E)_STRIP) --strip-unneeded -R .pdr -R .comment -R .note $(INSTALL_DIR)/$$i;  done 
+endif
+
+$(COMPONENT)_$(E)_recursive_devel_stripped_install: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_devel_stripped_install,%,$(@F))_FULL_INSTALL) true
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_devel_stripped_install,%,$(@F))_FULL_DEVEL_INSTALL) true
+	mkdir -p $(DEBUG_INSTALL_DIR)
+	for i in `(cd $(INSTALL_DIR) && find . -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1)`; do mkdir -p  $(DEBUG_INSTALL_DIR)/`dirname $$i`; $(CP) $(INSTALL_DIR)/$$i $(DEBUG_INSTALL_DIR)/$$i; $($(COMPONENT)_$(E)_STRIP) --strip-unneeded -R .pdr -R .comment -R .note $(INSTALL_DIR)/$$i;  done 
+
+$(COMPONENT)_$(E)_recursive_binary_install: $$($(COMPONENT)_$(E)_FULL_BINARY_MAKEFILES) $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP) 
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_binary_install,%,$(@F))_FULL_INSTALL) true
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_binary_install,%,$(@F))_FULL_DEVEL_INSTALL) true
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && cp $(filter %_binary_makefile, $^) $(INSTALL_DIR)/$(prefix)
+
+$(COMPONENT)_$(E)-full-copy: $(COMPONENT)_$(E)_recursive_install
+$(COMPONENT)_$(E)_recursive_install: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_install,%,$(patsubst %-full-copy,%,$(@F)))_FULL_INSTALL) true
+ifdef DEBUG_INSTALL_DIR
+	mkdir -p $(DEBUG_INSTALL_DIR)
+	for i in `(cd $(INSTALL_DIR) && find . -type f | $(xargs) file | grep "ELF" | grep "not stripped"  | cut -d ":" -f 1)`; do mkdir -p  $(DEBUG_INSTALL_DIR)/`dirname $$i`; $(CP) $(INSTALL_DIR)/$$i $(DEBUG_INSTALL_DIR)/$$i; $($(COMPONENT)_$(E)_STRIP) --strip-unneeded -R .pdr -R .comment -R .note $(INSTALL_DIR)/$$i;  done 
+endif
+
+$(COMPONENT)_$(E)_test_install: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_TEST_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_TEST_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_test_install,%,$(@F))_TEST_INSTALL) 
+
+$(COMPONENT)_$(E)_recursive_test_install: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_TEST_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_test_install,%,$(@F))_FULL_TEST_INSTALL) true
+
+$(COMPONENT)_$(E)_recursive_all_install: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_$(E)_ELEM) $$($(COMPONENT)_$(E)_TEST_ELEM) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_all_install,%,$(@F))_FULL_TEST_INSTALL) true
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_recursive_all_install,%,$(@F))_FULL_DEVEL_INSTALL) true
+
+$(COMPONENT)_$(E)_recursive_clean: $$($(COMPONENT)_$(E)_FULL_CLEAN)
+
+$(COMPONENT)_$(E)_docs_install: $($(COMPONENT)_DOC_PARTS)
+	$(mkdir) -p $(INSTALL_DIR)
+	export DIR=$(INSTALL_DIR) && ODIR=`pwd` && cd $$DIR && $($(patsubst %_docs_install,%,$(@F))_DOC_INSTALL) 
+
+ifeq ($(E),$(ORIGE))
+.PHONY: $(COMPONENT)-copy $(COMPONENT)_install $(COMPONENT)-full-copy $(COMPONENT)_recursive_install $(COMPONENT)_devel_install
+.PHONY: $(COMPONENT)-test-copy $(COMPONENT)_test_install $(COMPONENT)-test-full-copy $(COMPONENT)_recursive_test_install $(COMPONENT)_recursive_clean
+
+$(COMPONENT)-copy: $(COMPONENT)_install
+$(COMPONENT)_install: $(COMPONENT)_$(E)_install
+$(COMPONENT)-full-copy: $(COMPONENT)_recursive_install
+$(COMPONENT)_recursive_install: $(COMPONENT)_$(E)_recursive_install
+$(COMPONENT)_devel_install: $(COMPONENT)_$(E)_devel_install
+$(COMPONENT)_recursive_devel_install: $(COMPONENT)_$(E)_recursive_devel_install
+$(COMPONENT)_recursive_devel_stripped_install: $(COMPONENT)_$(E)_recursive_devel_stripped_install
+$(COMPONENT)_recursive_binary_install: $(COMPONENT)_$(E)_recursive_binary_install
+$(COMPONENT)-test-copy: $(COMPONENT)_test_install
+$(COMPONENT)_test_install: $(COMPONENT)_$(E)_test_install
+$(COMPONENT)-test-full-copy: $(COMPONENT)_recursive_test_install
+$(COMPONENT)_recursive_test_install: $(COMPONENT)_$(E)_recursive_test_install
+$(COMPONENT)_recursive_all_install: $(COMPONENT)_$(E)_recursive_all_install
+$(COMPONENT)_recursive_clean: $(COMPONENT)_$(E)_recursive_clean
+endif
+##>
+
+# Shorthands and local copies of the real packaging rules. Only available when
+# E == ORIGE
+##<
+ifeq ($(E),$(ORIGE))
+
+##< component.tgz
+$(call addHelp,<componentContractIdentifier>.tgz,\
+  Package rule used to create a tgz holding all the production parts of the@\
+  component identified by <componentContractIdentifier>. The directory@\
+  structure inside the tgz is the same as it would be on the filesystem when@\
+  the component was installed by an install rule.,5._Package_Commands)
+
+$(COMPONENT).tgz: $(OUTPUT_PREFIX/)$(COMPONENT)_$(E).tgz
+	$(CP) $< $@
+
+%/$(COMPONENT).tgz: $(OUTPUT_PREFIX/)$(COMPONENT)_$(E).tgz 
+	$(CP) $< $@
+##>
+
+$(COMPONENT)-devel.tgz: $(OUTPUT_PREFIX/)$(COMPONENT)_$(E)-devel.tgz
+	$(CP) $< $@
+
+%/$(COMPONENT)-devel.tgz: $(OUTPUT_PREFIX/)$(COMPONENT)_$(E)-devel.tgz 
+	$(CP) $< $@
+
+$(COMPONENT).tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+$(COMPONENT).tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+
+PATTERN_RULES+=%/$(COMPONENT).tpu
+%/$(COMPONENT).tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+%/$(COMPONENT).tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+	
+$(COMPONENT)-full.tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+$(COMPONENT)-full.tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+
+PATTERN_RULES+=%/$(COMPONENT)-full.tpu
+%/$(COMPONENT)-full.tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+%/$(COMPONENT)-full.tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+
+$(COMPONENT)-test-full.tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+$(COMPONENT)-test-full.tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+	$(CP) $< $@
+
+PATTERN_RULES+=%/$(COMPONENT)-test-full.tpu
+%/$(COMPONENT)-test-full.tpu_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+%/$(COMPONENT)-test-full.tpu: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+	$(CP) $< $@
+
+# TODO
+# Remove the content of following ifneq () ... endif to get rid of the .zip and .zipa rules
+# as soon as we reach CoreMW iteration 46.
+ifneq ($(NO_ZIP_COMPAT),1)
+zip_deprecation_notice=@echo -e "DEPRECATION NOTICE:\nThe \"$(1)\" rule is deprecated and will be removed during CoreMW iteration 46. Instead, use the \"$(2)\" rule.\nUse to option \"NO_ZIP_COMPAT=1\" in your build to temporarily disable all \".zip\" and \".zipa\" related build rules."
+zipa_deprecation_notice=@echo -e "DEPRECAToION NOTICE:\nAll \".zipa\" rules are deprecated and will be removed during CoreMW iteration 46.\nUse to option \"NO_ZIP_COMPAT=1\" in your build to temporarily disable all \".zip\" and \".zipa\" related build rules."
+$(COMPONENT).zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+$(COMPONENT).zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,.zip,.tpu)
+
+PATTERN_RULES+=%/$(COMPONENT).zip
+%/$(COMPONENT).zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+%/$(COMPONENT).zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,.zip,.tpu)
+	
+$(COMPONENT)-test-full.zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+$(COMPONENT)-test-full.zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,-test-full.zip,-test-full.tpu)
+
+PATTERN_RULES+=%/$(COMPONENT)-test-full.zip
+%/$(COMPONENT)-test-full.zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+%/$(COMPONENT)-test-full.zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,-test-full.zip,-test-full.tpu)
+
+
+$(COMPONENT).zipa_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+$(COMPONENT).zipa: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+	$(call zipa_deprecation_notice)
+
+PATTERN_RULES+=%/$(COMPONENT).zipa
+%/$(COMPONENT).zipa_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+%/$(COMPONENT).zipa: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E).tpu
+	$(CP) $< $@
+	$(call zipa_deprecation_notice)
+
+$(COMPONENT)-full.zipa_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+$(COMPONENT)-full.zipa: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+	$(call zipa_deprecation_notice)
+
+PATTERN_RULES+=%/$(COMPONENT)-full.zipa
+%/$(COMPONENT)-full.zipa_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+%/$(COMPONENT)-full.zipa: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+	$(call zipa_deprecation_notice)
+
+$(COMPONENT)-full.zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+$(COMPONENT)-full.zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,-full.zip,-full.tpu)
+
+PATTERN_RULES+=%/$(COMPONENT)-full.zip
+%/$(COMPONENT)-full.zip_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+%/$(COMPONENT)-full.zip: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tpu
+	$(CP) $< $@
+	$(call zip_deprecation_notice,-full.zip,-full.tpu)
+endif
+
+##< component-full.tgz
+$(call addHelp,<componentContractIdentifier>-full.tgz,\
+  Package rule used to create a tgz holding all the production parts of the@\
+  component identified by <componentContractIdentifier> and all the production@\
+  parts of the components it depends on. The directory structure inside the tgz@\
+  is the same as it would be on the filesystem when the component was installed@\
+  by a recursive install rule.,5._Package_Commands)
+
+$(COMPONENT)-full.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tgz
+	$(CP) $< $@
+
+%/$(COMPONENT)-full.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-full.tgz
+	$(CP) $< $@
+##>
+
+##< component-test-full.tgz
+$(call addHelp,<componentContractIdentifier>-test-full.tgz,\
+  Package rule used to create a tgz holding all the production and test parts@\
+  of the component identified by <componentContractIdentifier> and all the@\
+  production parts of the components it depends on. The directory structure@\
+  inside the tgz is the same as it would be on the filesystem when the@\
+  component was installed by a recursive install rule.,5._Package_Commands)
+
+%/$(COMPONENT)-test-full.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tgz
+	$(CP) $< $@
+
+$(COMPONENT)-test-full.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test-full.tgz
+	$(CP) $< $@
+##>
+
+##< component-test.tgz
+$(call addHelp,<componentContractIdentifier>-test.tgz,\
+  Package rule used to create a tgz holding all the production and test parts@\
+  of the component identified by <componentContractIdentifier>. The directory@\
+  structure inside the tgz is the same as it would be on the filesystem when@\
+  the component was installed by a test install rule.,5._Package_Commands)
+
+
+%/$(COMPONENT)-test.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test.tgz
+	$(CP) $< $@
+
+$(COMPONENT)-test.tgz: $($(COMPONENT)_PREFIX/)$(COMPONENT)_$(E)-test.tgz
+	$(CP) $< $@
+##>
+endif
+##>
+
+# Klocwork related rules
+##<
+$(call addHelp,PROJECT,Used by the klocwork rule to select a klocwork server project. By default this@is set to CoreMW.,0._Variables_that_influence_the_build_process)
+ifeq ($(TARG_ARCH),KLOCWORK)
+PROJECT=CoreMW
+PATTERN_RULES+=$($(COMPONENT)_PREFIX/)%/project/initialized
+$($(COMPONENT)_PREFIX/)%/project/initialized_NEEDED_TOOLS:=kwcheck
+$($(COMPONENT)_PREFIX/)%/project/initialized: $(wildcard $($(COMPONENT)_COMP_DIR)/klocwork/*.kb)
+	$(rm) -rf $(@D)
+	$(rm) -rf $(dir $(@D))/settings
+	$(mkdir) -p $(dir $(@D))
+	$(kwcheck) create --project "$(PROJECT)" -pd $(@D) -sd $(dir $(@D))/settings $(COMPONENT_FROM_TARGET)
+	if [ -e $($(COMPONENT_FROM_TARGET)_COMP_DIR)/klocwork/*.kb ] ; then /ap/klocwork/client/latest/bin/kwcheck import -pd $(@D) -sd $(dir $(@D))/settings $($(COMPONENT_FROM_TARGET)_COMP_DIR)/klocwork/*.kb; fi
+	touch $@
+
+$(COMPONENT)-klocwork_NEEDED_TOOLS:=kwcheck
+$(COMPONENT)-klocwork_NEEDED_RULES:=$($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinjectall  $($(COMPONENT)_PREFIX/)klocwork/project/initialized
+$(COMPONENT)-klocwork: $($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinjectall $($(COMPONENT)_PREFIX/)klocwork/project/initialized 
+ifeq ($(DESTDIR),)
+	$(kwcheck) run -l -y -pd $(dir $(word 2, $^)) -sd $(dir $(dir $(word 2, $^)))/settings -j auto -b $< 
+else
+	$(mkdir) -p $(DESTDIR)
+	$(kwcheck) run -l -y -pd $(dir $(word 2, $^)) -sd $(dir $(dir $(word 2, $^)))/settings -j auto --F xml --report $(DESTDIR)/klocwork.xml -b $< 
+endif
+
+$(COMPONENT)-klocwork-full: $($(COMPONENT)_PREFIX/)klocwork-full/klocwork-full.kwinjectall $($(COMPONENT)_PREFIX/)klocwork-full/project/initialized 
+ifeq ($(DESTDIR),)
+	$(kwcheck) run -pd $(dir $(word 2, $^)) -sd $(dir $(dir $(word 2, $^)))/settings -j auto -b $< 
+else
+	$(mkdir) -p $(DESTDIR)
+	$(kwcheck) run -pd $(dir $(word 2, $^)) -sd $(dir $(dir $(word 2, $^)))/settings -j auto --F xml --report $(DESTDIR)/klocwork.xml -b $< 
+endif
+
+PATTERN_RULES+=%.kwinject
+%.kwinject_NEEDED_TOOLS:=kwinject
+%.kwinject: %.kwtrace
+	$(mkdir) -p $(@D)
+	$(kwinject) -t $< -o $@
+
+$($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinjectall: $($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinject $($(COMPONENT)_PREFIX/)klocwork/klocwork.java
+	$(cp) $< $@
+	$(CAT) $(filter %.java,$^) >> $@
+
+$($(COMPONENT)_PREFIX/)klocwork-full/klocwork-full.kwinjectall: $($(COMPONENT)_PREFIX/)klocwork-full/klocwork-full.kwinject $($(COMPONENT)_PREFIX/)klocwork-full/klocwork-full.java
+	$(cp) $< $@
+	$(CAT) $(filter %.java,$^) >> $@
+
+$(COMPONENT).kwinject: $($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinject
+	$(cp) $< $@
+
+$(COMPONENT)-test.kwinject: $($(COMPONENT)_PREFIX/)klocwork/klocwork-test.kwinject
+	$(cp) $< $@
+
+%/$(COMPONENT).kwinject: $($(COMPONENT)_PREFIX/)klocwork/klocwork.kwinject
+	$(cp) $< $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork.java: $$($(COMPONENT)_$(E)_PARTS) 
+	count=0 && if test -n "$(patsubst %.jar,%.jar.kw,$(filter %.jar,$^))"; then \
+		rm -f $@ ;\
+		for x in $(patsubst %.jar,%.jar.kw,$(filter %.jar,$^)) ; do \
+			let count=$$count+1; \
+			grep -h -v "version;" $$x | sed "s@;COMPILE_UNIT_.*;@;COMPILE_UNIT_$$count;@" >> $@; \
+		 done ; \
+	fi
+	touch $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork-full.java: $$($(COMPONENT)_$(E)_FULL_PARTS) 
+	if test -n "$(patsubst %.jar,%.jar.kw,$(filter %.jar,$^))"; then \
+		grep -v "version;" $(patsubst %.jar,%.jar.kw,$(filter %.jar,$^)) > $@; \
+	fi
+	touch $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork-test.java: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_TEST_PARTS)
+	if test -n "$(patsubst %.jar,%.jar.kw,$(filter %.jar,$^))"; then \
+		grep -v "version;" $(patsubst %.jar,%.jar.kw,$(filter %.jar,$^)) > $@; \
+	fi
+	touch $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork.kwtrace: $$($(COMPONENT)_$(E)_PARTS)
+	$(mkdir) -p $(@D)
+	$(CAT) $(filter-out %.jar,$^) > $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork-full.kwtrace: $$($(COMPONENT)_$(E)_FULL_PARTS)
+	$(mkdir) -p $(@D)
+	$(CAT) $(filter-out %.jar,$^) > $@
+
+$($(COMPONENT)_PREFIX/)%/klocwork-test.kwtrace: $$($(COMPONENT)_$(E)_PARTS) $$($(COMPONENT)_$(E)_TEST_PARTS)
+	$(mkdir) -p $(@D)
+	$(CAT) $(filter-out %.jar,$^) > $@
+endif
+##>
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

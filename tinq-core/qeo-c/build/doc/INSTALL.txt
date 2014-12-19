@@ -1,0 +1,184 @@
+Introduction
+------------
+
+This document describes the directory layout and the build system used in the
+MediaGEN deliveries. It does this from the perspective of a developer that
+wants to build one or more components provided by MediaGEN. It does not
+document the internals of the build system, nor does it document how to create
+MediaGEN compatible Makefiles. Instead, it focuses on:
+- describing where you can find the relevant files to start a build;
+- getting the components up and running on your development host;
+- setting up cross compilation for the components;
+- providing examples on how to integrate the components into other build
+  environments.
+
+<PREREQ>
+
+Directory Layout
+----------------
+
+MediaGEN components are delivered as tarballs that can be extracted using
+
+> tar -xzf <component_name>.tgz
+
+This will create a folder named <component_name>. Inside you will find a
+directory layout that aims to be compatible with the directory layout required
+by the Technicolor component repository. Because of this, you will find two
+subdirectories in each component delivery and a set of scripts that are used
+by the repository to build and test the component (1). The subdirectories are
+a folder called project and one called metadata. The project folder contains
+the actual source code of the component, the build system and tests for the
+component. The metadata folder contains documentation, license and patent
+information of the component.  To build a component, you need to be in the
+project subdirectory of the MediaGEN component. The project folder always has
+the following layout:
+
+- api/                          : a subdirectory holding all things related to
+                                  the external api of the component
+--- api/headers/ => optional    : a subdirectory of api holding all header
+                                  files exported to other components  
+- samples/       => optional    : samples for this component
+- build/                        : a subdirectory holding files related to the
+                                  build system
+- src/                          : a subdirectory containing source files and
+                                  internal header files
+- test/                         : a subdirectory containing test files and
+                                  test code for the component 
+--- test/unit/                  : a subdirectory containing everything related
+                                  to unit testing
+--- .../        => optional     : other subdirectories containing tests might
+                                  exist
+- .../          => optional     : a component can contain other subdirectories 
+- Makefile_component            : a Makefile that can be used to build the
+                                  component
+
+(1) As the structure of these scripts is not yet fixed in the repository,
+current deliveries will not yet contain those files. They will be added when
+the the structure becomes stable.  
+
+Creating a simple build for host using the MediaGEN build environment
+-------------------------------------------------------------------
+
+To build for host navigate to the project directory 
+
+> cd project
+
+and use 
+
+> make -f Makefile_component
+
+to build the component. This command will build all the code that is needed to
+install and run the component. All object files, libraries, applications and
+other derived objects will be put in a subdirectory call output inside the
+project directory.
+
+To install the component, use 
+
+> make -f Makefile_component install 
+
+By default this will install the component in /usr/local, so if you want to use
+the command like this, you will need root privileges (sudo or su -c). If you do
+not want to install in /usr/local, you can overrule the default installation
+prefix, by adding prefix=<alternate_path> to the install command.
+
+> make -f Makefile_component install prefix=/tmp/try_install
+
+If prefix is a non-existing path, it will be created.
+
+The MediaGEN build environment differentiates between a normal installation (all
+files needed to run the component) and a development installation (files
+needed to run the component + headers + build support files). To install the
+component and all files needed to develop on this component, use
+
+> make -f Makefile_component devel_install
+
+Again. the prefix variable can be used to change the directory in which
+everything gets installed.
+
+To clean the component, simply remove the output directory. or use 
+
+> make -f Makefile_component clean
+
+Cross-compiling
+---------------
+
+To cross-compile a middleware component, you need to specify the target
+environment for which you want to compile on the command line of the build
+command. You do this by setting the E variable to point to a new .env file. In
+all the previous documented commands, the default E setting HOSTLINUX was
+automatically added by the build environment, and the default .env file
+build/supported_targets/HOSTLINUX.env was used. To enable a new cross compiler,
+you need to create a new .env file. There are two places where you can put this
+file:
+- either create a file in build/supported_targets, called <envname>.env. If you
+  do it like this, you can compile with you cross compiler by adding
+  E=<envname> to your command line.
+- alternatively, put this file in another directory
+  <path_to_e_file>/<envname>.env and add both E=<envname> and
+  EDIR=<path_to_e_file> to the make command line. This way you can reuse the
+  same .env file for different builds.
+
+There are two ways to create a new .env file. You can
+- either manual create a new .env file. Look at the MIPSLINUX.env example file in
+  build/supported_targets for an example.
+- alternatively generate the .env file using autotools. This requires
+  autotools, automake and pkgconfig. To generate the .env file, go the project
+  directory, and execute 
+  
+  > ./build/autogen.sh 
+
+  followed by a call to the configure file created in ./build 
+  
+  > ./build/configure --host=<my-target-architecture>
+
+  Make sure your cross-compiler is in your path, or point the CC variable to
+  your cross-compiler. Furthermore, you can use --prefix to change the default
+  prefix stored in the .env file, pass CFLAGS to ./build/configure to change
+  the default optimization options, ...
+
+  When configure finishes, a file build/supported_targets/configure.env will
+  have been created. Add E=configure to use it in a compilation. 
+  
+  Alternatively, the above ./build/autogen.sh also created a Makefile, which
+  wraps around the Makefile_component. It automatically sets E to configure,
+  adds a distclean target that removes all the files created by the autotools
+  and remaps install to devel_install (autotools packages also install all
+  headers when you call the install target). Use  
+
+  > make install 
+
+  to build and install a DEVELOPMENT version of the component. 
+
+
+Finally, the build environment has the option to prepend the contents of the
+variable DESTDIR to each installed target file. This is typically used when you
+are cross-compiling and creating a root file system. In this case, you would set
+the prefix to /usr, but you want to install in <path_to_rootfs>/usr/.... This
+can be done by setting DESTDIR to <path_to_rootfs>.
+
+> make -f Makefile_component DESTDIR=<path_to_rootfs> install
+> make -f Makefile_component DESTDIR=<path_to_rootfs> devel_install
+
+or 
+
+> make DESTDIR=<path_to_rootfs>
+
+when you are using the wrapper Makefile generated by ./build/autogen.sh.
+
+Combining multiple components
+-----------------------------
+
+When you compile a component that has a dependency on another component, the
+build environment will search for the needed libraries using pkgconfig. The
+build system automatically generates the .pc files used by pkgconfig and
+installs them when you do a development install. If component b has a
+dependency on component a, it will search for a file called a.pc (typically)
+in /usr/lib/pkgconfig. If you installed the component a with a prefix not
+equal to /usr, or if you used DESTDIR to relocate the component, you have to
+make sure that pkgconfig finds the needed .pc files (and in case you are cross
+compiling the .pc files for the correct architecture). You can do that by
+modifying the PKG_CONFIG_PATH variable (see man pkg-config for details). This
+has to be done before you start a build (export the correct PKG_CONFIG_PATH
+before you start a build) or compilation will fail. 
+
+

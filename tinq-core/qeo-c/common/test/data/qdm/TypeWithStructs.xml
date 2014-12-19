@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<types xmlns="http://www.qeo.org/formal/2013/Qeo_Data_Model">
+  <include file="qeo_types.xml"/>
+  <module name="org::qeo::dynamic::qdm::test">
+	<struct name="Substruct1">
+      <member name="msubstring" type="string"/>
+      <member name="msubint32" type="int32"/>
+    </struct>
+	<struct name="Substruct2">
+      <member name="msubshort" type="int16"/>
+      <member name="msubstring" type="string"/>
+    </struct>
+	<struct name="Substruct3">
+      <member name="msubstring" type="string"/>
+      <member name="msubstruct2" type="nonBasic" nonBasicTypeName="Substruct2" sequenceMaxLength="-1"/>
+      <member name="msubfloat" type="float32"/>
+    </struct>
+    <struct name="TypeWithStructs" behavior="event">
+      <member name="msubstruct1" type="nonBasic" nonBasicTypeName="Substruct1" sequenceMaxLength="-1"/>
+      <member name="msubstruct3" type="nonBasic" nonBasicTypeName="Substruct3" sequenceMaxLength="-1"/>
+      <member name="mfloat32" type="float32"/>
+      <member name="mstring" type="string"/>
+    </struct>
+  </module>
+</types>

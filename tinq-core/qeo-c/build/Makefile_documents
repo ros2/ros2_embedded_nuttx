@@ -1,0 +1,8 @@
+# Initialize DOC to the first element inside $(COMPONENT).DOCUMENTS_RUN
+DOC:=$(word 1, $($(COMPONENT).DOCUMENTS_RUN))
+
+# Remove $(DOC) from $(COMPONENT).DOCUMENTS_RUN
+$(COMPONENT).DOCUMENTS_RUN:=$(filter-out $(DOC), $($(COMPONENT).DOCUMENTS_RUN))
+
+# Include Makefile_lib to generate the lib build commands
+include $(projectdir/)build/Makefile_doc

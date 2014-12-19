@@ -1,0 +1,41 @@
+## FILE: Makefile_doc
+#
+# Description: This Makefile will be included once for each document defined in
+# each component Makefile. It is responsible for generating the build commands
+# for the documentation for which this Makefile was included.
+#
+# Input variables:
+# - COMPONENT
+# - DOC
+# - $(COMPONENT).$(DOC)_DITAMAP
+#
+
+##>
+
+include $(projectdir/)build/Makefile_anttasks
+
+$($(COMPONENT)_PREFIX/)$(DOC).pdf: DOC_PART_COMPONENT := $(COMPONENT)
+$($(COMPONENT)_PREFIX/)$(DOC).pdf: $(ANT_TASK_JAR)
+	cd "$(projectdir/)thirdparty/ibm/DITA-OT" && \
+        export "DITA_DOC=$(patsubst %.pdf,%,$(@F))" && \
+        export 'DOC_TITLE=$($(DOC_PART_COMPONENT).$(patsubst %.pdf,%,$(@F))_TITLE)' && \
+        export 'DOC_TITLE_ALT=$($(DOC_PART_COMPONENT).$(patsubst %.pdf,%,$(@F))_TITLE_ALT)' && \
+        export 'DOC_ID=$($(DOC_PART_COMPONENT).$(patsubst %.pdf,%,$(@F))_DOC_ID)' && \
+        export DOC_TYPE="pdf" && \
+	unset DISPLAY && \
+        export DITA_DIR=`$(PWD)` && export ANT_OPTS="-Xmx512m -Djavax.xml.transform.TransformerFactory=net.sf.saxon.TransformerFactoryImpl" && \
+        export ANT_HOME="$$DITA_DIR/tools/ant" && cd - && \
+        CLASSPATH="$$DITA_DIR/lib:$$DITA_DIR/lib/dost.jar:$$DITA_DIR/lib/resolver.jar:$$DITA_DIR/lib/icu4j.jar" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9.jar:$$DITA_DIR/lib/saxon/saxon9-dom.jar:$$CLASSPATH" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-dom4j.jar:$$DITA_DIR/lib/saxon/saxon9-jdom.jar:$$CLASSPATH" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-s9api.jar:$$DITA_DIR/lib/saxon/saxon9-sql.jar:$$CLASSPATH" && \
+        export CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-xom.jar:$$DITA_DIR/lib/saxon/saxon9-xpath.jar:$$DITA_DIR/lib/saxon/saxon9-xqj.jar:$$CLASSPATH" && \
+        $$ANT_HOME/bin/ant -f $(projectdir/)build/ant/document.xml -Dbuild.dir=$($(DOC_PART_COMPONENT)_PREFIX/) \
+        -Ddoc.references="$($(DOC_PART_COMPONENT).$(patsubst %.pdf,%,$(@F))_REFERENCES)" \
+	-Ddoc.abbreviations="$(PART_PRE_DOC_ABBREVIATIONS)" \
+        -Dchapter.list="$(subst $(space),$(comma),$(strip $($(DOC_PART_COMPONENT).$(patsubst %.pdf,%,$(@F))_CHAPTERS)))" \
+	-Dinput.dir="$($(DOC_PART_COMPONENT)_COMP_DIR)/doc/dita/" -Dtarget.name=$@ -Dtask.defs=$<
+
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

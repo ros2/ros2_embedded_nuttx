@@ -1,0 +1,103 @@
+### Generic build commands. 
+###
+### This part describes how to build a .o file from a .c/.cpp/.cxx/.cc file.
+
+##< GNU make dependency generation
+#Don't do dependency generation for ClearMake
+ifneq ($(patsubst %clearmake,clearmake,$(MAKE)),clearmake)
+ifneq ($($(COMPONENT)_DEPS_DONE),1)
+$(COMPONENT)_DEPS_DONE:=1
+  AUTODEPEND=$(space)-MD
+  $(COMPONENT)_DEPDIR:=$(OUTPUT_PREFIX/)$(COMPONENT)
+  -include $($(COMPONENT)_DEPDIR)/*.d
+
+#Macro's are not supported by ClearMake
+define cp_depend
+ if [ -d $(dir $2) ]; then $(mkdir) -p $(dir $2); fi
+ $(CP) $1 $2
+ $(SED) -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' -e '/^$$/ d' -e 's/$$/ :/' < $1 >> $2
+ $(rm) -f $1
+endef
+
+endif
+endif
+##>
+
+_LOCALINCLUDES     =$(foreach path,$(LOCALINCLUDES),$(addprefix -I,$(filter /%,$(path)))$(addprefix -I$($(COMPONENT_FROM_TARGET)_COMP_DIR/),$(filter-out /%, $(path))))
+_PART_LOCALINCLUDES=$(foreach path,$(PART_LOCALINCLUDES),$(addprefix -I,$(filter /%,$(path)))$(addprefix -I$($(COMPONENT_FROM_TARGET)_COMP_DIR/),$(filter-out /%, $(path))))
+
+ifeq ($($(COMPONENT).$(PROGRAM)$(LIB)_TEST),1)
+$(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS=$($(COMPONENT)_$(E)_TEST_CCDEPS)
+endif
+
+$(COMPONENT)_$(E)_C_TO_O = $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS)
+$(COMPONENT)_$(E)_CPP_TO_O = $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CCC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CCFLAGS)
+
+ifneq ($($(E)_SHARED_DIR_INFIX),)
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir$($(E)_SHARED_DIR_INFIX)%.o: %.c $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir$($(E)_SHARED_DIR_INFIX)%.o: %.cpp $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CCC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CCFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir$($(E)_SHARED_DIR_INFIX)%.o: %.cc $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CCC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CCFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir$($(E)_SHARED_DIR_INFIX)%.o: %.S $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+ifeq ($(TARG_ARCH),MIPS)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -D__ASSEMBLER__ -o $@ -c $<
+else
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+endif
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir%.o: %.c $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir%.o: %.cpp $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CCC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CCFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir%.o: %.cc $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CCC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CCFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+$($(COMPONENT)_PREFIX/)$(LIB)$(PROGRAM)_dir%.o: %.S $$($(COMPONENT)_$(E)_CCDEPS) $$($(COMPONENT)_$(PROGRAM)$(LIB)_$(E)_TEST_CCDEPS) $($(COMPONENT).$(LIB)$(PROGRAM)_CCDEPS) $$($(COMPONENT)_$(E)_COMPONENT_MAKEFILE_DEP)
+	@$(mkdir) -p $(@D)
+ifeq ($(TARG_ARCH),MIPS)
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -D__ASSEMBLER__ -o $@ -c $<
+else
+	$($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_CC)$(AUTODEPEND) $($(COMPONENT_FROM_TARGET)_$(E_FROM_TARGET)_TMP_CFLAGS) $(LOCALDEFINES) $(PART_LOCALDEFINES) $(_LOCALINCLUDES) $(_PART_LOCALINCLUDES) -o $@ -c $<
+endif
+ifdef AUTODEPEND
+	@$(call cp_depend,$(@:.o=.d),$($(COMPONENT_FROM_TARGET)_DEPDIR)/$(subst /,_,$(patsubst /%,%,$(<D)))_$(@F:.o=.d))
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

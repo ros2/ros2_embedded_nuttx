@@ -1,0 +1,21 @@
+#!/bin/bash
+# Check if configure needs to be restarted
+export CONFIGURE="$CONFIGURE_DIR./configure $@"
+
+# create a .tmp.reconfigure file with the configure command and environment
+ENV="PATH CONFIGURE PROJECTARCH PROJECTNAME PROJECTCROSS PROJECTLIBC AS AR CC CXX LD OBJCOPY OBJDUMP RANLIB LDFLAGS CFLAGS CPPFLAGS CONFIGURE_DIR PKG_CONFIG_PATH"
+rm -f .tmp.reconfigure
+for VAR in $ENV; do
+    echo $VAR=${!VAR} >> .tmp.reconfigure
+done
+
+# append an shasum of the configure script to detect when it changes
+shasum -p $CONFIGURE_DIR./configure >> .tmp.reconfigure
+
+if ! (diff .tmp.reconfigure .reconfigure &> /dev/null); then
+	[ "$V" != "" ] && echo $CONFIGURE
+	# touch configure if older than configure.in, but avoid to do it all the time
+	[ -f $CONFIGURE_DIR./configure.in ] && [ $CONFIGURE_DIR./configure.in -nt $CONFIGURE_DIR./configure ] && touch $CONFIGURE_DIR./configure
+	$CONFIGURE_DIR./configure "$@" || exit 1
+	mv .tmp.reconfigure .reconfigure
+fi

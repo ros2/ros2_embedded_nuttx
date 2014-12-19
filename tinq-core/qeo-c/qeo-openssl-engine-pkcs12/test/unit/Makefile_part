@@ -1,0 +1,10 @@
+# Unit testing libraries
+qeo-openssl-engine-pkcs12.LIBRARIES                   += libpkcs12enginetests 
+
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_SRCS        := $(addprefix libqeo-openssl-engine-pkcs12:src/, engine_pkcs12.c) $(addprefix test/unit/testsuites/suite_engine/, main.c engine_fixtures.c tcase_basictests/basictests.c )
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_SRCS        += $(addprefix test/unit/mocks/Mock, platform.c) $(addprefix test/unit/mocks/qeo_platform_mocks/impl/Mock, qeo_platform_impl.c)
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_LOCALINCLUDES   := test/unit/testsuites/suite_engine/ test/unit/mocks $(unittest-check_INCLUDES) $(cmock_INCLUDES) $(qeo-c-util_INCLUDES) $(qeo-openssl-engine-pkcs12_INCLUDES)
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_LOCALINCLUDES  += test/unit/mocks/qeo_platform_mocks/impl
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_LOCALDEFINES    := -Wall -Werror -g -O0
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_LDADD           := $(unittest-check_LIBS) $(cmock_LIBS) $(qeo-openssl-engine-pkcs12_LIBS) -L$(qeo-openssl-engine-pkcs12_PREFIX)
+qeo-openssl-engine-pkcs12.libpkcs12enginetests_LDDEPS          := libqeo-openssl-engine-pkcs12.so

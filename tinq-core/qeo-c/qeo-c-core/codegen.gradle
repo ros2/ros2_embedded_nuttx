@@ -1,0 +1,42 @@
+/*
+ Hack alert !!!
+ We are redefining the buildDir from gradle to output.
+ As "./build/" is already used for the middleware build system.
+ So we decided to use the output directory of that system.
+ Keep this line on top of the others!
+*/
+project.buildDir = "output/gradle"
+
+
+apply from: (System.properties['qeoGradleHelper'] ?: '/home/users/cpeqeo/gradle-helper') + '/artifactory.gradle'
+apply from: (System.properties['qeoGradleHelper'] ?: '/home/users/cpeqeo/gradle-helper') + '/codegen.gradle'
+
+version = project.qeoVersion
+
+generateTestTypes {
+  ext.qdms = fileTree("test/data/qdm").include("*.xml") as Collection
+  ext.language = "c"
+  ext.outputDir = "test/src/qdm"
+}
+
+generateTypes {
+    ext.language = "c"
+    ext.outputDir = "src/qdm"
+    //note: generated files have to be listed in .gitignore to avoid them being checkedin
+    ext.qdms = [
+        "catalog/qeo_types.xml",
+        "catalog/qeo_DeviceInfo.xml",
+        "catalog/qeo_Policy.xml",
+        "catalog/qeo_RegistrationCredentials.xml",
+        "catalog/qeo_RegistrationRequest.xml",
+        "catalog/qeo_Forwarder.xml"
+    ]
+}
+
+dependencies {
+    generated "org.qeo:qeo-qdm:${project.qeoVersion}@zip"
+}
+
+tasks.assemble.dependsOn generateTypes
+tasks.assemble.dependsOn generateTestTypes
+

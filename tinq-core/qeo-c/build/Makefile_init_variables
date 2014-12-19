@@ -1,0 +1,59 @@
+##< The E variable
+$(call addHelp,E,\
+This variable is used to select the environment for which you want to compile.@\
+It selects the compiler and sets target specific defines that can be used in@\
+the other Makefiles and in the source code. If this variable is not provided it@\
+will default to HOSTLINUX unless you specified a klocwork target - like@\
+klocwork or kwinject - in which case it will be set to KLOCWORK.@\
+@\
+HOSTLINUX is a special environment that uses your host compiler to create a@\
+build. It will search for a gcc in your path and use that to compile@\
+everything.  Do not use this for cross-compilation - i.e. do not put a@\
+cross-compiler called gcc first in the path and then put E=HOSTLINUX - as the@\
+build environment will compile and execute some test applications compiled with@\
+the found gcc to deduce key properties of your host platform.@\
+@\
+KLOCWORK is also a special environment that simulates a build in order to@\
+generate a kwinject file which can then be used as input for the Klocwork@\
+static code analyzer.,0._Variables_that_influence_the_build_process)
+
+
+# If E is not defined, we need to set it to something sensible
+##<
+ifndef E
+  ifneq ($(findstring kwinject,$(MAKECMDGOALS))$(findstring klocwork,$(MAKECMDGOALS)),)
+    override E:=KLOCWORK
+    override ORIGE:=KLOCWORK
+  else
+    ifeq ($(HOSTOS),Darwin)
+    	E:=HOSTDARWIN
+    	ORIGE:=HOSTDARWIN
+    else
+    	E:=HOSTLINUX
+    	ORIGE:=HOSTLINUX
+    endif
+    $(shell echo "Warning: The make variable E that specifies the target environment was not specified on the command line." >&2)
+    $(shell echo "         It was automatically put to $(E)." >&2)
+    $(shell echo "" >&2)
+  endif
+endif
+##>
+##>
+
+ifeq ($(E),HOSTDARWIN)
+	LIBSUFFIX:=.dylib
+    LIBRARY_PATH_FLAVOUR:=DYLD_LIBRARY_PATH
+else
+	LIBSUFFIX:=.so
+    LIBRARY_PATH_FLAVOUR:=LD_LIBRARY_PATH
+endif
+
+# ORIGE should be set to the value of E that was passed on the commandline, or
+# to the first define of E we encountered in a toplevel Makefile
+##<
+ifndef ORIGE
+  ORIGE:=$(E)
+endif
+##>
+
+# vim: foldmethod=marker foldmarker=##<,##> :

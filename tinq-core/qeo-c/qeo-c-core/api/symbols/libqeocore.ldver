@@ -1,0 +1,88 @@
+qeocore_0.1 {
+global:
+    /* qeo/factory.h */
+    qeo_factory_create;
+    qeo_factory_create_by_id;
+    qeo_factory_close;
+    qeo_version_string;
+
+    /* qeo_dyntype.h */
+    qeocore_type_register;
+    qeocore_type_register_tsm;
+    qeocore_type_get_member_id;
+    qeocore_type_free;
+    qeocore_type_string_new;
+    qeocore_type_primitive_new;
+    qeocore_type_sequence_new;
+    qeocore_type_enum_new;
+    qeocore_type_struct_new;
+    qeocore_type_struct_add;
+    qeocore_enum_value_to_string;
+    qeocore_enum_string_to_value;
+
+    /* types.h (qeo-c-core) */
+    qeo_policy_identity_get_uid;
+    
+    /* qeocore factory.h */
+    qeocore_factory_new;
+    qeocore_factory_close;
+    qeocore_factory_init;
+    qeocore_factory_policy_refresh;
+    qeocore_factory_set_domainid;
+    qeocore_factory_get_domainid;
+    qeocore_factory_get_realm_id;
+    qeocore_factory_set_identity;
+    qeocore_factory_set_intf;
+    qeocore_factory_get_user_data;
+    qeocore_factory_set_user_data;
+    qeocore_factory_set_forwarder;
+    qeocore_atexit;
+
+    qeocore_fwdfactory_new;
+    qeocore_fwdfactory_set_public_locator;
+    qeocore_fwdfactory_close;
+    
+    /* qeo_identity.h */
+    qeocore_get_identities;
+    qeocore_free_identities;
+    
+    /* qeo_language_binding.h */
+    qeocore_set_log_hook;
+    
+    qeocore_data_reset;
+    qeocore_data_free;
+    qeocore_data_set_member;
+    qeocore_data_get_member;
+    qeocore_data_sequence_new;
+    qeocore_data_sequence_free;
+    qeocore_data_sequence_set;
+    qeocore_data_sequence_get;
+    qeocore_data_get_status;
+    qeocore_data_get_instance_handle;
+    qeocore_data_get_data;
+    
+    qeocore_reader_open;
+    qeocore_reader_enable;
+    qeocore_reader_close;
+    qeocore_reader_get_userdata;
+    qeocore_reader_data_new;
+    qeocore_reader_read;
+    qeocore_reader_take;
+    qeocore_reader_policy_update;
+    
+    qeocore_writer_open;
+    qeocore_writer_enable;
+    qeocore_writer_close;
+    qeocore_writer_get_userdata;
+    qeocore_writer_data_new;
+    qeocore_writer_write;
+    qeocore_writer_remove;
+    qeocore_writer_policy_update;
+    
+    qeocore_remote_registration_encrypt_otc;
+    qeocore_remote_registration_free_encrypted_otc;
+    
+local:
+    *;
+};
+

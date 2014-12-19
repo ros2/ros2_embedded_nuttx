@@ -1,0 +1,14 @@
+# Make sure we have a search path
+include $(projectdir/)build/Makefile_include_components.default.search_path
+
+include $(projectdir/)build/Makefile_patches
+
+# We are going to recurse, so allocate some place on our stack
+INC_DEPTH+=1
+
+# Put the component search path below, and start resolving using Makefile_include_components_stub.search_path
+RESOLVE_PATHS_$(words $(INC_DEPTH)):=$(COMPONENT_SEARCH_PATH)
+include $(projectdir/)build/Makefile_include_components_stub.search_path
+
+# Free space on the stack
+INC_DEPTH:=$(subst -, ,$(patsubst -%,%,$(patsubst 1%,%,$(patsubst -%,%,$(subst $(space),-,$(INC_DEPTH))))))

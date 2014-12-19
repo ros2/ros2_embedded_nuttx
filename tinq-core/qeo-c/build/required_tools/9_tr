@@ -1,0 +1,17 @@
+ifndef tr
+tr=$(shell if tr --version > /dev/null 2>/dev/null; then $(echo) tr; fi)
+endif
+
+ifeq ($(tr),)
+tr=$(shell if gtr --version > /dev/null 2>/dev/null; then $(echo) gtr; fi)
+endif
+
+ifeq ($(tr),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working tr in the path. This is required. Provide tr on the commandline (e.g. tr=/bin/tr).") 
+$(shell $(echo) "Could not find a working tr in the path. This is required. Provide tr on the commandline (e.g. tr=/bin/tr)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

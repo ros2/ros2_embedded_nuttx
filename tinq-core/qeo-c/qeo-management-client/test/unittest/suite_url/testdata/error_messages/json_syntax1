@@ -1,0 +1,10 @@
+{
+  "href" : "http://join.qeodev.org/",
+    "check" : {
+      "href" : "http://join.qeodev.org/pull/checkpolicy"
+    },
+    "pull" : {
+      "href" : "https://join.qeodev.org:8443/pull/policy"
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{ 
+  "locators": [ 
+    { 
+      "type": "TCPv4",
+      "address": "200",
+      "port": 100
+    },
+    { 
+      "type": "TCPv6",
+      "address": "201",
+      "port": 101
+    },
+    { 
+      "type": "UDPv4",
+      "address": "202",
+      "port": 102
+    },
+    { 
+      "type": "UDPv6",
+      "address": "203",
+      "port": 103
+    },
+    { 
+      "type": "TCPv4",
+      "address": "204",
+      "port": 104
+    },
+    { 
+      "type": "TCPv6",
+      "address": "205",
+      "port": 105
+    },
+    { 
+      "type": "UDPv4",
+      "address": "206",
+      "port": 106
+    },
+    { 
+      "type": "UDPv6",
+      "address": "207",
+      "port": 107
+    },
+    { 
+      "type": "TCPv4",
+      "address": "208",
+      "port": 108
+    },
+    { 
+      "type": "TCPv6",
+      "address": "209",
+      "port": 109
+    }
+  ]
+}

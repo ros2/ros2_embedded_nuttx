@@ -1,0 +1,178 @@
+## FILE: Makefile_component_bot. 
+# 
+# Description: This Makefile has to be included at the end of every component
+# Makefile. It is responsible for: 
+# - Generating build commands for all libraries and programs listed in
+#   $(COMPONENT).LIBRARIES, $(COMPONENT).PROGRAMS (by including
+#   Makefile_program/Makefile_libraries multiple times as needed).
+# - Generate the different packaging and installation targets for each
+#   component (by including Makefile_package).
+# - Generate clean commands for a component (by including Makefile_clean)
+# - Switch the E variable to the value needed by some (unresolved) components
+#   when we reach the end of the component that has been designated
+#   COMPONENT_BUILD_MANAGER
+#
+# Input variables: 
+# - COMPONENT (taken from the preamble of the component Makefile - modified by
+#   Makefile_component_top). Has to be set when this makefile is included.
+# - $(COMPONENT).LIBRARIES (taken from the body of the component Makefile). Can
+#   be empty/unset. If set, it holds a list of libraries that can be build for
+#   the component, without the actual library extension (so, no .so/.a) 
+# - $(COMPONENT).PROGRAMS (taken from the body of the component Makefile). Can
+#   be empty/unset. If set, it hold a list of programs that can be build for
+#   this component.
+# - $(COMPONENT)_DIR: is this still needed???? Finalize the value in
+#   $(COMPONENT)_DIR.
+# - projectdir/: set to the root for software project. Automatically determined
+#   in Makefile_host, or provided on the commandline.
+# - E: Set to the current compilation environment, i.e. the architecture for
+#   which we are compiling this component.
+# - ORIGE: Set to the original compilation environment, i.e. the E variable
+#   passed on the commandline (or HOSTLINUX if no environment was given on the
+#   commandline).
+# - COMPONENT_BUILD_MANAGER:
+#
+# Output/Modified global variables:
+# - E: can be set to a new value to include dependencies that need to be
+#   compiled for a different architecture. 
+#
+# Can include: 
+# - Makefile_libraries
+# - Makefile_programs
+# - Makefile_package
+# - Makefile_clean
+# - Makefile_switch_env
+ 
+
+
+$(COMPONENT)_DIR:=$($(COMPONENT)_DIR)
+
+# Make the list of coverage files for this component empty, an enable immediate
+# expansion on this list. The coverage files will be added in Makefile_program
+# and Makefile_library
+$(COMPONENT)_$(E)_COVERAGE_FILES:=
+
+# Used when querying: don't actually read build rules (faster).
+ifneq ($(MAKE_NO_RULES),1)
+# Generate build commands for all libraries
+##<
+
+# Make a copy of the list of all libraries, because we want to preserve the
+# list for other purposes (the sort is there to eliminate spurious spaces, to
+# assure the following test can succeed even if a user added a list with
+# spaces)
+
+$(COMPONENT).LIBRARIES_RUN:=$(sort $($(COMPONENT).LIBRARIES))
+
+# If we have libraries defined for this component...
+ifneq ($($(COMPONENT).LIBRARIES_RUN),)
+# Foreach lib include Makefile_libraries (which will set the LIB variable and
+# include Makefile_lib)
+include $(patsubst %,$(projectdir/)build/Makefile_libraries,$($(COMPONENT).LIBRARIES_RUN))
+endif
+##>
+
+# Generate build commands for all programs
+##<
+
+# Make a copy of the list of all programs, because we want to preserve the
+# list for other purposes (the sort is there to eliminate spurious spaces, to
+# assure the following test can succeed even if a user added a list with
+# spaces)
+
+$(COMPONENT).PROGRAMS_RUN:=$(sort $($(COMPONENT).PROGRAMS))
+
+# If we have programs defined for this component...
+ifneq ($($(COMPONENT).PROGRAMS_RUN),)
+# Foreach program include Makefile_programs (which will set the PROGRAM
+# variable and include Makefile_program)
+include $(patsubst %,$(projectdir/)build/Makefile_programs,$($(COMPONENT).PROGRAMS_RUN))
+endif
+##>
+
+
+# Generate build commands for all modules
+##<
+
+# Make a copy of the list of all modules, because we want to preserve the
+# list for other purposes (the sort is there to eliminate spurious spaces, to
+# assure the following test can succeed even if a user added a list with
+# spaces)
+
+$(COMPONENT).MODULES_RUN:=$(sort $($(COMPONENT).MODULES))
+
+# If we have programs defined for this component...
+ifneq ($($(COMPONENT).MODULES_RUN),)
+# Foreach module include Makefile_modules 
+include $(patsubst %,$(projectdir/)build/Makefile_modules,$($(COMPONENT).MODULES_RUN))
+endif
+##>
+
+
+# Generate build commands for all docs
+##<
+
+# Make a copy of the list of all documents, because we want to preserve the
+# list for other purposes (the sort is there to eliminate spurious spaces, to
+# assure the following test can succeed even if a user added a list with
+# spaces)
+
+$(COMPONENT).DOCUMENTS_RUN:=$(sort $($(COMPONENT).DOCUMENTS))
+
+# If we have documents defined for this component...
+ifneq ($($(COMPONENT).DOCUMENTS_RUN),)
+# Foreach doc include Makefile_documents (which will set the DOC variable and
+# include Makefile_doc)
+include $(patsubst %,$(projectdir/)build/Makefile_documents,$($(COMPONENT).DOCUMENTS_RUN))
+endif
+##>
+
+# Generate build commands for all jar files
+##<
+
+# Make a copy of the list of all jar files, because we want to preserve the
+# list for other purposes (the sort is there to eliminate spurious spaces, to
+# assure the following test can succeed even if a user added a list with
+# spaces)
+
+$(COMPONENT).JARS_RUN:=$(sort $($(COMPONENT).JARS))
+
+# If we have documents defined for this component...
+ifneq ($($(COMPONENT).JARS_RUN),)
+# Foreach jar: include Makefile_jars (which will set the JAR variable and
+# include Makefile_jar)
+include $(patsubst %,$(projectdir/)build/Makefile_jars,$($(COMPONENT).JARS_RUN))
+endif
+##>
+
+
+# Generate commands for service libraries
+include $(projectdir/)build/Makefile_xml_to_lib
+
+# Generate packaging commands for the component
+include $(projectdir/)build/Makefile_package
+
+# Generate clean commands for the component
+include $(projectdir/)build/Makefile_clean
+
+endif
+
+# Check if we are that component that initially started this build
+ifeq ($(COMPONENT), $(COMPONENT_BUILD_MANAGER))
+# If we are the component that started the build, we might need to do a
+# recursive tail call to include components, with a different E value, to
+# resolve the remaining components for a different target environment. Normally
+# this gets done in Makefile_include_component when INC_DEPTH is empty (i.e.
+# the toplevel), however, when a build was started from a component Makefile,
+# this never happens.
+ifeq ($(E),$(ORIGE))
+include $(projectdir/)build/Makefile_switch_env
+endif
+
+# If a build was initiated from a component, and we reach this point all
+# Makefiles of component we depend on have been read, and we can call
+# Makefile_last to generated rules, vars that depend on the knowledge of all
+# components 
+include $(projectdir/)build/Makefile_last
+endif
+# vim: foldmethod=marker foldmarker=##<,##> :

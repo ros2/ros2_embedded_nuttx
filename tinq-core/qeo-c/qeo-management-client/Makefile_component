@@ -1,0 +1,136 @@
+ifneq ($($(qeo-management-client_INCLUDED)),1)
+
+override COMPONENT := technicolor.middleware.core.qeo-management-client
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+qeo-management-client_INCLUDES := api/headers $$(qeo-c-util_INCLUDES) $$(openssl_INCLUDES) $$(libcurl_INCLUDES)
+qeo-management-client_CFLAGS   := -std=gnu99
+qeo-management-client_LIBS     := -lqeomgmtclient $$(qeo-c-util_LIBS) $$(openssl_LIBS) $$(libcurl_LIBS) $$(jansson_LIBS) 
+
+qeo-management-client_PARTS_INSTALL      := \
+	libqeomgmtclient.so@$$(libdir/)libqeomgmtclient.so:755
+qeo-management-client_ELEM_INSTALL       := 
+
+qeo-management-client_TEST_PARTS         :=
+qeo-management-client_TEST_PARTS_INSTALL := \
+	client_app@$$(bindir/)qeo-mgmt-client-app:755 \
+	libutforwarders.so@$$(libdir/)unittests/libutforwarders.so:644 \
+	libuturldiscovery.so@$$(libdir/)unittests/libuturldiscovery.so:644 \
+	libutclient.so@$$(libdir/)unittests/libutclient.so:644 \
+	libutsscepmock.so@$$(libdir/)unittests/libutsscepmock.so:644 \
+	libutcertparser.so@$$(libdir/)unittests/libutcertparser.so:644 \
+
+qeo-management-client_TEST_ELEM_INSTALL  := \
+	test/qeo_mgmt_client_test_run.sh@$$(bindir/)qeo_mgmt_client_test_run.sh:755 \
+	test/client_app/device_cmds.sh@$$(bindir/)device_cmds.sh:755 \
+	test/client_app/policy_cmds.sh@$$(bindir/)policy_cmds.sh:755 \
+	test/client_app/policy_check_cmds.sh@$$(bindir/)policy_check_cmds.sh:755 \
+	test/client_app/forwarder_cmds.sh@$$(bindir/)forwarder_cmds.sh:755 \
+	test/client_app/test_all.sh@$$(bindir/)test_all.sh:755 \
+	test/client_app/valgrind.sh@$$(bindir/)valgrind.sh:755 \
+        test/client_app/valgrind.supp@$$(bindir/)valgrind.supp:644 \
+	test/testdata/forwarder_single_locator@$$(bindir/)testdata/forwarder_single_locator:644 \
+	test/testdata/forwarder_multiple_locators@$$(bindir/)testdata/forwarder_multiple_locators:644 \
+
+qeo-management-client_TEST_RUN           := $$(bindir/)qeo_mgmt_client_test_run.sh
+
+qeo-management-client_DEPS               := qeo-c-util openssl libcurl jansson
+qeo-management-client_TEST_DEPS          := unittest-check cmock
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-management-client.LIBRARIES := libqeomgmtclient
+
+qeo-management-client.libqeomgmtclient_LDADD         := $(qeo-c-util_LIBS) $(openssl_LIBS) $(libcurl_LIBS) $(jansson_LIBS) 
+qeo-management-client.libqeomgmtclient_LOCALDEFINES  := -Wall -Werror
+qeo-management-client.libqeomgmtclient_LOCALINCLUDES := src/libsscep/ scr/management-client/ $(qeo-management-client_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.libqeomgmtclient_SRCS          := $(addprefix src/libsscep/, \
+  curl_util.c \
+  certutils.c \
+  ias.c \
+  net.c \
+  pkcs7.c \
+  sscep.c \
+  ) \
+  $(addprefix src/management-client/, \
+  qeo_mgmt_urls.c \
+  qeo_mgmt_cert_parser.c \
+  qeo_mgmt_cert_util.c \
+  qeo_mgmt_curl_util.c \
+  qeo_mgmt_json_util.c \
+  qeo_mgmt_util.c \
+  cnhelper.c \
+  csr.c \
+  qeo_mgmt_client.c \
+  qeo_mgmt_fwd.c \
+  )
+
+### Test programs ###
+ 
+qeo-management-client.PROGRAMS += client_app
+
+qeo-management-client.client_app_LDADD         := $(qeo-management-client_LIBS)
+qeo-management-client.client_app_LOCALDEFINES  := $(qeo-management-client_CFLAGS) -Wall -Werror
+qeo-management-client.client_app_LOCALINCLUDES := src/ test/client_app/ $(qeo-management-client_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.client_app_SRCS          := $(addprefix test/client_app/, \
+  client_app.c \
+  keygen.c \
+  )
+  
+qeo-management-client.LIBRARIES += libutclient libutsscepmock libutcertparser libuturldiscovery libutforwarders
+
+# Treat libutclient and libutsscepmock as shared libs (instead of apps) on x86_64 buildhosts.
+#   The infix "shared" will be added to the path of the object file
+#   Advantage: they will be built with option -fPIC
+#   Sideffect: no coverage tests.
+ifeq ($($(E)_SHARED_DIR_INFIX),)
+  $(E)_CLIENT_APP_LOAN:=client_app:
+endif
+
+qeo-management-client.libutclient_SRCS          := $(addprefix test/unittest/suite_client/, client.c) \
+                                                   $(addprefix $($(E)_CLIENT_APP_LOAN)test/client_app/, keygen.c) \
+                                                   $(addprefix test/unittest/mocks/curl/, curl_easy_mock.c)
+qeo-management-client.libutclient_LOCALINCLUDES := src/ test/client_app test/unittest/mocks/curl test/unittest/suite_client $(qeo-management-client_INCLUDES) $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.libutclient_LOCALDEFINES  := -DDEBUG -Wall -Werror
+qeo-management-client.libutclient_LDADD         := $(qeo-management-client_LIBS)
+
+qeo-management-client.libutsscepmock_SRCS          := $(addprefix test/unittest/suite_sscepclient/, sscepclient.c certstore.c) \
+                                                   $(addprefix $($(E)_CLIENT_APP_LOAN)test/client_app/, keygen.c) \
+                                                   $(addprefix test/unittest/mocks/sscep/, sscep_mock.c) \
+                                                   $(addprefix test/unittest/mocks/url_discovery/, url_discovery_mock.c) \
+                                                   $(addprefix libqeomgmtclient:src/management-client/, qeo_mgmt_util.c cnhelper.c csr.c qeo_mgmt_client.c qeo_mgmt_fwd.c qeo_mgmt_cert_util.c qeo_mgmt_json_util.c qeo_mgmt_curl_util.c) \
+                                                   $(addprefix libqeomgmtclient:src/libsscep/, curl_util.c)
+
+qeo-management-client.libutsscepmock_LOCALINCLUDES := src/libsscep/ src/management-client/ test/client_app test/unittest/mocks/sscep test/unittest/suite_sscepclient $(qeo-management-client_INCLUDES) $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.libutsscepmock_LOCALDEFINES  := -DDEBUG -Wall -Werror
+qeo-management-client.libutsscepmock_LDADD         := $(qeo-c-util_LIBS) $(openssl_LIBS) $(libcurl_LIBS) $(jansson_LIBS)
+
+qeo-management-client.libutcertparser_SRCS          := $(addprefix test/unittest/suite_cert_parser/, cert_parser.c certstore.c) \
+                                                    $(addprefix libqeomgmtclient:src/management-client/, qeo_mgmt_cert_parser.c qeo_mgmt_cert_util.c)
+qeo-management-client.libutcertparser_LOCALINCLUDES := test/client_app test/unittest/mocks/curl test/unittest/suite_client $(qeo-management-client_INCLUDES) $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES)
+qeo-management-client.libutcertparser_LOCALDEFINES  := -DDEBUG -Wall -Werror
+qeo-management-client.libutcertparser_LDADD         := $(qeo-c-util_LIBS) $(openssl_LIBS) 
+
+
+qeo-management-client.libuturldiscovery_SRCS          := $(addprefix test/unittest/suite_url/, url_discovery.c json_messages.c) \
+                                                    $(addprefix libqeomgmtclient:src/management-client/, qeo_mgmt_client.c qeo_mgmt_util.c qeo_mgmt_cert_util.c qeo_mgmt_curl_util.c qeo_mgmt_urls.c qeo_mgmt_json_util.c qeo_mgmt_fwd.c csr.c cnhelper.c) \
+                                                    $(addprefix test/unittest/mocks/sscep/, sscep_mock.c) \
+                                                    $(addprefix test/unittest/mocks/curl/, curl_easy_mock.c) \
+                                                    $(addprefix libqeomgmtclient:src/libsscep/, curl_util.c)
+qeo-management-client.libuturldiscovery_LOCALINCLUDES := src/management-client/ src/libsscep/ test/unittest/mocks/curl test/unittest/suite_url $(qeo-management-client_INCLUDES) $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.libuturldiscovery_LOCALDEFINES  := -DDEBUG -Wall -Werror
+qeo-management-client.libuturldiscovery_LDADD         := $(qeo-c-util_LIBS) $(openssl_LIBS) $(jansson_LIBS) 
+
+qeo-management-client.libutforwarders_SRCS          := $(addprefix test/unittest/suite_fwd/, fwd.c json_messages.c) \
+                                                    $(addprefix test/unittest/mocks/curl/, curl_easy_mock.c)
+qeo-management-client.libutforwarders_LOCALINCLUDES := test/unittest/mocks/curl test/unittest/suite_fwd $(qeo-management-client_INCLUDES) $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES) $(jansson_INCLUDES)
+qeo-management-client.libutforwarders_LOCALDEFINES  :=  -Wall -Werror -DDEBUG
+qeo-management-client.libutforwarders_LDADD         := $(qeo-management-client_LIBS) $(qeo-c-util_LIBS) $(jansson_LIBS) 
+
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

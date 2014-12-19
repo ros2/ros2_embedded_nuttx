@@ -1,0 +1,8 @@
+# Initialize JAR to the first element inside $(COMPONENT).JARS_RUN
+JAR:=$(word 1, $($(COMPONENT).JARS_RUN))
+
+# Remove $(JAR) from $(COMPONENT).JARS_RUN
+$(COMPONENT).JARS_RUN:=$(filter-out $(JAR), $($(COMPONENT).JARS_RUN))
+
+# Include Makefile_lib to generate the lib build commands
+include $(projectdir/)build/Makefile_jar

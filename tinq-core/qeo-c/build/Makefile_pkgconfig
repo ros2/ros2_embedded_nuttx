@@ -1,0 +1,19 @@
+FIRST_PKGCONFIG:=$(firstword $(TRY_PKGCONFIG))
+TRY_PKGCONFIG:=$(filter-out $(FIRST_PKGCONFIG),$(TRY_PKGCONFIG))
+
+ifeq ($(shell pkg-config --exists $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) && echo OK),OK)    
+$(shell echo Did not find a component Makefile for $(FIRST_PKGCONFIG), but found pkg-config info for $(FIRST_PKGCONFIG) >&2)
+ALL_COMPONENTS:=$(ALL_COMPONENTS) $(FIRST_PKGCONFIG)
+$(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_INCLUDES:=$(patsubst -I%,%,$(filter -I%,$(shell pkg-config $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) --cflags)))
+$(firstword $(subst :,_,$(FIRST_PKGCONFIG)))_INCLUDES:=$(patsubst -I%,%,$(filter -I%,$(shell pkg-config $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) --cflags)))
+$(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_CFLAGS:=$(filter-out -I%,$(shell pkg-config $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) --cflags))
+$(firstword $(subst :,_,$(FIRST_PKGCONFIG)))_CFLAGS:=$($(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_CFLAGS)
+$(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_LIBS:=$(shell pkg-config $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) --libs)
+$(firstword $(subst :,_,$(FIRST_PKGCONFIG)))_LIBS:=$(shell pkg-config $(firstword $(subst :, ,$(FIRST_PKGCONFIG))) --libs)
+override $(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_PKGCONFIG_LIBS:=@$(firstword $(subst :, ,$(FIRST_PKGCONFIG)))
+override $(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_PKGCONFIG_CFLAGS:=@$(firstword $(subst :, ,$(FIRST_PKGCONFIG)))
+override $(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_INSTALL:=true
+override $(firstword $(subst :,_,$(FIRST_PKGCONFIG)))_INSTALL:=true
+override $(firstword $(subst :, ,$(FIRST_PKGCONFIG)))_DEVEL_INSTALL:=true
+override $(firstword $(subst :,_,$(FIRST_PKGCONFIG)))_DEVEL_INSTALL:=true
+endif

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+set -u
+
+make -C $(dirname $0)/project -f Makefile_component clean
+
+exit 0

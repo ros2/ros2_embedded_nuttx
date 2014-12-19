@@ -1,0 +1,17 @@
+ifndef readlink
+readlink=$(shell if readlink --version >/dev/null 2>/dev/null; then $(echo) readlink; fi)
+endif
+
+ifeq ($(readlink),)
+readlink=$(shell if greadlink --version >/dev/null 2>/dev/null; then $(echo) greadlink; fi)
+endif
+
+ifeq ($(readlink),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working readlink in the path. This is required if you do not specify projectdir. Provide readlink on the commandline (e.g. readlink=/bin/readlink).") 
+$(shell $(echo) "Could not find a working readlink in the path. This is required if you do not specify projectdir. Provide readlink on the commandline (e.g. readlink=/usr/bin/readlink)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

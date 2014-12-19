@@ -1,0 +1,13 @@
+ifndef ls
+ls=$(shell if ls > /dev/null 2>/dev/null; then $(echo) ls; fi)
+endif
+
+ifeq ($(ls),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working ls in the path. This is required if you do not specify projectdir. Provide ls on the commandline (e.g. ls=/bin/ls).") 
+$(shell $(echo) "Could not find a working ls in the path. This is required if you do not specify projectdir. Provide ls on the commandline (e.g. ls=/bin/ls)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

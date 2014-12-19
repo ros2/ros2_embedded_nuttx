@@ -1,0 +1,126 @@
+## FILE: Makefile_java
+#
+# Description: This Makefile will be included if a component defines $(COMPONENT)_JAVA=1
+#
+
+
+NEEDED_TOOLS+=ant java
+
+ifeq ($(E),KLOCWORK)
+NEEDED_TOOLS+=kwant
+endif
+
+include $(projectdir/)build/Makefile_anttasks
+
+ifeq ($(E),KLOCWORK)
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar: CLASSES_ANT=$(kwant) -o $@.kw
+else
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar: CLASSES_ANT=$(ant)
+endif
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar: JAVA_COVERAGE:=$($(COMPONENT)_COVERAGE)
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar: override COMPONENT:=$(COMPONENT)
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar: $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $(shell find $($(COMPONENT)_COMP_DIR)/src/java -type f -name '*.java' 2> /dev/null)
+	$(CLASSES_ANT) -f $(projectdir/)build/ant/compile.xml \
+		       -Djava.dir=$($(patsubst %_classes.jar,%,$(@F))_COMP_DIR/)src/java \
+		       -Dclass.dir=$($(patsubst %_classes.jar,%,$(@F))_PREFIX/)classes \
+		       -Dclasspath="$(subst $(space),:,$(strip $(filter %.jar,$^) $(addprefix $($(patsubst %_classes.jar,%,$(@F))_COMP_DIR)/,$(filter-out /%,$($(patsubst %_classes.jar,%,$(@F))_CLASSPATH))) $(filter /%,$($(patsubst %_classes.jar,%,$(@F))_CLASSPATH))))" \
+		       -Ddestination.jar=$@ \
+		       -Dcoverage=$(JAVA_COVERAGE)
+
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_junit_classes.jar: $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_CLASSES) $(shell find $($(COMPONENT)_COMP_DIR)/test/junit -type f -name '*.java' 2> /dev/null)
+	$(ant) -f $(projectdir/)build/ant/compile.xml \
+		-Djava.dir=$($(patsubst %_junit_classes.jar,%,$(@F))_COMP_DIR/)test/junit \
+		-Dclass.dir=$($(patsubst %_junit_classes.jar,%,$(@F))_PREFIX/)junitclasses \
+		-Dclasspath="$(subst $(space),:,$(strip $(filter %.jar,$^) $(addprefix $($(patsubst %_junit_classes.jar,%,$(@F))_COMP_DIR)/,$(filter-out /%,$($(patsubst %_junit_classes.jar,%,$(@F))_CLASSPATH))) $(filter /%,$($(patsubst %_junit_classes.jar,%,$(@F))_CLASSPATH))))" \
+		-Ddestination.jar=$@ \
+		-Dcoverage=
+
+$($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.list: $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar
+	unzip $^ *.class -d $(@D)/tmp
+	cd $(@D)/tmp && for x in $$(find . -type f -name "*.class" | cut -c3-) ; \
+	do echo -n "+$$(dirname $$x | tr '/' '.').$$(basename $$x .class)," ; done > $@
+	rm -rf $(@D)/tmp
+
+$(COMPONENT)_TEST_PARTS_INSTALL += $(COMPONENT)_classes.list@$(datadir/)test/class.list
+
+$($(COMPONENT)_PREFIX/)testclasses_unpacked: $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_CLASSES) $($(COMPONENT)_PREFIX/)$(COMPONENT)_junit_classes.jar $(ANT_TASK_OUT_DIR)/anttasks_build
+	$(ant) -f $(projectdir/)build/ant/unpack.xml \
+		-Dtasks.jar=$(ANT_TASK_JAR) \
+		-Dclasses="$(subst $(space),:,$(filter %.jar,$^))" \
+		-Dclass.dir="$(patsubst %_unpacked,%,$(@))" && touch $@
+ 
+$($(COMPONENT)_PREFIX/)mainclasses_unpacked: $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $(ANT_TASK_OUT_DIR)/anttasks_build
+	$(ant) -f $(projectdir/)build/ant/unpack.xml \
+		-Dtasks.jar=$(ANT_TASK_JAR) \
+		-Dclasses="$(subst $(space),:,$(filter %.jar,$^))" \
+		-Dclass.dir="$(patsubst %_unpacked,%,$@)" && touch $@
+ifeq ($(E),KLOCWORK)
+	cat $(addsuffix .kw,$(filter %_classes.jar,$<)) > $@.kw
+endif
+
+# javadoc targets
+##< 
+ifeq ($(COMPONENT_BUILD_MANAGER),$(COMPONENT))
+ifeq ($(E),$(ORIGE))
+.PHONY: javadoc
+javadoc             : $(COMPONENT)_javadoc
+endif
+endif
+
+
+#.PHONY: $(COMPONENT)_javadoc
+$(COMPONENT)_javadoc: JAVADOC_COMPONENT:=$(COMPONENT)
+$(COMPONENT)_javadoc: JAVADOC_OUTPUT_DIR:=$($(COMPONENT)_COMP_DIR)/../metadata/documentation/
+$(COMPONENT)_javadoc: $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $(shell find $($(COMPONENT)_COMP_DIR)/src/java -type f -name '*.java' 2> /dev/null)
+	$(ant) -f $(projectdir/)build/ant/javadoc.xml \
+		-Doutput.dir="$(JAVADOC_OUTPUT_DIR)" \
+		-Dinclude.list="$($(JAVADOC_COMPONENT)_PACKAGES)" \
+		-Dexclude.list="$($(JAVADOC_COMPONENT)_PACKAGES)" \
+		-Djava.dir="$($(JAVADOC_COMPONENT)_COMP_DIR/)src/java" \
+		-Dclasses="$(subst $(space),:,$(filter %.jar,$^))" \
+		-Ddoc.title="$(JAVADOC_COMPONENT)"
+
+##>
+
+# checkstyle targets
+##<
+ifeq ($(COMPONENT_BUILD_MANAGER),$(COMPONENT))
+ifeq ($(E),$(ORIGE))
+.PHONY: checkstyle
+checkstyle             : $(COMPONENT)_checkstyle
+endif
+endif
+
+NEEDED_TOOLS += checkstyle
+
+$(COMPONENT)_checkstyle: CHECKSTYLE_COMPONENT:=$(COMPONENT)
+$(COMPONENT)_checkstyle: $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) 
+#$(COMPONENT)_checkstyle: $($(COMPONENT)_PREFIX/)$(COMPONENT)_junit_classes.jar $($(COMPONENT)_PREFIX/)$(COMPONENT)_classes.jar $$($(COMPONENT)_$(E)_CT_NEEDED_CLASSES) $$($(COMPONENT)_$(E)_CT_NEEDED_TEST_CLASSES)
+	$(ant) -f $(projectdir/)build/ant/checkcodestyle.xml \
+		-Doutput.dir="$($(CHECKSTYLE_COMPONENT)_PREFIX/)" \
+		-Dclasses="$(subst $(space),:,$(filter %.jar,$^))" \
+		-Djava.src.dir="$($(CHECKSTYLE_COMPONENT)_COMP_DIR/)src/java" \
+		-Dcheckstyle.path=$(checkstyle_CLASSES)
+
+#		-Djava.test.dir="$($(CHECKSTYLE_COMPONENT)_COMP_DIR/)test/junit" \
+
+
+.PHONY: $(COMPONENT)_recursive_java_tdw_install
+$(COMPONENT)_recursive_java_tdw_install: $(COMPONENT)_$(E)_recursive_java_tdw_install
+
+#all jars needed for a tdw_install
+$(COMPONENT)_$(E)_JARS_java_tdw_install = $(patsubst %,$(COMPONENT)_$(E)_%_java_tdw_install,$($(COMPONENT).JARS))
+
+.PHONY: $(COMPONENT)_$(E)_recursive_java_tdw_install
+$(COMPONENT)_$(E)_recursive_java_tdw_install: override COMPONENT:=$(COMPONENT)
+$(COMPONENT)_$(E)_recursive_java_tdw_install: override E:=$(E)
+$(COMPONENT)_$(E)_recursive_java_tdw_install: $$($(COMPONENT)_$(E)_JARS_java_tdw_install)
+
+$($(COMPONENT)_PREFIX/)$(COMPONENT)-all-src.jar : override COMPONENT:=$(COMPONENT)
+$($(COMPONENT)_PREFIX/)$(COMPONENT)-all-src.jar : $($(COMPONENT)_PREFIX/)mainclasses_unpacked
+	rm -f $@
+	$(foreach c,$($(COMPONENT)_$(E)_ALL_CT_DEPS_SHORT),$(if $($(c)_JAVA), cd $($(c)_COMP_DIR/)src/java && zip -qru $@ . && )) true
+
+##> 
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

@@ -1,0 +1,22 @@
+[meta]
+version=1.0
+seqnr=16
+[uid:120]
+*=rw
+org::qeo::system::*=rw
+[uid:108]
+*=rw
+topic=r<uid:105>w<uid:108>
+org::qeo::system::*=rw
+[uid:11f]
+org::qeo::sample::simplechat::ChatMessage=w<uid:105; uid:11f> r<uid:105;uid:11f>
+#*=rw
+org::qeo::system::*=rw
+[uid:105]
+*=rw
+
+org::qeo::system::*=rw
+[rid:4c759526656cfa6c]
+org::qeo::system::Policy=rw
+
+

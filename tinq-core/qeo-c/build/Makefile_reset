@@ -1,0 +1,10 @@
+TO_RESET:=$(word 1, $(RESET_COMPONENTS))
+RESET_COMPONENTS:=$(filter-out $(TO_RESET),$(RESET_COMPONENTS))
+# Unset <component>_PARTS. From this point on, you should really use
+# $(COMPONENT)_$(E)_PARTS.
+$(TO_RESET)_PARTS:=
+# Unset <component>_DEVEL_INSTALL. From this point on, you should really use
+# $(COMPONENT)_$(E)_DEVEL_INSTALL.
+$(TO_RESET)_DEVEL_INSTALL:=
+$(TO_RESET)_PREFIX:=
+$(TO_RESET)_BUILT_HEADERS :=

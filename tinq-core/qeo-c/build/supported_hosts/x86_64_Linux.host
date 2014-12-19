@@ -1,0 +1,4 @@
+# All derived objects are output to this directory
+OUTPUT_PREFIX    := $(projectdir/)output
+
+HOST_NEEDS_PIC := 1

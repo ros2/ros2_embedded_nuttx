@@ -1,0 +1,80 @@
+qeo_0.1 {
+global:
+    /* qeocore/factory.h (qeo-c-core) */
+    qeocore_factory_get_realm_id;
+    qeocore_fwdfactory_new;
+    qeocore_fwdfactory_set_public_locator;
+    qeocore_fwdfactory_close;
+    qeocore_factory_refresh_policy;
+    /* qeocore/config.h (qeo-c-core) */
+    qeocore_parameter_set;
+    
+    /* qeo/factory.h (qeo-c-core) */
+    qeo_factory_create;
+    qeo_factory_create_by_id;
+    qeo_factory_close;
+    qeo_version_string;
+
+    /* api.h (qeo-c) */
+    qeo_factory_create_event_reader;
+    qeo_event_reader_close;
+    qeo_event_reader_policy_update;
+    qeo_factory_create_event_writer;
+    qeo_event_writer_close;
+    qeo_event_writer_write;
+    qeo_event_writer_policy_update;
+    qeo_factory_create_state_reader;
+    qeo_state_reader_close;
+    qeo_state_reader_foreach;
+    qeo_state_reader_policy_update;
+    qeo_factory_create_state_change_reader;
+    qeo_state_change_reader_close;
+    qeo_state_change_reader_policy_update;
+    qeo_factory_create_state_writer;
+    qeo_state_writer_close;
+    qeo_state_writer_write;
+    qeo_state_writer_remove;
+    qeo_state_writer_policy_update;
+    qeo_enum_value_to_string;
+    qeo_enum_string_to_value;
+
+    /* language_binding.c (qeo-c-core) */
+    qeo_policy_identity_get_uid;
+
+    /* device.h (qeo-c-util) */
+    qeo_platform_get_device_info;
+    qeo_platform_free_device_info;
+
+    /* dds_seq.h (dds) */
+    dds_seq_require;
+    dds_seq_cleanup;
+    dds_seq_reset;
+    dds_seq_append;
+    dds_seq_prepend;
+    dds_seq_insert;
+    dds_seq_replace;
+    dds_seq_remove_first;
+    dds_seq_remove_last;
+    dds_seq_remove;
+    dds_seq_every;
+    dds_seq_from_array;
+    dds_seq_to_array;
+    dds_seq_copy;
+    dds_seq_equal;
+
+    /* HACK FOR SDK: 
+     * It seems not possible to use multiple version scripts..
+     * Therefore we add the few symbols needed for qeo-c-json-async HERE.
+     * In any case, it won't harm...
+     */
+    qeo_json_async_*;
+
+    /* generated types */
+    org_qeo_system_DeviceId_type;
+    org_qeo_system_DeviceInfo_type;
+    org_qeo_UUID_type;
+
+local:
+    *;
+};
+

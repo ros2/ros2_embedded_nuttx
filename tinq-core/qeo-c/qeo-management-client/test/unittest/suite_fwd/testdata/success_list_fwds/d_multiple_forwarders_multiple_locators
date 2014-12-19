@@ -1,0 +1,54 @@
+{
+  "forwarders": [ 
+    {
+      "id": "1",
+      "locators": [
+        {
+          "type": "TCPv4",
+          "address": "212.118.224.153",
+          "port": 7400
+        }, 
+        {
+          "type": "UDPv4",
+          "address": "212.118.224.152",
+          "port": 111
+        }
+      ] 
+    }, 
+    {
+      "id": "2",
+      "locators": [
+        {
+          "type": "UDPv6",
+          "address": "fe80::250:bfff:feb7:c61e",
+          "port": 8080
+        }
+      ] 
+    }, 
+    {
+      "id": "3",
+      "locators": [
+        {
+          "type": "TCPv6",
+          "address": "fe80::250:bfff:feb7:c61d",
+          "port": 7400
+        }
+      ] 
+    }, 
+    {
+      "id": "4",
+      "locators": [
+        {
+          "type": "UDPv6",
+          "address": "fe80::250:bfff:feb7:c61d",
+          "port": 8080
+        },
+        {
+          "type": "TCPv4",
+          "address": "212.118.224.153",
+          "port": 100
+        } 
+      ] 
+    }
+  ]
+}

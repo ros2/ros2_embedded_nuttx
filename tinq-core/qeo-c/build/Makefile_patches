@@ -1,0 +1,76 @@
+# if PATCHES_CONFIG_PATH exists, read the path to the patch directory from this file,
+# otherwise, keep the old behaviour ($(projectdir/)thirdparty/thomson/patches which symlinks to /vobs/import/thomson/patches)
+PATCHES_CONFIG_PATH:=$(projectdir/)tools/internal/buildconfig/patches.conf
+# try to include the symbol COMPONENT_PATCH_DIR_OVERRIDE defined in PATCHES_CONFIG_PATH, if the file is not present, 
+# the variable COMPONENT_PATCH_DIR_OVERRIDE will be empty
+sinclude $(PATCHES_CONFIG_PATH) 
+ifneq ($(COMPONENT_PATCH_DIR_OVERRIDE),) #file exists, symbol is defined
+  ifneq ($(wildcard $(COMPONENT_PATCH_DIR_OVERRIDE)),) #if directory specified by COMPONENT_PATCH_DIR_OVERRIDE exists
+    COMPONENT_PATCH_DIR:=$(COMPONENT_PATCH_DIR_OVERRIDE)
+  else
+    $(shell echo "Patch directory specified in $(PATCHES_CONFIG_PATH) does not exist, no patches will be applied!" >&2)
+	die
+  endif
+else
+  COMPONENT_PATCH_DIR:=$(projectdir/)thirdparty/thomson/patches
+endif
+
+# If a component patch dir has been set, and patches are found, this Makefile
+# is responsible for generating patched components in the output directory and
+# modifying the component search path
+
+ifdef COMPONENT_PATCH_DIR
+COMPONENT_PATCH_SEARCH_PATH:=*-%_*.patch
+COMPONENT_PATCH_SEARCH_PATH:=$(addprefix $(COMPONENT_PATCH_DIR)/,$(COMPONENT_PATCH_SEARCH_PATH))
+$(COMPONENT)_PATCHES:=$(sort $(wildcard $(subst %,$(COMPONENT),$(COMPONENT_PATCH_SEARCH_PATH))))
+NEEDED_PATCHED_COMPONENTS:=$(foreach comp,$(foreach word,$(NEEDED_COMPONENTS),$(word 1, $(subst :, ,$(word)))),$(sort $(patsubst %,$(comp),$(wildcard $(subst %,$(comp),$(COMPONENT_PATCH_SEARCH_PATH))))))
+
+ifneq ($(sort $(NEEDED_PATCHED_COMPONENTS)),)
+$(shell (echo; echo "Patches applied to component(s):" $(NEEDED_PATCHED_COMPONENTS); echo) >&2)
+
+# The actual patching work is done by Makefile_component_patched. The code
+# below generates this makefile.
+
+$(shell for codi in $(foreach c, $(NEEDED_PATCHED_COMPONENTS), $c:$(firstword $(foreach p,$(COMPONENT_SEARCH_PATH),$(wildcard $(subst %,$(c), $(p))))));\
+        do\
+             c=`echo $$codi | sed "s/:.*//g"`;\
+             f=`echo $$codi | sed "s/.*://g"`;\
+             d=`dirname $$f`;\
+             mkdir -p $(OUTPUT_PREFIX)/patched_components/$$c;\
+             if [ ! -e $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched ];\
+             then \
+                 echo 'ifneq ($$($$('$${c}'_INCLUDED)),1)' > $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo 'ifndef COMPONENT_DEFAULT_PATCH_LEVEL' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo 'COMPONENT_DEFAULT_PATCH_LEVEL:=2' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo 'endif' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo 'ifeq ($$('$$c'_PATCH_LEVEL),)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo $$c'_PATCH_LEVEL:=$$(COMPONENT_DEFAULT_PATCH_LEVEL)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo 'endif'  >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+		 echo $${c}'_PATCHES:=$$(sort $$(wildcard $$(subst %,'$${c}',$$(COMPONENT_PATCH_SEARCH_PATH))))'  >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+		 echo $${c}'_OLD_PATCHES:=$$(shell cat $(OUTPUT_PREFIX)/patched_components/'$$c'/applied_patches 2>/dev/null)'  >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+		 echo $${c}'_CHANGED_FILES:=$$(shell find '$$d' $$('$${c}'_PATCHES) -newer $(OUTPUT_PREFIX)/patched_components/'$$c'/applied_patches 2>/dev/null)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+		 echo 'ifneq ($$(filter-out $$('$${c}'_OLD_PATCHES),$$('$${c}'_PATCHES))$$(filter-out $$('$${c}'_PATCHES),$$('$${c}'_OLD_PATCHES))$$('$${c}'_CHANGED_FILES),)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo '$$(shell (mv $(OUTPUT_PREFIX)/patched_components/'$$c'/Makefile_component_patched $(OUTPUT_PREFIX)/patched_components/'$$c'_Makefile_component_patched; rm -rf $(OUTPUT_PREFIX)/patched_components/'$$c' ; mkdir -p $(OUTPUT_PREFIX)/patched_components/'$$c'; tar -chf - -C '$$d' . | tar -xf - -C $(OUTPUT_PREFIX)/patched_components/'$$c'; mv $(OUTPUT_PREFIX)/patched_components/'$$c'_Makefile_component_patched $(OUTPUT_PREFIX)/patched_components/'$$c'/Makefile_component_patched) >&2)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo '$$(shell ABORT=0; cd $(OUTPUT_PREFIX)/patched_components/'$$c' && for i in $$('$${c}'_PATCHES); do echo "!     Apply: $$$$i"; echo "!" ; patch --dry-run -s -f -p$$('$${c}_PATCH_LEVEL') < $$$$i > /dev/null ; if [ $$$$? -ne 0 ]; then ABORT=1; fi; patch -f -p$$('$${c}_PATCH_LEVEL') < $$$$i | sed "s/^/!            /g" ; echo "!" ; done >&2; if [ $$$$ABORT -eq 1 ] ; then echo ABORT; fi)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo '$$(shell echo $$('$${c}'_PATCHES) > $(OUTPUT_PREFIX)/patched_components/'$$c'/applied_patches)' >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo "endif" >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo "" >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo "include $(OUTPUT_PREFIX)/patched_components/$$c/"`basename $$f` >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+                 echo "endif" >> $(OUTPUT_PREFIX)/patched_components/$$c/Makefile_component_patched;\
+             fi;\
+        done >&2)
+
+# Adapt the component search path
+
+COMPONENT_SEARCH_PATH:=$(OUTPUT_PREFIX)/patched_components/%/Makefile_component_patched $(filter-out $(OUTPUT_PREFIX)/patched_components/%/Makefile_component_patched, $(COMPONENT_SEARCH_PATH))
+
+MAKEFILES_MUST_BE_REMOVED:=$(filter $(patsubst %,$(OUTPUT_PREFIX)/patched_components/%/Makefile_component_patched,$(foreach word,$(NEEDED_COMPONENTS),$(word 1, $(subst :, ,$(word))))),$(filter-out $(patsubst %,$(OUTPUT_PREFIX)/patched_components/%/Makefile_component_patched,$(NEEDED_PATCHED_COMPONENTS)),$(wildcard $(OUTPUT_PREFIX)/patched_components/*/Makefile_component_patched)))
+
+ifneq ($(MAKEFILES_MUST_BE_REMOVED),)
+$(shell echo "Must remove $(MAKEFILES_MUST_BE_REMOVED), because these component are no longer patched" >&2)
+$(shell echo "" >&2)
+$(shell rm -rf $(dir $(MAKEFILES_MUST_BE_REMOVED)) >&2)
+endif
+
+endif
+endif

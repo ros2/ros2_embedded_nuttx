@@ -1,0 +1,14 @@
+ifndef echo
+echo=$(shell if echo >/dev/null 2>/dev/null; then echo echo; fi) 
+endif 
+
+ifeq ($(echo),)
+echo=$(shell if /bin/echo >/dev/null 2>/dev/null; then /bin/echo /bin/echo; fi) 
+endif
+
+ifeq ($(echo),)
+$(error Could not find a working echo. Provide the full path to echo on the command line (echo=/path/to/echo). Aborting...)
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

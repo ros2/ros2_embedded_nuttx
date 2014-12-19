@@ -1,0 +1,23 @@
+genhtml_COMPONENT:=lcov
+geninfo_COMPONENT:=lcov
+gcovr_COMPONENT:=gcovr
+ant_COMPONENT:=ant
+javac_COMPONENT:=jdk
+java_COMPONENT:=jdk
+checkstyle_COMPONENT:=checkstyle
+rebusCodegenC.sh_COMPONENT:=rebusCodegenC
+rebusCodegenCScripts.sh_COMPONENT:=rebusCodegenC
+rebusCodegenCPP.sh_COMPONENT:=rebusCodegenRPC
+codegenProvisDefaults.sh_COMPONENT:=rebusCodegen
+rgcCodegen.sh_COMPONENT:=configAdmin
+tputool_COMPONENT:=tputool
+kwcheck_COMPONENT:=klocwork
+kwant_COMPONENT:=klocwork
+kwinject_COMPONENT:=klocwork
+coredx_ddl_COMPONENT:=ddsCodegen
+doxygen_COMPONENT:=doxygen
+
+# Temp solution (vandenheuvelm)
+gcovr:=/home/users/cpeqeo/tools/bin/gcovr
+kwinject:=/ap/klocwork/client/latest/bin/kwinject
+kwcheck:=/ap/klocwork/client/latest/bin/kwcheck

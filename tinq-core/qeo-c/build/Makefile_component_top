@@ -1,0 +1,1186 @@
+## FILE: Makefile_component_top
+#
+# Description: The first Makefile included for each component Makefile.
+#
+
+# Preserve original makefile variable as clearmake 7.0.1 will erroneously
+# change this variable if it encounters an Makefile include that includes
+# multiple files
+
+MAKEFILE_ORIG:=$(MAKEFILE)
+
+# If the core of the build system has not yet been intialized, initialize it
+# now.
+ifndef MAKEFILE_INITIALIZED
+include $(projectdir/)build/Makefile_init
+endif
+
+# COMPONENT is specified in the format group.subgroup.component
+# The following code resets COMPONENT to component, and stores group.subgroup
+# in component_GROUP
+##<
+ifeq ($(findstring .,$(COMPONENT)),.)
+REAL_COMPONENT:=$(word $(words $(subst ., ,$(COMPONENT))),$(subst ., ,$(COMPONENT)))
+$(REAL_COMPONENT)_GROUP:=$(patsubst %.$(REAL_COMPONENT),%,$(COMPONENT))
+$(REAL_COMPONENT)_$(E)_GROUP:=$($(REAL_COMPONENT)_GROUP)
+override COMPONENT:=$(REAL_COMPONENT)
+endif
+##>
+
+# If a COMPONENT_BUILD_MANAGER was not yet defined, it means a component
+# Makefile was called standalone. In this case, we set the
+# COMPONENT_BUILD_MANAGER to the component. The effect of this is that Makefile
+# last will be included at the end of the Makefile_bot included in the
+# component Makefile.
+ifndef COMPONENT_BUILD_MANAGER
+  COMPONENT_BUILD_MANAGER:=$(COMPONENT)
+
+  # Skip testing (and the inclusion of test dependencies) unless a "test" target
+  # was given on the commandline.
+  ifneq ($(findstring test,$(MAKECMDGOALS)),test)
+  ifneq ($(findstring recursive_all_install,$(MAKECMDGOALS)),recursive_all_install)
+    SKIP_TESTING=1
+  endif
+  endif
+  
+  ifeq ($(findstring coverage,$(MAKECMDGOALS)),coverage)
+    COVERAGE:=1
+  endif
+
+  ifeq ($(findstring gcovr,$(MAKECMDGOALS)),gcovr)
+    COVERAGE:=1
+  endif
+
+  # If we are component build manager, we assume $(MAKEFILE) is set to toplevel
+  # Makefile = the build managers Makefile
+  ifneq ($(patsubst %clearmake,clearmake,$(MAKE)),clearmake)
+    # In GNU make 3.81 we have the name of the top level Makefile in the first
+    # word of MAKEFILE_LIST
+    MAKEFILE:=$(firstword $(MAKEFILE_LIST))
+    MAKEFILE_ABSOLUTE:=$(addprefix $(shell $(pwd))/,$(filter-out /%,$(MAKEFILE)))$(filter /%,$(MAKEFILE))
+    RESOLVED:=$(COMPONENT):$(E)@$(MAKEFILE_ABSOLUTE)
+    $(COMPONENT)_COMP_DIR:=$(patsubst %/,%,$(dir $(MAKEFILE_ABSOLUTE)))
+  else
+    # The clearmake case. Toplevel Makefile is in $(MAKEFILE_ORIG)
+    # 
+    # Furthermore, for generating source sdks this path must be absolute! So if
+    # the path does not start with a slash, we add the current directory to it.
+    # This is not needed for GNU make as generation of SDKs does not yet work
+    # in GNU make
+    MAKEFILE_ABSOLUTE:=$(addprefix $(shell $(pwd))/,$(filter-out /%,$(MAKEFILE_ORIG)))$(filter /%,$(MAKEFILE_ORIG))
+    $(COMPONENT)_COMP_DIR:=$(patsubst %/,%,$(dir $(MAKEFILE_ABSOLUTE)))
+    RESOLVED:=$(COMPONENT):$(E)@$(MAKEFILE_ABSOLUTE)
+  endif
+# If COMPONENT_BUILD_MANAGER was defined we came here through
+# Makefile_include_component. It will have set $(RESOLVE_PATH_$(words
+# $(INC_DEPTH))), and we use it to find out the COMP_DIR
+else
+  $(COMPONENT)_COMP_DIR:=$(shell $(readlink) -f $(firstword $(shell ls -d $(subst &,$(HOSTMACHINE_CAPS),$(subst @,$(E),$(patsubst %/,%,$(dir $(patsubst %,$(RESOLVE_PATH_$(words $(INC_DEPTH))),$(COMPONENT)))))) 2>/dev/null)))
+endif
+
+# Scripts can use this path so we need to export it
+export $(COMPONENT)_COMP_DIR
+
+$(COMPONENT)_COMP_DIR/:=$($(COMPONENT)_COMP_DIR)/
+
+ifndef MAKE_SILENT_COMPONENTS
+ifneq ($($(COMPONENT)_GROUP),)
+$(shell $(echo) Component: $($(COMPONENT)_GROUP).$(COMPONENT) for $(E) >&2)
+else
+$(shell $(echo) Component: $(COMPONENT) for $(E) >&2)
+endif
+endif
+
+ifeq ($(MAKE_DOES_NOT_NEED_EVAL),1)
+# Clearmake syntax
+$(shell echo '$(COMPONENT)_INCLUDED=$(COMPONENT)_$$(E)_INCLUDED')
+else
+# GNU make syntax
+$(eval $(shell echo '$(COMPONENT)_INCLUDED=$(COMPONENT)_$$(E)_INCLUDED'))
+endif
+
+# New define
+$(COMPONENT)_$(E)_INCLUDED:=1
+
+ifneq ($($(COMPONENT)_SUBMAKEFILES),)
+$(COMPONENT)_SUBMAKEFILES:=$(addprefix $($(COMPONENT)_COMP_DIR/),$($(COMPONENT)_SUBMAKEFILES))
+$(COMPONENT)_INSTALLS:=1
+include $($(COMPONENT)_SUBMAKEFILES)
+$(COMPONENT)_INSTALLS:=0
+endif
+ 
+ifneq ($($(COMPONENT)_SSUBMAKEFILES),)
+$(COMPONENT)_SSUBMAKEFILES:=$(addprefix $($(COMPONENT)_COMP_DIR/),$($(COMPONENT)_SSUBMAKEFILES))
+$(COMPONENT)_INSTALLS:=1
+sinclude $($(COMPONENT)_SSUBMAKEFILES)
+$(COMPONENT)_INSTALLS:=0
+endif
+ 
+# Build commands for components that have the same E as the one specified on
+# the commandline
+##<
+ifeq ($(E),$(ORIGE))
+# If E is ORIGE and COMPONENT_BUILD_MANAGER is COMPONENT, we are in
+# Makefile_top for the component that originated the build. For this component
+# we create shorthand rules
+##<
+ifeq ($(COMPONENT_BUILD_MANAGER),$(COMPONENT))
+
+### Build rules
+
+# default/all target.
+##<
+$(call addHelp,all,\
+  The default target: Build rule used to trigger a build of all production@\
+  parts of the component from which the build was initiated.,1._Build_Commands)
+
+.PHONY: all
+all: $(COMPONENT)_default
+# default is provided for legacy reasons
+.PHONY: default
+default: $(COMPONENT)_default
+##>
+# test target. 
+##<
+$(call addHelp,test,\
+  Build rule used to trigger a build of all production and test parts of the@\
+  component from which the build was initiated.,1._Build_Commands)
+.PHONY: test
+test: $(COMPONENT)_$(E)_test
+##>
+# docs target.
+##<
+$(call addHelp,docs,\
+  Build rule used to trigger a build of all documentation parts of the@\
+  component from which the build was initiated.,1._Build_Commands)
+.PHONY: docs
+docs: $(COMPONENT)_docs
+##>
+
+### Clean rules
+
+# clean target. See Makefile_clean for the implementation
+##<
+$(call addHelp,clean,\
+  Clean rule that will remove all the output created for the component from@\
+  which the build was initiated. The implementation is very simple: it will@\
+  recursively remove the output directory for the component. Mind that this@\
+  rule does not clean the directories of components on which the top-level@\
+  component depends.,2._Clean_Commands)
+.PHONY: clean
+clean: $(COMPONENT)_clean
+##>	
+
+# clean_all target. See Makefile_clean for the implementation
+##<
+$(call addHelp,clean_all,\
+  Clean rule that will remove all the output created for the component from@\
+  which the build was initiated and also for its dependencies. The@\
+  implementation is very simple: it will recursively remove the complete@\
+  output directory. ,2._Clean_Commands)
+.PHONY: clean_all
+clean_all: $(COMPONENT)_clean_all
+##>
+
+### Run rules
+
+# test_run target. 
+##<
+$(call addHelp,test_run,\
+  Execute rule used to trigger a run of - a part of - the test code of the@\
+  component from which the build was initiated. This rule will trigger a@\
+  build of the test code$(comma) perform a recursive_test_install to a working@\
+  directory$(comma) enter that directory and execute a test command. What gets@\
+  executed is up to the component developer$(comma) but we assume it will start some@\
+  kind of unit tests. See the component Makefile documentation for a@\
+  description on how to specify a test run command.,4._Execute_Commands)
+.PHONY: test_run
+test_run: $(COMPONENT)_test_run
+##>
+# coverage_test_run target.
+##<
+# coverage_test_run has a tool-component dependency. Need to specify that here.
+.PHONY: coverage_test_run
+coverage_test_run_NEEDED_RULES:=$(COMPONENT)_coverage_test_run
+coverage_test_run             : $(COMPONENT)_coverage_test_run
+$(call addHelp,coverage_test_run,\
+  Execute rule used to trigger a run of - a part of - the test code of the@\
+  component from which the build was initiated and collect coverage information@\
+  along the way. This rule will trigger a build of the test code and the@\
+  production code$(comma) pass the required options to compile all these parts for@\
+  coverage information collection$(comma) perform a recursive_test_install to a working@\
+  directory of the compiled parts and all needed dependencies$(comma) enter that@\
+  directory and execute a test command. Which command gets executed is up to the@\
+  component developer$(comma) but we assume it will start some kind of unit@\
+  tests. See the component Makefile documentation for description on how to@\
+  specify a test run command. After the test has run$(comma) lcov will be called to@\
+  produce a coverage report.,4._Execute_Commands)
+##>
+##>
+# gcovr_test_run target.
+##<
+.PHONY: gcovr_test_run
+gcovr_test_run_NEEDED_RULES:=$(COMPONENT)_gcovr_test_run
+gcovr_test_run             : $(COMPONENT)_gcovr_test_run
+$(call addHelp,gcovr_test_run,\
+  Execute rule used to do the same as the coverage_test_run rule$(comma)@\
+  but the generated report will be an XML file in cobertura format.,4._Execute_Commands)
+##>
+
+### Install rules
+
+ifdef EMULATE_AUTOTOOLS
+# install target when we are emulating autotools. See Makefile_package for
+# definition of $(COMPONENT)_$(E)_install
+.PHONY: install
+install: $(COMPONENT)_$(E)_devel_install
+else
+# install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_install
+##<
+$(call addHelp,install,\
+  Install rule used to install all the production parts and elements of the@\
+  component from which the build was initiated to the directory DESTDIR. If@\
+  DESTDIR was not provided on the command line this rule will try to install@\
+  to the root directory /.,3._Install_Commands)
+.PHONY: install
+install: $(COMPONENT)_$(E)_install
+##>
+# devel_install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_devel_install
+##<
+$(call addHelp,devel_install,\
+ Install rule used to install all the production parts and the header files of@\
+ the component from which the build was initiated and a package config file@\
+ that describe how you can develop against this component to the directory@\
+ DESTDIR. If DESTDIR was not provided on the command line this rule will try@\
+ to install to the root directory /.,3._Install_Commands)
+.PHONY: devel_install
+devel_install: $(COMPONENT)_$(E)_devel_install
+##>
+# recursive_devel_install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_recursive_devel_install
+##<
+$(call addHelp,recursive_devel_install,\
+ Install rule used to install all the production parts and the header files of@\
+ the component from which the build was initiated and of all the components it@\
+ depends on and also package config files for each that describe how you can@\
+ develop against these components to the directory DESTDIR. If DESTDIR was not@\
+ provided on the command line this rule will try to install to the root@\
+ directory /.,3._Install_Commands)
+.PHONY: recursive_devel_install
+recursive_devel_install: $(COMPONENT)_$(E)_recursive_devel_install
+##>
+# recursive_devel_stripped_install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_recursive_devel_stripped_install
+##<
+$(call addHelp,recursive_devel_stripped_install,\
+ Install rule used to install all the production parts and the header files of@\
+ the component from which the build was initiated and of all the components it@\
+ depends on and also package config files for each that describe how you can@\
+ develop against these components to the directory DESTDIR. It will strip the@\
+ binaries and provided instripped in DEBUG_INSTALL_DIR. If DESTDIR was not@\
+ provided on the command line this rule will try to install to the root@\
+ directory /.,3._Install_Commands)
+.PHONY: recursive_devel_stripped_install
+recursive_devel_stripped_install: $(COMPONENT)_$(E)_recursive_devel_stripped_install
+##>
+# recursive_binary_install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_recursive_binary_install
+##<
+$(call addHelp,recursive_binary_install,\
+ Install rule used to install all the production parts and the header files of@\
+ the component from which the build was initiated and of all the components it@\
+ depends on and also package config files and makefile_component files for each@\
+ that describe how you can develop against these components to the directory@\
+ DESTDIR. If DESTDIR was not provided on the command line this rule will try to@\
+ install to the root directory /.,3._Install_Commands)
+.PHONY: recursive_binary_install
+recursive_binary_install: $(COMPONENT)_$(E)_recursive_binary_install
+##>
+# docs_install target. See Makefile_package for definition of
+# $(COMPONENT)_$(E)_docs_install
+##<
+$(call addHelp,docs_install,\
+  Install rule used to install all the documentation of the component from@\
+  which the build was initiated to the directory DESTDIR. If DESTDIR was not@\
+  provided on the command line this rule will try to install to the root@\
+  directory /.,3._Install_Commands)
+.PHONY: docs_install
+docs_install: $(COMPONENT)_$(E)_docs_install
+##>
+endif
+
+# test_install target. See Makefile_package for the definition of
+# $(COMPONENT)_$(E)_test_install
+##<
+$(call addHelp,test_install,\
+  Install rule used to install all production and test parts and elements of@\
+  the component from which the build was initiated to the directory DESTDIR. If@\
+  DESTDIR was not provided on the command line this rule will try to install to@\
+  the root directory /.,3._Install_Commands)
+.PHONY: test_install
+test_install: $(COMPONENT)_$(E)_test_install
+##>
+# recursive_install target. See Makefile_package for the definition of
+# $(COMPONENT)_$(E)_test_install
+##<
+$(call addHelp,recursive_install,\
+  Install rule used to install all production parts and elements of the@\
+  component from which the build was initiated and of all the components it@\
+  depends on to the directory DESTDIR. If DESTDIR was not provided on the@\
+  command line this rule will try to install to the root directory /.,3._Install_Commands)
+.PHONY: recursive_install
+recursive_install: $(COMPONENT)_$(E)_recursive_install
+##>
+# recursive_test_install target. See Makefile_package for the definition of
+# $(COMPONENT)_$(E)_recursive_test_install
+##<
+$(call addHelp,recursive_test_install,\
+  Install rule used to install both the production and the test parts and@\
+  elements of the component from which the build was initiated and of all the@\
+  production parts of the components it depends on - either with a normal@\
+  dependency or a test dependency - to the directory DESTDIR. If DESTDIR was@\
+  not provided on the command line this rule will try to install to the root@\
+  directory /.,3._Install_Commands)
+.PHONY: recursive_test_install 
+recursive_test_install: $(COMPONENT)_$(E)_recursive_test_install
+##>
+# recursive_all_install target. See Makefile_package for the definition of
+# $(COMPONENT)_$(E)_recursive_all_install
+##<
+$(call addHelp,recursive_all_install,\
+  Install rule used to install both the production and the test parts and the@\
+  header files of the component from which the build was initiated and of all@\
+  the components it depends on - either with a normal dependency or a test@\
+  dependency - and also package config files for each that describe how you can@\
+  develop against these components to the directory DESTDIR. If DESTDIR was@\
+  not provided on the command line this rule will try to install to the root@\
+  directory /.,3._Install_Commands)
+.PHONY: recursive_all_install 
+recursive_all_install: $(COMPONENT)_$(E)_recursive_all_install
+##>
+##>
+# recursive_clean target. See Makefile_package for the definition of
+# $(COMPONENT)_$(E)_recursive_all_install
+##<
+$(call addHelp,recursive_clean,\
+  Clean rule that will remove all the output created for the component from@\
+  which the build was initiated and all of the components it depends on. The@\
+  implementation is very simple: it will recursively remove the output@\
+  directory for the component and its dependencies.,2._Clean_Commands)
+.PHONY: recursive_clean 
+recursive_clean: $(COMPONENT)_$(E)_recursive_clean
+##>
+
+### Miscellaneous rules
+
+# klokwork target.
+##<
+$(call addHelp,klocwork,\
+Rule used to trigger a klocwork run on all production parts of the@\
+component from which the build was initiated.@\
+The KLOCWORK environment should be used for this rule.@\
+The default Klocwork project is CoreMW$(comma) but this can be overruled with@\
+the project variable.@\
+If DESTDIR is provided on the command line$(comma) a Klocwork report will@\
+be generated in DESTDIR with name klocwork.xml.,6._Miscellaneous_Commands)
+.PHONY: klocwork
+klocwork_NEEDED_RULES:=$(COMPONENT)-klocwork
+klocwork             : $(COMPONENT)-klocwork
+##>
+# doxygen target.
+##<
+.PHONY: doxygen
+doxygen_NEEDED_RULES:=$(COMPONENT)_doxygen
+doxygen             : $(COMPONENT)_doxygen
+##>
+# dist target.
+##<
+.PHONY: dist
+dist_NEEDED_RULES:=$(COMPONENT)_dist
+dist             : $(COMPONENT)_dist
+##>
+# help target.
+##<
+ifneq ($(MAKE_DOES_NOT_SUPPORT_FUNCTIONS),1)
+.PHONY: help
+help:
+	@($(foreach type,$(sort $(foreach topic,$(sort $(HELP_TOPICS)),$(HELP_TOPIC_$(topic)_TYPE))),$(echo) $(type) | tr "_" " " && $(echo) "$(type) " | sed "s/./-/g" && $(echo) && $(foreach topic,$(sort $(HELP_TOPICS)),$(if $(filter $(type),$(HELP_TOPIC_$(topic)_TYPE)),$(echo) "   $(topic):" | sed "s/_o/</g" | sed "s/_c/>/g" | sed "s/__/_/g" && $(echo) "$(HELP_TOPIC_$(topic)_MESSAGE)" | sed "s/^/      /g" | sed "s/@ */@      /g" | tr "@" "\n" && $(echo) && ))) true) | less
+else
+.PHONY: help
+help:
+	@$(GNU_MAKE) -f $(MAKEFILE_ABSOLUTE) help
+
+endif
+##>
+endif
+##>
+
+# This variant is only there if the target architecture of this component is
+# $(ORIGE), i.e. the E passed on the comnandline or set in the toplevel
+# Makefile. 
+##<
+.PHONY: $(COMPONENT)_default
+$(COMPONENT)_default: $(COMPONENT)_$(E)_default
+.PHONY: $(COMPONENT)_docs
+$(COMPONENT)_docs: $(COMPONENT)_$(E)_docs
+.PHONY: $(COMPONENT)_binary_makefile
+$(COMPONENT)_binary_makefile: $(COMPONENT)_$(E)_binary_makefile
+.PHONY: $(COMPONENT)_coverage_test_run
+$(COMPONENT)_coverage_test_run_NEEDED_RULES:=$(COMPONENT)_$(E)_coverage_test_run
+$(COMPONENT)_coverage_test_run             : $(COMPONENT)_$(E)_coverage_test_run
+.PHONY: $(COMPONENT)_gcovr_test_run
+$(COMPONENT)_gcovr_test_run_NEEDED_RULES:=$(COMPONENT)_$(E)_gcovr_test_run
+$(COMPONENT)_gcovr_test_run             : $(COMPONENT)_$(E)_gcovr_test_run
+.PHONY: $(COMPONENT)_test_run
+$(COMPONENT)_test_run: $(COMPONENT)_$(E)_test_run
+.PHONY: $(COMPONENT)_test
+$(COMPONENT)_test: $(COMPONENT)_$(E)_test
+.PHONY: $(COMPONENT)_doxygen
+$(COMPONENT)_doxygen_NEEDED_RULES:=$(COMPONENT)_$(E)_doxygen
+$(COMPONENT)_doxygen             : $(COMPONENT)_$(E)_doxygen
+##>
+
+# We add this needed rule here, because the rule is defined in
+# Makefile_per_component, and tool resolution happens before we have read that
+# file
+$(COMPONENT)_dist_NEEDED_RULES:=%/$(COMPONENT)-repository.tgz
+endif
+##>
+
+include $(projectdir/)build/Makefile_env
+
+# $(COMPONENT)_$(E)_default target
+##<
+.PHONY: $(COMPONENT)_$(E)_default
+$(COMPONENT)_$(E)_default: $$($(COMPONENT)_$(E)_FULL_PARTS)
+##>
+# $(COMPONENT)_$(E)_docs target
+##<
+.PHONY: $(COMPONENT)_$(E)_docs
+$(COMPONENT)_$(E)_docs: $$($(COMPONENT)_$(E)_DOC_PARTS)
+##>
+# $(COMPONENT)_$(E)_test target
+##<
+.PHONY: $(COMPONENT)_$(E)_test
+$(COMPONENT)_$(E)_test: $$($(COMPONENT)_$(E)_FULL_TEST_PARTS)
+##>
+# $(COMPONENT)_$(E)_binary target and related macros. This rule creates a
+# binary version of a component for a certain target architecture 
+##<
+BINARY_INTERESTING_PART=$(subst :, ,$(word 2,$(subst @, ,$(i))))
+BINARY_INTERESTING_PART_1=$(word 1,$(subst :, ,$(word 2,$(subst @, ,$(i)))))
+BINARY_INTERESTING_PART_2=$(word 2,$(subst :, ,$(word 2,$(subst @, ,$(i)))))
+
+BINARY_ELEM_INSTALL_INNER_PARTS=$(foreach i,$($(BINARY_COMPONENT)_PARTS_INSTALL_ORIG),\
+	$(patsubst $$(bindir/)%,$(BINARY_BINDIR)/%,\
+	$(patsubst $$(bindir)%,$(BINARY_BINDIR)%,\
+	$(patsubst $$(datadir/)%,$(BINARY_DATADIR)/%,\
+	$(patsubst $$(datadir)%,$(BINARY_DATADIR)%,\
+	$(patsubst $$(sysconfdir/)%,$(BINARY_SYSCONFDIR)/%,\
+	$(patsubst $$(sysconfdir)%,$(BINARY_SYSCONFDIR)%,\
+	$(patsubst $$(libdir/)%,$(BINARY_LIBDIR)/%,\
+	$(patsubst $$(libdir)%,$(BINARY_LIBDIR)%,\
+	$(BINARY_INTERESTING_PART_1)))@$(subst $(BINARY_LIBDIR)/,$$$$(libdir/),$(subst $$,$$$$,$(BINARY_INTERESTING_PART_1)))$(addprefix :,$(BINARY_INTERESTING_PART_2)))))))))
+
+BINARY_ELEM_INSTALL_INNER_ELEM=$(foreach i,$(filter-out s:% d:%,$($(BINARY_COMPONENT)_ELEM_INSTALL_ORIG)),\
+	$(subst $$(datadir/),$(BINARY_DATADIR)/,\
+	$(subst $$(datadir),$(BINARY_DATADIR),\
+	$(subst $$(libdir/),$(BINARY_LIBDIR)/,\
+	$(subst $$(libdir),$(BINARY_LIBDIR),\
+	$(BINARY_INTERESTING_PART_1)))))@$(subst $$,$$$$,$(BINARY_INTERESTING_PART_1))$(addprefix :,$(BINARY_INTERESTING_PART_2)))
+
+BINARY_ELEM_INSTALL_INNER=$(filter-out @,$(sort $(BINARY_ELEM_INSTALL_INNER_PARTS) $(BINARY_ELEM_INSTALL_INNER_ELEM) $(subst $$,$$$$,$(filter s:% d:%,$($(BINARY_COMPONENT)_ELEM_INSTALL_ORIG)) $($(BINARY_COMPONENT)_PARTS_INSTALL_ORIG_LND))))
+
+BINARY_ELEM_INSTALL=$(patsubst $(projectdir)%,$$$$(projectdir)%,$(patsubst /$(BINARY_PREFIX)/%,%,$(BINARY_ELEM_INSTALL_INNER)))
+
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_COMPONENT:=$(COMPONENT)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_E:=$(E)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_PREFIX:=$(prefix)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_LIBDIR:=$(libdir)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_BINDIR:=$(bindir)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_DATADIR:=$(datadir)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_INCDIR:=$(incdir)
+%/$(COMPONENT)_$(E)_binary_makefile: BINARY_SYSCONFDIR:=$(sysconfdir)
+%/$(COMPONENT)_$(E)_binary_makefile:
+	$(mkdir) -p $(@D)
+	$(echo) '# This file was automatically generated for the component' > $@
+	$(echo) 'ifneq ($$($$($(BINARY_COMPONENT)_INCLUDED)),1)' >> $@
+	$(echo) 'override COMPONENT:=$(addprefix $(addsuffix .,$($(BINARY_COMPONENT)_GROUP)),$(BINARY_COMPONENT))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_LICENSE:=$($(BINARY_COMPONENT)_LICENSE)' >> $@
+	$(echo) '$(BINARY_COMPONENT)_INCLUDES:=$(patsubst $(projectdir)%,$$$$(projectdir)%,$(patsubst /$(BINARY_PREFIX)/%,%,$(subst $${includedir},$(BINARY_INCDIR),$(patsubst -I%,%,$($(BINARY_COMPONENT)_PKGCONFIG_INCLUDES_SELF))))) $(subst $$,$$$$,$(filter $$%,$($(BINARY_COMPONENT)_INCLUDES_ORIG)))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_LIBS:=-L$$$$(projectdir/)native/$$$$(E)/$(libdir) $(subst $$,$$$$,$(filter-out -L%,$($(BINARY_COMPONENT)_LIBS_ORIG)))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_ELEM_INSTALL:=$(BINARY_ELEM_INSTALL)'>> $@
+	$(echo) '$(BINARY_COMPONENT)_TOOLS:=$(sort $($(BINARY_COMPONENT)_TOOLS))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_DEPS:=$(sort $($(BINARY_COMPONENT)_DEPS))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_CT_DEPS:=$(sort $($(BINARY_COMPONENT)_CT_DEPS))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_DT_DEPS:=$(sort $($(BINARY_COMPONENT)_DT_DEPS))' >> $@
+	$(echo) '$(BINARY_COMPONENT)_CFLAGS:=$(sort $($(BINARY_COMPONENT)_CFLAGS))' >> $@
+	$(echo) 'include $$(projectdir/)build/Makefile_component_top' >> $@
+	$(echo) 'include $$(projectdir/)build/Makefile_component_bot' >> $@
+	$(echo) 'endif' >> $@
+
+##>
+# $(COMPONENT)_$(E)_doxygen target
+##<
+.PHONY: $(COMPONENT)_$(E)_doxygen
+$(COMPONENT)_$(E)_doxygen_NEEDED_TOOLS:=doxygen
+$(COMPONENT)_$(E)_doxygen: DOXYGEN_COMPONENT:=$(COMPONENT)
+$(COMPONENT)_$(E)_doxygen:
+	mkdir -p $($(DOXYGEN_COMPONENT)_COMP_DIR)/../metadata/documentation/api && cd $($(DOXYGEN_COMPONENT)_COMP_DIR)/api/headers && SOURCE_DIRS="$($(DOXYGEN_COMPONENT)_COMP_DIR)/api/headers" PROJECT=$(addprefix $(addsuffix .,$($(DOXYGEN_COMPONENT)_GROUP)),$(DOXYGEN_COMPONENT)) OUTPUT_DIR=$($(DOXYGEN_COMPONENT)_COMP_DIR)/../metadata/documentation/api $(doxygen) $(projectdir/)build/Doxyfile
+
+##>
+# $(COMPONENT)_$(E)_test_covrun target
+##<
+.PHONY: %/$(COMPONENT)_$(E)_test_covrun
+%/$(COMPONENT)_$(E)_test_covrun: testbindir:=$(bindir)
+%/$(COMPONENT)_$(E)_test_covrun: testlibdir:=$(libdir)
+%/$(COMPONENT)_$(E)_test_covrun: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_ELEM) $$($(COMPONENT)_TEST_ELEM)
+	# Make sure all test files are gone, to get a clean working directory
+	$(rm) -rf $(@D)
+	# Remove gcda files from previous runs
+	$(rm) -f $(patsubst %.o,%.gcda,$($(patsubst %_test_covrun,%_COVERAGE_FILES,$(@F))))
+	# Make the directory in which we will install the test application
+	$(mkdir) -p $(@D)
+	# Install the test application to the coverage directory
+	export DIR=$(@D) && ODIR=`$(pwd)` && cd $$DIR && $($(patsubst %_test_covrun,%_FULL_TEST_INSTALL,$(@F))) true
+	# Execute the test
+	cd $(@D) && export PATH=`pwd`/$(testbindir):$$PATH && export $(LIBRARY_PATH_FLAVOUR)=`pwd`/$(testlibdir):$($(LIBRARY_PATH_FLAVOUR)) && export COLLECT_COVERAGE=1 && $($(patsubst %_test_covrun,%_TEST_RUN,$(@F)))
+
+##>
+# $(COMPONENT)_$(E)_coverage_test_run target
+##<
+.PHONY: $(COMPONENT)_$(E)_coverage_test_run
+$(COMPONENT)_$(E)_coverage_test_run_NEEDED_TOOLS:=genhtml geninfo
+$(COMPONENT)_$(E)_coverage_test_run             : $($(COMPONENT)_$(E)_PREFIX)/coverage/$(COMPONENT)_$(E)_test_covrun
+	# Create info files (empty ones if the object files were not used)
+	for i in $(patsubst %.o,%.gcda,$($(patsubst %_coverage_test_run,%_COVERAGE_FILES,$(@F)))); do if [ -e $$i ] ; then $(geninfo) `$(echo) $$i | sed "s/.gcda$$/.gcno/g"`; else GCNO=`$(echo) $$i | sed "s/.gcda$$/.gcno/g"`; if [ -e $$GCNO ] ; then $(geninfo) -i $$GCNO; fi; fi; done
+	# Make direcory for storing the report
+	$(mkdir) -p $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report
+	# Generate html report
+	#
+	#
+	$(echo) '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">' > $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '<html lang="en">' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '    <head>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '             <title>Coverage info for $(subst _, on ,$(patsubst %_coverage_test_run,%,$@))</title>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '             <link rel="stylesheet" type="text/css" href="@basedir@gcov.css">' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '    </head>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '<body>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '    <table width="100%" border=0 cellspacing=0 cellpadding=0>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '    <tr><td class="title">$(patsubst %,%.,$($(patsubst %_coverage_test_run,%_GROUP,$@)))$(subst _, on ,$(patsubst %_coverage_test_run,%,$@))</td></tr>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+	$(echo) '    </table>' >> $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html
+
+	$(genhtml) -t '$($(patsubst %_coverage_test_run,%_TEST_RUN,$@))' --legend --html-prolog $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report/header.html -o $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report `$(ls) $(addsuffix .info,$(patsubst %.o,%.gcno,$($(patsubst %_coverage_test_run,%_COVERAGE_FILES,$(@F))))) 2>/dev/null`
+ifneq ($(DESTDIR),)
+	$(mkdir) -p "$(DESTDIR)"
+	$(cp) -r $($(patsubst %_coverage_test_run,%_PREFIX,$@))/coverage_report "$(DESTDIR)"
+endif
+
+
+##>
+# $(COMPONENT)_$(E)_gcovr_test_run target
+##<
+.PHONY: $(COMPONENT)_$(E)_gcovr_test_run
+$(COMPONENT)_$(E)_gcovr_test_run_NEEDED_TOOLS:=gcovr
+$(COMPONENT)_$(E)_gcovr_test_run             : $($(COMPONENT)_$(E)_PREFIX)/coverage/$(COMPONENT)_$(E)_test_covrun
+	# Make direcory for storing the report
+	$(mkdir) -p $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/coverage_report
+	# Copy the relevant .gcda files to a separate directory
+	$(rm) -rf $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/gcovr_files
+	#$(mkdir) -p $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/gcovr_files
+	for i in $(patsubst %.o,%.gcno,$($(patsubst %_gcovr_test_run,%_COVERAGE_FILES,$(@F)))); do \
+		if [ ! -e $$i ] ; then \
+			$(mkdir) -p $$(dirname $$i) && touch $$i; \
+		fi; \
+	done
+	for i in $(patsubst %.o,%.gcda,$($(patsubst %_gcovr_test_run,%_COVERAGE_FILES,$(@F)))) $(patsubst %.o,%.gcno,$($(patsubst %_gcovr_test_run,%_COVERAGE_FILES,$(@F)))); do \
+		if [ -e $$i ]; then \
+			$(mkdir) -p $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/gcovr_files/$$(dirname $$i) && \
+			$(cp) $$i $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/gcovr_files/$$i; \
+		fi; \
+	done
+	cd $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/gcovr_files && $(gcovr) -x -o $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/coverage_report/coverage.xml
+ifneq ($(DESTDIR),)
+	$(mkdir) -p "$(DESTDIR)"
+	$(cp) $($(patsubst %_gcovr_test_run,%_PREFIX,$@))/coverage_report/coverage.xml "$(DESTDIR)"
+endif
+
+##>
+# $(COMPONENT)_$(E)_coverage_test_run.tgz target
+##<
+$(COMPONENT)_$(E)_coverage_test_run.tgz_NEEDED_RULES:=$(COMPONENT)_$(E)_coverage_test_run
+$(COMPONENT)_$(E)_coverage_test_run.tgz             : $(COMPONENT)_$(E)_coverage_test_run
+	tar -czf $@ -C $($(patsubst %_coverage_test_run.tgz,%_PREFIX,$@))/coverage_report .
+##>
+# $(COMPONENT)_$(E)_test_run target
+##<
+.PHONY: $(COMPONENT)_$(E)_test_run
+$(COMPONENT)_$(E)_test_run: testbindir:=$(bindir)
+$(COMPONENT)_$(E)_test_run: testlibdir:=$(libdir)
+$(COMPONENT)_$(E)_test_run: $$($(COMPONENT)_$(E)_FULL_PARTS) $$($(COMPONENT)_$(E)_FULL_TEST_PARTS) $$($(COMPONENT)_ELEM) $$($(COMPONENT)_TEST_ELEM) 
+	$(rm) -rf $($(patsubst %_test_run,%_PREFIX,$@))/test_run_dir
+	$(mkdir) -p $($(patsubst %_test_run,%_PREFIX,$@))/test_run_dir
+	export DIR=$($(patsubst %_test_run,%_PREFIX,$@))/test_run_dir && ODIR=`$(pwd)` && cd $$DIR && $($(patsubst %_test_run,%,$(@F))_FULL_TEST_INSTALL) true
+	cd $($(patsubst %_test_run,%_PREFIX,$@))/test_run_dir && export PATH=`pwd`/$(testbindir):$$PATH && export $(LIBRARY_PATH_FLAVOUR)=`pwd`/$(testlibdir):$($(LIBRARY_PATH_FLAVOUR)) && $($(patsubst %_test_run,%_TEST_RUN,$@))
+
+##>
+
+# $(COMPONENT)-test-doc.pdf
+##<
+
+include $(projectdir/)build/Makefile_anttasks
+
+$($(COMPONENT)_PREFIX/)$(COMPONENT)-test-doc.pdf: $(ANT_TASK_JAR)
+	cd "$(projectdir/)thirdparty/ibm/DITA-OT" && \
+	unset DISPLAY && \
+        export DITA_DIR=`$(PWD)` && export ANT_OPTS="-Xmx512m -Djavax.xml.transform.TransformerFactory=net.sf.saxon.TransformerFactoryImpl" && \
+        export ANT_HOME="$$DITA_DIR/tools/ant" && cd - && \
+        CLASSPATH="$$DITA_DIR/lib:$$DITA_DIR/lib/dost.jar:$$DITA_DIR/lib/resolver.jar:$$DITA_DIR/lib/icu4j.jar" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9.jar:$$DITA_DIR/lib/saxon/saxon9-dom.jar:$$CLASSPATH" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-dom4j.jar:$$DITA_DIR/lib/saxon/saxon9-jdom.jar:$$CLASSPATH" && \
+        CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-s9api.jar:$$DITA_DIR/lib/saxon/saxon9-sql.jar:$$CLASSPATH" && \
+        export CLASSPATH="$$DITA_DIR/lib/saxon/saxon9-xom.jar:$$DITA_DIR/lib/saxon/saxon9-xpath.jar:$$DITA_DIR/lib/saxon/saxon9-xqj.jar:$$CLASSPATH" && \
+        $$ANT_HOME/bin/ant -f $(projectdir/)/build/ant/test-doc.xml -Dbuild.dir=$($(patsubst %-test-doc.pdf,%,$(@F))_PREFIX/) -Dcomponent.name=$(patsubst %-test-doc.pdf,%,$(@F)) \
+          -Dinput.dir=$($(patsubst %-test-doc.pdf,%,$(@F))_COMP_DIR)/doc/test/ -Dtarget.pdf=$@ -Dtask.defs=$<
+
+##>
+
+# Expand dependency lists, so we can initialize NEEDED_COMPONENTS correctly
+##<
+# Add true conditional dependencies to <component>_DEPS
+$(COMPONENT)_DEPS:=$($(COMPONENT)_DEPS) $($(COMPONENT)_DEPS-y) $($(COMPONENT)_DEPS-1)
+
+# Add <component>_DEPS to the Deploy Time dependencies (<component>_DEPS is
+# both Deploy Time and Compile Time dependency) + Add true conditional DT_DEPS
+# to <component>_DT_DEPS
+$(COMPONENT)_DT_DEPS:=$(sort $($(COMPONENT)_DT_DEPS) $($(COMPONENT)_DT_DEPS-y) $($(COMPONENT)_DT_DEPS-1) $($(COMPONENT)_DEPS))
+# Add the target environment to the component name in <component>_DT_DEPS, if
+# it not already provided
+$(COMPONENT)_DT_DEPS:=$(foreach comp, $($(COMPONENT)_DT_DEPS), $(comp)$(subst 1,:$(E),$(subst 2,,$(words $(subst :, ,$(comp))))))
+
+# Add <component>_DEPS to the Compiler Time dependencies (<component>_DEPS is
+# both Deploy Time and Compile Time dependency) + Add true conditional CT_DEPS
+# # to <component>_CT_DEPS
+$(COMPONENT)_CT_DEPS:=$(sort $($(COMPONENT)_CT_DEPS) $($(COMPONENT)_CT_DEPS-y) $($(COMPONENT)_CT_DEPS-1) $($(COMPONENT)_DEPS))
+# Add the target environment to the component name in <component>_CT_DEPS, if
+# it not already provided
+$(COMPONENT)_CT_DEPS:=$(foreach comp, $($(COMPONENT)_CT_DEPS), $(comp)$(subst 1,:$(E),$(subst 2,,$(words $(subst :, ,$(comp))))))
+
+# Add true conditional dependencies to <component>_DEPS
+$(COMPONENT)_TEST_DEPS:=$($(COMPONENT)_TEST_DEPS) $($(COMPONENT)_TEST_DEPS-y) $($(COMPONENT)_TEST_DEPS-1)
+
+# Add <component>_TEST_DEPS to the Deploy Time dependencies (<component>_TEST_DEPS is
+# both Deploy Time and Compile Time dependency) + Add true conditional DT_TEST_DEPS
+# to <component>_DT_TEST_DEPS
+$(COMPONENT)_DT_TEST_DEPS:=$(sort $($(COMPONENT)_DT_TEST_DEPS) $($(COMPONENT)_DT_TEST_DEPS-y) $($(COMPONENT)_DT_TEST_DEPS-1) $($(COMPONENT)_TEST_DEPS))
+# Add the target environment to the component name in <component>_DT_TEST_DEPS, if
+# it not already provided
+$(COMPONENT)_DT_TEST_DEPS:=$(foreach comp, $($(COMPONENT)_DT_TEST_DEPS), $(comp)$(subst 1,:$(E),$(subst 2,,$(words $(subst :, ,$(comp))))))
+
+# Add <component>_TEST_DEPS to the Compiler Time dependencies (<component>_TEST_DEPS is
+# both Deploy Time and Compile Time dependency) + Add true conditional CT_TEST_DEPS
+# # to <component>_CT_TEST_DEPS
+$(COMPONENT)_CT_TEST_DEPS:=$(sort $($(COMPONENT)_CT_TEST_DEPS) $($(COMPONENT)_CT_TEST_DEPS-y) $($(COMPONENT)_CT_TEST_DEPS-1) $($(COMPONENT)_TEST_DEPS))
+# Add the target environment to the component name in <component>_CT_TEST_DEPS, if
+# it not already provided
+$(COMPONENT)_CT_TEST_DEPS:=$(foreach comp, $($(COMPONENT)_CT_TEST_DEPS), $(comp)$(subst 1,:$(E),$(subst 2,,$(words $(subst :, ,$(comp))))))
+
+# Store a target environment specific variant of these dependencies, because
+# the list of dependencies can be different on different target environments
+$(COMPONENT)_$(E)_DT_DEPS:=$($(COMPONENT)_DT_DEPS)
+$(COMPONENT)_$(E)_CT_DEPS:=$($(COMPONENT)_CT_DEPS)
+$(COMPONENT)_$(E)_DT_TEST_DEPS:=$($(COMPONENT)_DT_TEST_DEPS)
+$(COMPONENT)_$(E)_CT_TEST_DEPS:=$($(COMPONENT)_CT_TEST_DEPS)
+
+# DT DEPS and CT DEPS can be set in the component Makefile. If we include these
+# twice (for different target environments), we need to make sure DT/CT DEPS
+# are reset. So, the common build system should always use the E variants of
+# this variables
+$(COMPONENT)_DT_DEPS:=
+$(COMPONENT)_CT_DEPS:=
+$(COMPONENT)_DT_TEST_DEPS:=
+$(COMPONENT)_CT_TEST_DEPS:=
+##>
+
+
+NEEDED_COMPONENTS:=$(sort $($(COMPONENT)_$(E)_CT_DEPS) $($(COMPONENT)_$(E)_DT_DEPS))
+
+ifneq ($(SKIP_TESTING), 1)
+NEEDED_COMPONENTS:=$(sort $(NEEDED_COMPONENTS) $($(COMPONENT)_$(E)_CT_TEST_DEPS) $($(COMPONENT)_$(E)_DT_TEST_DEPS))
+endif
+
+NEEDED_TOOLS:=$(sort $(NEEDED_TOOLS) $($(COMPONENT)_NEEDED_TOOLS))
+
+# Add some special static analysis parts to the normal parts when we are
+# running static analysis
+ifeq ($(E),KLOCWORK)
+$(COMPONENT)_PARTS += $($(COMPONENT)_STATIC_ANALYSIS_EXTRA_PARTS)
+endif
+
+# Store variables from the preamble of the component that might be different
+# for components that are compiled for different target environments
+##<
+RESTORE_PARTS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_PARTS_INSTALL)
+RESTORE_TEST_PARTS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_PARTS_INSTALL)
+RESTORE_EXPORTED_TEST_PARTS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL)
+RESTORE_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_INSTALL)
+RESTORE_TEST_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_INSTALL)
+RESTORE_DEVEL_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_DEVEL_INSTALL)
+RESTORE_PARTS_$(words $(INC_DEPTH)):=$($(COMPONENT)_PARTS)
+RESTORE_TEST_PARTS_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_PARTS)
+RESTORE_EXPORTED_TEST_PARTS_$(words $(INC_DEPTH)):=$($(COMPONENT)_EXPORTED_TEST_PARTS)
+RESTORE_TEST_RUN_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_RUN)
+RESTORE_ELEM_$(words $(INC_DEPTH)):=$($(COMPONENT)_ELEM)
+RESTORE_TEST_ELEM_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_ELEM)
+RESTORE_ELEM_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_ELEM_INSTALL)
+RESTORE_TEST_ELEM_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_TEST_ELEM_INSTALL)
+RESTORE_HEADERS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_HEADERS_INSTALL)
+RESTORE_BUILT_HEADERS_$(words $(INC_DEPTH)):=$($(COMPONENT)_BUILT_HEADERS)
+RESTORE_BUILT_HEADERS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_BUILT_HEADERS_INSTALL)
+RESTORE_DOCS_INSTALL_$(words $(INC_DEPTH)):=$($(COMPONENT)_DOCS_INSTALL)
+RESTORE_NODIST_$(words $(INC_DEPTH)):=$($(COMPONENT)_NODIST)
+RESTORE_INCLUDES_$(words $(INC_DEPTH)):=$($(COMPONENT)_INCLUDES)
+RESTORE_LIBS_$(words $(INC_DEPTH)):=$($(COMPONENT)_LIBS)
+RESTORE_PREFIX_$(words $(INC_DEPTH)):=$($(COMPONENT)_PREFIX)
+RESTORE_CFLAGS_$(words $(INC_DEPTH)):=$($(COMPONENT)_CFLAGS)
+RESTORE_TOOLS_$(words $(INC_DEPTH)):=$($(COMPONENT)_TOOLS)
+RESTORE_JAVA_$(words $(INC_DEPTH)):=$($(COMPONENT)_JAVA)
+##>
+
+# Store the component and the target environment. The include of other
+# components will change these variables.
+##<
+RESTORE_COMPONENT_$(words $(INC_DEPTH)):=$(COMPONENT)
+RESTORE_E_$(words $(INC_DEPTH)):=$(E)
+##>
+
+# Include other components 
+include $(projectdir/)build/Makefile_include_components
+
+# Restore component and target environment first
+##< 
+override COMPONENT:=$(RESTORE_COMPONENT_$(words $(INC_DEPTH)))
+override E:=$(RESTORE_E_$(words $(INC_DEPTH)))
+##>
+
+# Restore all other variables, and expand the defered variables in them
+# ($$(VAR)) now. At this point all component on which this component depends
+# will be read, so we can safely expand the variables. See Makefile_functions
+# for the function DEFERED_RESOLVER 
+##<
+
+$(COMPONENT)_PARTS_INSTALL:=$(RESTORE_PARTS_INSTALL_$(words $(INC_DEPTH)))
+$(COMPONENT)_PARTS_INSTALL_ORIG:=$(RESTORE_PARTS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PARTS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_PARTS_INSTALL:=$(RESTORE_TEST_PARTS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_PARTS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL:=$(RESTORE_EXPORTED_TEST_PARTS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_INSTALL:=$(RESTORE_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_INSTALL:=$(RESTORE_TEST_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_DEVEL_INSTALL:=$(RESTORE_DEVEL_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_DEVEL_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_PARTS:=$(RESTORE_PARTS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PARTS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_PARTS:=$(RESTORE_TEST_PARTS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_PARTS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_EXPORTED_TEST_PARTS:=$(RESTORE_EXPORTED_TEST_PARTS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_EXPORTED_TEST_PARTS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_RUN:=$(RESTORE_TEST_RUN_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_RUN
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_ELEM:=$(RESTORE_ELEM_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_ELEM
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_ELEM:=$(RESTORE_TEST_ELEM_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_ELEM
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_ELEM_INSTALL_ORIG:=$(RESTORE_ELEM_INSTALL_$(words $(INC_DEPTH)))
+$(COMPONENT)_ELEM_INSTALL:=$(RESTORE_ELEM_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_ELEM_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TEST_ELEM_INSTALL:=$(RESTORE_TEST_ELEM_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TEST_ELEM_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_HEADERS_INSTALL:=$(RESTORE_HEADERS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_HEADERS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_BUILT_HEADERS:=$(RESTORE_BUILT_HEADERS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_BUILT_HEADERS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_BUILT_HEADERS_INSTALL:=$(RESTORE_BUILT_HEADERS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_BUILT_HEADERS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_DOCS_INSTALL:=$(RESTORE_DOCS_INSTALL_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_DOCS_INSTALL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_NODIST:=$(RESTORE_NODIST_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_NODIST
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_INTRA_INCLUDES:=$(filter-out $$(%_INCLUDES),$(RESTORE_INCLUDES_$(words $(INC_DEPTH))))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_INTRA_INCLUDES
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_PKGCONFIG_INCLUDES:=$(subst _INCLUDES,_PKGCONFIG_INCLUDES,$(RESTORE_INCLUDES_$(words $(INC_DEPTH))))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PKGCONFIG_INCLUDES
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_INCLUDES_ORIG:=$(RESTORE_INCLUDES_$(words $(INC_DEPTH)))
+$(COMPONENT)_INCLUDES:=$(RESTORE_INCLUDES_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_INCLUDES
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_PKGCONFIG_LIBS:=$(subst _LIBS,_PKGCONFIG_LIBS,$(RESTORE_LIBS_$(words $(INC_DEPTH))))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PKGCONFIG_LIBS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_LIBS_ORIG:=$(RESTORE_LIBS_$(words $(INC_DEPTH)))
+$(COMPONENT)_LIBS:=$(RESTORE_LIBS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_LIBS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_PREFIX:=$(RESTORE_PREFIX_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PREFIX
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_PKGCONFIG_CFLAGS:=$(subst _CFLAGS,_PKGCONFIG_CFLAGS,$(RESTORE_CFLAGS_$(words $(INC_DEPTH))))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_PKGCONFIG_CFLAGS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_CFLAGS_ORIG:=$(RESTORE_CFLAGS_$(words $(INC_DEPTH)))
+$(COMPONENT)_CFLAGS:=$(RESTORE_CFLAGS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_CFLAGS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_TOOLS:=$(RESTORE_TOOLS_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_TOOLS
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+ifneq ($($(COMPONENT)_TOOLS),)
+DEFERED_RESOLVE:=$($(COMPONENT)_TOOLS)
+include $(projectdir/)build/Makefile_defered_resolver_tools_stub
+endif
+
+$(COMPONENT)_JAVA:=$(RESTORE_JAVA_$(words $(INC_DEPTH)))
+DEFERED_RESOLVER_VAR=$(COMPONENT)_JAVA
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+ifeq ($(sort $($(COMPONENT)_JAVA)),1)
+$(COMPONENT)_$(E)_CLASSES:=$($(COMPONENT)_PREFIX)/$(COMPONENT)_classes.jar
+include $(projectdir/)build/Makefile_java
+endif
+##>
+
+
+# Do some postprocessing on the preamble variables (to allow relative paths)
+##<
+
+# For PARTS_INSTALL, we add the output prefix to relative paths
+$(COMPONENT)_PARTS_INSTALL        :=$(filter s:% d:% /%,$($(COMPONENT)_PARTS_INSTALL)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out s:% d:% /%,$($(COMPONENT)_PARTS_INSTALL)))
+# For TEST_PARTS_INSTALL, we add the output prefix to relative paths 
+$(COMPONENT)_TEST_PARTS_INSTALL   :=$(filter s:% d:% /%,$($(COMPONENT)_TEST_PARTS_INSTALL)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out s:% d:% /%,$($(COMPONENT)_TEST_PARTS_INSTALL)))
+# For EXPORTED_TEST_PARTS_INSTALL, we add the output prefix to relative paths 
+$(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL :=$(filter s:% d:% /%,$($(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out s:% d:% /%,$($(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL)))
+# For PARTS, we add the output prefix to relative paths
+$(COMPONENT)_PARTS                :=$(addprefix $($(COMPONENT)_PREFIX/),$($(COMPONENT)_PARTS))
+# For TEST_PARTS, we add the output prefix to relative paths
+$(COMPONENT)_TEST_PARTS           :=$(addprefix $($(COMPONENT)_PREFIX/),$($(COMPONENT)_TEST_PARTS))
+# For EXPORTED_TEST_PARTS, we add the output prefix to relative paths
+$(COMPONENT)_EXPORTED_TEST_PARTS  :=$(addprefix $($(COMPONENT)_PREFIX/),$($(COMPONENT)_EXPORTED_TEST_PARTS))
+# For INCLUDES, we add the component directory to relative paths
+$(COMPONENT)_INCLUDES             :=$(foreach dir, $($(COMPONENT)_INCLUDES),$(filter /%,$(dir))$(addprefix $($(COMPONENT)_COMP_DIR/),$(filter-out /%,$(dir))))
+# For PKGCONFIG_INCLUDES, we add the component directory to relative paths
+$(COMPONENT)_PKGCONFIG_INCLUDES   :=$(foreach dir, $($(COMPONENT)_PKGCONFIG_INCLUDES),$(filter /%,$(dir))$(addprefix $($(COMPONENT)_COMP_DIR/),$(filter-out /%,$(dir))))
+# For INTRA_INCLUDES, we add the component directory to relative paths
+$(COMPONENT)_INTRA_INCLUDES       :=$(foreach dir, $($(COMPONENT)_INTRA_INCLUDES)    ,$(filter /%,$(dir))$(addprefix $($(COMPONENT)_COMP_DIR/),$(filter-out /%,$(dir))))
+# For LIBS, we automatically add the output directory as a library search path
+$(COMPONENT)_LIBS                 :=-L$($(COMPONENT)_PREFIX) $($(COMPONENT)_LIBS)
+# For PKG_CONFIG_LIBS, we automatically add the output directory as a library search path
+$(COMPONENT)_PKGCONFIG_LIBS       :=-L$($(COMPONENT)_PREFIX) $($(COMPONENT)_PKGCONFIG_LIBS)
+# For BUILT_HEADERS_INSTALL, we add the output prefix to relative paths
+$(COMPONENT)_BUILT_HEADERS_INSTALL:=$(foreach file, $($(COMPONENT)_BUILT_HEADERS_INSTALL),$(filter /%,$(file))$(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /% s:% d:%,$(file))))
+# For BUILT_HEADERS, we add the output prefix to relative paths
+$(COMPONENT)_BUILT_HEADERS        :=$(foreach file, $($(COMPONENT)_BUILT_HEADERS),$(filter /%,$(file))$(addprefix $($(COMPONENT)_PREFIX/),$(filter-out /%,$(file))))
+# For ELEM_INSTALL, we add the component directory to relative paths
+$(COMPONENT)_ELEM_INSTALL         :=$(filter s:% d:% /%,$($(COMPONENT)_ELEM_INSTALL)) $(addprefix $($(COMPONENT)_COMP_DIR/),$(filter-out s:% d:% /%,$($(COMPONENT)_ELEM_INSTALL)))
+# For TEST_ELEM_INSTALL, we add the component directory to relative paths
+$(COMPONENT)_TEST_ELEM_INSTALL    :=$(filter s:% d:% /%,$($(COMPONENT)_TEST_ELEM_INSTALL)) $(addprefix $($(COMPONENT)_COMP_DIR/),$(filter-out s:% d:% /%,$($(COMPONENT)_TEST_ELEM_INSTALL)))
+# For DOCS_INSTALL, we add the output prefix to relative paths
+$(COMPONENT)_DOCS_INSTALL         :=$(filter /%,$($(COMPONENT)_DOCS_INSTALL)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out s:% d:% /%,$($(COMPONENT)_DOCS_INSTALL)))
+
+##>
+
+ifdef NO_LIBRARY_VERSIONING
+override $(COMPONENT)_MAJOR_VERSION:=
+endif
+
+# For components with a major version, we need to add the library version to the installed components
+ifneq ($(strip $($(COMPONENT)_MAJOR_VERSION)),)
+ifeq ($(E),HOSTDARWIN)
+$(COMPONENT)_PARTS_INSTALL:=$(foreach entry,$($(COMPONENT)_PARTS_INSTALL),$(patsubst %$(LIBSUFFIX),%.$($(COMPONENT)_MAJOR_VERSION)$(LIBSUFFIX),$(word 1,$(subst :, ,$(entry)))):$(word 2,$(subst :, ,$(entry))))
+else
+$(COMPONENT)_PARTS_INSTALL:=$(foreach entry,$($(COMPONENT)_PARTS_INSTALL),$(patsubst %$(LIBSUFFIX),%$(LIBSUFFIX).$($(COMPONENT)_MAJOR_VERSION),$(word 1,$(subst :, ,$(entry)))):$(word 2,$(subst :, ,$(entry))))
+endif
+endif
+
+$(COMPONENT)_PARTS_INSTALL_ORIG_LND:=$(filter s:% d:%,$($(COMPONENT)_PARTS_INSTALL_ORIG))
+$(COMPONENT)_PARTS_INSTALL_ORIG:=$(filter /%,$($(COMPONENT)_PARTS_INSTALL_ORIG)) $(addprefix $($(COMPONENT)_PREFIX/),$(filter-out s:% d:% /%,$($(COMPONENT)_PARTS_INSTALL_ORIG)))
+
+# Infer $(COMPONENT)_LIBRARY_SEARCH_PATH_INSTALLED, a variable used in the
+# generated pkgconfig files and in the Makefile_components for generated binary
+# components. After expansion, it contains a list of directories that have to
+# be searched for libraries when this component has been installed. To
+# determine it, both the PARTS_INSTALL variable and the _LIBS variable are
+# considered.
+#
+##<
+
+# For a word in a parts install rule, the source
+part_split_1=$(firstword $(subst @, ,$(part)))
+# For a word in a parts install rule, the target
+part_split_2=$(word 2,$(subst :, ,$(subst @, ,$(part))))
+# Pattern used to infer the install library search dir for a part
+path_library_pattern=$(addprefix %,$(firstword $(subst @, ,$(patsubst /%,%,$(patsubst $(path)%,%,$(filter $(path)/$(lib),$(part)))))))
+
+$(COMPONENT)_MINUS_L_ORIGINAL:=$(patsubst -l%,%,$(filter -l%,$($(COMPONENT)_LIBS_ORIG)))
+$(COMPONENT)_LIBRARY_PATTERN:=$(addprefix lib,$(addsuffix $(LIBSUFFIX)%,$($(COMPONENT)_MINUS_L_ORIGINAL)) $(addsuffix .a%,$($(COMPONENT)_MINUS_L_ORIGINAL)))
+$(COMPONENT)_LIBRARY_SEARCH_PATH_ORIGINAL:=$(patsubst -L%,%,$(filter -L%,-L$($(COMPONENT)_PREFIX) $($(COMPONENT)_LIBS_ORIG)))
+
+DEFERED_RESOLVER_VAR:=$(COMPONENT)_LIBRARY_SEARCH_PATH_ORIGINAL
+$(DEFERED_RESOLVER_VAR):=$(DEFERED_RESOLVER)
+
+$(COMPONENT)_LIBRARY_SEARCH_PATH_INSTALLED:=$(sort $(foreach part,$($(COMPONENT)_PARTS_INSTALL_ORIG),$(foreach lib,$($(COMPONENT)_LIBRARY_PATTERN),$(foreach path,$($(COMPONENT)_LIBRARY_SEARCH_PATH_ORIGINAL),$(subst %,,$(patsubst $(path_library_pattern),%,$(filter $(path_library_pattern),$(part_split_2))))))))
+##>
+
+ifneq ($(prefix),)
+$(COMPONENT)_LIBS_INSTALLED:=$(addprefix -L,$(patsubst %/,%,$(patsubst $(prefix)%,$${prefix}%,$(subst $$(prefix),$${prefix},$(subst $$(prefix/),$$(prefix)/,$(subst $$(libdir),$${libdir},$(subst $$(libdir/),$$(libdir)/,$($(COMPONENT)_LIBRARY_SEARCH_PATH_INSTALLED)))))))) $(filter-out -L%,$($(COMPONENT)_PKGCONFIG_LIBS))
+else
+$(COMPONENT)_LIBS_INSTALLED:=$(addprefix -L,$(patsubst %/,%,$(subst $$(prefix/),$$(prefix)/,$(subst $$(libdir),$${libdir},$(subst $$(libdir/),$$(libdir)/,$($(COMPONENT)_LIBRARY_SEARCH_PATH_INSTALLED)))))) $(filter-out -L%,$($(COMPONENT)_PKGCONFIG_LIBS))
+endif
+
+# Next we will split the variables with combined information about
+# parts/elements and installation <component>_PARTS_INSTALL,
+# <component>_ELEM_INSTALL, ... The used functions are in Makefile_functions
+
+##< NORMAL PARTS 
+ifneq ($(strip $($(COMPONENT)_PARTS_INSTALL)),)
+CI_PARTS_VAR:=$(COMPONENT)_PARTS_INSTALL
+$(COMPONENT)_PARTS:=$($(COMPONENT)_PARTS) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+
+ifneq ($($(COMPONENT)_INSTALL),)
+$(COMPONENT)_INSTALL+=&&
+ifndef MAKE_SILENT_COMPONENTS
+$(shell $(echo) "WARNING: Use of deprecated variable $(COMPONENT)_INSTALL" >&2)
+endif
+endif
+
+$(COMPONENT)_INSTALL:=$($(COMPONENT)_INSTALL) $(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS) # && find . -type f | xargs objdump  -p  2>/dev/null  | egrep ": *file format|SONAME" | sed "s/^\(.*\): *file format .*$$/@\1:/g" | tr "\n@" " \n" | sed -n "s/^\(.*\)\/\([^\/]*\): *SONAME *\(.*\)$$/test -e \1\/\3 || ln -fs \2 \1\/\3/gp" | bash
+
+ifneq ($($(COMPONENT)_MAJOR_VERSION),)
+   ifneq  ($($(COMPONENT)_DEVEL_INSTALL),)
+      $(COMPONENT)_DEVEL_INSTALL:=$($(COMPONENT)_DEVEL_INSTALL) &&
+   endif
+   ifeq ($(E),HOSTDARWIN)
+   $(COMPONENT)_DEVEL_INSTALL+=$(foreach target,$(filter %.$($(COMPONENT)_MAJOR_VERSION)$(LIBSUFFIX),$(CI_EXTRACT_TARGETS_FROM_PARTS)),$(LN) -sf $(notdir $(target)) $(dir $(target))/$(patsubst %.$($(COMPONENT)_MAJOR_VERSION)$(LIBSUFFIX),%$(LIBSUFFIX),$(notdir $(target))) && )true
+   else
+   $(COMPONENT)_DEVEL_INSTALL+=$(foreach target,$(filter %$(LIBSUFFIX).$($(COMPONENT)_MAJOR_VERSION),$(CI_EXTRACT_TARGETS_FROM_PARTS)),$(LN) -sf $(notdir $(target)) $(dir $(target))/$(patsubst %$(LIBSUFFIX).$($(COMPONENT)_MAJOR_VERSION),%$(LIBSUFFIX),$(notdir $(target))) && )true
+   endif
+endif
+endif 
+
+##>
+
+##< DOC PARTS 
+ifneq ($(strip $($(COMPONENT)_DOCS_INSTALL)),)
+CI_PARTS_VAR:=$(COMPONENT)_DOCS_INSTALL
+$(COMPONENT)_DOC_PARTS:=$(sort $($(COMPONENT)_DOC_PARTS) $(CI_EXTRACT_SOURCES_FROM_PARTS))
+
+$(COMPONENT)_DOC_INSTALL:=$(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+
+endif 
+
+ifeq ($(strip $($(COMPONENT)_DOC_INSTALL)),)
+$(COMPONENT)_DOC_INSTALL:=true
+endif
+##>
+
+##< ELEM INSTALL
+ifneq ($(strip $($(COMPONENT)_ELEM_INSTALL)),)
+ifneq ($(strip $($(COMPONENT)_INSTALL)),)
+$(COMPONENT)_INSTALL+=&&
+endif
+CI_PARTS_VAR:=$(COMPONENT)_ELEM_INSTALL
+$(COMPONENT)_ELEM:=$($(COMPONENT)_ELEM) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+$(COMPONENT)_INSTALL:=$($(COMPONENT)_INSTALL) $(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+endif 
+
+ifeq ($(strip $($(COMPONENT)_INSTALL)),)
+$(COMPONENT)_INSTALL:=true
+endif
+##>
+
+##< TEST_PARTS
+CI_PARTS_VAR:=$(COMPONENT)_TEST_PARTS_INSTALL
+
+$(COMPONENT)_TEST_PARTS:=$($(COMPONENT)_TEST_PARTS) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+
+$(COMPONENT)_TEST_INSTALL:=$($(COMPONENT)_INSTALL) && $(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+
+ifneq ($($(COMPONENT)_EXPORTED_TEST_PARTS),)
+$(COMPONENT)_TEST_PARTS:=$($(COMPONENT)_TEST_PARTS) $($(COMPONENT)_EXPORTED_TEST_PARTS)
+endif
+
+CI_PARTS_VAR:=$(COMPONENT)_EXPORTED_TEST_PARTS_INSTALL
+
+$(COMPONENT)_TEST_PARTS:=$($(COMPONENT)_TEST_PARTS) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+
+$(COMPONENT)_EXPORTED_TEST_INSTALL:=$(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+$(COMPONENT)_TEST_INSTALL:=$($(COMPONENT)_TEST_INSTALL) && $($(COMPONENT)_EXPORTED_TEST_INSTALL)
+
+##>
+
+##< TEST_ELEM INSTALL
+ifneq ($(strip $($(COMPONENT)_TEST_ELEM_INSTALL)),)
+ifneq ($(strip $($(COMPONENT)_TEST_INSTALL)),)
+$(COMPONENT)_TEST_INSTALL+=&&
+endif
+CI_PARTS_VAR:=$(COMPONENT)_TEST_ELEM_INSTALL
+$(COMPONENT)_TEST_ELEM:=$($(COMPONENT)_ELEM) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+
+$(COMPONENT)_TEST_INSTALL:=$($(COMPONENT)_TEST_INSTALL) $(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+endif 
+
+ifeq ($(strip $($(COMPONENT)_TEST_INSTALL)),)
+$(COMPONENT)_TEST_INSTALL:=true
+endif
+##>
+
+##< HEADERS INSTALL
+ifneq ($($(COMPONENT)_BUILT_HEADERS_INSTALL),)
+CI_PARTS_VAR:=$(COMPONENT)_BUILT_HEADERS_INSTALL
+
+$(COMPONENT)_BUILT_HEADERS:=$($(COMPONENT)_BUILT_HEADERS) $(CI_EXTRACT_SOURCES_FROM_PARTS)
+
+ifneq ($($(COMPONENT)_HEADERS_INSTALL),)
+$(COMPONENT)_HEADERS_INSTALL+=&&
+endif
+
+$(COMPONENT)_HEADERS_INSTALL:=$($(COMPONENT)_HEADERS_INSTALL) $(CI_MAKE_ONLY_DIRS) && $(CI_MAKE_DIRS) && $(CI_COPY_FILES) && $(CI_CHANGE_MODE) && $(CI_MAKE_LINKS)
+endif 
+
+ifneq ($(strip $(filter $($(COMPONENT)_COMP_DIR/)api/headers%,$($(COMPONENT)_INTRA_INCLUDES))),)
+ifneq ($(strip $($(COMPONENT)_HEADERS_INSTALL)),)
+$(COMPONENT)_HEADERS_INSTALL+=&&
+endif
+
+$(COMPONENT)_HEADERS_INSTALL+=cp -prL $(patsubst %,%/*,$(filter $($(COMPONENT)_COMP_DIR/)api/headers%,$($(COMPONENT)_INTRA_INCLUDES))) $(incdir) && chmod -R +w $(incdir)
+endif
+
+ifneq ($(strip $($(COMPONENT)_HEADERS_INSTALL)),)
+   ifneq  ($($(COMPONENT)_DEVEL_INSTALL),)
+      $(COMPONENT)_DEVEL_INSTALL:=$($(COMPONENT)_DEVEL_INSTALL) &&
+   else
+      $(COMPONENT)_DEVEL_INSTALL:=
+   endif
+   $(COMPONENT)_DEVEL_INSTALL+=$(mkdir) -p $(incdir) && $($(COMPONENT)_HEADERS_INSTALL) &&
+else
+   ifneq  ($($(COMPONENT)_DEVEL_INSTALL),)
+      $(COMPONENT)_DEVEL_INSTALL:=$($(COMPONENT)_DEVEL_INSTALL) &&
+   else
+      $(COMPONENT)_DEVEL_INSTALL:=
+   endif
+endif
+
+ifneq ($($(COMPONENT)_DONT_GENERATE_PKGCONFIG),1)
+$(COMPONENT)_PKGCONFIG_INCLUDES_COMP:=$(filter $($(COMPONENT)_COMP_DIR/)api/headers%,$($(COMPONENT)_INTRA_INCLUDES))
+$(COMPONENT)_PKGCONFIG_INCLUDES_BUILT:=$(filter-out $($(COMPONENT)_PKGCONFIG_INCLUDES_COMP),$(sort $(foreach idir, $(subst //,/,$($(COMPONENT)_INTRA_INCLUDES)), $(patsubst %,$(idir),$(filter $(idir)/%,$(subst //,/,$($(COMPONENT)_BUILT_HEADERS)))))))
+
+ifneq ($(filter-out $($(COMPONENT)_PKGCONFIG_INCLUDES_COMP) $($(COMPONENT)_PKGCONFIG_INCLUDES_BUILT),$(subst //,/,$($(COMPONENT)_INTRA_INCLUDES))),)
+$(shell echo "WARNING: some header files for $(COMPONENT) are not distributed ($(filter-out $($(COMPONENT)_PKGCONFIG_INCLUDES_COMP) $($(COMPONENT)_PKGCONFIG_INCLUDES_BUILT),$($(COMPONENT)_INTRA_INCLUDES)))" >&2)
+endif
+
+$(COMPONENT)_PKGCONFIG_INCLUDES_SELF:=$(sort $(patsubst $($(COMPONENT)_COMP_DIR/)api/headers%,-I$${includedir}%,$($(COMPONENT)_PKGCONFIG_INCLUDES_COMP)) $(addprefix -I,$(patsubst $(incdir)%,$${includedir}%,$(sort $(patsubst %/,%,$(foreach install,$(subst //,/,$($(COMPONENT)_BUILT_HEADERS_INSTALL)),$(foreach idir, $($(COMPONENT)_PKGCONFIG_INCLUDES_BUILT),$(patsubst %$(word 1,$(subst :,$(space),$(subst @,$(space),$(patsubst $(idir)/%,%,$(filter $(idir)/%,$(install)))))),%,$(word 2,$(subst :,$(space),$(subst @,$(space),$(patsubst $(idir)/%,%,$(filter $(idir)/%,$(install))))))))))))))
+
+$(COMPONENT)_DEVEL_INSTALL+=$(mkdir) -p $(pkgconfigdir) && $(echo) "prefix=/$(prefix)" > $(pkgconfigdir/)$(COMPONENT).pc && $(echo) 'libdir=$(addprefix /,$(filter-out $${prefix}%,$(patsubst $(prefix)%,$${prefix}%,$(libdir))))$(filter $${prefix}%,$(patsubst $(prefix)%,$${prefix}%,$(libdir)))' >> $(pkgconfigdir/)$(COMPONENT).pc && $(echo) 'includedir=$(addprefix /,$(filter-out $${prefix}%,$(patsubst $(prefix)%,$${prefix}%,$(incdir))))$(filter $${prefix}%,$(patsubst $(prefix)%,$${prefix}%,$(incdir)))' >> $(pkgconfigdir/)$(COMPONENT).pc && $(echo) "Name: $(COMPONENT)" >> $(pkgconfigdir/)$(COMPONENT).pc && $(echo) -n "Version: " >> $(pkgconfigdir/)$(COMPONENT).pc && if [ -e $(projectdir/)/build/version ] ; then $(CAT) $(projectdir/)/build/version >> $(pkgconfigdir/)$(COMPONENT).pc; else $(DATE) +%Y.%m.%d.%H.%M.%S.`id -un` >> $(pkgconfigdir/)$(COMPONENT).pc; fi && $(echo) "Description: $(COMPONENT)" >> $(pkgconfigdir/)$(COMPONENT).pc && $(echo) '$(filter-out @%,Libs: $($(COMPONENT)_LIBS_INSTALLED))' >> $(pkgconfigdir/)$(COMPONENT).pc &&  $(echo) '$(filter-out @%,Cflags: $(strip $($(COMPONENT)_PKGCONFIG_CFLAGS) $($(COMPONENT)_PKGCONFIG_INCLUDES_SELF)))' >> $(pkgconfigdir/)$(COMPONENT).pc  &&  $(echo) 'Requires: $(patsubst @%,%,$(sort $(filter @%,$($(COMPONENT)_PKGCONFIG_CFLAGS) $($(COMPONENT)_PKGCONFIG_INCLUDES) $($(COMPONENT)_PKGCONFIG_LIBS))))' >> $(pkgconfigdir/)$(COMPONENT).pc
+else
+ifneq  ($($(COMPONENT)_DEVEL_INSTALL),)	
+ $(COMPONENT)_DEVEL_INSTALL+=true
+endif
+endif
+##>
+
+# Target environment version of variables in the preamble.
+###<
+$(COMPONENT)_$(E)_LIBS                  := $(foreach l,$($(COMPONENT)_LIBS),$($(patsubst %_LIBS,%_$(E)_LIBS,$(filter %_LIBS,$(l))))$(filter-out %_LIBS,$(l)))
+$(COMPONENT)_$(E)_INSTALL               := $($(COMPONENT)_INSTALL)
+$(COMPONENT)_$(E)_INCLUDES              := $($(COMPONENT)_INCLUDES)
+$(COMPONENT)_$(E)_INTRA_INCLUDES        := $($(COMPONENT)_INTRA_INCLUDES)
+$(COMPONENT)_$(E)_DEVEL_INSTALL         := $($(COMPONENT)_DEVEL_INSTALL)
+$(COMPONENT)_$(E)_PARTS                 := $($(COMPONENT)_PARTS)
+$(COMPONENT)_$(E)_TEST_PARTS            := $($(COMPONENT)_TEST_PARTS)
+$(COMPONENT)_$(E)_EXPORTED_TEST_PARTS   := $($(COMPONENT)_EXPORTED_TEST_PARTS)
+$(COMPONENT)_$(E)_TEST_RUN              := $($(COMPONENT)_TEST_RUN)
+$(COMPONENT)_$(E)_TEST_INSTALL          := $($(COMPONENT)_TEST_INSTALL)
+$(COMPONENT)_$(E)_EXPORTED_TEST_INSTALL := $($(COMPONENT)_EXPORTED_TEST_INSTALL)
+$(COMPONENT)_$(E)_DIR                   := $($(COMPONENT)_DIR)
+$(COMPONENT)_$(E)_COMP_DIR              := $($(COMPONENT)_COMP_DIR)
+$(COMPONENT)_$(E)_CFLAGS                := $($(COMPONENT)_CFLAGS)
+$(COMPONENT)_$(E)_ELEM                  := $($(COMPONENT)_ELEM)
+$(COMPONENT)_$(E)_ELEM_INSTALL          := $($(COMPONENT)_ELEM_INSTALL)
+$(COMPONENT)_$(E)_HEADERS_INSTALL       := $($(COMPONENT)_HEADERS_INSTALL)
+$(COMPONENT)_$(E)_BUILT_HEADERS         := $($(COMPONENT)_BUILT_HEADERS)
+$(COMPONENT)_$(E)_DOCS_INSTALL          := $($(COMPONENT)_DOCS_INSTALL)
+$(COMPONENT)_$(E)_DOC_PARTS             := $($(COMPONENT)_DOC_PARTS)
+$(COMPONENT)_$(E)_DOC_INSTALL           := $($(COMPONENT)_DOC_INSTALL)
+$(COMPONENT)_$(E)_NODIST                := $($(COMPONENT)_NODIST)
+##>
+
+# Keep only the $(E) specific variables.
+###<
+# In theory we should reset all other variables defined above too.
+# But we are afraid of the impact.
+$(COMPONENT)_INSTALL :=
+$(COMPONENT)_INTRA_INCLUDES :=
+$(COMPONENT)_EXPORTED_TEST_PARTS :=
+$(COMPONENT)_TEST_INSTALL :=
+$(COMPONENT)_EXPORTED_TEST_INSTALL :=
+$(COMPONENT)_HEADERS_INSTALL :=
+$(COMPONENT)_DOCS_INSTALL :=
+##>
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

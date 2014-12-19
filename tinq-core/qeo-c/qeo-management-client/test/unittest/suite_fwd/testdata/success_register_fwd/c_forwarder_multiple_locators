@@ -1,0 +1,24 @@
+{ 
+  "locators": [ 
+    { 
+      "type": "TCPv4",
+      "address": "212.118.224.153",
+      "port": 8080
+    },
+    { 
+      "type": "TCPv6",
+      "address": "hostname",
+      "port": 7400
+    },
+    { 
+      "type": "UDPv4",
+      "address": "212.118.224.153",
+      "port": 6666
+    },
+    { 
+      "type": "UDPv6",
+      "address": "fe80::250:bfff:feb7:c61d",
+      "port": 7777
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+# To avoid accidental multiple inclusion
+ifneq ($($(qeo-openssl-engine-pkcs12_INCLUDED)),1)
+
+# The name of this component (the override prefix is mandatory as long as we
+# keep using COMPONENT=NMONMODULE/NMONKERNEL on the command line)
+override COMPONENT := technicolor.qeo.qeo-openssl-engine-pkcs12
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+# The license of the component
+
+# The exported header files for this component
+qeo-openssl-engine-pkcs12_INCLUDES     := api/headers $$(openssl_INCLUDES)
+
+# The compiler flags that have to be added to use the libraries of this component
+qeo-openssl-engine-pkcs12_CFLAGS     := -std=gnu99
+
+# The linker flags that have to be added to use the libraries of this component
+qeo-openssl-engine-pkcs12_LIBS       :=  -lqeo-openssl-engine-pkcs12 $$(openssl_LIBS)
+
+# The parts (libraries and programs) that make up this component
+qeo-openssl-engine-pkcs12_PARTS_INSTALL  := \
+    libqeo-openssl-engine-pkcs12.so@$$(libdir/)libqeo-openssl-engine-pkcs12.so:755 
+
+qeo-openssl-engine-pkcs12_ELEM_INSTALL := \
+# Test parts of this component (unit tests)
+#qeo-openssl-engine-pkcs12_TEST_PARTS +=  
+qeo-openssl-engine-pkcs12_TEST_PARTS_INSTALL += \
+	libpkcs12enginetests.so@$$(libdir/)unittests/libpkcs12enginetests.so:644 \
+
+qeo-openssl-engine-pkcs12_TEST_ELEM_INSTALL += \
+	test/script/qeo_test_run.sh@$$(bindir/)qeo_test_run.sh:755 \
+	d:$$(bindir/)credtool \
+	../common/test/tools/qeo-credentials/*@$$(bindir/)credtool \
+	test/script/addon-qeocreds.source@$$(bindir/)addon-qeocreds.source:644 \
+	test/script/addon-valgrind.source@$$(bindir/)addon-valgrind.source:644 \
+	test/script/valgrind.supp@$$(bindir/)valgrind.supp:644
+
+qeo-openssl-engine-pkcs12_TEST_RUN := $$(bindir/)qeo_test_run.sh
+
+# Compile time and deploy time dependencies for parts
+qeo-openssl-engine-pkcs12_DEPS          := openssl qeo-c-util
+# qeo-openssl-engine-pkcs12_CT_DEPS := <list of compile time dependencies>
+# qeo-openssl-engine-pkcs12_DT_DEPS := <list of deploy time dependencies>
+qeo-openssl-engine-pkcs12_TEST_DEPS := unittest-check cmock
+# qeo-openssl-engine-pkcs12_CT_TEST_DEPS := <list of compile time test dependencies>
+# qeo-openssl-engine-pkcs12_CT_TEST_DEPS :=
+# qeo-openssl-engine-pkcs12_DT_TEST_DEPS := <list of deploy time test dependencies>
+# qeo-openssl-engine-pkcs12_BUILT_HEADERS := <list of generated header files for this component>
+
+# Documentation for the component that needs to be built
+# (api specifications and High Level Software design required by repository)
+# qeo-openssl-engine-pkcs12_DOCS := <doc install rule>
+
+# qeo-openssl-engine-pkcs12_<VARIABLENAME> := <value>
+# <TOOL_NAME> := <command to run the tool>
+
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-openssl-engine-pkcs12.LIBRARIES := libqeo-openssl-engine-pkcs12 
+
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_CCDEPS :=
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_LDADD  := $(openssl_LIBS) $(qeo-c-util_LIBS) 
+
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_LDDEPS := 
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_LDFLAGS :=
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_LOCALDEFINES   = $(qeo-openssl-engine-pkcs12_CFLAGS) -D_GNU_SOURCE -Wall -Werror
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_LOCALINCLUDES :=  $(qeo-openssl-engine-pkcs12_INCLUDES) $(openssl_INCLUDES) $(qeo-c-util_INCLUDES)
+qeo-openssl-engine-pkcs12.libqeo-openssl-engine-pkcs12_SRCS          := $(addprefix src/, engine_pkcs12.c)
+
+##< Test Parts
+# Unit testing libraries
+
+include $($(COMPONENT)_COMP_DIR/)test/unit/Makefile_part
+##>
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

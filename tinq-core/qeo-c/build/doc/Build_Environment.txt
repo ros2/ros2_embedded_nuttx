@@ -1,0 +1,1540 @@
+The Core Middleware Development Environment
+-------------------------------------------
+
+
+BRUNO NOTES: the term component contract identifier is used in this document
+to denote an identifier for a group of components that implement the same
+contract.  Recently, I came to suspect that "componentType", like e.g.
+introduced in Service Component Architectures is probably a better term for
+this group of components that implement the same contract. The component
+contract identifier would then become componentType identifier, i.e. a
+shorthand that identifies a certain componentType. We specify the
+componentType in the export part of a component Makefile: references are
+dependencies (SCA would not do this on components, but on services???), the
+functional api is one of the non-remotable interfaces, services, ...
+Furthermore, keeping with Service Component Architecture Terminology, a source
+package (i.e. our component directories) would be called a component
+implementation and the built implementation (along with composition
+information) would be called an assembly
+
+
+
+
+0. Foreword
+-----------
+
+A typical development environments consists of lots of tools, scripts and
+support systems: editors, code generators, build systems, compilers, source
+code management system(s), build farms/continuous integration setups, test
+frameworks, code analyzers,... . Because of this, completely documenting a
+development environment is a near impossible task, not the least because
+development enviroments constantly evolve to improve the level of support for the
+developers that use them. Given this observation, it stands to reason that this
+document by no means holds a complete technical reference guide of all parts of
+the core middleware development environment. Instead it contains a collection
+of texts on a number of different subjects related to the core middleware
+development: it documents some of the core development environment building
+blocks but it also tries to provide background information on the how and why's
+of certain aspects of the development environment (and if these parts sound
+like the ramblings of a madman, I apologize - writing does not come naturally
+to me and I tend to lose myself in my own text - now where was I ... :))  
+
+While this text is more or less structured as a document you can read from top
+to bottom, feel free to skip the topics that are of no interest to you, start
+somewhere in the middle of the document, or read only the second word of every
+paragraph :)). Furthermore, you should consider this to be a living document:
+if you feel some information is missing, feel free to add it (but for
+consistency reasons, you should probably either try to keep to the rambling
+madman writing style or completly rework the document) or you can ask me
+(opensource@qeo.org) for an extension of this document (by now you are
+probably already more inclined to ask for a synopsis - if that is the case,
+please skip the introduction :)). 
+
+
+1. Introduction
+---------------
+
+The revolution project is a project aimed at creating "a generic and convergent
+middleware architecture for Technicolor Connect devices". The Revolution
+middleware architecture is a coherent collection of 'replaceable components'
+that can be shared across different revolution platforms.
+
+This document is geared towards developers of (core) middleware. It documents
+the complete "component-oriented" development environment that is used to
+develop the components (in the core part of) the Revolution middleware
+architecture. The term "component-oriented" development environment deserves
+some explanation. We describe a development environment that:
+- is geared towards developing components separately and provides the necessary
+  tooling for doing this, 
+- guides developers when they are developing the components towards creating
+  components that can easily be reused in different contexts,
+- provides support for building, packaging and exporting components in a number
+  of different formats.
+- builds further on a mature and proven Software Configuration Management
+  system and provides tools for managing, tracking and maintaining different
+  component software configurations and versions. 
+- ...
+
+As the term "component" is omnipresent in the above description (and in the
+rest of this document), and because the term is ambiguous and overloaded in
+mainstream technical literature we feel it is necessary to slightly sidetrack
+and describe what exactly we understand by the term "component". 
+
+Books have been written on the subject of what a component actually is (check
+for instance "Component Software: Beyond Object-Oriented Programming" by
+Clemens Szyperski), so discussing this in the full would probably lead us too
+far. Fortunately the most important property of components can easily be
+derived from their name: Components are all about composition. A component can
+easily be composed with other components to form a multitude of different
+systems. In other words, components can be reused to solve similar problems in
+different environments.
+
+The above tells us nothing about -when- we are going to compose different
+components with each other to form a complete system. Yet it is of utmost
+importance to specify this clearly from the start, as defining it removes a lot
+of the ambiguity of the term 'component'. Software modules, for instance, are
+blocks of source code that can be configured and compiled together with other
+software modules in such a way that they form a larger system. In other words,
+they can be composed (through configuration and compilation) to form different
+systems. Yet we typically do not consider them to be components. The reason
+for this is twofold. First of all, modules are typically tightly coupled (i.e.
+they typically use each others global variables and statically depend on
+specific implementations of functions), which often hampers the whole
+composition process: we are not just composing them, we are molding them (by
+configuration or by development specifically done for this purpose) until they
+can actually be composed. Second, module composition occurs at compile-time,
+which is quite early in the software release cycle. To maximize reuse
+opportunities, it is advisable that component composition (or integration if
+you like) can occur as late as possible in the software release cycle. In
+practice this means that preferably component composition occurs only at deploy
+time(*)(**). 
+
+(*)  By deploy-time, we mean the moment the component is actually added to the
+     system. This can be when the initial firmware image for a device is
+     created, or it can be when the component is later on installed or
+     upgraded, e.g. via a package manager/life cycle management mechanism. 
+
+(**) In some situations, one might even want to go further than that and defer
+     the actual composition until the moment where the component gets
+     instantiated. For instance, when a component that has a dependency on a
+     library component is started (instantiated), the system could load a
+     specific version of the library component depending on the current load of
+     the system. We consider this very similar to deploy time composition and
+     will not refer to it in the rest of the document. However, we believe the
+     rules listed below also apply in that situation). 
+
+The above statement has tremendous consequences for the way we develop
+components. Component developers (and component implementations) should never
+rely on knowledge of the internals/implementation of the components they
+depend on, because the components they depend on might be replaced with
+components that have completely different internals/implementations at deploy
+time. Furthermore, well-know approaches, like the configure-make-make install
+approach used by the open source community can only partially be used:
+typically, the configure scripts of a software package query the libraries and
+applications they depend on and they use and embed the detected results in the
+build of the software package. The detected results might or might not apply in
+all the deployment scenarios where the compiled software package will be used.
+
+Instead of relying on knowledge of implementation details or relying on compile
+time detection of implementation details, components need to rely on something
+called "the component contract". The contract of a deployable component should
+specify
+- what the inter-component dependencies of the component are                      (makefile)
+- which interfaces are provided by the component, as well as the documentation
+  of these interfaces including pre- and post-conditions for using the
+  interfaces                                                                      (api dir + doc)
+- how the component can be deployed, i.e. a component should list how and
+  where the different build artifacts, scripts, data files, ... need to be
+  installed to allow instantiation/execution of the component                     (makefile)
+- how the component can be instantiated, i.e. we need to know how the
+  component can be executed/started                                               (makefile/startup script?)
+- how the instances behave through the advertised interfaces (not just
+  per-interface specs).                                                           (doc)
+
+
+Now that we explained what we understand by the term component, let's get back
+on track, and focus again on the core middleware development environment.  The
+core middleware development environment presented in this document was
+constructed to allow 
+- the definition of component contracts in a simple, straightforward manner. 
+- efficient development, building and compile time integration testing of
+  components, even when the component dependencies and the component contracts
+  are not yet fully materialized.
+- ...
+
+The development environment promotes modular development of components, it will
+even enforce it in official builds of the component, but it tries not to get in
+the way of a developer: 
+- Component developers can use well know means to express the contract of the
+  component: header files, makefiles, ... . where possible, they do not need
+  to rely on an abstract language to specify this contract. Furthermore,
+  useless duplication of component contract information is avoided. Finally,
+  where possible, tools will be introduced to warn developers if they break
+  and/or extend a component contract.
+- Component developers do not need to resort to a convoluted build process when
+  they want to recreate a complete system image from source: the build
+  environment allows composite builds of complete systems from source. The
+  build system even allows complete parallel builds of complete systems, and
+  tries to offer the maximum available parallelism by offering a complete
+  non-recursive build environment for components. 
+- Component contracts are not set in stone at the moment of their conception.
+  Because of this the build environment allows development against an actual
+  component implementation. However, this should be seen as a
+  temporary situation. When the component contract is mature and stable, we
+  will use tooling to automatically generate a "pseudo contract component",
+  i.e. a mockup that presents the same contract to other components as the
+  original component, but lacks an actual implementation.  This "pseudo
+  contract component" can be used as a dependency to other components and can
+  be used to perform the compile time integration tests performed during the
+  build.  However, because it does not contain a real implementation there is
+  no chance that things that are not specified by the component contract can
+  be used. Official builds should also be created against a "pseudo contract
+  component".
+- Component can query the contract of dependencies from within the Makefile and
+  the source code (this is typically needed for compile time integration
+  testing). At the same time, the build system tries to hide the actual
+  implementation details from depending components. 
+
+Furthermore, the build environment assists in delivering the source code of a
+component to external parties and the component repository. Source code
+packages can be build out of the tree and external packages can easily be
+integrated in the tree.
+
+Finally, by design, you will not find a component configuration mechanism in
+the build environment. This is because we feel configuration, especially
+externally observable configuration of a component, hampers composition with
+other components. While it is more than probable that we will not be able to
+postpone the introduction of a configuration system indefinitely, we feel it
+should be handle with great care and only be done on a need to have basis. 
+
+The remainder of this document is structured as follows:
+
+* Building blocks of the development environment: gives an overview of some of
+  the core building blocks of the core middleware build environment.
+
+* Component vob layout: focuses on the first building blocks, i.e. the source
+  code management system used. This chapter describes how new components should
+  be named, and shows where components need to be put inside clearcase. 
+  
+* Component directory layout: goes into the component directory and describes
+  the layout of an individual component directory.
+
+* Building components: changes the focus to a second building block, the build
+  system. It shows how (native) components and component parts can be built and
+  packaged and how you can run the test cases embedded inside the component
+  directories. 
+
+* Writing component Makefiles: continues on the topic of the component build
+  system and shows you how you need to write your own component Makefiles.
+
+* Extending the build system: provides info on how to add new compilers to the
+  built system, extend the component Makefile syntax, ...
+
+
+
+
+
+2. Building blocks of the (core) middleware development environment
+
+
+============================== TODO =================================
+The source code management system used for core middleware development is
+clearcase. The layout of the source code inside clearcase is document in 3.
+"Clearcase vob and directory layout for (core) middleware". 
+
+The core build system is a make based build system. It is presented in 4. "   
+
+The build management website is used for project management and continuous
+integration.
+
+
+The test setup used...
+
+Baseline and (official) build process 
+
+The Technicolor component repository
+
+============================== TODO =================================
+
+3. Clearcase vob and directory layout for (core) middleware
+
+As in the future (core) middleware will be integrated as an integral part in
+all kinds of revolution projects and because we wanted to make a definite
+break with the pre-existing legacy software of non-revolution software in the
+other vobs, we chose to create a new vob hierarchy starting from the root
+directory /middleware. Inside this /middleware directory, all source code,
+makefiles, documentation and tests of the different components are stored in
+self-contained component directories. The different component directories are
+clustered together in logical groups of components with similar
+responsibilities and/or related functionality. 
+
+This clustering is done in accordance with the Revolution architecture
+document: if components are grouped together in the "detailed product view"
+drawings in the architecture document, we will group components in clearcase
+in exactly the same way. However, because the names for component groups are
+often quite lengthy (and contain spaces), we typically will abbreviate the
+group names to reduce the typing needed to navigate to a certain component
+directories. 
+
+The actual component directory names (and the group names) are preferably
+short lower case identifiers without separators (so no spaces, dashes or
+underscores in the name). This identifier should typically be (an abbreviation
+of) the name used for your component in the "detailed product view" drawings
+in the architecture document. If you feel that you cannot come up with an
+meaningful identifier/abbreviation for your component that consists solely of
+lower case letters, you are allowed to use capital letters to separate
+different words in the identifier. So all directories leading up to and
+including the component directory must be in lowerCamelCase ([a-z][a-zA-Z]*).
+
+Furthermore, because component directory names play an important role in the
+component dependency resolution process in the build environment, each
+component directory name should be unique in the entire middleware hierarchy.
+To be a little more specific: there may never be two component directories
+with the same name, unless they are two different implementations of the same
+component contract.
+
+Finally, to control the use of third party software, you should never directly
+import third party code inside the vobs under /middleware. Imported code
+belongs in an import vob dedicated to importing the software for a certain
+vendor/organization. This allows for easy identification of third-party code
+when a build is audited. We chose to name the /vobs/import/<provider> for the
+name of the import vob. Components should be added in the import vobs,
+typically in the root of the import vob (in some case it might be more logical
+to cluster several components from a vendor together - this is also allowed).
+The top-level directory under which you import the component should be the
+component name, and component directory naming rules apply.
+
+When you want to add a new component, you can use the following decision tree
+to decide where you need to put your component:
+
+a. If your component consists (mainly) of "Technicolor" code 
+
+   - If your component is a component that physically will end up on a
+     revolution target (i.e. it is not just a tool used during the
+     development/build/test process):
+	* Lookup the block that represents the component in the architecture
+	  document, more specifically in the "detailed product views". If the
+	  component cannot be found, and you think this component is part of
+	  the revolution middleware and it is possible that this component
+	  will end up on a revolution target, contact the architecture group
+	  and discuss with them where in the revolution architecture detailed
+	  product views your component belongs. 
+	* Map the names found in the detailed product views of the
+	  architecture document to easy to type directory names, taking into
+	  account other components for which (part of) the directory hierarchy
+	  was already created, abbreviating where this makes sense and making
+	  sure all directory paths are lowerCamelCase. 
+	* If you end up with a path that is not yet inside a vob (follow the
+	  directory hierarchy from the /middleware root as far as you can,
+	  enter that directory and type cleartool ls. If you are not in a vob,
+	  this will produce an error), contact ISF to request the vob.
+	  Describe where the component can be found in the "detailed product
+	  views" and list the path you were trying to create. Also give an
+	  indication as to how large the code base of this component (and
+	  other components that are clustered together with this component)
+	  will become in the end. ISF will create a vob somewhere in the
+	  directory architecture (based on the pre-existing situation,
+	  clearcase limitations and your code size estimates). Once the vob
+	  has been created, you can start working on your component.
+   - If this code will never end up on target (but it is a tool used during
+     the develop/build/test process) and it is created in Technicolor, it
+     should go in the vob called /middleware/tools/internal. In this vob,
+     create the directory <componentName> for your component.
+
+b. If the component (mainly) consists of third party code:
+   - Find out the name of the organization that sold the code or (for open
+     source) the organization that holds (most of) the copyrights on that
+     code. If no such organization can be found, the organization name
+     defaults to "acme".  The code should be placed in a subdirectory that
+     identifies the component in a vob called "/vobs/import/<organization>".
+     If this vob does not exist, contact ISF to request the vob. List the name
+     of the package you want to import, the name of the organization that sold
+     the code/holds the copyright, the full path of the new vob and the
+     license of the code you are importing.
+   - If the component is also present in the "detailed product views" of the
+     architecture document, create a relative symlink from the position where
+     you would have created the component if this was a "Technicolor"
+     component to the component directory in the import vob.
+   - If the component in not present in the "detailed product views" of the
+     architecture document, it must be a tool used during the
+     development/build/test process. A symlink should be created from
+     /middleware/tools/external/<organization>/<componentName> to the
+     component directory in the import vob.
+     
+
+Examples:
+
+The CRUD part of the "Rebus Service Framework" from Core Middleware
+maps to  "Core Middleware" - "Rebus Service Framework" - "Rebus CRUD". The
+shorthand for this is /middleware/core/servicefw/rebusCRUD.
+
+The internationalization part of gettext, was put in /vobs/import/GNU/intl.
+(For historical reasons, the vob /vobs/import/GNU was chosen. Better would
+have been /vobs/import/fsf for "Free Software Foundation".) In the
+architecture document, it shows up as "Core Middleware" - "Middleware
+Foundation Libraries" - "Internationalization". (TODO: actually it doesn't!
+Where is it?). This was mapped to /middleware/core/mfl/intl. 
+
+Check is an open source library, that is only used to assist in writing unit
+tests. It is not really part of the middleware offering. The copyright is held
+by the individual developer, and thus the code should be imported under
+/vobs/import/acme in /vobs/import/acme/check. As it does not show up in the
+"detailed product views" of the architecture document, a symlink must be
+created from /middleware/tools/external/acme/check to the imported code.
+(TODO: this still needs to be cleaned up: acme vob should be remounted and
+/middleware/tools/external vob created).
+
+
+3. Component directory layout
+
+============================== TODO =================================
+All (core) middleware components are structured in a uniform way. This
+structure is chosen to facilitate submission to the component repository.
+
+- project
+- project/api/                     : a subdirectory holding all things related
+				     to the external api of the component
+- project/api/headers/ => optional : a subdirectory of api holding all header
+                                     files exported to other components
+- project/samples/     => optional : samples for this component
+- project/build/                   : a subdirectory holding files related to
+                                     the build system
+- project/src/                     : a subdirectory containing source files and
+                                     internal header files
+- project/test/                    : a subdirectory containing test files and
+                                     test code for the component
+- project/test/unit/               : a subdirectory containing everything
+                                     related to unit testing
+- project/test/.../    => optional : other subdirectories containing tests
+                                     might exist
+- project/.../         => optional : a component can contain other
+                                     subdirectories
+- project/Makefile_component       : a Makefile that can be used to build the
+                                     component
+
+- metadata
+
+- (metadata/manifest.txt)          : the manifest file describing the
+				     component. Not in clearcase, as it is auto
+                                     generated at build time.
+- metadata/certifications/         : if this component needs or obtained
+				     certification put the related documents
+                                     here.
+- metadata/documentation/          : put all component related documentation here 
+- (metadata/documentation/INSTALL.txt) : added at build time
+- (metadata/licenses/)             : generated at build time
+- (metadata/patents/patents.pdf)   : 
+- metadata/patents/                : directory that holds all patents related
+                                     to this component
+
+
+============================== TODO =================================
+
+4. The build system
+
+============================== TODO =================================
+
+4.a. General
+
+============================== TODO =================================
+
+4.a.1 Prerequisites for using the CoreMW build system
+
+To use the (core) middleware build environment, you need a version of either
+GNU make or clearmake that supports secondary expansion. Secondary expansion
+is a GNU make extension that makes it possible to define make rules with
+prerequisites derived from make variables defined after the actual make rule
+(see the GNU make manual for details). The following make tools support
+secondary expansion:
+
+- GNU make, versions 3.81 or later (3.81 and 3.82 have been tested) have
+  secondary expansion. GNU make can be obtained from ftp://ftp.gnu.org. To
+  know the version of GNU make that is installed on your machine, execute:
+
+> make --version
+
+GNU Make 3.81 
+
+- The GNU make emulation mode of clearmake (the build tool provided with
+  Rational Clearcase) also supports secondary expansion in all recent versions
+  (7.0.x.x or later).  Forge has been tested against several 7.0.x.x Clearcase
+  releases.  To know the version of clearmake that is installed on your
+  machine, execute:
+
+> cleartool -ver
+
+ClearCase version 7.0.0 ...
+
+  When compiling inside clearcase, clearmake is recommanded. However, make
+  sure you use the GNU make emulation mode:
+
+> clearmake -C gnu
+
+4.a.2.  
+
+============================== TODO =================================
+  
+4.b. Using the build system
+
+4.b.1. Building from inside the component directory
+
+The most typical use case of the build environment is that builds get
+initiated from inside the component's project directory.
+
+The general structure of the build command used in clearcase is
+
+> clearmake -C gnu <clearcase-opts> -f Makefile_component <target-spec> <variable-spec>
+
+Outside clearcase (in an sdk or a snapshot) the build command would become
+
+> make -f Makefile_component <target-spec> <variable-spec>
+
+
+We list the most common targets and variables below. You can always obtain
+these from the build environment itself, by building using the target help:
+
+> make -f Makefile_component help
+
+
+4.b.1.a. Variables that influence the build process
+
+<componentContractIdentifier>_COVERAGE:
+   When this variable is set to 1, all parts of the component identified
+   by <componentContractIdentifier> will be compiled for collecting coverage
+   information, provided the target environment definition specifies how a
+   component can be compiled for coverage information collection.
+
+<componentContractIdentifier>_DEBUG:
+   When this variable is set to 1, all parts of the component identified
+   by <componentContractIdentifier> will be compiled for debugging, provided
+   the target environment definition specifies how a component can be compiled
+   for debugging.
+
+COMPONENT_SEARCH_PATH_PREFIX:
+   This variable can be set to a pattern that will be prefixed to the default
+   component search path. For example, by specifying:
+   
+   COMPONENT_SEARCH_PATH_PREFIX=/work/extra_components/%/project/Makefile_component
+   
+   the first directory that will be searched for components will be the
+   /work/extra_components/precompiled folder. When the build system looks for a
+   component identified as <componentContractIdentifier> it will replace the %
+   by <componentContractIdentifier>, and include the file
+   
+   /work/extra_components/<componentContractIdentifier>/project/Makefile_component
+   
+   if it exists. If it does not exist, the default component search path will be
+   used to find another Makefile that defines the component. If that fails, an
+   error will be reported by the build environment. COMPONENT_SEARCH_PATH_PREFIX
+   can hold multiple patterns, separated by spaces.
+
+COVERAGE:
+   When this variable is set to 1, all parts of all components will be compiled
+   for collecting coverage information, provided the target environment definition
+   specifies how a component can be compiled for coverage information collection.
+
+DEBUG:
+   When this variable is set to 1, all parts of all components will be compiled
+   for debugging, provided the target environment definition specifies how a
+   component can be compiled for debugging.
+
+DESTDIR:
+   This variable specifies the installation directory for all install commands.
+
+E:
+   This variable is used to select the environment for which you want to
+   compile. It selects the compiler and sets target specific defines that can be
+   used in the other Makefiles and in the source code. If this variable is not
+   provided it will default to HOSTLINUX. This is a special environment that
+   uses your host compiler to create a build. It will search for a gcc in
+   your path and use that to compile everything. Do not use this for
+   cross-compilation - i.e. do not put a cross-compiler called gcc first in the
+   path and then put E=HOSTLINUX - as the build environment will compile and
+   execute some test applications compiled with the found gcc to deduce key
+   properties of your host platform.
+
+OUTPUT_PREFIX:
+   This variable can be used to override the path where derived objects - i.e.
+   the result files of build commands - need to be put. It should always be
+   predefined to a sane value compile. Currently it is set to:
+   
+   /vobs/do_vob1/do_store/
+   
+   but that can be because you overruled it on the command line
+
+4.b.1.b. Build Targets
+
+all:
+   The default target: Build rule used to trigger a build of all production
+   parts of the component from which the build was initiated.
+
+docs:
+   Build rule used to trigger a build of all documentation parts of the
+   component from which the build was initiated.
+
+test:
+   Build rule used to trigger a build of all production and test parts of the
+   component from which the build was initiated.
+
+4.b.1.c. Clean Targets
+
+clean:
+   Clean rule that will remove all the output created for the component from
+   which the build was initiated. The implementation is very simple: it will
+   recursively remove the output directory for the component. Mind that this
+   rule does not clean the directories of components on which the top-level
+   component depends.
+
+4.b.1.d. Install Targets
+
+devel_install:
+   Install rule used to install all the production parts and the header files of
+   the component from which the build was initiated and a package config file
+   that describe how you can develop against this component to the directory
+   DESTDIR. If DESTDIR was not provided on the command line this rule will try
+   to install to the root directory /.
+
+docs_install:
+   Install rule used to install all the documentation of the component from
+   which the build was initiated to the directory DESTDIR. If DESTDIR was not
+   provided on the command line this rule will try to install to the root
+   directory /.
+
+install:
+   Install rule used to install all the production parts and elements of the
+   component from which the build was initiated to the directory DESTDIR. If
+   DESTDIR was not provided on the command line this rule will try to install
+   to the root directory /.
+
+recursive_install:
+   Install rule used to install all production parts and elements of the
+   component from which the build was initiated and of all the components it
+   depends on to the directory DESTDIR. If DESTDIR was not provided on the
+   command line this rule will try to install to the root directory /.
+
+recursive_test_install:
+   Install rule used to install both the production and the test parts and
+   elements of the component from which the build was initiated and of all the
+   production parts of the components it depends on - either with a normal
+   dependency or a test dependency - to the directory DESTDIR. If DESTDIR was
+   not provided on the command line this rule will try to install to the root
+   directory /.
+
+test_install:
+   Install rule used to install all production and test parts and elements of
+   the component from which the build was initiated to the directory DESTDIR. If
+   DESTDIR was not provided on the command line this rule will try to install to
+   the root directory /.
+
+4.b.1.e. Execute targets
+
+coverage_test_run:
+   Execute rule used to trigger a run of - a part of - the test code of the
+   component from which the build was initiated and collect coverage information
+   along the way. This rule will trigger a build of the test code and the
+   production code, pass the required options to compile all these parts for
+   coverage information collection, perform a recursive_test_install to a working
+   directory of the compiled parts and all needed dependencies, enter that
+   directory and execute a test command. Which command gets executed is up to the
+   component developer, but we assume it will start some kind of unit
+   tests. See the component Makefile documentation for description on how to
+   specify a test run command. After the test has run, lcov will be called to
+   produce a coverage report. 
+
+test_run:
+   Execute rule used to trigger a run of - a part of - the test code of the
+   component from which the build was initiated. This rule will trigger a
+   build of the test code, perform a recursive_test_install to a working
+   directory, enter that directory and execute a test command. What gets
+   executed is up to the component developer, but we assume it will start some
+   kind of unit tests. See the component Makefile documentation for a
+   description on how to specify a test run command.
+
+checkstyle: 
+   Execute rule available to Java components (<componentContractIdentifier>_JAVA := 1). This rule
+   will perform style checking on the sources found in <componentContractIdentifier>_COMP_DIR/src/java.
+   Checkstyle check for indentation, the presence of Javadoc, but also perform a number of static code
+   analysis checks.
+javadoc:   
+   Execute rule available to Java components (<componentContractIdentifier>_JAVA := 1). This rule
+   will generate the javadoc html pages based on the comments found in the sources of
+   <componentContractIdentifier>_COMP_DIR/src/java.
+
+4.b.1.f. Package Targets
+
+<componentContractIdentifier>-full.tgz:
+   Package rule used to create a tgz holding all the production parts of the
+   component identified by <componentContractIdentifier> and all the production
+   parts of the components it depends on. The directory structure inside the tgz
+   is the same as it would be on the filesystem when the component was installed
+   by a recursive install rule.
+
+<componentContractIdentifier>-test-full.tgz:
+   Package rule used to create a tgz holding all the production and test parts
+   of the component identified by <componentContractIdentifier> and all the
+   production parts of the components it depends on. The directory structure
+   inside the tgz is the same as it would be on the filesystem when the
+   component was installed by a recursive install rule.
+
+<componentContractIdentifier>-test.tgz:
+   Package rule used to create a tgz holding all the production and test parts
+   of the component identified by <componentContractIdentifier>. The directory
+   structure inside the tgz is the same as it would be on the filesystem when
+   the component was installed by a test install rule.
+
+<componentContractIdentifier>.tgz:
+   Package rule used to create a tgz holding all the production parts of the
+   component identified by <componentContractIdentifier>. The directory
+   structure inside the tgz is the same as it would be on the filesystem when
+   the component was installed by an install rule.
+
+
+4.b.2. Building multiple top-level components at once
+
+============================== TODO =================================
+
+4.c Extending the build system
+
+============================== TODO =================================
+
+4.c.1. Writing component Makefiles
+
+A component makefile consists of three parts (called the identification
+section, the export section and the build section) wrapped in one or two make
+conditionals to avoid multiple inclusion. Details on the make conditionals to
+avoid multiple inclusion are explained in 4.c.1.b.
+
+The identification section simply contains a Makefile statement to set the
+name of the component.
+
+The export section provides all information exported by the component to "the
+outside world", i.e. to other components, to packaging tools, ... Because the
+information inside the export section is used by many different consumers (the
+build system, other components, scripts that process the information in the
+export section, ...) the structure in it is fixed: in the export section, there
+is only a limited number of predefined variables that can be set and only a
+limited subset of normal make syntax can be used.
+
+The build section contains the actual build commands for the parts of the
+component that need to be build. You can easily identify it as the
+export section must end with 
+
+include $(projectdir/)build/Makefile_component_top
+
+Likewise, the last line of the build section should always be
+
+include $(projectdir/)build/Makefile_component_bot
+
+
+4.c.1.b. General terms 
+
+Contract identifier: For a component, a "contract identifier" is an identifier
+that allows to uniquely identify the api/abi (i.e. the contract) provided by
+the component.  As you can create multiple components that provide the same
+api/abi (implement the same contract), several components can use the same
+contract identifier. When two components have the same contract identifier, it
+should be possible to swap out either one of these components and replace it
+by the other one (at least at compile time, preferable also at system
+composition time/deploy time).
+
+Component name: A "Component name" is an identifier that allows to uniquely
+identify a specific component implementation. At the very least the component
+name contains the company name of the company that developed the component and
+a contract identifier.
+
+
+4.c.1.c. Controlling multiple inclusion of component Makefiles
+
+A component Makefile must start with a guard that prevents multiple inclusion.
+The format of the guard must be
+
+> ifneq ($($(<componentContractIdentifier>_INCLUDED)),1)
+
+Note that the component contract identifier is used to prevent multiple
+inclusion, not the component name. It makes no sense to include two components
+with the same contract identifier in the same build: as they implement the
+same contract, they should be indistinguishable from a build system
+perspective.
+
+Futhermore, notice the double expansion of the
+<componentContractIdentifier>_INCLUDED variable. This double expansion is
+there because we are actually preventing multiple inclusion FOR THE SAME
+ARCHITECTURE: the $($(<componentContractIdentifier>_INCLUDED)) construct will
+only evaluate to 1 if a component with the given contract identifier was
+already included for the current architecture. So it is possible that a
+component makefile is read multiple times in a build if a component with the
+same contract was requested for different target architectures.
+
+A second guard limits usage of the component to a certain architecture. This
+guard is used to support precompiled components. The format of this guard
+should be
+
+> ifeq ($(E),<TARGET_PLATFORM_ENVIRONMENT_NAME>)
+
+where TARGET_PLATFORM_ENVIRONMENT_NAME is a target platform architecture
+identifier. If this guard is present, it means the component can only be used
+on the specified architecture.
+
+4.c.1.d. The identification section
+
+The first statement following the inclusion guards should be the assignment of
+the component name. The format of the assignment is
+
+> override COMPONENT:=<companyName>.path.inside.full.company.delivery.to.<componentContractIdentifier>
+
+Inside an sdk from a company, the component Makefile will reside in the
+subdirectory
+
+path/inside/full/company/delivery/to/componentContractIdentifier/project
+
+The only allowed characters in the componentContractIdentifier are [a-zA-Z].
+It might seem weird that typical seperator characters, like underscores,
+dashes and dots are not allowed. However, as the component contract identifier
+is typically also used as part of the package name when packaging up a
+component, and because underscores are not allowed by some package management
+systems, we cannot allow underscores. Furthermore, dashes are prohibited,
+because the component contract identifier is also passed as a defined
+preprocessor macro to the source code (and preprocessor macros cannot contain
+underscores).  Finally, dots are already used to seperate the contract
+identifier from the rest of the component name.
+
+The only allowed characters in the component full name are [a-zA-Z.].
+
+4.c.1.e. The export section
+
+Following the assignment of the component name, we find the export section.
+The export section describes the component to the build system, packaging
+systems and to the components that reference this component. The only makefile
+construct that you can use in the export section are variable assignments.
+Furthermore, only a limited set of variable assignments are allowed. 
+
+Inside the export section, it is possible to refer to the variables set in the
+export section of the components on which this component depends (even though
+those component makefiles most likely have not yet been read) or to use global
+variables set by the build environment. However, when you do this you have to
+prefix the variables with two dollar signs (as opposed to the regular one
+dollar sign used in normal make syntax). These double dollar signs allow the
+build system to defer the expansion of the variables that have been annotated
+in this fashion to the point where the global variables are set and all the
+definitions for the components on which this component depends have been read. 
+
+For example: mycomponent_LIBS = -lmylib $$(othercompent_LIBS) 
+
+Some other rules apply to the use of make constructs in the export section.
+First of all, is impossible to correctly use the make function $(wildcard ...)
+inside the export section of a component: relative wildcard paths would only
+work when the component is built from the component directory, absolute paths
+cannot be constructed because the path to the component directory is only
+inferred at the end of the export section.
+
+Also, do not use tabs as seperators in the variables set in the export
+section: they are removed by the deferred expansion process.
+
+The remainder of this section groups the different allowed variables in the
+export section based on the functional area in which each of these individual
+variables plays a role. Each group will start with a description of the
+functionality and then provide an indepth description of all possible
+variables that influence this functionality. 
+
+----- Specifying dependency information
+
+A component needs access to the contract of the components with which it
+interacts for a number of reasons:
+- Developers might need type definitions for types specified in contracts of
+  the component.
+- To build, many compilers will use or require this contractually specified
+  interface, to check if the created component indeed adheres to the contract.
+- To access the services of a component it might be necessary to generate code
+  based on the service contract of the component that provides the service.
+
+Furthermore, when the component is installed to a platform, it will require
+that some conditions have to be satisfied, at minimum, the other components
+with which this component interacts have to be available.
+
+All the above examples introduce a dependency between components. But they are
+different types of dependencies. We can divide the dependency types into 3
+distinct classes:
+- Compile-time dependencies: These are the elements that are required to
+  compile/build a component. Header files (because they are needed to compile)
+  and libraries (because they are used to verify if all needed symbols were
+  resolved at link-time) are in this category.
+- Deploy-time dependencies: These are the elements that need to be in place to
+  be able to use a component successfully in its execution environment.
+  (Shared) libraries fall in this category (so shared libraries are both
+  compile time and deploy time dependencies), as do external executables
+  called by this component.  
+- Run-time dependencies: These are the elements that are required for a
+  component to run properly. Contrary to compile and deploy time dependencies,
+  these can be hard- and soft-requirements. In the former case, the component
+  can't function properly whenever its dependencies are not satisfied. In the
+  latter case, the component is operational but its functionality is
+  restricted (e.g. some features are disabled). Service needed at run-time
+  fall into this category, and in some cases also executable code (e.g.
+  libraries that are only loaded at run-time (dlopen)).
+
+
+Component makefiles contain no information about the run-time behaviour of a
+component, but they are responsible for building components and packaging
+them. So each compile time and deploy time dependency needs to be specified in
+the component Makefile. Dependencies are expressed on
+componentContractIdentifier. We list specific component dependencies by adding
+the needed componentContractIdentifier in one of the different dependency
+variables.
+
+The most common way to specify component dependencies is with the variable
+<componentContractIdentifier>_DEPS:
+
+> <componentContractIdentifier>_DEPS := <list of dependencies>
+
+This variable holds a list of component contracts on which this component has
+both a compile time and a deploy time dependency, i.e. the parts of the
+components that implement the contracts specified in this list have to be
+built before this component can be built AND when this component is installed,
+you also so need to install a list of components that implements the contract
+specifiers listed in this variable.
+
+Example:
+
+foo_DEPS := bar
+
+Sometimes you might want to express that the component you are developing has a
+dependency on (it needs some kind of information from) other components, but
+only when we are building the component (i.e. you can deploy it without the
+other components). In that case, you can use the following: 
+
+> <componentContractIdentifier>_CT_DEPS := <list of compile time dependencies>
+
+This variable holds a list of components on which this component has a
+compile-time dependency. More formal, the parts of the components that
+implement the contracts specified in this list have to be built before this
+component can be built, and the contract of those component needs to be
+available in this component. This variable is rarely used: normally, you use
+the variable <componentContractIdentifier>_DEPS. You would only use this
+variable if you have a compile dependency, that is not a deploy time
+dependency. An example of this would be: two applications share data via a
+pipe. One of them puts a header file that describes the format of the data.
+The other component needs this header file at compile time, but there is no
+strict requirement for both components to be present in the system (the pipe
+would block if nobody wrote to it, but the rest of the component would work).  
+
+Example:
+
+foo_CT_DEPS := corge
+
+> <componentContractIdentifier>_DT_DEPS := <list of deploy time dependencies>
+
+This variable holds a list of components on which this component has a deploy
+time dependency, i.e. if you deploy this component, you also need to deploy a
+list of components that implements the contract specifiers listed in this
+variable. This variable is used more than
+<componentContractIdentifier>_CT_DEPS but is still not frequently used:
+normally, you use the variable <componentContractIdentifier>_DEPS.  You would
+only use this variable if you have a deploy time dependency, that is not a
+compile time dependency. An example would be the situation where one component
+would start another component 
+
+Example:
+
+foo_DT_DEPS := grault
+
+Tests bundled with the component might have more dependencies than the
+component itself (e.g. a test framework, mock tools, coverage tools, ...).
+Because of this you have a test variant for each of the variables for
+specifiying normal component dependencies. If you specify a component contract
+in one of these variables, a component that implements this contract will only
+be searched if you are building a test target. The variables that can be used
+for tests are:
+
+> <componentContractIdentifier>_TEST_DEPS := <list of test dependencies>
+> <componentContractIdentifier>_CT_TEST_DEPS := <list of compile time test dependencies>
+> <componentContractIdentifier>_DT_TEST_DEPS := <list of deploy time test dependencies>
+
+---- Communicating usage information to depending components
+
+If a component has a compile time dependency on another component, it
+typically needs information that describes how to use and locate the contract
+of this component. The following variables do exactly that:
+
+> <componentContractIdentifier>_INCLUDES := <list of include directories>
+
+A list of include directories that need to be passed to the compiler if you
+want to develop against this component. If an include directory is specified
+with a relative path (no slash at the start of the path), the build system
+assumes that this path is relative to the project directory of your component.
+The use of absolute paths is allowed for testing and prototyping purposes, but
+production versions should never use it. Furthermore, the list can contain
+references to <componentContractIdentifier>_INCLUDES variables of other
+components (using the two dollar signs). As it is advised that your component
+stores all its exported headers in the api/headers directory under the project
+directory, typically this directory (along with references to _INCLUDES
+variables of other components) is the only thing that is there. Do not
+mindlessly at references to all _INCLUDES variables of all the components you
+depend on. Only add those that are really needed (e.g. because a function
+definition in your exported header files needs a type definition from one of
+you dependencies).
+
+Example:
+
+foo_INCLUDES := api/headers $$(bar_INCLUDES)
+
+> <componentContractIdentifier>_CFLAGS := <list of defines>
+
+This variable holds a list of extra options that need to be passed to the
+compiler when we want to compile against this component. Typically you add
+these, because you cannot use the exported header files of this component
+without setting passing some non-standard compiler flags. It can contain
+defines (e.g. in the form -DDEFINE=VALUE), or any other combination of compiler
+flags (e.g. -fno-strict-aliasing). Avoid the use of this variable: no compiler
+specific options should be needed, and it should be possible to use the
+exported header files without setting preprocessor defines.
+
+> <componentContractIdentifier>_LIBS := <list of linker flags>
+
+A list of options that need to be added by depending components to the
+compiler/linker if you want to link against the libraries provided by this
+component. It can contain -L<searchdir>, -l<library> and references
+<componentContractIdentifier>_LIBS variables (two dollar signs!) of other
+components. The output directory (i.e. the directory where all the parts of
+this component are build) is prepended as a search path to this variable, so
+typically you only need to add the -l<library> and not the -L<searchdir>. 
+
+Examples:
+
+foo_LIBS:= -lbaz $$(bar_LIBS)
+
+> <componentContractIdentifier>_BUILT_HEADERS := <list of generated header files for this component>
+
+This variable is used to flag to depending components that (part of) the api
+of this component is not useable until certain (header) files have been built.
+This in practice means that compilation commands of depending components
+cannot be started until (at least the api parts of) this component have been
+built. The value of this variable should be a list of header files specified
+with a relative path. The build system assumes the path is specified relative
+to the default output directory. For testing purposes, you can also include
+absolute paths, but they should never end up in released code.
+
+foo_BUILT_HEADERS := generated_baz.h
+
+---- Installing stuff
+
+Component have to be packaged or installed inside a filesystem before they can
+be used. The following variables control installation and packaging:
+
+> <componentContractIdentifier>_ELEM_INSTALL:= <regular files install rules>
+
+A list of regular files (i.e. they are not build output) that need to be
+installed when the component is installed. For each file to install we will
+have an <installable_part>@<target_file>:mode-trustlevel entry in the list. 
+If the <installable_part> is specified using a relative path, the component 
+project directory will be prepended to it. <target_file> must contain the complete
+path name of the part when it is installed to target, but without the leading
+slash (if any). For specifying the target file, typically a set of variables
+that specify default installation paths for libraries ($$(libdir)), binaries
+($$(bindir)), ... can be used. The mode argument is a standard unix
+numerical mode (see e.g. the man page of chmod). This mode is optional if you
+do not care about the protection mode, just specify your part install rule as
+<installable_part>@<target_file>. Finally, an optional trust level can be specified 
+for a target file which can be mapped to security credentials on a platform.  
+Furthermore, d:<dirname> elements can be
+used to create directories on the target device and s:<symlink
+origin>@<symlink target> elements to create symbolic links. Similar to
+<target_file>, you should strip leading slashes from <dirname> and <symlink
+target>. 
+
+Example:
+
+foo_ELEM_INSTALL := datafile@$$(datadir/)datafile:444
+
+The following list of variable are defined at this point:
+bindir & bindir/: the directory for installing binaries. It reasonable to assume that bindir is a part of the PATH 
+   environment variable.
+
+> incdir & incdir/: The directory to install headers into when providing a development package/
+
+> libdir & libdir/: the directory for installing libraries into. It fairs to assume this directory
+    is part of default library search path.
+
+> pkgconfigdir & pkgconfigdir/: TODO
+  
+> datadir & datadir/: The directory to place data in
+
+> sysconfdir & sysconfdir/: the directory to put configuration files in. It defaults to etc.
+  
+> rgcdir & rgcdir/: The directory for installing rebus generic consumers in. These consumers can be used by the 
+    viewframework. It safe to assume that rgc libraries are found by the view framework when properly installed in
+  the rgcdir
+  
+> viewmapdir & viewmapdir/: The directory to store viewmap files in. These mapping files are use by the view framework
+    to extend its view. 
+
+> clifwmapdir & clifwmapdir/: The directory to store clifw map files in. These mapping files are use by the CLI framework
+    to extend its commands. 
+
+> luamoddir & luamoddir/: The default directory to install lua modules (lua scripts) in. Modules in luamoddir should
+     be picked lua interpreter automatically.
+
+> lualibdir & lualibdir/: The default directory to install lua libraries (native shared libraries). Shared libraries in
+    this dir are automatically found by the lua interpreter.
+
+> <componentContractIdentifier>_PARTS_INSTALL := <parts install rule>
+
+A list of built artifacts for this component that need to be installed to the
+target device when this component is deployed, combined with installation
+information for each part. For each installable built artifact we will have an
+<installable_part>@<target_file>:mode-trustlevel that behaves identical to the install
+rule of elements, except for the fact that the default output directory will
+be prepended to the <installable_part> if this path is a relative path.
+
+Example: 
+
+foo_PARTS_INSTALL := libbaz.so@$$(libdir/)libqux.so:664 d:workdir/subdir s:/workdir/realfile@workdir/linkfile
+
+Test parts often also need to be installed before they can be used. Hence the
+following variables:
+
+> <componentContractIdentifier>_TEST_ELEM_INSTALL := <regular files that need to be installed for testing>
+
+Extra regular files (not build output) that need to be installed when the
+tests are installed. Format is identical to the format used for _ELEM_INSTALL. 
+
+Example:
+
+foo_TEST_ELEM_INSTALL:= test_in@$$(datadir/)testin
+
+> <componentContractIdentifier>_TEST_PARTS_INSTALL := <test parts install rule>
+
+A list of extra built artifacts for this component that only need to be
+created and installed when a test version of this component is built and
+installed. The format is identical to the format used for specifying
+_PARTS_INSTALL.
+
+Example:
+
+foo_TEST_PARTS_INSTALL:= foo_test_program@$$(bindir/)testme
+
+> <componentContractIdentifier>_EXPORTED_TEST_PARTS_INSTALL := <test parts install rule>
+
+A list of extra built artifacts for this component that need to be created and
+installed when a test version of this component is built and installed (just
+like _TEST_PARTS_INSTALL) but also when full test install is done on a
+component that has a test dependency on this component. The format is identical
+to the format used for specifying _PARTS_INSTALL.
+
+Example:
+
+foo_EXPORTED_TEST_PARTS_INSTALL:= foo_test_program2@$$(bindir/)testmeinstallme
+
+
+---- Building stuff that does not need to be installed
+
+There are situations where you just want to build some parts, but they do not
+need to be installed. In that case the following variable is used:
+
+> <componentContractIdentifier>_PARTS := <list of parts not listed in the parts install rule>
+
+A list of built artifacts for this component that do not need to be installed
+to the target device when this component is deployed. Typically used for
+static library parts. Just like for _PARTS_INSTALL, the default output
+directory is prepended to all parts in the list that are specified using
+relative paths. 
+
+Example:
+
+foo_PARTS := libquux.a
+
+
+When you ask for a build of the component, it will build the parts in here and
+all parts in the left hand side of the install rules in _PARTS_INSTALL. 
+
+
+---- Describing tests
+
+The build environment allows you to automatically run (unit) tests from the build
+system. If you want to use this functionality you need to describe to the
+build environment how to run you (unit) tests. You use the following variable
+for that:
+
+> <componentContractIdentifier>_TEST_RUN := <command that needs to be executed to start a test run>
+
+When the build system wants to execute (unit) tests, it will install the tests
+(and all deploy time dependencies), go to the directory where the tests were
+installed and execute the command line given in this variable.
+
+Example:
+
+
+foo_TEST_RUN := $$(bindir/)testme $$(datadir/)testin
+
+---- Controlling the output of repository packages
+
+Apart from packaging, we also want to be able to export source code packages
+for each component to the repository. Some extra information needs to be
+specified to allow the build environment to build a repository compliant
+package. 
+
+> <componentContractIdentifier>_LICENSE := <LICENSE>
+
+where <LICENSE> must be an acronym or abbreviated identifier
+identifying the license of this component. It must be the same as the
+acronym used by the component repository. This is a required field.
+
+The following licenses are known in the repository:
+
+GPL2 : GNU GPL 2.0 license
+MITL : MIT License
+BSDL : BSD License
+MOZL : Mozilla Public License
+APCH : Apache License
+APSL : Apple Public Source License
+LGPL : Library level GPL license
+TCLR : Technicolor proprietary license
+BRCM : Broadcom proprietary license
+INTC : Intel proprietary license
+
+Example:
+
+foo_LICENSE:=MITL
+
+
+> <componentContractIdentifier>_DOCS_INSTALL := <list of doc install rules>
+Install rules that install generated documents into the metadata/documentation
+directory of a delivered repository component. Format is that same as the one
+used for _PARTS_INSTALL:
+
+Example:
+
+foo_DOCS_INSTALL:= spec.pdf@HighLevelDesignSpecification.pdf:664
+
+> <componentContractIdentifier>_JAVA= <ENABLE>
+This variables defines support for Java compilation. When a component contains java 
+code extra targets are required. However since only a limited set of components
+actually needs this,the inclusion of these targets are triggered by defining 
+<componentContractIdentifier>_JAVA=1 This enables for example target suchs as javadoc and checkstyle,
+but also it allows to compile java sources and package them into jars. See for more details Makefile
+build section. Not defining this variable or giving it a value other then 1 will result in no Java support.
+
+---- Providing a trust level for packages or individual resources
+
+It is possible to assign a trust level to a component or individual 
+resources of the package. This trust level will be used at deployment 
+time to link credentials with the package.
+
+> <componentContractIdentifier>_TRUST_LEVEL := <trust level>
+
+where <trust level> is a valid trust level recognized by the platform for
+which you are building. When building a Deployment Unit (.tpu). The build
+system will translate this trust level to a default trust level specified 
+in the resulting manifest file for the DU.
+
+Example:
+
+foo_TRUST_LEVEL:=guest
+
+It is also possible to specify a trust level for an individual resource
+which will overrule the default trust level for the package.
+It is also possible to provide such a trust level to an intermediate
+directory.
+As the mode is optional, it can be left blank as shown in the example below.
+
+Examples:
+
+foo_PARTS_INSTALL:= bar@bar:664-guest 
+or 
+foo_ELEM_INSTALL:= bar@bar:-guest
+or 
+foo_PARTS_INSTALL:= bar@bardir:-root/bar:644-guest
+
+---- Providing a resource group for packages
+
+It is possible to assign a resource group to a component. This resource group
+will be translated to a control group in which the component will run when
+managed by LCM.
+
+> <componentContractIdentifier>_RESOURCE_GROUP := <resource group>
+
+where <resource group> is a valid resource group recognized by the platform for
+which you are building. When building a Deployment Unit (.tpu). The build
+system will translate this resource group to a default resource group specified 
+in the resulting manifest file for the DU. For more information about this,
+take a look at the LCM documentation.
+
+Example:
+
+foo_RESOURCE_GROUP:=applications
+
+============================== TODO =================================
+
+> <componentContractIdentifier>_<VARIABLENAME> := <value>
+
+Component specific export section variables are allowed, but
+the use of component specific variables in the export section of a
+component should be avoided as much as possible, as
+- they can be tricky in situations where the component is included
+multiple times in the same compilation run (e.g. once for different
+architectures). Because of this <value> must be constant,
+regardless of the compilation architecture.
+- the value of these variables cannot be automatically verified
+- they need to be part of your component documentation, and every
+implementation of this component must correctly set this variable
+- these variable should not be used to communicate implementation
+details to components that depend on this component, as component
+should be oblivious of the implementation details of other
+components.
+
+> <TOOL_NAME> := <command to run the tool>
+
+
+
+============================== TODO =================================
+
+----- Marking the end of the component export section
+
+The component export section must be closed with the line
+
+> include $(projectdir/)build/Makefile_component_top
+
+4.c.1.f. The component Makefile build section
+
+Following the export section is the build section. The build section
+describes how the different parts of the component can be built. We distinguish
+two types of build sections: structured and free form. Similar to the
+export section, the expressiveness of a structured build section is
+limited: only certain make variables can be set and only a (very) limited
+subset of normal make syntax can be used. Structured build sections are easy to
+use: you basically just fill in a template and the build system will create the
+correct rules for building your parts. The drawback of this is that only a
+limited number of component part types can be built using the structured form.
+In you need to build something not supported by a structured build section, you
+need to use a free-form build section. A free-form build section is more
+expressive, it supports most of the normal Makefile syntax (although some extra
+rules are imposed to assure component interoperability) and allows you to
+define your own makefile rules.
+
+Even though free-form bodies are more powerful, the advantage of using
+structured component bodies are manyfold: makefiles with a structured build
+section can be build using parallel/distributed make tools, you do not have to
+worry about clearmake and GNU make incompatibilities, everything is in place
+to allow building components for different target architectures in the same
+invocation of make and they can be parsed and verified by external tools.
+Furthermore, if you are using the Technicolor Component SDK (see ...) you can
+use the Makefile editor plugin to create and edit Makefiles with structured
+bodies. 
+
+We first describe the structured component build section. The rules applying
+to free form build sections will be listed next.  
+
+4.c.1.f.1. Structured component bodies.
+
+Structured component bodies can be used to create program, library and
+document parts (and test parts). To add a program part to a component, you
+need to add the name of the program to the
+<componentContractIdentifier>.PROGRAMS list:
+
+> <componentContractIdentifier>.PROGRAMS := <list of programs>
+
+For libraries, you need to add the library name to the
+<componentContractIdentifier>.LIBRARIES list. The library name is the filename
+part of a library, without .so (shared object) or .a (archive) extensions.
+Adding a library name to the library list makes sure both .a and .so build
+rules are generated. Note that most linkers expects libraries to start with the
+prefix lib, so if you want to create libraries that can be used for linking,
+make sure you include the lib prefix in the library name. The build environment
+does not check for this as it might be useful to create libraries without the
+prefix when you will only dlopen them from within a program.
+
+> <componentContractIdentifier>.LIBRARIES := <list of libraries without extension>
+
+Finally, documents that need to be built are specified in the
+<componentContractIdentifier>.DOCUMENTS list. Similar to libraries, you do not
+need to specify the type (.pdf, ...) of document in this list. 
+
+> <componentContractIdentifier>.DOCUMENTS := <list of documents without extension>
+
+It is allowed to add elements to this list further on in the component build
+section using standard makefile syntax, e.g. 
+
+> <componentContractIdentifier>.JARS := <list of jar files to generate without extension>
+
+> <componentContractIdentifier>.PROGRAMS += <more programs>
+
+This can be useful if you for instance want to put your normal component parts
+first in the component build section, and the test parts after all definitions
+related to the normal parts.
+
+As an example, for a component with contract identifier 'foo' that consists of
+an application 'bar', a library 'libbar.so' and a document barDesign.pdf, we
+would list:
+
+foo.PROGRAMS  := bar
+foo.LIBRARIES := libbar
+foo.DOCUMENTS := barDesign
+foo.JARS := jbar
+
+For each of these programs, libraries and documents, you need to set some
+specific variables that control what source files will be used, what the
+compiler options should be, .... Below we list all available variables listed
+in the order of importance:
+
+For documents, the following variables can be set. The main goal of these 
+variable is to provide extra info so dita book XML file can be generated 
+from a template. References to DITA topics and maps are relative to 
+<componentContractIdentifier>_COMP_DIR/doc/dita and must remain inside 
+<componentContractIdentifier>_COMP_DIR/doc/dita.
+
+> <componentContractIdentifier>.<doc>_TITLE := <the title of the document>
+This variable must be defined and contains the title for the document.
+
+> <componentContractIdentifier>.<doc>_TITLE_ALT := <the subtitle of the document>
+This variable may be defined and contains the subtitle for the document.
+
+> <componentContractIdentifier>.<doc>_CHAPTERS := <a list of dita topics and/or maps>
+The chapters variable is also a required parameter as it contains a list 
+of dita topics and/or dita maps with the actual content of the document. The 
+order of the arguments is importent as it dictates the order in which the 
+files are added the document. The first element will be chapter 1, the second 
+chapter 2, ...
+ 
+> <componentContractIdentifier>.<doc>_REFERENCES := <the path to a dita topic containing reference information>
+The references variable refers to a single topic which contains references to 
+other documents relevant to the current one. The content will be use as 
+reference list.
+
+> <componentContractIdentifier>.<doc>_DOC_ID := <the document id of the document>
+The official document ID of the document. This ID should match the ID assigned 
+to the document by DOC/CCO (e.g. through Demetrius).
+
+The output style of the document can be manipulated through two environment 
+variables:
+
+DOC_AUDIENCE: The audience for which you want to compile the document. If set to 
+"public", this will remove "For internal use only" watermarks and hide elements 
+in the DITA source for which the audience attribute is set to "internal". Any 
+other value will result in internal documentation (default = internal).
+
+DOC_DRAFT: Whether or not to include "DRAFT" watermarks in the document. If set 
+to yes, the subtitle will include the date and time on which the document was 
+compiled. If set to any other value, the value of the _TITLE_ALT variable will 
+be used (default = yes).
+
+In our foo example, this would become (assuming the ditamap is called
+bardesign.ditamap and stored in the doc subdirectory of the foo project
+directory):
+
+foo.barDesign_DITAMAP := doc/bardesign.ditamap
+
+For libraries and programs the following variables can be set:  
+
+> <componentContractIdentifier>.<program or library>_SRCS := <list of sources>
+
+A list of source files that make up your program or library. If a source file
+is specified with a relative path (no slash at the start of the path), the
+build system assumes that this path is relative to the project directory of
+your component. The use of absolute paths is allowed for testing and
+prototyping purposes, but production versions should never use it. Supported
+extensions for source code files are .c for c-files, .cpp, .cc for c++ files.
+Example:
+
+foo.bar_SRCS    := src/baz.c src/qux.cc
+foo.libbar_SRCS := src/quux.cpp
+
+> <componentContractIdentifier>.<program or library>_LOCALINCLUDES := <list of include directories to use>
+
+A list of include directories that have to be added to the compiler command
+line. Do not add -I, it is automatically added. Similar to source files,
+relative paths are assumed to be relative to the project directory.  This list
+can also contain variable references to the variable
+<componentContractIdentifier>_INCLUDES of other components.  The use of
+absolute paths in this list is only allowed for testing and prototyping
+purposes.
+
+Example:
+
+foo.bar_LOCALINCLUDES := api/headers src/private_headers
+
+> <componentContractIdentifier>.<program or library>_LOCALDEFINES := <list of preprocessor defines>
+
+A list of defines that need to be passed to the compiler. Format is -D<FLAG>
+-D<NEXTFLAG>=<VALUE>. 
+
+Example:
+
+foo.bar_LOCALDEFINES := -DLIBRARY
+
+> <componentContractIdentifier>.<program or library>_LDADD := <linker flags>
+
+A list of extra libraries and library search paths that should be added to the
+command line of the linker. Can be libraries provided by the toolchain (-lm)
+or references to other component libraries. These last should be provided as
+$(<componentContractIdentifier>_LIBS). For testing purposes, you can also use
+this line to specify linker options that need to be added at the end of the
+command line or to add direct references for libraries somewhere in the
+filesystem. These should however be removed in official deliveries.
+
+Example:
+
+foo.bar_LDADD := $(baz_LIBS) -lgrault -lm
+
+> <componentContractIdentifier>.<program or library>_CCDEPS := <list of intra component compile dependencies>
+
+A list of intra component parts (typically headers) that need to built before
+you can start compiling this part. Typically used for generated code created
+inside this component. Currently, you can only need to use this variable if
+you are mixing free form and structured build sections. If the dependencies
+are specified using relative paths, the default output directory is prepended.
+Mind that you should never use this for intercomponent dependencies. If a
+generated header files constitutes an inter component dependency, it should
+have been added to the _BUILT_HEADERS variable of that component (and the
+build system will automatically add it as a compile-time dependency for all
+parts.
+
+Example:
+
+foo.bar_CCDEPS:= generated_header_file.h
+
+> <componentContractIdentifier>.<program or library>_LDDEPS := <list of intra comonent link dependencies>
+
+A list of intra component parts that need to built before you can start
+linking this part.  Typically something like <libname>.so, where <libname> is
+a component defined in this component.  If the dependencies are specified
+using relative paths, the default output directory is prepended.  Mind that
+you should never use this for inter component dependencies. If a file
+constitutes an inter component dependency, it should have been added to the
+_PARTS variable or the _PARTS_INSTALL variable of that component (and the
+build system will automatically add it as a link-time dependency for all
+parts).
+
+Example:
+
+foo.bar_LDDEPS:= libgrault.a 
+
+> <componentContractIdentifier>.<program or library>_LDFLAGS := <linker flags>
+
+A list of flags that need to be passed before the object files passed to the
+linker. Can be used to tweak linking behavior for testing purposes. The use of
+this variable should be avoided and the variable can not be present in
+official deliveries of the component.
+
+> <componentContractIdentifier>.<jar>_MANIFEST := <a path to the manifest file for this jar>
+This identifier should point to a file which will be used a manifest. This file should follow the manifest
+file syntax. When this variable is not set, then an empty manifest will be used.
+
+> <componentContractIdentifier>.<jar>_INCLUDES := <A komma seperated list of inclussion paterns for classes to include>
+The includes patterns allow to add compiled classes inside the jar. All own classes found in 
+<componentContractIdentifier>_COMP_DIR/src/java and <componentContractIdentifier>_COMP_DIR/test/junit
+in case of a test jar are availble, along with all classes from compiletime dependencies.
+The syntax of the patterns is equal to typical ant filter syntax where '**' means any number 
+of directories and '*' any character sequence.
+**/*.class --> meaning all files with the '.class' extension 
+
+> <componentContractIdentifier>.<jar>_EXCLUDES := <A komma seperated list of inclussion paterns for classes to exclude>
+Similar to the _INCLUDES variant, but the filter pattern is used to describe classes to exclude.
+
+TODO: extra extension need to be foreseen to add aditional resource into a jar (image files, plugin.xml files, ...).
+
+============================== TODO =================================
+4.c.1.d.2. Free-form component bodies
+
+
+
+4.c.2. Adding new target environments
+

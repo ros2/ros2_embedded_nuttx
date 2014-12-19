@@ -1,0 +1,81 @@
+ifneq ($($(qeo-c-json_INCLUDED)),1)
+
+override COMPONENT := technicolor.middleware.core.qeo-c-json
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+qeo-c-json_INCLUDES := api/headers $$(qeo-c-core_INCLUDES)
+qeo-c-json_CFLAGS   := -std=gnu99
+qeo-c-json_LIBS     := -lqeojson
+qeo-c-json_LIBS     += $$(qeo-c-core_LIBS) $$(jansson_LIBS)
+
+qeo-c-json_PARTS_INSTALL      := \
+	libqeojson.so@$$(libdir/)libqeojson.so:755
+qeo-c-json_ELEM_INSTALL       := 
+
+qeo-c-json_TEST_PARTS         :=
+qeo-c-json_TEST_PARTS_INSTALL := \
+	systest_event_public@$$(bindir/)systest/public/event:755 \
+	systest_state_public@$$(bindir/)systest/public/state:755 \
+	systest_int64_public@$$(bindir/)systest/public/int64:755 
+qeo-c-json_TEST_PARTS_INSTALL += \
+	libutapi.so@$$(libdir/)unittests/libutapi.so:755
+qeo-c-json_TEST_ELEM_INSTALL  := \
+	test/script/qeo_test_run.sh@$$(bindir/)qeo_test_run.sh:755 \
+	d:$$(bindir/)credtool \
+	../common/test/tools/qeo-credentials/*@$$(bindir/)credtool \
+	test/script/addon-qeocreds.source@$$(bindir/)addon-qeocreds.source:644 \
+	test/script/addon-valgrind.source@$$(bindir/)addon-valgrind.source:644 \
+	test/script/valgrind.supp@$$(bindir/)valgrind.supp:644 \
+	test/unittest/event_type.json@$$(datadir/)/event_type.json:400 \
+	test/unittest/state_type.json@$$(datadir/)/state_type.json:400 \
+
+qeo-c-json_TEST_RUN           := $$(bindir/)qeo_test_run.sh create_qeo_home_for_junit
+
+qeo-c-json_DEPS               := qeo-c-core qeo-c-util jansson
+qeo-c-json_TEST_DEPS          := unittest-check 
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-c-json.LIBRARIES := libqeojson
+
+qeo-c-json.libqeojson_LOCALDEFINES  := $(qeo-c-json_CFLAGS) -Wall -Werror -D_GNU_SOURCE
+qeo-c-json.libqeojson_LOCALINCLUDES := src/ $(qeo-c-json_INCLUDES) $(jansson_INCLUDES)
+qeo-c-json.libqeojson_SRCS          := $(addprefix src/, callback.c json_types_util.c qeo_json.c)
+qeo-c-json.libqeojson_LDADD         := $(qeo-c-core_LIBS) $(jansson_LIBS)
+
+### System tests ###
+
+# Test libraries
+ 
+# Build rules for system tests
+
+qeo-c-json_SYSTESTS = event state int64
+
+qeo-c-json.PROGRAMS += $(foreach test, $(qeo-c-json_SYSTESTS), systest_$(test)_public)
+
+define qeo-c-json_SYSTEST_TEMPL
+qeo-c-json.systest_$(1)_public_LDADD         := $(qeo-c-json_LIBS) $(jansson_LIBS)
+qeo-c-json.systest_$(1)_public_LOCALDEFINES  := $(qeo-c-json_CFLAGS) -Wall -Werror
+qeo-c-json.systest_$(1)_public_LOCALINCLUDES := $(qeo-c-json_INCLUDES) $(jansson_INCLUDES)
+qeo-c-json.systest_$(1)_public_SRCS          := $(addprefix test/systest/, $(1)_main.c verbose.c)
+endef
+$(foreach test, $(qeo-c-json_SYSTESTS), $(eval $(call qeo-c-json_SYSTEST_TEMPL,$(test))))
+
+#### Unit test libraries ###
+
+qeo-c-json.LIBRARIES += libutapi
+
+qeo-c-json.libutapi_SRCS          := $(addprefix libqeojson:src/, callback.c json_types_util.c qeo_json.c) \
+                                $(addprefix test/unittest/, suite_api_inargs.c)
+qeo-c-json.libutapi_LOCALINCLUDES := src $(qeo-c-json_INCLUDES) $(unittest-check_INCLUDES) $(libjansson_INCLUDES)
+qeo-c-json.libutapi_LOCALDEFINES  := -Wall -Werror
+qeo-c-json.libutapi_LDADD         := $(qeo-c-core_LIBS) $(unittest-check_LIBS)  $(qeo-c-json_LIBS) -L$(qeo-c-json_PREFIX)
+qeo-c-json.libutapi_LDDEPS        := libqeojson.so  
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

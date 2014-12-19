@@ -1,0 +1,17 @@
+ifndef rm
+rm=$(shell if rm --version > /dev/null 2>/dev/null; then $(echo) rm; fi)
+endif
+
+ifeq ($(rm),)
+rm=$(shell if grm --version > /dev/null 2>/dev/null; then $(echo) grm; fi)
+endif
+
+ifeq ($(rm),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working rm in the path. This is required if you do not specify projectdir. Provide rm on the commandline (e.g. rm=/bin/rm).") 
+$(shell $(echo) "Could not find a working rm in the path. This is required if you do not specify projectdir. Provide rm on the commandline (e.g. rm=/bin/rm)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

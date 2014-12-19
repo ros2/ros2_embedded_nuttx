@@ -1,0 +1,8 @@
+# Initialize MODULE to the first element inside $(COMPONENT).MODULES_RUN
+MODULE:=$(word 1, $($(COMPONENT).MODULES_RUN))
+
+# Remove $(MODULE) from $(COMPONENT).MODULES_RUN
+$(COMPONENT).MODULES_RUN:=$(filter-out $(MODULE), $($(COMPONENT).MODULES_RUN))
+
+# Include Makefile_module to generate the module build commands
+include $(projectdir/)build/Makefile_module

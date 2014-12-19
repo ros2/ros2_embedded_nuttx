@@ -1,0 +1,64 @@
+# If all components have been resolved there is nothing left to be done... We
+# stop recursion
+ifneq ($(patsubst %:$(E),%,$(filter %:$(E),$(NEEDED_COMPONENTS))), )
+
+# Take the first path currently listed in RESOLVE_PATHS_$(words $(INC_DEPTH),
+# store it in RESOLVE_PATH_$(words $(INC_DEPTH))
+RESOLVE_PATH_$(words $(INC_DEPTH)):=$(firstword $(RESOLVE_PATHS_$(words $(INC_DEPTH))))
+
+# Take the remainder of the paths and store it in
+# RESOLVE_PATH_$(words $(INC_DEPTH))
+RESOLVE_PATHS_$(words $(INC_DEPTH)):=$(wordlist 2, $(words $(RESOLVE_PATHS_$(words $(INC_DEPTH))) extra), $(RESOLVE_PATHS_$(words $(INC_DEPTH))))
+
+# Preserve this list of needed components on the stack. We need this to find
+# out which components were resolved by the include on the next line.
+STACK_$(words $(INC_DEPTH)):=$(NEEDED_COMPONENTS)
+
+
+WILL_RESOLVE_MAKEFILES:=$(shell ls $(subst &,$(HOSTMACHINE_CAPS),$(subst @,$(E),$(patsubst %,$(RESOLVE_PATH_$(words $(INC_DEPTH))), $(patsubst %:$(E),%,$(filter %:$(E),$(NEEDED_COMPONENTS)))))) 2>/dev/null)
+
+ifneq ($(WILL_RESOLVE_MAKEFILES),)
+#WILL_RESOLVE_$(words $(INC_DEPTH)):=$(filter-out $(RESOLVED),$(foreach file,$(WILL_RESOLVE_MAKEFILES), $(patsubst $(RESOLVE_PATH_$(words $(INC_DEPTH))),%,$(file)):$(E)@$(file)))
+
+# Try to include some component Makefiles
+sinclude $(WILL_RESOLVE_MAKEFILES)
+
+NEEDED_COMPONENTS:=$(STACK_$(words $(INC_DEPTH)))
+
+HAVE_RESOLVED:=$(foreach comp,$(RESSTACK_$(words $(INC_DEPTH))),$(comp):$(E)@$(firstword $(wildcard $(subst %,$(comp),$(RESOLVE_PATH_$(words $(INC_DEPTH)))))))
+#ifneq ($(sort $(HAVE_RESOLVED)),$(sort $(WILL_RESOLVE_$(words $(INC_DEPTH)))))
+#$(shell echo Something strange happened: expected $(WILL_RESOLVE_$(words $(INC_DEPTH))) got $(HAVE_RESOLVED) >&2)
+#$(shell echo "Expected: $(WILL_RESOLVE_$(words $(INC_DEPTH))) :" >&2)
+#$(shell echo "Got     : $(HAVE_RESOLVED) :" >&2)
+#die
+#endif
+# If we resolved a component, store its Makefile in the RESOLVED list 
+RESOLVED:=$(RESOLVED) $(HAVE_RESOLVED)
+endif
+
+RESSTACK_$(words $(INC_DEPTH)):=
+
+NEEDED_COMPONENTS:=$(filter-out $(ALL_COMPONENTS), $(NEEDED_COMPONENTS))
+
+ifeq ($(patsubst %:$(E),%,$(filter %:$(E),$(NEEDED_COMPONENTS))), )
+# If all components have been resolved, make sure recursion stops
+RESOLVE_PATHS_$(words $(INC_DEPTH))=
+endif
+
+# If there are paths left to consider, recurse
+ifneq ($(RESOLVE_PATHS_$(words $(INC_DEPTH))), )
+INCLUDE_COMPONENTS_STUB_RECURSE:=$(projectdir/)build/Makefile_include_components_stub.search_path
+else
+INCLUDE_COMPONENTS_STUB_RECURSE:=NON_EXISTING_FILE
+endif
+else
+# If all components have been resolved, make sure recursion stops
+RESOLVE_PATHS_$(words $(INC_DEPTH))=
+INCLUDE_COMPONENTS_STUB_RECURSE:=NON_EXISTING_FILE
+endif
+
+# Clearmake has a limit of 64 nested conditional statements. To overcome this
+# we use this tail call optimization: instead of testing if we need to include
+# the file, we either include the file, or we include a non existing file. This
+# removes the nested conditionals
+sinclude $(INCLUDE_COMPONENTS_STUB_RECURSE)

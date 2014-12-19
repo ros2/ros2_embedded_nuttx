@@ -1,0 +1,27 @@
+TOOL:=$(firstword $(NEEDED_TOOLS))
+
+NEEDED_TOOLS:=$(filter-out $(TOOL),$(NEEDED_TOOLS))
+
+ifeq ($($(TOOL)),)
+ifneq ($($(TOOL)_COMPONENT),)
+#If somebody forced a fixed component Makefile (no %) in the COMPONENT SEARCH
+#PATH, make sure we do not use that Makefile here....
+IGNORE_FORCED_COMPONENT_MAKEFILES:=$(wildcard  $(subst &,$(HOSTMACHINE_CAPS),$(subst @,HOSTLINUX,$(COMPONENT_SEARCH_PATH))))
+ifneq ($(filter-out $(IGNORE_FORCED_COMPONENT_MAKEFILES),$(wildcard $(subst &,$(HOSTMACHINE_CAPS),$(subst @,HOSTLINUX,$(subst %,$($(TOOL)_COMPONENT),$(COMPONENT_SEARCH_PATH)))))),)
+TOOL_USES_COMPONENT:=1
+NEEDED_COMPONENTS:=$(sort $(NEEDED_COMPONENTS) $($(TOOL)_COMPONENT):HOSTLINUX)
+endif
+endif
+endif
+
+ifeq ($($(TOOL)),)
+ifneq ($(TOOL_USES_COMPONENT),1)
+$(TOOL):=$(TOOL)
+endif
+endif
+
+TOOL_USES_COMPONENT:=0
+
+ifneq ($(NEEDED_TOOLS),)
+include $(projectdir/)build/Makefile_tools_resolve
+endif

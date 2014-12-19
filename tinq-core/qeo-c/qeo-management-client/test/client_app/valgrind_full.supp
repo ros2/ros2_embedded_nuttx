@@ -1,0 +1,89 @@
+{
+   Ignore openssl load strings
+   Memcheck:Leak
+   ...
+   fun:int_err_set_item
+   fun:err_load_strings
+   ...
+}
+{
+   Openssl add all algorithms
+   Memcheck:Leak
+   ...
+   fun:OPENSSL_add_all_algorithms_noconf
+   ...
+}
+{                                                                                                            
+   SSL library init                                                                          
+   Memcheck:Leak                                                                                             
+   ...
+   fun:SSL_library_init                                                                                      
+   ...
+}
+{
+   d2i_PKCS12_fp one time stuff
+   Memcheck:Leak
+   ...
+   fun:ERR_clear_error
+   ...
+   fun:ASN1_item_d2i_fp
+   fun:d2i_PKCS12_fp
+   ...
+}
+{
+   d2i_PKCS12_fp one time stuff creating bio
+   Memcheck:Leak
+   ...
+   fun:BIO_new
+   fun:ASN1_item_d2i_fp
+   fun:d2i_PKCS12_fp
+   ...
+}
+{
+   One time stuff when parsing pkcs12 rsa
+   Memcheck:Leak
+   ...
+   fun:rsa_cb
+   ...
+   fun:parse_bags
+   fun:parse_pk12
+   fun:PKCS12_parse
+   ...
+} 
+{
+   One time stuff when parsing pkcs12 rsa
+   Memcheck:Leak
+   ...
+   fun:x509_cb
+   ...
+   fun:parse_bags
+   fun:parse_pk12
+   fun:PKCS12_parse
+   ...
+}                                      
+{ 
+   curl ssl one time leaks
+   Memcheck:Leak
+   ...
+   fun:Curl_ossl_connect
+   fun:Curl_ssl_connect
+   fun:Curl_http_connect
+   fun:Curl_protocol_connect
+   fun:Curl_setup_conn
+   fun:Curl_connect
+   fun:connect_host
+   fun:Curl_do_perform
+   fun:Curl_perform
+   fun:curl_easy_perform
+   ...
+}
+{ 
+   global memory when creating private rsa keys
+   Memcheck:Leak
+   ...
+   fun:RSA_new_method
+   fun:RSA_new
+   fun:RSA_generate_key
+   fun:keygen_create 
+   ...
+}

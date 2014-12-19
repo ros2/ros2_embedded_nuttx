@@ -1,0 +1,116 @@
+ifneq ($($(qeo-c-util_INCLUDED)),1)
+
+override COMPONENT := technicolor.middleware.core.qeo-c-util
+override COMPONENT_SEARCH_PATH_PREFIX := $(projectdir/)../../*/%/Makefile_component
+
+qeo-c-util_INCLUDES := api/headers 
+qeo-c-util_CFLAGS   := -std=gnu99
+qeo-c-util_LIBS     := -lqeoutil 
+ifeq ($(SOAPTEST), 1)
+qeo-c-util_LIBS     += $$(libsoap_LIBS)
+endif
+
+qeo-c-util_PARTS_INSTALL      := \
+	libqeoutil.so@$$(libdir/)libqeoutil.so:755
+qeo-c-util_ELEM_INSTALL       := 
+
+qeo-c-util_TEST_PARTS         :=
+qeo-c-util_TEST_PARTS_INSTALL := \
+	libutlog.so@$$(libdir/)unittests/libutlog.so:755 \
+	libutplatform.so@$$(libdir/)unittests/libutplatform.so:755
+qeo-c-util_TEST_ELEM_INSTALL  := \
+    test/script/qeo_test_run.sh@$$(bindir/)qeo_test_run.sh:755 \
+	d:$$(bindir/)credtool \
+	../common/test/tools/qeo-credentials/*@$$(bindir/)credtool \
+	test/script/addon-qeocreds.source@$$(bindir/)addon-qeocreds.source:644 \
+	test/script/addon-valgrind.source@$$(bindir/)addon-valgrind.source:644 \
+	test/script/valgrind.supp@$$(bindir/)valgrind.supp:644
+qeo-c-util_TEST_RUN           := $$(bindir/)qeo_test_run.sh create_qeo_home_for_junit
+
+
+qeo-c-util_DEPS               :=
+ifeq ($(SOAPTEST), 1)
+qeo-c-util_DEPS               := libsoap
+endif
+qeo-c-util_TEST_DEPS          := unittest-check cmock
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-c-util.LIBRARIES := libqeoutil
+
+qeo-c-util.libqeoutil_LDADD         := $(libsoap_LIBS)
+qeo-c-util.libqeoutil_LOCALDEFINES  := $(qeo-c-util_CFLAGS) -Wall -Werror
+qeo-c-util.libqeoutil_LOCALINCLUDES := src/ $(qeo-c-util_INCLUDES)
+qeo-c-util.libqeoutil_SRCS          := $(addprefix src/, qeo_log.c)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/, common.c platform.c)
+
+#if anybody knows a more maintainable way to do this...
+ifeq ($(filter $(E),GOOG_ARMANDROID GOOG_X86ANDROID IOS_ARMV7_CLANG IOS IOS_ARMV7S_CLANG IOS_ARM64_CLANG IOS_SIM32_CLANG IOS_SIM64_CLANG, ),)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/impl/default/, linux_default_device.c)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/impl/default/, default_impl.c)
+endif
+
+ifeq ($(SOAPTEST), 1)
+qeo-c-util.libqeoutil_LOCALINCLUDES += $(libsoap_INCLUDES)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/impl/soap/, qeo_registration_credentials_soap.c soap_impl.c)
+endif
+
+ifeq ($(E),KLOCWORK)
+#compile all sourcefiles for klocwork
+qeo-c-util.libqeoutil_SRCS          := $(addprefix src/, qeo_log.c)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/, common.c platform.c)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/impl/default/, default_impl.c linux_default_device.c)
+qeo-c-util.libqeoutil_SRCS          += $(addprefix src/platform/impl/soap/, qeo_registration_credentials_soap.c soap_impl.c)
+endif
+
+### Test programs ###
+
+### Unit test libraries ###
+
+qeo-c-util.LIBRARIES += libutlog libutplatform
+
+qeo-c-util.libutlog_SRCS          := $(addprefix libqeoutil:src/, qeo_log.c) \
+                                $(addprefix test/unittest/suite_log/, test.c)
+qeo-c-util.libutlog_LOCALINCLUDES := src $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES)
+qeo-c-util.libutlog_LOCALDEFINES  := -Wall -Werror
+qeo-c-util.libutlog_LDADD         := $(cmock_LIBS) $(unittest-check_LIBS) -L$(qeo-c-util_PREFIX)
+qeo-c-util.libutlog_LDDEPS        := libqeoutil.so
+
+
+qeo-c-util.libutplatform_SRCS          := $(addprefix libqeoutil:src/, qeo_log.c) \
+                                        $(addprefix libqeoutil:src/platform/, common.c linux_common.c qeo_registration_credentials.c)
+
+ifeq ($(E),RPI_ARMHFLINUX)
+qeo-c-util.libutplatform_SRCS          	:= $(addprefix libqeoutil:src/platform/, linux.c)
+endif
+
+ifeq ($(E),REVG_MIPSLINUX)
+qeo-c-util.libutplatform_SRCS          	:= $(addprefix libqeoutil:src/platform/, linux.c)
+endif       
+                                        
+ifeq ($(E),HOSTLINUX)
+qeo-c-util.libutplatform_SRCS          	:= $(addprefix libqeoutil:src/platform/, linux.c)
+endif
+
+ifeq ($(E),HOSTLINUX_CLANG)
+qeo-c-util.libutplatform_SRCS          	:= $(addprefix libqeoutil:src/platform/, linux.c)
+endif
+
+ifeq ($(E),)
+qeo-c-util.libutplatform_SRCS          	:= $(addprefix libqeoutil:src/platform/, linux.c)
+endif    
+           
+                                        
+ qeo-c-util.libutplatform_SRCS         := $(addprefix test/unittest/suite_platform/, main.c) \
+                                        $(addprefix test/unittest/suite_platform/tcase_api/, test.c)
+qeo-c-util.libutplatform_LOCALINCLUDES := src $(qeo-c-util_INCLUDES) $(cmock_INCLUDES) $(unittest-check_INCLUDES)
+qeo-c-util.libutplatform_LOCALDEFINES  := -Wall -Werror
+qeo-c-util.libutplatform_LDADD         := $(qeo-c-util_LIBS) $(cmock_LIBS) $(unittest-check_LIBS) -L$(qeo-c-util_PREFIX)
+qeo-c-util.libutplatform_LDDEPS        := libqeoutil.so
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

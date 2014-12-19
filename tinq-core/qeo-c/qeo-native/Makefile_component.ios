@@ -1,0 +1,97 @@
+ifneq ($($(qeo-native_INCLUDED)),1)
+
+override COMPONENT := technicolor.middleware.core.qeo-native
+override COMPONENT_SEARCH_PATH_PREFIX :=  $(projectdir/)../../*/%/Makefile_component
+
+qeo-native_LICENSE  := TCLR
+qeo-native_INCLUDES := api/headers $$(qeo-tsm-to-dynamic_INCLUDES) $$(qeo-c-core_INCLUDES) $$(qeo-c-json-async_INCLUDES)
+qeo-native_CFLAGS   := -std=gnu99
+qeo-native_LIBS     := 
+
+qeo-native_PARTS_INSTALL      := \
+    $$(qeo-tsm-to-dynamic_$(E)_PREFIX)/libqeotsmtodyn_pic.a@$$(libdir/)libqeotsmtodyn.a:755 \
+    $$(qeo-c-core_$(E)_PREFIX)/libqeocore_pic.a@$$(libdir/)libqeocore.a:755 \
+    $$(qeo-c_$(E)_PREFIX)/libqeoc_pic.a@$$(libdir/)libqeoc.a:755 \
+    $$(qeo-openssl-engine-pkcs12_$(E)_PREFIX)/libqeo-openssl-engine-pkcs12_pic.a@$$(libdir/)libqeo-openssl-engine-pkcs12.a:755 \
+    $$(qeo-management-client_$(E)_PREFIX)/libqeomgmtclient_pic.a@$$(libdir/)libqeomgmtclient.a:755 \
+    $$(dds_$(E)_PREFIX)/libdds_pic.a@$$(libdir/)libdds.a:755 \
+    $$(libcurl_$(E)_PREFIX)/libcurl_pic.a@$$(libdir/)libcurl.a:755 \
+    $$(jansson_$(E)_PREFIX)/libjansson_pic.a@$$(libdir/)libjansson.a:755 \
+    $$(qeo-c-util_$(E)_PREFIX)/libqeoutil_pic.a@$$(libdir/)libqeoutil.a:755 \
+    $$(openssl_$(E)_PREFIX)/libssl_pic.a@$$(libdir/)libssl.a:755 \
+    $$(openssl_$(E)_PREFIX)/libcrypto_pic.a@$$(libdir/)libcrypto.a:755
+	
+
+qeo-native_DEPS               := qeo-c qeo-tsm-to-dynamic
+qeo-native_TEST_DEPS          := unittest-check
+
+include $(projectdir/)build/Makefile_component_top
+
+qeo-native.LIBRARIES := libqeo
+
+qeo-native.libqeo_LOCALDEFINES  := $(qeo-native_CFLAGS) -Wall -Werror
+#qeo-native.libqeo_LOCALINCLUDES := src/ $(qeo-native_INCLUDES)
+qeo-native.libqeo_SRCS          := $(addprefix src/, dummy.c)
+#qeo-c stuff
+qeo-native.libqeo_LDADD         := -L$(qeo-tsm-to-dynamic_$(E)_PREFIX) -lqeotsmtodyn_pic
+qeo-native.libqeo_LDADD         += -L$(qeo-c-core_$(E)_PREFIX) -Wl,-whole-archive -lqeocore_pic -Wl,-no-whole-archive
+qeo-native.libqeo_LDADD         += -L$(qeo-c_$(E)_PREFIX) -Wl,-whole-archive -lqeoc_pic -Wl,-no-whole-archive
+qeo-native.libqeo_LDADD         += -L$(qeo-openssl-engine-pkcs12_$(E)_PREFIX) -lqeo-openssl-engine-pkcs12_pic
+qeo-native.libqeo_LDADD         += -L$(qeo-management-client_$(E)_PREFIX) -lqeomgmtclient_pic
+qeo-native.libqeo_LDADD         += -L$(dds_$(E)_PREFIX) -ldds_pic
+qeo-native.libqeo_LDADD         += -L$(libcurl_$(E)_PREFIX) -lcurl_pic
+qeo-native.libqeo_LDADD         += -L$(jansson_$(E)_PREFIX) -ljansson_pic
+qeo-native.libqeo_LDADD         += -L$(qeo-c-util_$(E)_PREFIX) -lqeoutil_pic
+qeo-native.libqeo_LDADD         += -L$(openssl_$(E)_PREFIX) -lssl_pic
+qeo-native.libqeo_LDADD         += -L$(openssl_$(E)_PREFIX) -lcrypto_pic
+
+override qeo-native.libqeo_LDDEPS := $(qeo-tsm-to-dynamic_$(E)_PREFIX)/libqeotsmtodyn_pic.a $(qeo-c-core_$(E)_PREFIX)/libqeocore_pic.a $(qeo-c_$(E)_PREFIX)/libqeoc_pic.a $(qeo-c-util_$(E)_PREFIX)/libqeoutil_pic.a $(dds_$(E)_PREFIX)/libdds_pic.a $(openssl_$(E)_PREFIX)/libssl_pic.a $(openssl_$(E)_PREFIX)/libcrypto_pic.a $(qeo-openssl-engine-pkcs12_$(E)_PREFIX)/libqeo-openssl-engine-pkcs12_pic.a $(qeo-management-client_$(E)_PREFIX)/libqeomgmtclient_pic.a $(libcurl_$(E)_PREFIX)/libcurl_pic.a $(jansson_$(E)_PREFIX)/libjansson_pic.a   
+
+
+include $(projectdir/)build/Makefile_component_bot
+
+endif
+
+#### sdk packaging ###
+.PHONY: sdk sdk_clean
+
+qeo-native.sdk.dir := $($(COMPONENT)_$(E)_PREFIX)/sdk
+qeo-native.sdk.qeo_includes := api error factory types device util_error
+qeo-native.sdk.qeo_json_async_includes := jsonasync
+qeo-native.sdk.dds_includes := dds_error dds_seq dds_tsm dds_types
+qeo-native.sdk.libs := qeo ssl crypto curl qeoutil qeo-openssl-engine-pkcs12 jansson
+
+sdk_clean:
+	$(rm) -rf $(qeo-native.sdk.dir)
+	
+sdk: INSTALL_DIR=$(qeo-native.sdk.dir)/tmp
+sdk: sdk_clean recursive_devel_install
+	$(mkdir) -p $(qeo-native.sdk.dir)/c/include/dds && \
+	$(mkdir) -p $(qeo-native.sdk.dir)/c/include/qeo && \
+	$(mkdir) -p $(qeo-native.sdk.dir)/c/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME) && \
+	$(foreach f,$(qeo-native.sdk.qeo_includes),$(cp) $(INSTALL_DIR)/${incdir}/qeo/$(f).h $(qeo-native.sdk.dir)/c/include/qeo/$(f).h &&) \
+	$(foreach f,$(qeo-native.sdk.qeo_json_async_includes),$(cp) $(INSTALL_DIR)/${incdir}/qeo/$(f).h $(qeo-native.sdk.dir)/c/include/qeo/$(f).h &&) \
+	$(foreach f,$(qeo-native.sdk.dds_includes),$(cp) $(INSTALL_DIR)/${incdir}/dds_qeo/$(f)_qeo.h $(qeo-native.sdk.dir)/c/include/dds/$(f).h &&) \
+	$(foreach f,$(qeo-native.sdk.libs),$(cp) -P $(INSTALL_DIR)/${libdir}/lib$(f).so* $(qeo-native.sdk.dir)/c/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)/ && $($(COMPONENT)_$(E)_STRIP) $(qeo-native.sdk.dir)/c/lib/$($(COMPONENT)_$(E)_CONFIGURATION_NAME)/lib$(f).so &&) \
+	$(rm) -rf $(INSTALL_DIR)
+
+$($(COMPONENT)_$(E)_PREFIX)/sdk_$(E).tgz: sdk
+	$(tar) --owner=root --group=root -czf $@ -C $(qeo-native.sdk.dir) c
+
+$($(COMPONENT)_$(E)_PREFIX)/sdk_lib_$(E).tgz: sdk
+	$(tar) --owner=root --group=root -czf $@ -C $(qeo-native.sdk.dir)/c lib
+
+$($(COMPONENT)_$(E)_PREFIX)/sdk_headers_$(E).tgz: sdk
+	$(tar) --owner=root --group=root -czf $@ -C $(qeo-native.sdk.dir)/c include
+
+sdk.tgz: $($(COMPONENT)_$(E)_PREFIX)/sdk_$(E).tgz
+	$(cp) $< $@
+
+sdk_lib_$(E).tgz: $($(COMPONENT)_$(E)_PREFIX)/sdk_lib_$(E).tgz
+	$(cp) $< $@
+
+sdk_headers_$(E).tgz: $($(COMPONENT)_$(E)_PREFIX)/sdk_headers_$(E).tgz
+	$(cp) $< $@
+
+# Vim Modeline, used to enable folds on this Makefile
+# vim: foldmethod=marker foldmarker=##<,##> :

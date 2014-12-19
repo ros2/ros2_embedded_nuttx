@@ -1,0 +1,13 @@
+ifndef uname
+uname=$(shell if uname > /dev/null 2>/dev/null; then $(echo) uname; fi)
+endif
+
+ifeq ($(uname),)
+$(shell $(echo) "" >&2) 
+$(error "Could not find a working uname in the path. This is required if you do not specify projectdir. Provide uname on the commandline (e.g. uname=/bin/uname).") 
+$(shell $(echo) "Could not find a working uname in the path. This is required if you do not specify projectdir. Provide uname on the commandline (e.g. uname=/bin/uname)." >&2) 
+$(shell $(echo) "" >&2) 
+die
+endif
+
+# vim: foldmethod=marker foldmarker=##<,##> filetype=make :

@@ -1,0 +1,145 @@
+//Common file for qeo-native and qeo-forwarder
+
+/*
+ Hack alert !!!
+ We are redefining the buildDir from gradle to output.
+ As "./build/" is already used for the middleware build system.
+ So we decided to use the output directory of that system.
+ Keep this line on top of the others!
+ */
+project.buildDir = "output/gradle"
+
+apply from: (System.properties['qeoGradleHelper'] ?: '/home/users/cpeqeo/gradle-helper') + '/artifactoryVersion.gradle'
+apply from: (System.properties['qeoGradleHelper'] ?: '/home/users/cpeqeo/gradle-helper') + '/mwbuild.gradle'
+apply from: (System.properties['qeoGradleHelper'] ?: '/home/users/cpeqeo/gradle-helper') + '/artifactoryPom.gradle'
+
+//hints:
+//compile with dds force_malloc: add "-PmakeExtras=dds_FORCE_MALLOC=1"
+
+//define targets for which to make the SDK
+if (hasProperty("TARGET")) {
+    targets = getProperty("TARGET").split(":")
+    targets.each {
+        logger.warn("Overruled target, building for ${it}")
+    }
+}
+ext.doAssembleDebug = true
+if (hasProperty("ASSEMBLE_DEBUG") && !Boolean.parseBoolean(getProperty("ASSEMBLE_DEBUG"))) {
+    doAssembleDebug = false
+}
+ext.doAssembleRelease = true
+if (hasProperty("ASSEMBLE_RELEASE") && !Boolean.parseBoolean(getProperty("ASSEMBLE_RELEASE"))) {
+    doAssembleRelease = false
+}
+assemble {
+    description += " (Choose target with -PTARGET=MY_TARGET or -PTARGET=TARGET1:TARGET2)"
+}
+
+//define components which will be build in debug mode for DEBUG build.
+def componentsDebug = ["qeo-c", "qeo-c-core", "dds", "qeo-c-json-async", "qeo-c-json", "qeo-c-util", "qeo-management-client", "qeo-openssl-engine-pkcs12", "qeo-c", "openssl", "qeo-native", "qeo-forwarder"];
+
+project.tasks.build_tarball.enabled = false
+project.tasks.gcovr_test_run.enabled = false
+project.tasks.remove(build_devel_tarball)
+project.tasks.remove(build_test_full_tarball)
+
+if (doAssembleRelease) {
+    task assembleRelease {
+        description "Assembles release versions (disable with -PASSEMBLE_RELEASE=false)"
+        group "Build"
+    }
+    tasks.assemble.dependsOn(assembleRelease)
+}
+if (doAssembleDebug) {
+    task assembleDebug {
+        description "Assembles debug versions (disable with -PASSEMBLE_DEBUG=false)"
+        group "Build"
+    }
+    tasks.assemble.dependsOn(assembleDebug)
+}
+
+
+//define sdk task for each target
+targets.each{ target ->
+    def taskNameInstall = "mwbuildTgz${target}"
+    def taskNameInstallDebug = "mwbuildTgz${target}Debug"
+    def sdkFileLib      = "${project.name}_sdk_lib_${target}.tgz"
+    def sdkFileLibDebug = "${project.name}_sdk_lib_${target}_DEBUG.tgz"
+    def sdkFileSymbols  = "${project.name}_sdk_symbols_${target}.tgz"
+    def sdkFileHeaders  = "${project.name}_sdk_headers_${target}.tgz"
+    def sdkFileHeadersDebug  = "${project.name}_sdk_headers_${target}_DEBUG.tgz"
+    def sdkFileAllHeaders
+    def sdkFileAllHeadersDebug
+    if (publishAllHeaders) {
+        sdkFileAllHeaders  = "${project.name}_all_headers_${target}.tgz" //contains all headers file (also internal ones)
+        sdkFileAllHeadersDebug  = "${project.name}_all_headers_${target}_DEBUG.tgz" //contains all headers file (also internal ones)
+    }
+
+    //mwbuild tasks
+    if (doAssembleRelease) {
+        tasks.create(name: taskNameInstall, type: Exec) {
+            group "build"
+            description "Execute mwbuild for E=${target}"
+            workingDir projectDir
+            commandLine = project.ext.makeCmd + ["E=${target}", "dds_WERROR=0", sdkFileLib, sdkFileSymbols, sdkFileHeaders]
+            if (publishAllHeaders) {
+                commandLine += sdkFileAllHeaders
+            }
+        }
+        tasks.assembleRelease.dependsOn(taskNameInstall)
+    }
+
+    if (doAssembleDebug) {
+        tasks.create(name: taskNameInstallDebug, type: Exec) {
+            group "build"
+            description "Execute mwbuild for E=${target} for DEBUG"
+            workingDir projectDir
+            commandLine = project.ext.makeCmd + ["E=${target}", "dds_LOG_FILE=1", sdkFileLibDebug, sdkFileHeadersDebug]
+            if (publishAllHeaders) {
+                commandLine += sdkFileAllHeadersDebug
+            }
+            componentsDebug.each {
+                commandLine += "${it}_DEBUG=1"
+            }
+        }
+        tasks.assembleDebug.dependsOn(taskNameInstallDebug)
+    }
+
+
+    artifacts {
+        if (doAssembleRelease) {
+            archives (file: file(sdkFileLib), name: project.name, builtBy: assembleRelease, classifier: target) //libs tgz file
+            archives (file: file(sdkFileSymbols), name: project.name, builtBy: assembleRelease, classifier: "${target}-symbols") //debug symbols for libs tgz file
+        }
+        if (doAssembleDebug) {
+            archives (file: file(sdkFileLibDebug), name: project.name, builtBy: assembleDebug, classifier: "${target}-debug") //debug version libs tgz file
+        }
+    }
+}
+    
+
+//clean tasks
+cleanup.enabled = false //not working
+task deleteOutput(type: Delete) {
+    delete files("../output")
+}
+tasks.clean.dependsOn(deleteOutput)
+
+
+
+artifacts {
+    //use headers from the first target. They're the same for everything anyway.
+    if (doAssembleRelease) {
+        archives (file: file("${project.name}_sdk_headers_" + targets[0] + ".tgz"), name: project.name, builtBy: assembleRelease)
+        if (publishAllHeaders) {
+            archives (file: file("${project.name}_all_headers_" + targets[0] + ".tgz"), name: project.name, builtBy: assembleRelease, classifier: "allHeaders")
+        }
+    }
+    else {
+        archives (file: file("${project.name}_sdk_headers_" + targets[0] + "_DEBUG.tgz"), name: project.name, builtBy: assembleDebug)
+        if (publishAllHeaders) {
+            archives (file: file("${project.name}_all_headers_" + targets[0] + "_DEBUG.tgz"), name: project.name, builtBy: assembleDebug, classifier: "allHeaders")
+        }
+    }
+}
+

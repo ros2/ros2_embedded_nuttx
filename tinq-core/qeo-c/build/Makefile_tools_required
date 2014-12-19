@@ -1,0 +1,24 @@
+# Pick first rule out of the list of rules
+RULE:=$(firstword $(RULES))
+# Pop that one out of the list of rules
+RULES:=$(sort $(filter-out $(RULE), $(RULES)))
+
+PATRULE:=$(sort $(foreach pat,$(PATTERN_RULES),$(subst @,%,$(patsubst $(pat),$(subst %,@,$(pat)),$(filter $(pat),$(RULE))))))
+
+ifneq ($(PATRULE),)
+RULE:=$(PATRULE)
+endif
+
+# See what tools this rule needs
+NEEDED_TOOLS:=$(sort $(NEEDED_TOOLS) $($(RULE)_NEEDED_TOOLS))
+
+# Mark the rule as handled
+HANDLED_RULES:=$(sort $(HANDLED_RULES) $(RULE))
+
+# See what rules this rule depends on, and add them to the list of rules
+RULES:=$(filter-out $(HANDLED_RULES),$(sort $($(RULE)_NEEDED_RULES) $(RULES)))
+
+# Recurse to handle the next rule
+ifneq ($(RULES),)
+include $(projectdir/)build/Makefile_tools_required
+endif
