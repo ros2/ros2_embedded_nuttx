@@ -1,3 +1,0 @@
-tail -n +6 extern32.txt > /tmp/plot.dat
-gnuplot "plotx32.gp"
-

@@ -1,3 +1,0 @@
-tail -n +6 device64.txt > /tmp/plot.dat
-gnuplot "plotd64.gp"
-

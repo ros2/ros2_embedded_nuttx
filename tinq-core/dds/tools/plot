@@ -1,3 +1,0 @@
-$HOME/DDS/git/dds/tools/get_event_data $1
-gnuplot "$HOME/DDS/git/dds/tools/plot_data.gp"
-

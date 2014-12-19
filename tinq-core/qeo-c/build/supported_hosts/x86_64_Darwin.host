@@ -1,2 +1,0 @@
-# All derived objects are output to this directory
-OUTPUT_PREFIX    := $(projectdir/)output

@@ -1,8 +1,0 @@
-{
-  "PKI" : {
-    "scep" : {
-      "href" : "https://join.qeodev.org:8442/ra/scep/pkiclient.exe"
-    },
-    "deprecation" : ""
-  }
-}

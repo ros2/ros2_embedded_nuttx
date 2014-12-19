@@ -1,1 +1,0 @@
-include $(projectdir/)build/required_tools/*

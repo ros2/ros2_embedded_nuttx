@@ -1,6 +1,0 @@
-:cmock:
-  :mock_path:   '.'
-  :mock_prefix: 'Mock'
-  :plugins:
-    - :ignore
-    - :callback

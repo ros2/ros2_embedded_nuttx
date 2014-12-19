@@ -1,0 +1,6 @@
+[submodule "stlink"]
+	path = stlink
+	url = http://github.com/ros2/stlink
+[submodule "tinq-core"]
+	path = tinq-core
+	url = http://github.com/ros2/tinq-core

@@ -1,3 +1,0 @@
-tail -n +6 thread64.txt > /tmp/plot.dat
-gnuplot "plott64.gp"
-

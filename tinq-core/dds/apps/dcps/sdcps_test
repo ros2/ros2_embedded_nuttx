@@ -1,2 +1,0 @@
-LD_LIBRARY_PATH=/tmp/lib /tmp/bin/dcps_test -k myCerts/clientkey.pem -c myCerts/client.pem $*
-

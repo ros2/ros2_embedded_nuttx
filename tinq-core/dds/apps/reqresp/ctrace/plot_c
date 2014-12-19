@@ -1,3 +1,0 @@
-./get_event_data_c consumer.ctrc
-gnuplot "plot_data_c.gp"
-
