@@ -102,6 +102,10 @@ ifeq ($(CONFIG_EXAMPLES_HELLO),y)
 CONFIGURED_APPS += examples/hello
 endif
 
+ifeq ($(CONFIG_EXAMPLES_TALKER),y)
+CONFIGURED_APPS += examples/talker
+endif
+
 ifeq ($(CONFIG_EXAMPLES_HELLOXX),y)
 CONFIGURED_APPS += examples/helloxx
 endif

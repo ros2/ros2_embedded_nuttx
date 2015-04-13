@@ -1,0 +1,34 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config EXAMPLES_HELLO
+	bool "\"Hello, World!\" example"
+	default n
+	---help---
+		Enable the \"Hello, World!\" example
+
+if EXAMPLES_HELLO
+
+config EXAMPLES_HELLO_PROGNAME
+	string "Program name"
+	default "hello"
+	depends on BUILD_KERNEL
+	---help---
+		This is the name of the program that will be use when the NSH ELF
+		program is installed.
+
+config EXAMPLES_UDP_IPADDR
+	hex "Target IP address"
+	default 0xc0a80003
+
+config EXAMPLES_UDP_DRIPADDR
+	hex "Target default router address (Gateway)"
+	default 0xc0a80002
+
+config EXAMPLES_UDP_NETMASK
+	hex "Network mask"
+	default 0xffffff00
+
+endif
