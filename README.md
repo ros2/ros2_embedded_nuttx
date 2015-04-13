@@ -396,6 +396,46 @@ Following commands are available:
 
 ```
 
+### How to Create a NuttX App
+Browse to config directory of your device and copy dds. Then paste it as your app's name.
+```c
+cd nuttx/configs/$DEVICE_NAME/
+mkdir your_app_name
+cp -a dds/* your_app_name
+```
+
+Browse into the newly created directory and open defconfig. 
+
+Uncomment CONFIG_EXAMPLES_DDS_CHAT and add CONFIG_EXAMPLES_YOUR_APP_NAME=y into the config file.
+
+Also set CONFIG_USER_ENTRYPOINT="your_app_main" where you should replace your_app_main with your app's main function.
+```c
+cd your_app_name
+nano defconfig
+```
+
+Browse into the examples folder and copy hello. Then paste it as your app's name.
+```c
+cd ../../../apps/examples
+mkdir your_app_name
+cp -a hello/* your_app_name
+```
+
+Browse into the newly created directory and open Make.defs
+```c
+cd your_app_name
+nano Make.defs
+```
+
+Add the following three lines.
+
+ifeq ($(CONFIG_EXAMPLES_YOUR_APP_NAME),y)
+
+CONFIGURED_APPS += examples/your_app_name
+
+endif
+
+
 ### ROS Client Library
 The [ROS Client Library](rcl/README.md) (rcl) for embedded (implemented under the `rcl` directory) allows to code ROS applications using the ROS 2 API. Refer to [rcl.h](rcl/rcl.h) for a list of functions.
 
