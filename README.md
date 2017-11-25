@@ -87,15 +87,15 @@ __________________________________
 
 
 
-###Hardware
-####STM32F4Discovery board
+### Hardware
+#### STM32F4Discovery board
 Initially we kicked off the prototype with the `STM32F4Discovery board` together with the `STM32F4-BB` (this daugher board provides Ethernet). The board is connected to the computer using USB. This connection is used to power up the board, program and debug (through STLINK). `PD5`, `PD6` and `GND` are used as the serial connection (for development and debugging purposes, NSH, etc). An Ethernet cable is connected from the `STM32F4-BB` to the working station.
 
 ![](misc/images/IMG_20141030_171923.jpg)
 
 The size of Tinq and NuttX together made us switch into a board with more capacity the STM3240G-eval.
 
-####STM3240G-eval 
+#### STM3240G-eval 
 
 ![](misc/images/IMG_20141030_171929.jpg)
 
@@ -113,9 +113,9 @@ To get a serial console type:
 
 (assuming that `/dev/ttyUSB0` is the new device that appears when connecting the USB to serial cable)
 
-###Setting it up
+### Setting it up
 
-####Requirements
+#### Requirements
 Install the following requirements:
 
 ```bash
@@ -166,7 +166,7 @@ cd ..
 
 This configurations selects `apps/examples/dds` DDS application.
 
-#####Building
+##### Building
 
 ```bash
 cd nuttx/
@@ -174,7 +174,7 @@ make
 ```
 
 
-#####Programming
+##### Programming
 To program the board:
 ```bash
 make program
@@ -231,7 +231,7 @@ To program the board:
 make program
 ```
 
-#####Debugging
+##### Debugging
 
 ```bash
 cd nuttx/
